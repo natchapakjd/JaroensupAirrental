@@ -107,8 +107,8 @@ const Navbar = () => {
             </li>
           </ul>
         </div>
-        <div className="navbar-end">
-          <li className="list-none">
+        <div className="navbar-end ">
+          <li className="list-none ">
             {!token ? (
               <Link to="/login" className="text-sm md:text-base">
                 สมัครสมาชิก/เข้าสู่ระบบ
@@ -133,7 +133,7 @@ const Navbar = () => {
               {isToggle ? (
                 <ul
                   tabIndex={0}
-                  className="menu menu-sm dropdown-content bg-base-100 rounded-box z-[1] mt-3 w-52 p-2 shadow"
+                  className="menu menu-sm dropdown-content bg-base-100 rounded-box z-[1] mt-3 w-52 p-2 shadow bg-white text-black"
                 >
                   <li>
                     <a className="justify-between">

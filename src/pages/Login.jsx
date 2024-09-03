@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import Navbar from "../components/Navbar";
-import { Link ,useNavigate} from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import Swal from "sweetalert2";
 import axios from "axios";
 import Cookies from "universal-cookie";
@@ -29,9 +29,9 @@ const Login = () => {
             });
             const receivedToken = response.data.token;
             cookies.set('authToken', receivedToken, { path: '/' });
-            setTimeout(()=>{
+            setTimeout(() => {
                 navigate('/');
-            },800)
+            }, 800);
         } catch (err) {
             Swal.fire({
                 title: "ล็อคอินไม่สำเร็จ",
@@ -56,7 +56,7 @@ const Login = () => {
                                 id="username"
                                 value={username}
                                 onChange={handleUsernameChange}
-                                className="input input-bordered w-full"
+                                className="input input-bordered w-full bg-white"
                                 placeholder="Username"
                             />
                         </div>
@@ -69,7 +69,7 @@ const Login = () => {
                                 id="password"
                                 value={password}
                                 onChange={handlePasswordChange}
-                                className="input input-bordered w-full"
+                                className="input input-bordered w-full bg-white"
                                 placeholder="Password"
                             />
                         </div>

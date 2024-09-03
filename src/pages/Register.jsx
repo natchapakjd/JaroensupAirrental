@@ -61,7 +61,7 @@ const Register = () => {
               <input
                 type="text"
                 id="username"
-                className="input input-bordered w-full"
+                className="input input-bordered w-full bg-white"
                 placeholder="Username"
                 onChange = {handleUsernameChange}
               />
@@ -76,7 +76,7 @@ const Register = () => {
               <input
                 type="email"
                 id="email"
-                className="input input-bordered w-full"
+                className="input input-bordered w-full bg-white"
                 placeholder="Email"
                 onChange = {handleEmailChange}
               />
@@ -91,7 +91,7 @@ const Register = () => {
               <input
                 type="password"
                 id="password"
-                className="input input-bordered w-full"
+                className="input input-bordered w-full bg-white"
                 placeholder="Password"
                 onChange = {handlePasswordChange}
               />

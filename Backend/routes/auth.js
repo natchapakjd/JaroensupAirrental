@@ -8,7 +8,7 @@ router.post("/login", async (req, res) => {
   const { username, password } = req.body;
   console.log(req.body)
   db.query(
-    "SELECT * FROM member WHERE username = ?",
+    "SELECT * FROM users WHERE username = ?",
     [username],
     async (error, results) => {
       if (error) {
@@ -50,7 +50,7 @@ router.post("/register", async (req, res) => {
     console.log(req.body)
   
     db.query(
-      "SELECT * FROM member WHERE username = ?",
+      "SELECT * FROM users WHERE username = ?",
       [username],
       async (error, results) => {
         if (error) {
@@ -67,8 +67,8 @@ router.post("/register", async (req, res) => {
   
         // Insert the user into the database
         db.query(
-          "INSERT INTO member SET ?",
-          { username: username,role : "member", password: hashedPassword, email: email,},
+          "INSERT INTO users SET ?",
+          { username: username,role : "client", password: hashedPassword, email: email,},
           (error, results) => {
             if (error) {
               console.error("Database error:", error);
