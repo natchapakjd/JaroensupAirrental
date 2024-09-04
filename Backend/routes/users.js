@@ -30,6 +30,7 @@ router.get("/user/:id", (req, res) => {
   });
 });
 
+
 router.post("/change-password",(req,res)=>{
   const newPassword = req.body.newPassword
   const username = req.body.username

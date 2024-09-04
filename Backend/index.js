@@ -6,6 +6,7 @@ const auth =require('./routes/auth')
 const app = express();
 const port = 3000;
 const user =require('./routes/users')
+const noti =require('./routes/notification')
 
 app.use(express());
 app.use(cors());
@@ -13,6 +14,7 @@ app.use(bodyParser.json());
 
 app.use(auth)
 app.use(user)
+app.use(noti)
 
 app.get("/hello", (req, res) => {
     res.json("Hello world")

@@ -12,6 +12,7 @@ import Register from "./pages/Register";
 import Dashboard from "./pages/Dashboard";
 import Product from "./pages/Product"
 import Contact from "./pages/Contact";
+import Noti from "./pages/Noti";
 const router = createBrowserRouter([
   {
     path: "/",
@@ -40,6 +41,10 @@ const router = createBrowserRouter([
   {
     path: "/contact",
     element: <Contact/>
+  },
+  {
+    path: "/notification",
+    element: <Noti/>
   },
 ]);
 
