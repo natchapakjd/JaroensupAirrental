@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: localhost:8889
--- Generation Time: Sep 04, 2024 at 06:01 AM
+-- Generation Time: Sep 05, 2024 at 07:40 AM
 -- Server version: 5.7.24
 -- PHP Version: 8.3.1
 
@@ -172,7 +172,45 @@ CREATE TABLE `technicians` (
   `specialization` varchar(100) DEFAULT NULL,
   `nationality` varchar(50) DEFAULT NULL,
   `rating` decimal(3,2) DEFAULT '0.00',
-  `isOutsource` bit(1) DEFAULT NULL
+  `isOutsource` bit(1) DEFAULT NULL,
+  `work_experience` text,
+  `special_skills` text,
+  `certificates` text,
+  `background_check_status` enum('pending','completed','failed') DEFAULT 'pending',
+  `bank_account_number` varchar(20) DEFAULT NULL,
+  `start_date` date DEFAULT NULL,
+  `status` enum('active','inactive','suspended') DEFAULT 'active',
+  `notes` text,
+  `id_card_image` blob,
+  `driver_license_image` blob,
+  `criminal_record_image` blob,
+  `additional_documents` blob
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `technician_applicants`
+--
+
+CREATE TABLE `technician_applicants` (
+  `applicant_id` int(11) NOT NULL,
+  `date_of_birth` date DEFAULT NULL,
+  `address` varchar(255) DEFAULT NULL,
+  `email` varchar(100) NOT NULL,
+  `phone_number` varchar(15) DEFAULT NULL,
+  `application_date` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  `position_applied` varchar(100) DEFAULT NULL,
+  `application_status` enum('pending','interviewed','hired','rejected') DEFAULT 'pending',
+  `id_card_image` blob,
+  `driver_license_image` blob,
+  `criminal_record_image` blob,
+  `additional_documents` blob,
+  `notes` text,
+  `interview_date` date DEFAULT NULL,
+  `interviewer` varchar(255) DEFAULT NULL,
+  `first_name` varchar(255) DEFAULT NULL,
+  `last_name` varchar(255) DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 -- --------------------------------------------------------
@@ -194,15 +232,16 @@ CREATE TABLE `users` (
   `gender` enum('male','female') DEFAULT NULL,
   `role` enum('admin','tech','client') NOT NULL,
   `created_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
-  `linetoken` text
+  `linetoken` text,
+  `date_of_birth` date DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 --
 -- Dumping data for table `users`
 --
 
-INSERT INTO `users` (`user_id`, `username`, `password`, `firstname`, `lastname`, `email`, `phone`, `age`, `address`, `gender`, `role`, `created_at`, `linetoken`) VALUES
-(1, 'member', '$2b$08$puL/BVQts/nUDCrmb7dlnOFnHqPmJ/6pl9DgCmPl0tiFTwpciBQRO', NULL, NULL, 'member@gmail.com', NULL, NULL, NULL, NULL, 'client', '2024-09-03 11:07:21', NULL);
+INSERT INTO `users` (`user_id`, `username`, `password`, `firstname`, `lastname`, `email`, `phone`, `age`, `address`, `gender`, `role`, `created_at`, `linetoken`, `date_of_birth`) VALUES
+(1, 'member', '$2b$08$puL/BVQts/nUDCrmb7dlnOFnHqPmJ/6pl9DgCmPl0tiFTwpciBQRO', NULL, NULL, 'member@gmail.com', NULL, NULL, NULL, NULL, 'client', '2024-09-03 11:07:21', NULL, NULL);
 
 -- --------------------------------------------------------
 
@@ -307,6 +346,12 @@ ALTER TABLE `technicians`
   ADD KEY `user_id` (`user_id`);
 
 --
+-- Indexes for table `technician_applicants`
+--
+ALTER TABLE `technician_applicants`
+  ADD PRIMARY KEY (`applicant_id`);
+
+--
 -- Indexes for table `users`
 --
 ALTER TABLE `users`
@@ -390,6 +435,12 @@ ALTER TABLE `tasktypes`
 --
 ALTER TABLE `technicians`
   MODIFY `tech_id` int(11) NOT NULL AUTO_INCREMENT;
+
+--
+-- AUTO_INCREMENT for table `technician_applicants`
+--
+ALTER TABLE `technician_applicants`
+  MODIFY `applicant_id` int(11) NOT NULL AUTO_INCREMENT;
 
 --
 -- AUTO_INCREMENT for table `users`
