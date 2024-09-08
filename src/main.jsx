@@ -7,47 +7,55 @@ import {
 import "./index.css";
 import Home from "./pages/Home";
 import Login from "./pages/Login";
-import Reward from "./pages/Reward";
 import Register from "./pages/Register";
 import Dashboard from "./pages/Dashboard";
-import Product from "./pages/Product"
+import Product from "./pages/Product";
 import Contact from "./pages/Contact";
 import Noti from "./pages/Noti";
+import WorkExperience from "./pages/WorkExperience";
+import ProtectedRoute from "./authentication/ProtectedRoute";
+
+// Configure the router with routes
 const router = createBrowserRouter([
   {
     path: "/",
-    element: <Home/>,
+    element: <Home />,
   },
   {
-    path: "/reward",
-    element: <Reward/>,
+    path: "/experience",
+    element: <WorkExperience />,
   },
   {
     path: "/login",
-    element: <Login/>,
+    element: <Login />,
   },
   {
     path: "/register",
-    element: <Register/>,
+    element: <Register />,
   },
   {
     path: "/dashboard",
-    element: <Dashboard/>
+    element: (
+      <ProtectedRoute>
+        <Dashboard />
+      </ProtectedRoute>
+    ),
   },
   {
     path: "/product",
-    element: <Product/>
+    element: <Product />,
   },
   {
     path: "/contact",
-    element: <Contact/>
+    element: <Contact />,
   },
   {
     path: "/notification",
-    element: <Noti/>
+    element: <Noti />,
   },
 ]);
 
+// Render the application
 ReactDOM.createRoot(document.getElementById("root")).render(
   <React.StrictMode>
     <RouterProvider router={router} />

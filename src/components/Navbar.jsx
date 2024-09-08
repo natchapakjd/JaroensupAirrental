@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import { Link ,useNavigate} from "react-router-dom";
 import Cookies from "universal-cookie";
+import { jwtDecode } from "jwt-decode";
 // import Swal from "sweetalert2";
 const Navbar = () => {
   const cookies = new Cookies();
@@ -11,7 +12,9 @@ const Navbar = () => {
     setIsToggle(!isToggle);
   };
 
+  
   const handleLogout = () => {
+    console.log(jwtDecode(token))
     cookies.remove("authToken", { path: "/" });
     // Swal.fire({
     //   title: "ออกจากระบบสำเร็จ",
@@ -68,7 +71,7 @@ const Navbar = () => {
                   </ul>
                 </li>
                 <li>
-                  <Link to="/reward">ผลงานของเรา</Link>
+                  <Link to="/experience">ผลงานของเรา</Link>
                 </li>
                 <li>
                   <Link to="/contact">ติดต่อเรา</Link>
@@ -100,7 +103,7 @@ const Navbar = () => {
               </details>
             </li>
             <li>
-              <Link to="/reward">ผลงานของเรา</Link>
+              <Link to="/experience">ผลงานของเรา</Link>
             </li>
             <li>
               <Link to="/contact">ติดต่อเรา</Link>
