@@ -88,7 +88,7 @@ const Register = () => {
               >
                 Password
               </label>
-              <input
+              <input  
                 type="password"
                 id="password"
                 className="input input-bordered w-full bg-white"

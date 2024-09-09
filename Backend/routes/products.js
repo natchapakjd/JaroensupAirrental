@@ -17,11 +17,11 @@ router.get("/products", (req, res) => {
 
 router.get("/product/:id", (req, res) => {
   const id = req.params.id
-  const query = "SELECT *FROM products WHERE  id = ?";
+  const query = "SELECT *FROM products WHERE  product_id = ?";
 
   db.query(query,[id] ,(err, result) => {
     if (err) {
-      console.error("Error fetching products " + err);
+      console.error("Error fetching product " + err);
       res.status(500).json({ error: "Failed to fetch product" });
     } else {
       res.json(result);
