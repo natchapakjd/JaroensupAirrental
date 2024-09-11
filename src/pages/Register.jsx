@@ -49,7 +49,7 @@ const Register = () => {
       <Navbar/>
       <div className="bg-gray-100 flex items-center justify-center min-h-screen">
         <div className="w-full max-w-md bg-white shadow-md rounded-lg p-8">
-          <h2 className="text-2xl font-semibold mb-6">Register</h2>
+          <h2 className="text-2xl font-semibold mb-6 text-black">Register</h2>
           <form>
             <div className="mb-4">
               <label
@@ -96,7 +96,7 @@ const Register = () => {
                 onChange = {handlePasswordChange}
               />
             </div>
-            <button className="btn btn-primary w-full" onClick={handleRegister}>
+            <button className="btn btn btn-success w-full" onClick={handleRegister}>
               Register
             </button>
           </form>

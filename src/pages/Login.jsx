@@ -45,7 +45,7 @@ const Login = () => {
             <Navbar />
             <div className="bg-gray-100 flex items-center justify-center min-h-screen">
                 <div className="w-full max-w-md bg-white shadow-md rounded-lg p-8">
-                    <h2 className="text-2xl font-semibold mb-6">Login</h2>
+                    <h2 className="text-2xl font-semibold mb-6 text-black">Login</h2>
                     <form onSubmit={handleLogin}>
                         <div className="mb-4">
                             <label htmlFor="username" className="block text-sm font-medium text-gray-700">
@@ -73,7 +73,7 @@ const Login = () => {
                                 placeholder="Password"
                             />
                         </div>
-                        <button type="submit" className="btn btn-primary w-full">
+                        <button type="submit" className="btn btn btn-success w-full">
                             Login
                         </button>
                     </form>

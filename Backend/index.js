@@ -8,7 +8,6 @@ const port = 3000;
 const user = require("./routes/users");
 const noti = require("./routes/notification");
 const prod = require("./routes/products");
-const adminlog = require("./routes/adminlog");
 const appointment = require("./routes/appointment");
 const attr = require("./routes/attributes");
 const brand = require("./routes/brands");
@@ -26,7 +25,6 @@ app.use(cors());
 app.use(bodyParser.json());
 
 app.use(auth);
-app.use(adminlog);
 app.use(appointment);
 app.use(attr);
 app.use(brand);

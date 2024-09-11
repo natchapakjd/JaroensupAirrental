@@ -24,7 +24,7 @@ const Contact = () => {
         </div>
 
         {/* Contact Information */}
-        <div className="container mx-auto px-4">
+        <div className="container mx-auto px-4 pb-5">
           <div className="bg-white p-6 rounded-lg shadow-lg">
             <h2 className="text-2xl font-bold mb-4">บริษัท ...จำกัด</h2>
             <p className="text-lg mb-2">เลขที่ 51 ซ.สุขาภิบาล5 ซอย5 แยก22 แขวงท่าแร้ง เขตบางเขน กรุงเทพฯ 10220</p>

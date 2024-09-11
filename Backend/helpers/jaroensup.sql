@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: localhost:8889
--- Generation Time: Sep 05, 2024 at 07:40 AM
+-- Generation Time: Sep 11, 2024 at 12:30 PM
 -- Server version: 5.7.24
 -- PHP Version: 8.3.1
 
@@ -18,7 +18,7 @@ SET time_zone = "+00:00";
 /*!40101 SET NAMES utf8mb4 */;
 
 --
--- Database: `test`
+-- Database: `jaroensup`
 --
 
 -- --------------------------------------------------------
@@ -32,6 +32,22 @@ CREATE TABLE `adminlogs` (
   `admin_id` int(11) DEFAULT NULL,
   `action` varchar(255) DEFAULT NULL,
   `timestamp` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `area_calculation_history`
+--
+
+CREATE TABLE `area_calculation_history` (
+  `calculation_id` int(11) NOT NULL,
+  `assignment_id` int(11) DEFAULT NULL,
+  `location_name` varchar(255) DEFAULT NULL,
+  `width` decimal(10,2) NOT NULL,
+  `height` decimal(10,2) NOT NULL,
+  `air_conditioners_needed` decimal(10,2) DEFAULT NULL,
+  `area_type` varchar(255) DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 -- --------------------------------------------------------
@@ -72,6 +88,23 @@ CREATE TABLE `categories` (
 -- --------------------------------------------------------
 
 --
+-- Table structure for table `payments`
+--
+
+CREATE TABLE `payments` (
+  `payment_id` int(11) NOT NULL,
+  `user_id` int(11) DEFAULT NULL,
+  `task_id` int(11) DEFAULT NULL,
+  `amount` decimal(10,2) NOT NULL,
+  `payment_method` enum('credit_card','debit_card','paypal','bank_transfer','cash') NOT NULL,
+  `payment_date` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  `status` enum('pending','completed','failed','refunded') DEFAULT 'pending',
+  `slip_images` blob
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+
+-- --------------------------------------------------------
+
+--
 -- Table structure for table `productattributes`
 --
 
@@ -96,7 +129,8 @@ CREATE TABLE `products` (
   `stock_quantity` int(11) DEFAULT NULL,
   `brand_id` int(11) DEFAULT NULL,
   `category_id` int(11) DEFAULT NULL,
-  `warehouse_id` int(11) DEFAULT NULL
+  `warehouse_id` int(11) DEFAULT NULL,
+  `product_image` blob
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 -- --------------------------------------------------------
@@ -113,6 +147,19 @@ CREATE TABLE `reviews` (
   `rating` int(11) DEFAULT NULL,
   `comment` text,
   `created_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `service_areas`
+--
+
+CREATE TABLE `service_areas` (
+  `service_area_id` int(11) NOT NULL,
+  `tech_id` int(11) NOT NULL,
+  `area_name` varchar(255) NOT NULL,
+  `description` text
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 -- --------------------------------------------------------
@@ -158,6 +205,24 @@ CREATE TABLE `tasktypes` (
   `task_type_id` int(11) NOT NULL,
   `type_name` varchar(100) NOT NULL,
   `description` text
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `task_deletion_log`
+--
+
+CREATE TABLE `task_deletion_log` (
+  `log_id` int(11) NOT NULL,
+  `task_id` int(11) NOT NULL,
+  `user_id` int(11) DEFAULT NULL,
+  `description` text,
+  `status` enum('pending','in_progress','completed','cancelled') DEFAULT 'pending',
+  `created_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  `start_date` date DEFAULT NULL,
+  `finish_date` date DEFAULT NULL,
+  `task_type_id` int(11) DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 -- --------------------------------------------------------
@@ -269,6 +334,13 @@ ALTER TABLE `adminlogs`
   ADD KEY `admin_id` (`admin_id`);
 
 --
+-- Indexes for table `area_calculation_history`
+--
+ALTER TABLE `area_calculation_history`
+  ADD PRIMARY KEY (`calculation_id`),
+  ADD KEY `assignment_id` (`assignment_id`);
+
+--
 -- Indexes for table `attributes`
 --
 ALTER TABLE `attributes`
@@ -288,6 +360,14 @@ ALTER TABLE `brands`
 ALTER TABLE `categories`
   ADD PRIMARY KEY (`category_id`),
   ADD UNIQUE KEY `name` (`name`);
+
+--
+-- Indexes for table `payments`
+--
+ALTER TABLE `payments`
+  ADD PRIMARY KEY (`payment_id`),
+  ADD KEY `user_id` (`user_id`),
+  ADD KEY `task_id` (`task_id`);
 
 --
 -- Indexes for table `productattributes`
@@ -316,6 +396,13 @@ ALTER TABLE `reviews`
   ADD KEY `tech_id` (`tech_id`);
 
 --
+-- Indexes for table `service_areas`
+--
+ALTER TABLE `service_areas`
+  ADD PRIMARY KEY (`service_area_id`),
+  ADD KEY `tech_id` (`tech_id`);
+
+--
 -- Indexes for table `taskassignments`
 --
 ALTER TABLE `taskassignments`
@@ -337,6 +424,13 @@ ALTER TABLE `tasks`
 ALTER TABLE `tasktypes`
   ADD PRIMARY KEY (`task_type_id`),
   ADD UNIQUE KEY `type_name` (`type_name`);
+
+--
+-- Indexes for table `task_deletion_log`
+--
+ALTER TABLE `task_deletion_log`
+  ADD PRIMARY KEY (`log_id`),
+  ADD KEY `task_id` (`task_id`);
 
 --
 -- Indexes for table `technicians`
@@ -377,6 +471,12 @@ ALTER TABLE `adminlogs`
   MODIFY `log_id` int(11) NOT NULL AUTO_INCREMENT;
 
 --
+-- AUTO_INCREMENT for table `area_calculation_history`
+--
+ALTER TABLE `area_calculation_history`
+  MODIFY `calculation_id` int(11) NOT NULL AUTO_INCREMENT;
+
+--
 -- AUTO_INCREMENT for table `attributes`
 --
 ALTER TABLE `attributes`
@@ -393,6 +493,12 @@ ALTER TABLE `brands`
 --
 ALTER TABLE `categories`
   MODIFY `category_id` int(11) NOT NULL AUTO_INCREMENT;
+
+--
+-- AUTO_INCREMENT for table `payments`
+--
+ALTER TABLE `payments`
+  MODIFY `payment_id` int(11) NOT NULL AUTO_INCREMENT;
 
 --
 -- AUTO_INCREMENT for table `productattributes`
@@ -413,6 +519,12 @@ ALTER TABLE `reviews`
   MODIFY `review_id` int(11) NOT NULL AUTO_INCREMENT;
 
 --
+-- AUTO_INCREMENT for table `service_areas`
+--
+ALTER TABLE `service_areas`
+  MODIFY `service_area_id` int(11) NOT NULL AUTO_INCREMENT;
+
+--
 -- AUTO_INCREMENT for table `taskassignments`
 --
 ALTER TABLE `taskassignments`
@@ -429,6 +541,12 @@ ALTER TABLE `tasks`
 --
 ALTER TABLE `tasktypes`
   MODIFY `task_type_id` int(11) NOT NULL AUTO_INCREMENT;
+
+--
+-- AUTO_INCREMENT for table `task_deletion_log`
+--
+ALTER TABLE `task_deletion_log`
+  MODIFY `log_id` int(11) NOT NULL AUTO_INCREMENT;
 
 --
 -- AUTO_INCREMENT for table `technicians`
@@ -465,6 +583,19 @@ ALTER TABLE `adminlogs`
   ADD CONSTRAINT `adminlogs_ibfk_1` FOREIGN KEY (`admin_id`) REFERENCES `users` (`user_id`);
 
 --
+-- Constraints for table `area_calculation_history`
+--
+ALTER TABLE `area_calculation_history`
+  ADD CONSTRAINT `area_calculation_history_ibfk_1` FOREIGN KEY (`assignment_id`) REFERENCES `taskassignments` (`assignment_id`);
+
+--
+-- Constraints for table `payments`
+--
+ALTER TABLE `payments`
+  ADD CONSTRAINT `payments_ibfk_1` FOREIGN KEY (`user_id`) REFERENCES `users` (`user_id`),
+  ADD CONSTRAINT `payments_ibfk_2` FOREIGN KEY (`task_id`) REFERENCES `tasks` (`task_id`);
+
+--
 -- Constraints for table `productattributes`
 --
 ALTER TABLE `productattributes`
@@ -488,6 +619,12 @@ ALTER TABLE `reviews`
   ADD CONSTRAINT `reviews_ibfk_3` FOREIGN KEY (`tech_id`) REFERENCES `technicians` (`tech_id`);
 
 --
+-- Constraints for table `service_areas`
+--
+ALTER TABLE `service_areas`
+  ADD CONSTRAINT `service_areas_ibfk_1` FOREIGN KEY (`tech_id`) REFERENCES `technicians` (`tech_id`);
+
+--
 -- Constraints for table `taskassignments`
 --
 ALTER TABLE `taskassignments`
@@ -501,6 +638,12 @@ ALTER TABLE `tasks`
   ADD CONSTRAINT `tasks_ibfk_1` FOREIGN KEY (`user_id`) REFERENCES `users` (`user_id`),
   ADD CONSTRAINT `tasks_ibfk_2` FOREIGN KEY (`task_type_id`) REFERENCES `tasktypes` (`task_type_id`),
   ADD CONSTRAINT `tasks_ibfk_3` FOREIGN KEY (`task_type_id`) REFERENCES `tasktypes` (`task_type_id`);
+
+--
+-- Constraints for table `task_deletion_log`
+--
+ALTER TABLE `task_deletion_log`
+  ADD CONSTRAINT `task_deletion_log_ibfk_1` FOREIGN KEY (`task_id`) REFERENCES `tasks` (`task_id`);
 
 --
 -- Constraints for table `technicians`
