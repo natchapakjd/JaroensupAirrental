@@ -51,7 +51,7 @@ const Register = () => {
       <div className="bg-gray-100 flex items-center justify-center min-h-screen">
         <div className="w-full max-w-md bg-white shadow-md rounded-lg p-8">
           <h2 className="text-2xl font-semibold mb-6 text-black">Register</h2>
-          <form>
+          <form onSubmit={handleRegister}>
             <div className="mb-4">
               <label
                 htmlFor="username"
@@ -98,8 +98,7 @@ const Register = () => {
               />
             </div>
             <button
-              className="btn btn btn-success w-full"
-              onClick={handleRegister}
+              className="btn btn btn-info text-white w-full"
             >
               Register
             </button>

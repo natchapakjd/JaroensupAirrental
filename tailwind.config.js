@@ -8,9 +8,21 @@ export default {
     extend: {
       fontFamily:{
         'prompt' : ['Prompt','sans-serif'],
+        'inter'  : ['Inter']
       },
       backgroundColor:{
-        'blue' : '#5ECFF2'
+        'blue' : '#2984FF',
+        'gray' : '#A8AFBD',
+        'black' : '#101010',
+        'orange' : '#FE774E',
+        'white' : '#FFFFFF',
+      },
+      textColor:{
+        'blue' : '#2984FF',
+        'gray' : '#A8AFBD',
+        'black' : '#101010',
+        'orange' : '#FE774E',
+        'white' : '#FFFFFF',
       }
     },
   },

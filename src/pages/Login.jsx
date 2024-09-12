@@ -88,7 +88,7 @@ const Login = () => {
                 placeholder="Password"
               />
             </div>
-            <button type="submit" className="btn btn-success w-full">
+            <button type="submit" className="btn btn-info w-full text-white">
               Login
             </button>
           </form>

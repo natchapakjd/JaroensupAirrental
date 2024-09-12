@@ -8,13 +8,13 @@ import "./index.css";
 import Home from "./pages/Home";
 import Login from "./pages/Login";
 import Register from "./pages/Register";
-import Dashboard from "./pages/Dashboard";
+import Dashboard from "./DashboardPage/Dashboard";
 import Product from "./pages/Product";
 import Contact from "./pages/Contact";
 import Noti from "./pages/Noti";
 import WorkExperience from "./pages/WorkExperience";
 import ProtectedRoute from "./authentication/ProtectedRoute";
-
+import AddProduct from "./DashboardContent/Products/AddProduct";
 // Configure the router with routes
 const router = createBrowserRouter([
   {
@@ -53,6 +53,11 @@ const router = createBrowserRouter([
     path: "/notification",
     element: <Noti />,
   },
+  {
+    path: "/dashboard/products/add",
+    element: <AddProduct/>,
+  }
+  
 ]);
 
 // Render the application

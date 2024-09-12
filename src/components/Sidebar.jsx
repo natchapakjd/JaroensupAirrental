@@ -28,76 +28,81 @@ const Sidebar = () => {
   };
   return (
     <div>
-      <aside className="w-64 h-screen sticky top-0 border bg-gray-100 text-black">
+      <aside className="w-64 h-screen sticky top-0 border font-inter ">
         <div className="relative">
-          <p className="text-xl font-bold mt-8 ml-10 mr-26 mb-14 ">Jaroensup</p>
-          <div className="flex flex-col  w-full ">
-            <ul className="flex flex-col  ml-10 mb-16">
-              <li className="mb-8 ">
-                <a className="text-base font-semibold"></a>
-              </li>
+          <p className="text-xl font-semibold mt-8 ml-10 mr-26 mb-9 ">
+            Jaroensup
+          </p>
+          <hr className="w-4/5 mx-auto" />
+          <div className="flex flex-col  w-full text-gray">
+          <ul className="flex flex-col  pt-10 w-full">
+            <li className="mb-8 hover:bg-blue hover:rounded-lg hover:py-3 hover:px-4 transition-all duration-300 hover:mx-5 hover:text-white">
+              <a className="text-base pl-10">
+                  Dashboard
+              </a>
+            </li>
 
-              <li className="mb-8">
-                <a className="text-base font-semibold">
-                  <div className="flex">
-                    {/* <AiFillDashboard classNameName="mt-1" />  */}Dashboard
-                  </div>
-                </a>
-              </li>
+            <li className="mb-8 hover:bg-blue hover:rounded-lg hover:py-3 hover:px-4 transition-all duration-300 hover:mx-5 hover:text-white">
+            <a className="text-base pl-10">
+                  Users
+              </a>
+            </li>
 
-              <li className="mb-8">
-                <a className="text-base   font-semibold"> Users</a>
-              </li>
-              <li className="mb-8">
-                <a className="text-base  font-semibold">
-                  <div className="flex">Tasks</div>
-                </a>
-              </li>
-              <li className="mb-8">
-                <a className="text-base   font-semibold">
-                  <div className="flex">Categories</div>
-                </a>
-              </li>
-            </ul>
 
+            <li className="mb-8 hover:bg-blue hover:rounded-lg hover:py-3 hover:px-4 transition-all duration-300 hover:mx-5 hover:text-white">
+            <a className="text-base pl-10">
+                  Tasks
+              </a>
+            </li>
+
+
+            <li className="mb-8 hover:bg-blue hover:rounded-lg hover:py-3 hover:px-4 transition-all duration-300 hover:mx-5 hover:text-white">
+            <a className="text-base pl-10">
+                  Categories
+              </a>
+            </li>
+
+          </ul>
+
+{/* 
             {role == "admin" ? (
               <ul className="flex flex-col ml-10 mb-16">
                 <li className="mb-8">
-                  <a className="text-base  font-semibold">
+                  <a className="text-base  ">
                     <div className="flex">WareHouse</div>
                   </a>
                 </li>
                 <li className="mb-8">
-                  <a className="text-base   font-semibold">
+                  <a className="text-base   ">
                     <div className="flex">Product</div>
                   </a>
                 </li>
                 <li className="mb-8">
-                  <a className="text-base   font-semibold">
+                  <a className="text-base   ">
                     <div className="flex">Profile</div>
                   </a>
                 </li>
                 <li className="mb-8">
-                  <a className="text-base   font-semibold">
+                  <a className="text-base   ">
                     <div className="flex">Report</div>
                   </a>
                 </li>
                 <li className="mb-8">
-                  <a className="text-base   font-semibold">
+                  <a className="text-base   ">
                     <div className="flex">Guide Book</div>
                   </a>
                 </li>
               </ul>
-            ) : null}
+            ) : null} */}
 
             <ul className="flex flex-col ml-10">
-              <li className="mb-8">
-                <a className="text-base   font-semibold">
+              {/* <li className="mb-8">
+                <a className="text-base   ">
                   <div className="flex">Setting</div>
                 </a>
-              </li>
+              </li> */}
               <li className="mb-8" onClick={handleLogout}>
-                <a className="text-base   font-semibold">
+                <a className="text-base   ">
                   <div className="flex">Logout</div>
                 </a>
               </li>
