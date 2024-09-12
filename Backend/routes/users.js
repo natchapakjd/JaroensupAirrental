@@ -53,4 +53,44 @@ router.post("/change-password",(req,res)=>{
     }
   })
 })
+
+
+router.put("/user/:username", (req, res) => {
+  const username = req.params.username;
+  const { firstname, lastname, email, phone, age, address, gender } = req.body;
+
+  const query = `
+    UPDATE users
+    SET firstname = ?, lastname = ?, email = ?, phone = ?, age = ?, address = ?, gender = ?
+    WHERE username = ?
+  `;
+
+  db.query(query, [firstname, lastname, email, phone, age, address, gender, username], (err, result) => {
+    if (err) {
+      console.error("Error updating user: " + err);
+      res.status(500).json({ error: "Failed to update user" });
+    } else if (result.affectedRows === 0) {
+      res.status(404).json({ error: "User not found" });
+    } else {
+      res.json({ message: "User updated successfully" });
+    }
+  });
+});
+
+router.delete("/user/:username", (req, res) => {
+  const username = req.params.username;
+  const query = "DELETE FROM users WHERE username = ?";
+
+  db.query(query, [username], (err, result) => {
+    if (err) {
+      console.error("Error deleting user: " + err);
+      res.status(500).json({ error: "Failed to delete user" });
+    } else if (result.affectedRows === 0) {
+      res.status(404).json({ error: "User not found" });
+    } else {
+      res.json({ message: "User deleted successfully" });
+    }
+  });
+});
+
 module.exports = router;

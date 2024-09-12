@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { Link ,useNavigate} from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import Cookies from "universal-cookie";
 import { jwtDecode } from "jwt-decode";
 // import Swal from "sweetalert2";
@@ -12,16 +12,11 @@ const Navbar = () => {
     setIsToggle(!isToggle);
   };
 
-  
   const handleLogout = () => {
-    console.log(jwtDecode(token))
     cookies.remove("authToken", { path: "/" });
-    // Swal.fire({
-    //   title: "ออกจากระบบสำเร็จ",
-    //   icon: "success",
-    // });
     navigate("/login");
   };
+
   return (
     <nav>
       <div className="navbar bg-white text-black font-prompt ">
@@ -89,7 +84,7 @@ const Navbar = () => {
             <li>
               <Link to="/product">สินค้า</Link>
             </li>
-            <li className="z-40" >
+            <li className="z-40">
               <details>
                 <summary>บริการของเรา</summary>
                 <ul className="p-2 bg-white text-black">

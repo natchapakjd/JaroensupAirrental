@@ -19,7 +19,9 @@ const taskType = require("./routes/taskType");
 const tech_applicant = require("./routes/tech_applicants");
 const tech = require("./routes/technicians");
 const warehouse = require("./routes/warehouses");
+const path = require("path");
 
+app.use("/uploads", express.static(path.join(__dirname, "uploads")));
 app.use(express());
 app.use(cors());
 app.use(bodyParser.json());

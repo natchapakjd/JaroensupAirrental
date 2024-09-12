@@ -2,6 +2,7 @@ import React from 'react'
 import Sidebar from '../components/Sidebar'
 import Header from '../components/Header'
 import UserContent from '../Dashboard/UserContent'
+import ProductContent from '../Dashboard/ProductContent'
 const Dashboard = () => {
   return (
     <>
@@ -9,7 +10,8 @@ const Dashboard = () => {
         <Sidebar/>
         <div className='w-full' >
             <Header className='mb-5'/>
-            <UserContent/>
+            {/* <UserContent/> */}
+            <ProductContent/>
         </div>
     </div>
    

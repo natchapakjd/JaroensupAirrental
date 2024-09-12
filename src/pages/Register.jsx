@@ -1,52 +1,53 @@
 import React from "react";
 import Navbar from "../components/Navbar";
-import { Link , useNavigate} from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { useState } from "react";
-import Swal from 'sweetalert2'
+import Swal from "sweetalert2";
 import axios from "axios";
 
 const Register = () => {
-    const [username,setUsername] =useState('')
-    const [email,setEmail] =useState('')
-    const [password,setPassword] =useState('')
-    const navigate = useNavigate();
+  const [username, setUsername] = useState("");
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const navigate = useNavigate();
 
-    const handleUsernameChange =(event)=>{
-        setUsername(event.target.value)
-    }
-    const handleEmailChange =(event)=>{
-        setEmail(event.target.value)
-    }
-    const handlePasswordChange =(event)=>{
-        setPassword(event.target.value)
-    }
+  const handleUsernameChange = (event) => {
+    setUsername(event.target.value);
+  };
+  const handleEmailChange = (event) => {
+    setEmail(event.target.value);
+  };
+  const handlePasswordChange = (event) => {
+    setPassword(event.target.value);
+  };
 
-    const handleRegister = async(e)=>{
-        e.preventDefault();
-        if(email,password,username){
-            try{
-                const response =  await axios.post('http://localhost:3000/register',{username,password,email})
-                Swal.fire({
-                    title: "สมัครสมาชิกสำเร็จ",
-                    icon: "success"      
-                })
-                console.log(response.data)
-
-                setTimeout(()=>{
-                    navigate('/login')
-                },800)
-            }catch(err){
-                Swal.fire({
-                    title: "สมัครสมาชิกไม่สำเร็จ",
-                    icon: "error"      
-                })
-            }   
-        }
-        
+  const handleRegister = async (e) => {
+    e.preventDefault();
+    if ((email, password, username)) {
+      try {
+        const response = await axios.post("http://localhost:3000/register", {
+          username,
+          password,
+          email,
+        });
+        Swal.fire({
+          title: "สมัครสมาชิกสำเร็จ",
+          icon: "success",
+        });
+        setTimeout(() => {
+          navigate("/login");
+        }, 800);
+      } catch (err) {
+        Swal.fire({
+          title: "สมัครสมาชิกไม่สำเร็จ",
+          icon: "error",
+        });
+      }
     }
+  };
   return (
     <>
-      <Navbar/>
+      <Navbar />
       <div className="bg-gray-100 flex items-center justify-center min-h-screen">
         <div className="w-full max-w-md bg-white shadow-md rounded-lg p-8">
           <h2 className="text-2xl font-semibold mb-6 text-black">Register</h2>
@@ -63,7 +64,7 @@ const Register = () => {
                 id="username"
                 className="input input-bordered w-full bg-white"
                 placeholder="Username"
-                onChange = {handleUsernameChange}
+                onChange={handleUsernameChange}
               />
             </div>
             <div className="mb-4">
@@ -78,7 +79,7 @@ const Register = () => {
                 id="email"
                 className="input input-bordered w-full bg-white"
                 placeholder="Email"
-                onChange = {handleEmailChange}
+                onChange={handleEmailChange}
               />
             </div>
             <div className="mb-4">
@@ -88,15 +89,18 @@ const Register = () => {
               >
                 Password
               </label>
-              <input  
+              <input
                 type="password"
                 id="password"
                 className="input input-bordered w-full bg-white"
                 placeholder="Password"
-                onChange = {handlePasswordChange}
+                onChange={handlePasswordChange}
               />
             </div>
-            <button className="btn btn btn-success w-full" onClick={handleRegister}>
+            <button
+              className="btn btn btn-success w-full"
+              onClick={handleRegister}
+            >
               Register
             </button>
           </form>

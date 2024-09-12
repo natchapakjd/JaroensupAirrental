@@ -1,31 +1,24 @@
-import React from "react";
-import Login from "../pages/Login";
-import { jwtDecode } from "jwt-decode";
-import AccessDenied from "./AccessDenied";
-import Cookies from "universal-cookie";
+import React from 'react';
+import { jwtDecode } from 'jwt-decode';
+import Cookies from 'universal-cookie';
+import Login from '../pages/Login';
+import AccessDenied from './AccessDenied';
 
-const ProtectedRoute = (props, c ) => {
+const ProtectedRoute = ({ children}) => {
   const cookies = new Cookies();
-  const token = cookies.get("authToken");
+  const token = cookies.get('authToken');
 
   if (token) {
     const decodedToken = jwtDecode(token);
     const userRole = decodedToken.role;
-    
-    if (userRole === "admin" && flag === 0 ) {
-      return <div>{props}</div>;
-    } 
-    else if (userRole === "tech" && flag=== 1) {
-      return <div><h1>{props}</h1></div>;
-    }
-    else if (userRole === "client") {
-      return <AccessDenied />;
-    }
-    else {
+
+    if ((userRole === 'admin') || (userRole === 'tech')) {
+      return <>{children}</>; 
+    } else {
       return <AccessDenied />;
     }
   } else {
-    return  <Login />;
+    return <Login />; 
   }
 };
 
