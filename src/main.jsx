@@ -15,6 +15,7 @@ import Noti from "./pages/Noti";
 import WorkExperience from "./pages/WorkExperience";
 import ProtectedRoute from "./authentication/ProtectedRoute";
 import AddProduct from "./DashboardContent/Products/AddProduct";
+import PageNotFound from "./authentication/PageNotFound";
 // Configure the router with routes
 const router = createBrowserRouter([
   {
@@ -34,7 +35,7 @@ const router = createBrowserRouter([
     element: <Register />,
   },
   {
-    path: "/dashboard",
+    path: "/dashboard/*",
     element: (
       <ProtectedRoute>
         <Dashboard />
@@ -54,8 +55,8 @@ const router = createBrowserRouter([
     element: <Noti />,
   },
   {
-    path: "/dashboard/products/add",
-    element: <AddProduct/>,
+    path: "*",
+    element: <PageNotFound/>
   }
   
 ]);

@@ -1,8 +1,11 @@
 import React, { useState } from "react";
 import axios from "axios";
 import Swal from "sweetalert2";
-import Sidebar from "../../components/Sidebar";
+import { useNavigate } from 'react-router-dom';
+
 const AddProduct = () => {
+  const navigate = useNavigate(); 
+
   const [formData, setFormData] = useState({
     name: "",
     description: "",
@@ -60,7 +63,10 @@ const AddProduct = () => {
           icon: "success",
         });
         clearFormData();
-        
+        setTimeout(() => {
+          navigate('/dashboard/products'); 
+        }, 800);
+
       } else {
         throw new Error("Failed to add product.");
       }
@@ -70,10 +76,7 @@ const AddProduct = () => {
   };
   return (
     <>
-      <div className="flex justify-between">
-        {" "}
-        <Sidebar />
-        <div className="bg-white p-8 rounded-lg shadow-lg w-full max-w-6xl mx-auto">
+        <div className="p-8 rounded-lg shadow-lg w-full  mx-auto font-inter">
           <h1 className="text-2xl font-semibold mb-6">Add New Product</h1>
           <form onSubmit={handleSubmit}>
             {Object.keys(formData).map((key) => (
@@ -124,7 +127,6 @@ const AddProduct = () => {
             </button>
           </form>
         </div>
-      </div>
     </>
   );
 };

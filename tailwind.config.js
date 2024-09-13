@@ -12,7 +12,7 @@ export default {
       },
       backgroundColor:{
         'blue' : '#2984FF',
-        'gray' : '#A8AFBD',
+        'greyCustom' : '#A8AFBD',
         'black' : '#101010',
         'orange' : '#FE774E',
         'white' : '#FFFFFF',

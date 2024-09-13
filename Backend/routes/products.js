@@ -112,8 +112,11 @@ router.post("/products", upload.single("product_image"), (req, res) => {
 });
 
 
-router.put("/product/:id", (req, res) => {
+router.put("/product/:id", upload.single('product_image'), (req, res) => {
   const id = req.params.id;
+  console.log("Request body:", req.body); // Debug statement
+  console.log("Request file:", req.file); // Debug statement
+
   const {
     name,
     description,
@@ -122,8 +125,9 @@ router.put("/product/:id", (req, res) => {
     brand_id,
     category_id,
     warehouse_id,
-    product_image,
   } = req.body;
+
+  const product_image = req.file ? req.file.path: null;
 
   const query = `UPDATE products
                  SET name = ?, description = ?, price = ?, stock_quantity = ?, brand_id = ?, category_id = ?, warehouse_id = ?, product_image = ?

@@ -88,13 +88,13 @@ const Login = () => {
                 placeholder="Password"
               />
             </div>
-            <button type="submit" className="btn btn-info w-full text-white">
+            <button type="submit" className="btn bg-blue hover:bg-blue w-full text-white">
               Login
             </button>
           </form>
           <p className="mt-4 text-center text-sm text-gray-600">
             Don't have an account?
-            <Link to="/register" className="text-blue-500">
+            <Link to="/register" className="text-blue">
               Register
             </Link>
           </p>
