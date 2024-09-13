@@ -1,6 +1,25 @@
 import React from "react";
 import Navbar from "../components/Navbar";
 import Footer from "../components/Footer";
+import imgSrc1 from "../assets/images/IMG_0848.jpg";
+import imgSrc2 from "../assets/images/IMG_0849.jpg";
+
+const workExperiences = [
+  {
+    id: 1,
+    imgSrc: imgSrc1,
+    companyName: "Company Name 1",
+    projectTitle: "Project Title 1",
+    description: "A brief description of the project or work experience. Highlight the key achievements and the impact made.",
+  },
+  {
+    id: 2,
+    imgSrc: imgSrc2,
+    companyName: "Company Name 2",
+    projectTitle: "Project Title 2",
+    description: "A brief description of the project or work experience. Highlight the key achievements and the impact made.",
+  },
+];
 
 const WorkExperience = () => {
   return (
@@ -19,53 +38,30 @@ const WorkExperience = () => {
           </header>
 
           <section className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-            {/* Example Work Experience Card */}
-            <div className="bg-white shadow-lg rounded-lg overflow-hidden">
-              <img
-                src="https://via.placeholder.com/600x400"
-                alt="Company Project"
-                className="w-full h-48 object-cover"
-              />
-              <div className="p-6">
-                <h2 className="text-xl font-semibold text-gray-800 mb-2">
-                  Company Name
-                </h2>
-                <h3 className="text-lg font-medium text-gray-700 mb-4">
-                  Project Title
-                </h3>
-                <p className="text-gray-600">
-                  A brief description of the project or work experience.
-                  Highlight the key achievements and the impact made.
-                </p>
+            {workExperiences.map(({ id, imgSrc, companyName, projectTitle, description }) => (
+              <div key={id} className="bg-white shadow-lg rounded-lg overflow-hidden">
+                <img
+                  src={imgSrc}
+                  alt={companyName}
+                  className="w-full h-48 object-cover"
+                />
+                <div className="p-6">
+                  <h2 className="text-xl font-semibold text-gray-800 mb-2">
+                    {companyName}
+                  </h2>
+                  <h3 className="text-lg font-medium text-gray-700 mb-4">
+                    {projectTitle}
+                  </h3>
+                  <p className="text-gray-600">
+                    {description}
+                  </p>
+                </div>
               </div>
-            </div>
-
-            {/* Add more work experience cards as needed */}
-            <div className="bg-white shadow-lg rounded-lg overflow-hidden">
-              <img
-                src="https://via.placeholder.com/600x400"
-                alt="Company Project"
-                className="w-full h-48 object-cover"
-              />
-              <div className="p-6">
-                <h2 className="text-xl font-semibold text-gray-800 mb-2">
-                  Company Name
-                </h2>
-                <h3 className="text-lg font-medium text-gray-700 mb-4">
-                  Project Title
-                </h3>
-                <p className="text-gray-600">
-                  A brief description of the project or work experience.
-                  Highlight the key achievements and the impact made.
-                </p>
-              </div>
-            </div>
-
-            {/* Add more work experience cards as needed */}
+            ))}
           </section>
         </div>
       </div>
-      <Footer/>
+      <Footer />
     </>
   );
 };

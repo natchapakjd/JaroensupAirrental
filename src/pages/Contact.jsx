@@ -16,7 +16,7 @@ const Contact = () => {
         <div className="container mx-auto px-4 mb-8">
           <iframe
             className="w-full h-80 rounded-lg shadow-lg"
-            src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d247943.07805996135!2d100.51583909225876!3d13.8323970412977!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x30e299bca25f00d9%3A0xf1b3210b3bd61a2!2sPN%20MAP!5e0!3m2!1sth!2sth!4v1724387269578!5m2!1sth!2sth"
+            src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3874.357660721919!2d100.61009159999999!3d13.8175492!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x30e29d836665efc7%3A0x6b2d16caaa5a845c!2s425%20Nak%20Niwat%20Rd%2C%20Khwaeng%20Lat%20Phrao%2C%20Khet%20Lat%20Phrao%2C%20Krung%20Thep%20Maha%20Nakhon%2010230!5e0!3m2!1sen!2sth!4v1726233305868!5m2!1sen!2sth"
             allowFullScreen
             loading="lazy"
             referrerPolicy="no-referrer-when-downgrade"
@@ -26,11 +26,11 @@ const Contact = () => {
         {/* Contact Information */}
         <div className="container mx-auto px-4 pb-5">
           <div className="bg-white p-6 rounded-lg shadow-lg">
-            <h2 className="text-2xl font-bold mb-4">บริษัท ...จำกัด</h2>
-            <p className="text-lg mb-2">เลขที่ 51 ซ.สุขาภิบาล5 ซอย5 แยก22 แขวงท่าแร้ง เขตบางเขน กรุงเทพฯ 10220</p>
+            <h2 className="text-2xl font-bold mb-4">บริษัท เจริญทรัพย์ จำกัด</h2>
+            <p className="text-lg mb-2">เลขที่ 425 ถ.นาคนิวาศ แขวงลาดพร้าว เขตลาดพร้าว กรุงเทพฯ 10230</p>
             <h3 className="text-xl font-semibold mb-2">ช่องทางการติดต่อ</h3>
             <ul className="list-disc list-inside text-gray-700">
-              <li>โทรศัพท์: 012-345-6789</li>
+              <li>โทรศัพท์: 085-907-7726</li>
               <li>อีเมล: contact@example.com</li>
               <li>เว็บไซต์: <a href="https://www.example.com" className="text-blue-500 hover:underline">www.example.com</a></li>
             </ul>
