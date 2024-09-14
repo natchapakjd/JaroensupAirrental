@@ -4,6 +4,20 @@ import { jwtDecode } from "jwt-decode";
 import { useState } from "react";
 import { useEffect } from "react";
 import { useLocation } from "react-router-dom";
+import { MdSpaceDashboard } from "react-icons/md";
+import { MdSupervisedUserCircle } from "react-icons/md";
+import { MdAddShoppingCart } from "react-icons/md";
+import { MdTask } from "react-icons/md";
+import { MdPayments } from "react-icons/md";
+import { MdEngineering } from "react-icons/md";
+import { MdCategory } from "react-icons/md";
+import { MdBrandingWatermark } from "react-icons/md";
+import { MdHistory } from "react-icons/md";
+import { MdRateReview } from "react-icons/md";
+import { MdWarehouse } from "react-icons/md";
+import { MdEditAttributes } from "react-icons/md";
+import { MdOutlineSettings } from "react-icons/md";
+
 
 const Sidebar = () => {
   const cookies = new Cookies();
@@ -39,8 +53,8 @@ const Sidebar = () => {
                     : null
                 }`}
               >
-                <a className="text-base pl-10" href="/dashboard/home">
-                  Dashboard
+                <a className="text-base pl-10 flex gap-1" href="/dashboard/home">
+                  <MdSpaceDashboard className="mt-1"/> Dashboard
                 </a>
               </li>
 
@@ -51,8 +65,8 @@ const Sidebar = () => {
                     : null
                 }`}
               >
-                <a className="text-base pl-10" href="/dashboard/user">
-                  Users
+                <a className="text-base pl-10 flex  gap-1" href="/dashboard/user">
+                 <MdSupervisedUserCircle className="mt-1"/> Users
                 </a>
               </li>
 
@@ -63,8 +77,8 @@ const Sidebar = () => {
                     : null
                 }`}
               >
-                <a className="text-base pl-10" href="/dashboard/products">
-                  Products
+                <a className="text-base pl-10 flex gap-1" href="/dashboard/products">
+                  <MdAddShoppingCart className="mt-1"/> Products
                 </a>
               </li>
 
@@ -75,8 +89,33 @@ const Sidebar = () => {
                     : null
                 }`}
               >
-                <a className="text-base pl-10" href="/dashboard/tasks">
-                  Tasks
+                <a className="text-base pl-10 flex gap-1" href="/dashboard/tasks">
+                  <MdTask className="mt-1"/> Tasks
+                </a>
+              </li>
+
+              <li
+                className={`mb-5 hover:rounded-lg hover:py-3 hover:px-4 transition-all duration-300 hover:mx-5 ${
+                  isActive("/dashboard/payments")
+                    ? "bg-blue text-white mx-5 px-4 py-3 rounded-lg"
+                    : null
+                }`}
+              >
+                <a className="text-base pl-10 flex gap-1" href="/dashboard/payments">
+                <MdPayments  className="mt-1"/>
+                Payments
+                </a>
+              </li>
+                
+              <li
+                className={`mb-5 hover:rounded-lg hover:py-3 hover:px-4 transition-all duration-300 hover:mx-5 ${
+                  isActive("/dashboard/applicants")
+                    ? "bg-blue text-white mx-5 px-4 py-3 rounded-lg"
+                    : null
+                }`}
+              >
+                <a className="text-base pl-10 flex gap-1" href="/dashboard/applicants">
+                  <MdEngineering className="mt-1"/>Applicants
                 </a>
               </li>
 
@@ -87,8 +126,8 @@ const Sidebar = () => {
                     : null
                 }`}
               >
-                <a className="text-base pl-10" href="/dashboard/categories">
-                  Categories
+                <a className="text-base pl-10 flex gap-1" href="/dashboard/categories">
+                  <MdCategory className="mt-1"/> Categories
                 </a>
               </li>
 
@@ -99,8 +138,8 @@ const Sidebar = () => {
                     : null
                 }`}
               >
-                <a className="text-base pl-10" href="/dashboard/brands">
-                  Brands
+                <a className="text-base pl-10 flex gap-1" href="/dashboard/brands">
+                  <MdBrandingWatermark className="mt-1"/> Brands
                 </a>
               </li>
 
@@ -111,8 +150,8 @@ const Sidebar = () => {
                     : null
                 }`}
               >
-                <a className="text-base pl-10" href="/dashboard/attributes">
-                  Attributes
+                <a className="text-base pl-10 flex gap-1" href="/dashboard/attributes">
+                  <MdEditAttributes className="mt-1"/>Attributes
                 </a>
               </li>
 
@@ -123,11 +162,38 @@ const Sidebar = () => {
                     : null
                 }`}
               >
-                <a className="text-base pl-10" href="/dashboard/warehouses">
-                  Warehouses
+                <a className="text-base pl-10 flex gap-1" href="/dashboard/warehouses">
+                 <MdWarehouse className="mt-1"/> Warehouses
+                </a>
+              </li>
+              <li
+                className={`mb-5 hover:rounded-lg hover:py-3 hover:px-4 transition-all duration-300 hover:mx-5 ${
+                  isActive("/dashboard/reviews")
+                    ? "bg-blue text-white mx-5 px-4 py-3 rounded-lg"
+                    : null
+                }`}
+              >
+                <a className="text-base pl-10 flex gap-1" href="/dashboard/reviews">
+                <MdRateReview className="mt-1"/>
+                Reviews
+                </a>
+              </li>
+
+              <li
+                className={`mb-5 hover:rounded-lg hover:py-3 hover:px-4 transition-all duration-300 hover:mx-5 ${
+                  isActive("/dashboard/history-log")
+                    ? "bg-blue text-white mx-5 px-4 py-3 rounded-lg"
+                    : null
+                }`}
+              >
+                <a className="text-base pl-10 flex gap-1" href="/dashboard/history-log">
+                <MdHistory className="mt-1"/>
+                History Log
                 </a>
               </li>
             </ul>
+
+           
 
             <ul>
               <li
@@ -137,8 +203,8 @@ const Sidebar = () => {
                     : "bg-gray-100 text-gray-600 mx-5 px-4 py-3 rounded-lg"
                 }`}
               >
-                <a className="text-base pl-10" href="/dashboard/settings">
-                  Settings
+                <a className="text-base pl-10 flex gap-1" href="/dashboard/settings">
+                 <MdOutlineSettings className="mt-1"/> Settings
                 </a>
               </li>
             </ul>
