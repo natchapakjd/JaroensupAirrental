@@ -8,7 +8,6 @@ const ProductContent = () => {
 
   useEffect(() => {
     fetchProducts();
-    console.log(products)
   }, []);
 
   const fetchProducts = async () => {

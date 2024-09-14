@@ -8,6 +8,10 @@ import AddProduct from '../DashboardContent/Products/AddProduct'
 import EditProduct from '../DashboardContent/Products/EditProducts'
 import CategoryContent from '../DashboardContent/Categories/CategoryContent'
 import AddCategory from '../DashboardContent/Categories/AddCategory'
+import AddUser from '../DashboardContent/Users/AddUser'
+import UserDetails from '../DashboardContent/Users/UserDetails'
+import EditUser from '../DashboardContent/Users/EditUser'
+import PageNotFound from '../authentication/PageNotFound'
 
 const Dashboard = () => {
   return (
@@ -18,7 +22,11 @@ const Dashboard = () => {
           <Header/>
 
           <Routes>
+            <Route path="*" element={<PageNotFound />} />
             <Route path="user" element={<UserContent />} />
+            <Route path="user/add" element={<AddUser />} />
+            <Route path="user/edit/:userId" element={<EditUser/>} />
+            <Route path="user/:userId" element={<UserDetails/>} />
             <Route path="products" element={<ProductContent />} />
             <Route path="categories" element={<CategoryContent />} />
             <Route path="category/add" element={<AddCategory />} />

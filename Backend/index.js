@@ -21,7 +21,10 @@ const tech = require("./routes/technicians");
 const warehouse = require("./routes/warehouses");
 const path = require("path");
 
-app.use("/uploads", express.static(path.join(__dirname, "uploads")));
+
+app.use("/uploads/product-image", express.static(path.join(__dirname, "uploads/product-image")));
+app.use("/uploads/user-image", express.static(path.join(__dirname, "uploads/user-image")));
+
 app.use(express());
 app.use(cors());
 app.use(bodyParser.json());
