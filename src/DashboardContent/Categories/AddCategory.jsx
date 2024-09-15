@@ -19,6 +19,8 @@ const AddCategory = () => {
     });
   };
 
+  
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
@@ -50,8 +52,9 @@ const AddCategory = () => {
   
 
   return (
-    <div className="p-8 rounded-lg shadow-lg w-full mx-auto font-inter h-screen">
+    <div className="p-8 rounded-lg shadow-lg w-full mx-auto font-inter h-screen" >
       <h1 className="text-2xl font-semibold mb-6">Add New Category</h1>
+      <div></div>
       <form onSubmit={handleSubmit}>
         <div className="mb-4">
           <label

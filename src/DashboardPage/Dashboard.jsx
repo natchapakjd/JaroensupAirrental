@@ -12,7 +12,13 @@ import AddUser from '../DashboardContent/Users/AddUser'
 import UserDetails from '../DashboardContent/Users/UserDetails'
 import EditUser from '../DashboardContent/Users/EditUser'
 import PageNotFound from '../authentication/PageNotFound'
-
+import BrandContent from '../DashboardContent/Brands/BrandContent'
+import AddBrand from '../DashboardContent/Brands/AddBrand'
+import WarehouseContent from '../DashboardContent/Warehouses/WarehouseContent'
+import AddWarehouse from '../DashboardContent/Warehouses/AddWarehouse'
+import AddAttribute from '../DashboardContent/Attributes/AddAttribute'
+import AttributeContent from '../DashboardContent/Attributes/AttributeContent'
+import DashboardContent from './DashboardContent'
 const Dashboard = () => {
   return (
       <div className='flex'>
@@ -23,7 +29,14 @@ const Dashboard = () => {
 
           <Routes>
             <Route path="*" element={<PageNotFound />} />
+            <Route path="home" element={<DashboardContent />} />
             <Route path="user" element={<UserContent />} />
+            <Route path="brands" element={<BrandContent />} />
+            <Route path="brand/add" element={<AddBrand />} />
+            <Route path="warehouses" element={<WarehouseContent />} />
+            <Route path="warehouse/add" element={<AddWarehouse />} />
+            <Route path="attributes" element={<AttributeContent />} />
+            <Route path="attribute/add" element={<AddAttribute />} />
             <Route path="user/add" element={<AddUser />} />
             <Route path="user/edit/:userId" element={<EditUser/>} />
             <Route path="user/:userId" element={<UserDetails/>} />
