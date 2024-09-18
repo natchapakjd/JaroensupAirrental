@@ -174,4 +174,23 @@ router.get("/user-image/:id", (req, res) => {
 });
 
 
+router.get("/api/getImageData", (req, res) => {
+  const sql = "SELECT user_id, profile_image FROM users";
+
+  db.query(sql, (err, results) => {
+    if (err) {
+      return res.status(500).send(err);
+    }
+
+    const imageObjects = results.map((row) => {
+      if (row.profile_image) {
+        return { user_id: row.user_id, file_data: Buffer.from(row.profile_image).toString("base64") };
+      }
+      return { user_id: row.user_id, file_data: null }; 
+    });
+
+    res.json(imageObjects);
+  });
+});
+
 module.exports = router;

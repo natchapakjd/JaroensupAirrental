@@ -1,6 +1,5 @@
 import React, { useEffect, useState } from 'react';
 import liff from '@line/liff';
-import { useNavigate } from 'react-router-dom';
 
 const Noti = () => {
     const [profile, setProfile] = useState(null);

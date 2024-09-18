@@ -56,14 +56,14 @@ const Navbar = () => {
                 </li>
                 <li>
                   <a>บริการของเรา</a>
-                  <ul className="p-2">
+                  {/* <ul className="p-2">
                     <li>
                       <a>งานเช่า</a>
                     </li>
                     <li>
                       <a>งานซ่อมบำรุง</a>
                     </li>
-                  </ul>
+                  </ul> */}
                 </li>
                 <li>
                   <Link to="/experience">ผลงานของเรา</Link>
@@ -85,17 +85,19 @@ const Navbar = () => {
               <Link to="/product">สินค้า</Link>
             </li>
             <li className="z-40">
-              <details>
+            <a href="/services">บริการของเรา</a>
+
+              {/* <details>
                 <summary>บริการของเรา</summary>
-                <ul className="p-2 bg-white text-black">
-                  <li>
+                {/* <ul className="p-2 bg-white text-black">
+                  {/* <li>
                     <a>งานเช่า</a>
                   </li>
                   <li>
                     <a>งานซ่อมบำรุง</a>
-                  </li>
-                </ul>
-              </details>
+                  </li> */}
+                {/* </ul> */} 
+              {/* </details>  */}
             </li>
             <li>
               <Link to="/experience">ผลงานของเรา</Link>
@@ -134,13 +136,17 @@ const Navbar = () => {
                   className="menu menu-sm dropdown-content bg-base-100 rounded-box z-[1] mt-3 w-52 p-2 shadow bg-white text-black"
                 >
                   <li>
-                    <a className="justify-between">
+                    <a className="justify-between" href="/profile-setting">
                       Profile
                       <span className="badge">New</span>
                     </a>
                   </li>
+                  
                   <li>
-                    <a>Settings</a>
+                    <a href="/history">History</a>
+                  </li>
+                  <li>
+                    <a href="/settings">Settings</a>
                   </li>
                   <li>
                     <a onClick={handleLogout}>Logout</a>

@@ -15,7 +15,6 @@ router.post("/login", async (req, res) => {
         console.error("Database error:", error);
         return res.status(500).json({ error: "Database error" });
       }
-
       if (results.length === 0) {
         return res.status(401).json({ error: "User not found" });
       }
@@ -30,7 +29,7 @@ router.post("/login", async (req, res) => {
         }
 
         const token = jwt.sign(
-          { username: user.username, role: user.role},
+          { id: user.user_id, role: user.role},
           "your-secret-key",
           { expiresIn: "1h" }
         );

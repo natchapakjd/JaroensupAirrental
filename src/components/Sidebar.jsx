@@ -17,6 +17,8 @@ import { MdRateReview } from "react-icons/md";
 import { MdWarehouse } from "react-icons/md";
 import { MdEditAttributes } from "react-icons/md";
 import { MdOutlineSettings } from "react-icons/md";
+import { MdCalculate } from "react-icons/md";
+import { MdPieChart } from "react-icons/md";
 
 
 const Sidebar = () => {
@@ -38,7 +40,7 @@ const Sidebar = () => {
 
   return (
     <div>
-      <aside className="w-64 h-screen sticky top-0 border font-inter ">
+      <aside className="w-64 h-full sticky top-0 border font-inter ">
         <div className="relative ">
           <p className="text-xl font-semibold mt-8 ml-10 mr-26 mb-9 ">
             Jaroensup
@@ -121,6 +123,18 @@ const Sidebar = () => {
 
               <li
                 className={`mb-5 hover:rounded-lg hover:py-3 hover:px-4 transition-all duration-300 hover:mx-5 ${
+                  isActive("/dashboard/analytics")
+                    ? "bg-blue text-white mx-5 px-4 py-3 rounded-lg"
+                    : null
+                }`}
+              >
+                <a className="text-base pl-10 flex gap-1" href="/dashboard/analytics">
+                  <MdPieChart className="mt-1"/>Analytics
+                </a>
+              </li>
+
+              <li
+                className={`mb-5 hover:rounded-lg hover:py-3 hover:px-4 transition-all duration-300 hover:mx-5 ${
                   isActive("/dashboard/categories")
                     ? "bg-blue text-white mx-5 px-4 py-3 rounded-lg"
                     : null
@@ -178,7 +192,18 @@ const Sidebar = () => {
                 Reviews
                 </a>
               </li>
-
+              <li
+                className={`mb-5 hover:rounded-lg hover:py-3 hover:px-4 transition-all duration-300 hover:mx-5 ${
+                  isActive("/dashboard/augmented-reality")
+                    ? "bg-blue text-white mx-5 px-4 py-3 rounded-lg"
+                    : null
+                }`}
+              >
+                <a className="text-base pl-10 flex gap-1" href="/dashboard/augmented-reality">
+                <MdCalculate className="mt-1"/>
+                Area calculation
+                </a>
+              </li>
               <li
                 className={`mb-5 hover:rounded-lg hover:py-3 hover:px-4 transition-all duration-300 hover:mx-5 ${
                   isActive("/dashboard/history-log")

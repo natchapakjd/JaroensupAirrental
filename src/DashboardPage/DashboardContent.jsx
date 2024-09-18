@@ -3,7 +3,7 @@ import { Link } from 'react-router-dom';
 
 const DashboardContent = () => {
   return (
-    <div className="p-8 bg-gray-100 min-h-screen font-inter">
+    <div className="p-8 bg-white min-h-screen font-inter">
       {/* Welcome Section */}
       <div className="bg-white p-6 rounded-lg shadow-lg mb-6">
         <h1 className="text-3xl font-bold text-gray-800">Welcome Back, Admin!</h1>

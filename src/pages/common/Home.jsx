@@ -1,6 +1,6 @@
 import React from "react";
-import Navbar from "../components/Navbar";
-import Footer from "../components/Footer";
+import Navbar from "../../components/Navbar";
+import Footer from "../../components/Footer";
 const Home = () => {
   return (
     <>
@@ -90,11 +90,7 @@ const Home = () => {
             </div>
           </div>
         </div>
-        <div className="bg-blue h-20 ">
-          <p className="text-white text-3xl py-6 text-center font-prompt">
-            บริษัทเจริญทรัพย์ จำกัด
-          </p>
-        </div>
+      
 
        
         <p className="text-2xl font-prompt  my-4 md: text-center text-black">

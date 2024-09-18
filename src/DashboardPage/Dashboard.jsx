@@ -19,19 +19,21 @@ import AddWarehouse from '../DashboardContent/Warehouses/AddWarehouse'
 import AddAttribute from '../DashboardContent/Attributes/AddAttribute'
 import AttributeContent from '../DashboardContent/Attributes/AttributeContent'
 import DashboardContent from './DashboardContent'
+import ThreeScene from '../DashboardContent/AugmentedReality/ThreeScene'
+import ReportContent from '../DashboardContent/Reports/ReportContent'
 const Dashboard = () => {
   return (
       <div className='flex'>
         <Sidebar />
-        
         <div className='w-full bg-gray-50'>
           <Header/>
-
           <Routes>
             <Route path="*" element={<PageNotFound />} />
             <Route path="home" element={<DashboardContent />} />
             <Route path="user" element={<UserContent />} />
             <Route path="brands" element={<BrandContent />} />
+            <Route path="augmented-reality" element={<ThreeScene />} />
+            <Route path="analytics" element={<ReportContent />} />
             <Route path="brand/add" element={<AddBrand />} />
             <Route path="warehouses" element={<WarehouseContent />} />
             <Route path="warehouse/add" element={<AddWarehouse />} />

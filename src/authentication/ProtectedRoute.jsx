@@ -1,7 +1,7 @@
 import React from 'react';
 import { jwtDecode } from 'jwt-decode';
 import Cookies from 'universal-cookie';
-import Login from '../pages/Login';
+import Login from '../pages/Authentication/Login';
 import AccessDenied from './AccessDenied';
 
 const ProtectedRoute = ({ children}) => {

@@ -2,6 +2,7 @@ import React, { useState, useEffect } from "react";
 import axios from "axios";
 import { useParams } from "react-router-dom";
 import UserImage from "../../ImagesComponent/UserImage";
+
 const UserDetails = () => {
   const [user, setUser] = useState(null);
   const [error, setError] = useState(null);
@@ -22,31 +23,39 @@ const UserDetails = () => {
   }, [userId]);
 
   if (error) {
-    return <div>{error}</div>;
+    return <div className="p-6 text-red-600">{error}</div>;
   }
 
   if (!user) {
-    return <div>Loading...</div>;
+    return <div className="p-6 text-gray-500">Loading...</div>;
   }
 
   return (
-    <div className="max-w-2xl mx-auto p-6 bg-white rounded-lg shadow-md">
-      <h1 className="text-2xl font-bold mb-4">{user.username}'s Details</h1>
-      <div>
+    <div className="max-w-4xl mx-auto p-8 bg-white rounded-lg shadow-lg border border-gray-200">
+      <h1 className="text-3xl font-bold mb-6 text-gray-800">{user.username}'s Details</h1>
+      <div className="flex items-center mb-6">
+        {user.profile_image ? (
+          <div className="w-24 h-24 mr-6 ">
+            <UserImage userId={user.user_id} className="w-full h-full object-cover rounded-full" />
+          </div>
+        ) : (
+          <div className="w-24 h-24 mr-6 bg-gray-300 rounded-full"></div>
+        )}
         <div>
-            {user.profile_image? <UserImage userId={user.user_id}/>:null}
+          <p className="text-lg font-medium text-gray-700"><strong>Username:</strong> {user.username}</p>
+          <p className="text-lg font-medium text-gray-700"><strong>First Name:</strong> {user.firstname}</p>
+          <p className="text-lg font-medium text-gray-700"><strong>Last Name:</strong> {user.lastname}</p>
+          <p className="text-lg font-medium text-gray-700"><strong>Email:</strong> {user.email}</p>
+          <p className="text-lg font-medium text-gray-700"><strong>Phone:</strong> {user.phone}</p>
         </div>
-        <p><strong>Username:</strong> {user.username}</p>
-        <p><strong>First Name:</strong> {user.firstname}</p>
-        <p><strong>Last Name:</strong> {user.lastname}</p>
-        <p><strong>Email:</strong> {user.email}</p>
-        <p><strong>Phone:</strong> {user.phone}</p>
-        <p><strong>Age:</strong> {user.age}</p>
-        <p><strong>Address:</strong> {user.address}</p>
-        <p><strong>Gender:</strong> {user.gender}</p>
-        <p><strong>Date of Birth:</strong> {user.date_of_birth}</p>
-        <p><strong>Role:</strong> {user.role}</p>
-        <p><strong>Created At:</strong> {new Date(user.created_at).toLocaleDateString()}</p>
+      </div>
+      <div className="space-y-4">
+        <p className="text-lg font-medium text-gray-700"><strong>Age:</strong> {user.age}</p>
+        <p className="text-lg font-medium text-gray-700"><strong>Address:</strong> {user.address}</p>
+        <p className="text-lg font-medium text-gray-700"><strong>Gender:</strong> {user.gender}</p>
+        <p className="text-lg font-medium text-gray-700"><strong>Date of Birth:</strong> {user.date_of_birth}</p>
+        <p className="text-lg font-medium text-gray-700"><strong>Role:</strong> {user.role}</p>
+        <p className="text-lg font-medium text-gray-700"><strong>Created At:</strong> {new Date(user.created_at).toLocaleDateString()}</p>
       </div>
     </div>
   );

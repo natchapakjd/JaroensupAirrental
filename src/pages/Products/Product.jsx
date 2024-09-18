@@ -1,8 +1,9 @@
 import React, { useState, useEffect } from "react";
-import Navbar from "../components/Navbar";
-import Footer from "../components/Footer";
+import { Link } from "react-router-dom"; // Import Link
+import Navbar from "../../components/Navbar";
+import Footer from "../../components/Footer";
 import axios from "axios";
-import ProductImage from "../ImagesComponent/ProductImage";
+import ProductImage from "../../ImagesComponent/ProductImage";
 
 const Product = () => {
   const [products, setProducts] = useState([]);
@@ -28,7 +29,7 @@ const Product = () => {
           <section className="container mx-auto p-6">
             <div className="text-center mb-12">
               <h1 className="text-4xl font-bold text-gray-800 mb-4">
-                Our Products
+                สินค้าของเรา
               </h1>
               <p className="text-lg text-gray-600">
                 Explore our wide range of products designed to meet your needs.
@@ -37,7 +38,7 @@ const Product = () => {
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
               {products.map((product) => (
                 <div
-                  key={product.id}
+                  key={product.product_id}
                   className="bg-white shadow-lg rounded-lg overflow-hidden"
                 >
                   {product.product_image ? (
@@ -50,22 +51,20 @@ const Product = () => {
                   ) : (
                     <p>No image</p>
                   )}
-                  {/* <img 
-                    src={product.imageUrl || "https://via.placeholder.com/300"} 
-                    alt={product.name} 
-                    className="w-full h-48 object-cover"
-                  /> */}
                   <div className="p-6">
                     <h2 className="text-xl font-semibold text-gray-800 mb-2">
                       {product.name}
                     </h2>
                     <p className="text-gray-600 mb-4">
                       {product.description ||
-                        "A brief description of the product goes here. It should give the user an idea of what the product is about."}
+                        "A brief description of the product goes here."}
                     </p>
-                    <span className="text-lg font-bold text-gray-900">
-                      ${product.price.toFixed(2)}
-                    </span>
+                    <Link
+                      to={`/product/${product.product_id}`} // Use Link to navigate
+                      className="mt-4 bg-blue text-white py-2 px-4 rounded hover:bg-blue "
+                    >
+                      View Details
+                    </Link>
                   </div>
                 </div>
               ))}
