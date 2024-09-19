@@ -8,32 +8,46 @@ import Footer from "../../components/Footer";
 const UserHistory = () => {
   const [taskHistory, setTaskHistory] = useState([]);
   const [orderHistory, setOrderHistory] = useState([]);
-  const [date, setDate] = useState("");
+  const [totalTasks, setTotalTasks] = useState(0);
+  const [totalOrders, setTotalOrders] = useState(0);
+  const [taskPage, setTaskPage] = useState(1);
+  const [orderPage, setOrderPage] = useState(1);
   const cookies = new Cookies();
   const token = cookies.get("authToken");
   const decodedToken = jwtDecode(token);
   const user_id = decodedToken.id;
 
+  const fetchUserData = async (taskPage, orderPage) => {
+    try {
+      // Fetch task history
+      const taskResponse = await axios.get(
+        `${import.meta.env.VITE_SERVER_URL}/task-paging?id=${user_id}&page=${taskPage}&limit=10`
+      );
+      setTaskHistory(taskResponse.data.tasks);
+      setTotalTasks(taskResponse.data.totalTasks);
+
+      // Fetch order history
+      const orderResponse = await axios.get(
+        `${import.meta.env.VITE_SERVER_URL}/api/orders/${user_id}?page=${orderPage}&limit=10`
+      );
+      setOrderHistory(orderResponse.data.orders);
+      setTotalOrders(orderResponse.data.totalItems);
+    } catch (error) {
+      console.error("Error fetching user history:", error);
+    }
+  };
+
   useEffect(() => {
-    const fetchUserData = async () => {
-      try {
-        const taskResponse = await axios.get(
-          `${import.meta.env.VITE_SERVER_URL}/tasks?id=${user_id}`
-        );
-        setTaskHistory(taskResponse.data);
+    fetchUserData(taskPage, orderPage);
+  }, [taskPage, orderPage, user_id]);
 
-        const orderResponse = await axios.get(
-          `${import.meta.env.VITE_SERVER_URL}/api/orders/${user_id}`
-        );
-        setOrderHistory(orderResponse.data[0].items);
-        setDate(new Date(orderResponse.data[0].created_at).toLocaleString());
-      } catch (error) {
-        console.error("Error fetching user history:", error);
-      }
-    };
+  const handleTaskPageChange = (direction) => {
+    setTaskPage((prev) => Math.max(1, prev + direction));
+  };
 
-    fetchUserData();
-  }, [user_id]);
+  const handleOrderPageChange = (direction) => {
+    setOrderPage((prev) => Math.max(1, prev + direction));
+  };
 
   return (
     <>
@@ -48,6 +62,7 @@ const UserHistory = () => {
               <tr>
                 <th>Task ID</th>
                 <th>Description</th>
+                <th>Address</th>
                 <th>Status</th>
                 <th>Appointment Date</th>
                 <th>Created At</th>
@@ -59,20 +74,30 @@ const UserHistory = () => {
                   <tr key={task.task_id}>
                     <td>{task.task_id}</td>
                     <td>{task.description}</td>
-                    <td><div className="badge badge-accent text-white">{task.status}</div></td>
+                    <td>{task.address}</td>
+                    <td>
+                      <div className="badge badge-accent text-white">{task.status}</div>
+                    </td>
                     <td>{new Date(task.appointment_date).toLocaleString()}</td>
                     <td>{new Date(task.created_at).toLocaleString()}</td>
                   </tr>
                 ))
               ) : (
                 <tr>
-                  <td colSpan="5" className="text-center">
-                    No task history found.
-                  </td>
+                  <td colSpan="6" className="text-center">No task history found.</td>
                 </tr>
               )}
             </tbody>
           </table>
+          <div className="flex justify-between mt-4">
+            <button onClick={() => handleTaskPageChange(-1)} disabled={taskPage === 1}>
+              Previous
+            </button>
+            <span>Page {taskPage} of {Math.ceil(totalTasks / 10)}</span>
+            <button onClick={() => handleTaskPageChange(1)} disabled={taskPage >= Math.ceil(totalTasks / 10)}>
+              Next
+            </button>
+          </div>
         </div>
 
         <div className="mb-5">
@@ -89,24 +114,35 @@ const UserHistory = () => {
             </thead>
             <tbody>
               {orderHistory.length > 0 ? (
-                orderHistory.map((order, index) => (
-                  <tr key={index + 1}>
-                    <td>{index + 1}</td> 
-                    <td>{order.product_name}</td>
-                    <td>{order.quantity}</td>
-                    <td>{order.total_price}</td>
-                    <td>{date}</td>
-                  </tr>
+                orderHistory.map((order) => (
+                  order.items.map((item, index) => (
+                    <tr key={item.product_id}>
+                      {index === 0 ? (
+                        <td rowSpan={order.items.length}>{order.order_id}</td>
+                      ) : null}
+                      <td>{item.product_name}</td>
+                      <td>{item.quantity}</td>
+                      <td>{item.total_price.toFixed(2)}</td>
+                      <td>{new Date(order.created_at).toLocaleString()}</td>
+                    </tr>
+                  ))
                 ))
               ) : (
                 <tr>
-                  <td colSpan="5" className="text-center">
-                    No order history found.
-                  </td>
+                  <td colSpan="5" className="text-center">No order history found.</td>
                 </tr>
               )}
             </tbody>
           </table>
+          <div className="flex justify-between mt-4">
+            <button onClick={() => handleOrderPageChange(-1)} disabled={orderPage === 1}>
+              Previous
+            </button>
+            <span>Page {orderPage} of {Math.ceil(totalOrders / 10)}</span>
+            <button onClick={() => handleOrderPageChange(1)} disabled={orderPage >= Math.ceil(totalOrders / 10)}>
+              Next
+            </button>
+          </div>
         </div>
       </div>
       <Footer />

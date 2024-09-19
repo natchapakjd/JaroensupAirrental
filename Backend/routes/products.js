@@ -19,7 +19,6 @@ const upload = multer({ storage: storage });
 router.get("/products", (req, res) => {
   const page = parseInt(req.query.page) || 1;
   const pageSize = parseInt(req.query.pageSize) || 10;
-
   const offset = (page - 1) * pageSize;
 
   const query = "SELECT * FROM products LIMIT ? OFFSET ?";
