@@ -19,6 +19,7 @@ import { MdEditAttributes } from "react-icons/md";
 import { MdOutlineSettings } from "react-icons/md";
 import { MdCalculate } from "react-icons/md";
 import { MdPieChart } from "react-icons/md";
+import { MdOutlineListAlt } from "react-icons/md";
 
 
 const Sidebar = () => {
@@ -95,7 +96,19 @@ const Sidebar = () => {
                   <MdTask className="mt-1"/> Tasks
                 </a>
               </li>
-
+              
+              <li
+                className={`mb-5 hover:rounded-lg hover:py-3 hover:px-4 transition-all duration-300 hover:mx-5 ${
+                  isActive("/dashboard/orders")
+                    ? "bg-blue text-white mx-5 px-4 py-3 rounded-lg"
+                    : null
+                }`}
+              >
+                <a className="text-base pl-10 flex gap-1" href="/dashboard/orders">
+                  <MdOutlineListAlt className="mt-1"/> Orders
+                </a>
+              </li>
+              
               <li
                 className={`mb-5 hover:rounded-lg hover:py-3 hover:px-4 transition-all duration-300 hover:mx-5 ${
                   isActive("/dashboard/payments")
