@@ -40,7 +40,7 @@ const RentAC = () => {
   useEffect(() => {
     const fetchProducts = async () => {
       try {
-        const response = await axios.get("http://localhost:3000/products");
+        const response = await axios.get(`${import.meta.env.VITE_SERVER_URL}/products`);
         setProducts(response.data);
       } catch (error) {
         console.error("Error fetching products:", error);
@@ -49,7 +49,7 @@ const RentAC = () => {
 
     const fetchTaskTypes = async () => {
       try {
-        const response = await axios.get("http://localhost:3000/tasktypes");
+        const response = await axios.get(`${import.meta.env.VITE_SERVER_URL}/tasktypes`);
         setTaskTypes(response.data);
       } catch (error) {
         console.error("Error fetching task types:", error);
@@ -98,9 +98,9 @@ const RentAC = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
-      const response = await axios.post("http://localhost:3000/tasks", {
+      const response = await axios.post(`${import.meta.env.VITE_SERVER_URL}/tasks`, {
         ...formData,
-        user_id, 
+        user_id,
       });
       console.log("Task created:", response.data);
       setFormData({
@@ -123,13 +123,13 @@ const RentAC = () => {
   return (
     <>
       <Navbar />
-      <div className="container mx-auto mt-10">
+      <div className="container mx-auto mt-10 font-prompt">
         <h2 className="text-2xl font-bold mb-4 mx-2">แบบฟอร์มแจ้งบริการ</h2>
         {loading ? (
           <p>Loading...</p>
         ) : (
           <form onSubmit={handleSubmit} className="bg-white p-6 rounded-lg shadow-md">
-             <div className="mb-4">
+            <div className="mb-4">
               <label className="block text-gray-700">Task Type</label>
               <select
                 name="task_type_id"
@@ -173,8 +173,6 @@ const RentAC = () => {
                 className="textarea textarea-bordered w-full"
               ></textarea>
             </div>
-           
-            
             <div className="mb-4">
               <label className="block text-gray-700">Quantity Used</label>
               <input
@@ -222,8 +220,7 @@ const RentAC = () => {
                 </Marker>
               )}
             </MapContainer>
-
-            <button type="submit" className="btn bg-blue hover:bg-blue text-white my-5 w-full">
+            <button type="submit" className="btn bg-blue hover:bg-blue-700 text-white my-5 w-full">
               Submit
             </button>
           </form>

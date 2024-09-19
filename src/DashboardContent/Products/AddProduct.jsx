@@ -29,28 +29,43 @@ const AddProduct = () => {
 
   const fetchBrands = async () => {
     try {
-      const response = await axios.get("http://localhost:3000/brands");
+      const response = await axios.get(`${import.meta.env.VITE_SERVER_URL}/brands`);
       setBrands(response.data);
     } catch (error) {
       console.error("Error fetching brands:", error);
+      Swal.fire({
+        title: "Error",
+        text: "Failed to fetch brands.",
+        icon: "error",
+      });
     }
   };
 
   const fetchCategories = async () => {
     try {
-      const response = await axios.get("http://localhost:3000/categories");
+      const response = await axios.get(`${import.meta.env.VITE_SERVER_URL}/categories`);
       setCategories(response.data);
     } catch (error) {
       console.error("Error fetching categories:", error);
+      Swal.fire({
+        title: "Error",
+        text: "Failed to fetch categories.",
+        icon: "error",
+      });
     }
   };
 
   const fetchWarehouses = async () => {
     try {
-      const response = await axios.get("http://localhost:3000/warehouses");
+      const response = await axios.get(`${import.meta.env.VITE_SERVER_URL}/warehouses`);
       setWarehouses(response.data);
     } catch (error) {
       console.error("Error fetching warehouses:", error);
+      Swal.fire({
+        title: "Error",
+        text: "Failed to fetch warehouses.",
+        icon: "error",
+      });
     }
   };
 
@@ -85,7 +100,7 @@ const AddProduct = () => {
 
     try {
       const response = await axios.post(
-        "http://localhost:3000/products",
+        `${import.meta.env.VITE_SERVER_URL}/products`,
         formDataToSend,
         {
           headers: {
@@ -103,7 +118,6 @@ const AddProduct = () => {
         setTimeout(() => {
           navigate('/dashboard/products'); 
         }, 800);
-
       } else {
         throw new Error("Failed to add product.");
       }

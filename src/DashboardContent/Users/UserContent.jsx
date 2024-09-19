@@ -1,8 +1,8 @@
 import axios from "axios";
 import React, { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
-import UserImage from "../../ImagesComponent/UserImage";
 import Swal from "sweetalert2";
+import { format } from 'date-fns'; // Added date-fns for date formatting
 
 const UserContent = () => {
   const [users, setUsers] = useState([]);
@@ -13,7 +13,7 @@ const UserContent = () => {
 
   const fetchUsers = async () => {
     try {
-      const response = await axios.get("http://localhost:3000/users");
+      const response = await axios.get(`${import.meta.env.VITE_SERVER_URL}/users`);
       setUsers(response.data);
     } catch (error) {
       console.error("Error fetching users:", error);
@@ -22,21 +22,20 @@ const UserContent = () => {
 
   const handleDelete = async (userId) => {
     try {
-      const response = await axios.delete(`http://localhost:3000/user/${userId}`);
-      console.log(response);
+      const response = await axios.delete(`${import.meta.env.VITE_SERVER_URL}/user/${userId}`);
       if (response.status === 200) {
         Swal.fire({
           title: "User deleted successfully",
           icon: "success",
         });
-        setUsers(users.filter(user => user.user_id !== userId));
+        setUsers(users.filter((user) => user.user_id !== userId));
       } else {
         throw new Error("Failed to delete user.");
       }
     } catch (error) {
       Swal.fire({
         title: "Error",
-        text: error.message,
+        text: error.response?.data?.message || error.message,
         icon: "error",
       });
     }
@@ -46,10 +45,12 @@ const UserContent = () => {
     <div className="font-inter mt-5">
       <div className="mb-4 flex justify-end mx-16">
         <Link to="/dashboard/user/add">
-          <button className="btn bg-blue hover:bg-blue text-white">Add User</button>
+          <button className="btn bg-blue hover:bg-blue text-white">
+            Add User
+          </button>
         </Link>
       </div>
-      
+
       <div className="overflow-x-auto">
         <table className="table w-full">
           <thead>
@@ -63,15 +64,21 @@ const UserContent = () => {
             </tr>
           </thead>
           <tbody>
-            {users.map((user, index) => (
-              <tr key={user.user_id || index}>
+            {users.map((user) => (
+              <tr key={user.user_id}>
                 <td>
                   <div className="flex items-center gap-3">
                     <div className="avatar">
                       <div className="mask mask-squircle h-12 w-12">
                         {user.profile_image ? (
-                          <UserImage userId={user.user_id} />
-                        ) : null}
+                          <img
+                            src={`${import.meta.env.VITE_SERVER_URL}${user.profile_image}`}
+                            alt={user.username}
+                            className="object-cover w-full h-full"
+                          />
+                        ) : (
+                          <p>No Image</p>
+                        )}
                       </div>
                     </div>
                     <div>
@@ -83,14 +90,16 @@ const UserContent = () => {
                 <td>{user.username}</td>
                 <td>{user.email}</td>
                 <td>{user.role}</td>
-                <td>{new Date(user.created_at).toLocaleDateString()}</td>
+                <td>{format(new Date(user.created_at), 'MM/dd/yyyy')}</td> {/* Improved date formatting */}
                 <td>
                   <div className="flex gap-2">
                     <Link to={`/dashboard/user/${user.user_id}`}>
                       <button className="btn btn-ghost btn-xs">Details</button>
                     </Link>
                     <Link to={`/dashboard/user/edit/${user.user_id}`}>
-                      <button className="btn btn-success text-white btn-xs">Edit</button>
+                      <button className="btn btn-success text-white btn-xs">
+                        Edit
+                      </button>
                     </Link>
                     <button
                       className="btn btn-error btn-xs text-white"

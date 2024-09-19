@@ -1,33 +1,51 @@
 import React, { useState, useEffect } from "react";
 import axios from "axios";
-import ProductImage from "../../ImagesComponent/ProductImage";
-import { Link } from "react-router-dom"; // Import Link from react-router-dom
+import { Link } from "react-router-dom";
+import Swal from "sweetalert2";
 
 const ProductContent = () => {
   const [products, setProducts] = useState([]);
+  const apiUrl = import.meta.env.VITE_SERVER_URL; // Use environment variable
 
   useEffect(() => {
     fetchProducts();
-  }, [products]);
+  }, []);
 
   const fetchProducts = async () => {
     try {
-      const response = await axios.get("http://localhost:3000/products");
-      setProducts(response.data);
+      const productsResponse = await axios.get(`${apiUrl}/products`);
+      const imagesResponse = await axios.get(`${apiUrl}/product-image`);
+
+      const updatedProducts = productsResponse.data.map((product) => {
+        const productImage = imagesResponse.data.find(
+          (img) => img.product_id === product.product_id
+        );
+        return {
+          ...product,
+          product_image: productImage ? productImage.product_image : null,
+        };
+      });
+
+      setProducts(updatedProducts);
     } catch (error) {
       console.error("Error fetching products:", error);
+      Swal.fire({
+        title: "Error",
+        text: "Failed to load products.",
+        icon: "error",
+      });
     }
   };
 
   const handleDelete = async (productId) => {
     try {
-      const response = await axios.delete(`http://localhost:3000/product/${productId}`);
+      const response = await axios.delete(`${apiUrl}/product/${productId}`);
       if (response.status === 200) {
         Swal.fire({
           title: "Product deleted successfully",
           icon: "success",
         });
-        setProducts(products.filter(product => product.product_id !== productId));
+        setProducts(products.filter((product) => product.product_id !== productId));
       } else {
         throw new Error("Failed to delete product.");
       }
@@ -41,7 +59,7 @@ const ProductContent = () => {
   };
 
   return (
-    <div className="p-8 rounded-lg shadow-lg w-full mx-auto  font-inter">
+    <div className="p-8 rounded-lg shadow-lg w-full mx-auto font-inter">
       <div className="flex justify-between items-center mb-4">
         <h2 className="text-xl font-semibold mt-8">Product List</h2>
         <Link to="/dashboard/products/add">
@@ -66,38 +84,52 @@ const ProductContent = () => {
           </tr>
         </thead>
         <tbody className="text-center">
-          {products.map((product) => (
-            <tr key={product.product_id}>
-              <td className="border border-gray-300 p-2">{product.product_id}</td>
-              <td className="border border-gray-300 p-2">{product.name}</td>
-              <td className="border border-gray-300 p-2">{product.description}</td>
-              <td className="border border-gray-300 p-2">{product.price}</td>
-              <td className="border border-gray-300 p-2">{product.stock_quantity}</td>
-              <td className="border border-gray-300 p-2">{product.brand_id}</td>
-              <td className="border border-gray-300 p-2">{product.category_id}</td>
-              <td className="border border-gray-300 p-2">{product.warehouse_id}</td>
-              <td className="border border-gray-300 p-2">
-                {product.product_image ? (
-                  <ProductImage productId={product.product_id} />
-                ) : (
-                  <p>No image</p>
-                )}
-              </td>
-              <td className="border border-gray-300 p-2">
-                <div className="flex justify-center gap-2">
-                  <Link to={`/dashboard/products/edit/${product.product_id}`}>
-                    <button className="btn btn-success text-white">Edit</button>
-                  </Link>
-                  <button
-                    onClick={() => handleDelete(product.product_id)}
-                    className="btn btn-error text-white"
-                  >
-                    Delete
-                  </button>
-                </div>
-              </td>
+          {products.length > 0 ? (
+            products.map((product) => (
+              <tr key={product.product_id}>
+                <td className="border border-gray-300 p-2">{product.product_id}</td>
+                <td className="border border-gray-300 p-2">{product.name}</td>
+                <td className="border border-gray-300 p-2">{product.description}</td>
+                <td className="border border-gray-300 p-2">{product.price}</td>
+                <td className="border border-gray-300 p-2">{product.stock_quantity}</td>
+                <td className="border border-gray-300 p-2">{product.brand_id}</td>
+                <td className="border border-gray-300 p-2">{product.category_id}</td>
+                <td className="border border-gray-300 p-2">{product.warehouse_id}</td>
+                <td className="border border-gray-300 p-2">
+                  {product.product_image ? (
+                    <div className="flex justify-center">
+                      <img
+                        src={`${apiUrl}${product.product_image}`}
+                        alt={product.name}
+                        className="w-32 h-32 object-cover"
+                      />
+                    </div>
+                  ) : (
+                    <div className="flex justify-center">
+                      <p>No image</p>
+                    </div>
+                  )}
+                </td>
+                <td className="border border-gray-300 p-2">
+                  <div className="flex justify-center gap-2">
+                    <Link to={`/dashboard/products/edit/${product.product_id}`}>
+                      <button className="btn btn-success text-white">Edit</button>
+                    </Link>
+                    <button
+                      onClick={() => handleDelete(product.product_id)}
+                      className="btn btn-error text-white"
+                    >
+                      Delete
+                    </button>
+                  </div>
+                </td>
+              </tr>
+            ))
+          ) : (
+            <tr>
+              <td colSpan="10" className="border border-gray-300 p-4">No products available</td>
             </tr>
-          ))}
+          )}
         </tbody>
       </table>
     </div>

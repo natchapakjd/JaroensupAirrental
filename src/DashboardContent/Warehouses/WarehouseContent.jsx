@@ -11,7 +11,7 @@ const WarehouseContent = () => {
   useEffect(() => {
     const fetchWarehouses = async () => {
       try {
-        const response = await axios.get('http://localhost:3000/warehouses');
+        const response = await axios.get(`${import.meta.env.VITE_SERVER_URL}/warehouses`);
         setWarehouses(response.data);
       } catch (err) {
         setError('Failed to fetch warehouses.');
@@ -22,7 +22,7 @@ const WarehouseContent = () => {
     };
 
     fetchWarehouses();
-  }, [warehouses]);
+  }, []);
 
   const handleDelete = async (id) => {
     try {
@@ -37,8 +37,8 @@ const WarehouseContent = () => {
       });
 
       if (result.isConfirmed) {
-        await axios.delete(`http://localhost:3000/warehouse/${id}`);
-        setWarehouses(warehouses.filter(warehouse => warehouse.id !== id));
+        await axios.delete(`${import.meta.env.VITE_SERVER_URL}/warehouse/${id}`);
+        setWarehouses(warehouses.filter(warehouse => warehouse.warehouse_id !== id));
         Swal.fire('Deleted!', 'Your warehouse has been deleted.', 'success');
       }
     } catch (err) {

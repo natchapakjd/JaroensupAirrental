@@ -5,6 +5,8 @@ import { Link } from 'react-router-dom';
 
 const AttributeContent = () => {
   const [attributes, setAttributes] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
 
   useEffect(() => {
     fetchAttributes();
@@ -12,11 +14,14 @@ const AttributeContent = () => {
 
   const fetchAttributes = async () => {
     try {
-      const response = await axios.get('http://localhost:3000/attributes');
+      const response = await axios.get(`${import.meta.env.VITE_SERVER_URL}/attributes`);
       const sortedAttributes = response.data.sort((a, b) => a.attribute_id - b.attribute_id);
       setAttributes(sortedAttributes);
     } catch (error) {
+      setError('Failed to fetch attributes.');
       console.error('Error fetching attributes:', error);
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -33,7 +38,7 @@ const AttributeContent = () => {
       });
 
       if (result.isConfirmed) {
-        const response = await axios.delete(`http://localhost:3000/attribute/${attributeId}`);
+        const response = await axios.delete(`${import.meta.env.VITE_SERVER_URL}/attribute/${attributeId}`);
         if (response.status === 200) {
           Swal.fire('Deleted!', 'Attribute has been deleted.', 'success');
           fetchAttributes();
@@ -46,12 +51,15 @@ const AttributeContent = () => {
     }
   };
 
+  if (loading) return <p>Loading...</p>;
+  if (error) return <p>{error}</p>;
+
   return (
     <div className="p-8 rounded-lg shadow-lg w-full mx-auto font-inter">
       <div className="flex justify-between items-center mb-6">
         <h1 className="text-2xl font-semibold">Attributes</h1>
         <Link to="/dashboard/attribute/add">
-          <button className="btn bg-blue text-white hover:bg-blue-700">Add Attribute</button>
+          <button className="btn bg-blue text-white hover:bg-blue">Add Attribute</button>
         </Link>
       </div>
       <table className="w-full border-collapse border border-gray-300 text-center">

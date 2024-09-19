@@ -8,11 +8,23 @@ const ProductDetails = () => {
   const { id } = useParams(); // Get product ID from URL
   const [product, setProduct] = useState(null);
   const navigate = useNavigate(); // ใช้ useNavigate
+  const [image,setImage] = useState();
+
 
   useEffect(() => {
     fetchProductDetails();
+    fetchProductImageById();
   }, [id]);
 
+  const fetchProductImageById = async () => {
+    try {
+      const response = await axios.get(`http://localhost:3000/product-image/${id}`);
+      setImage(response.data.product_image);
+      console.log(image)
+    } catch (error) {
+      console.error("Error fetching product details:", error);
+    }
+  }
   const fetchProductDetails = async () => {
     try {
       const response = await axios.get(`http://localhost:3000/product/${id}`);
@@ -37,7 +49,7 @@ const ProductDetails = () => {
             <div className="flex justify-center mb-6">
               {product.product_image && (
                 <img
-                  src={product.product_image}
+                src={`${import.meta.env.VITE_SERVER_URL}${image}`} 
                   alt={product.name}
                   className="w-full max-w-lg h-auto rounded-lg shadow-lg"
                 />

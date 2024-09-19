@@ -14,7 +14,7 @@ const AddBrand = () => {
     setLoading(true);
 
     try {
-      const response = await axios.post('http://localhost:3000/brands', {
+      const response = await axios.post(`${import.meta.env.VITE_SERVER_URL}/brands`, {
         name,
         description,
       });
@@ -57,7 +57,7 @@ const AddBrand = () => {
         </div>
         <button
           type="submit"
-          className={`btn bg-blue text-white hover:bg-blue-700 ${loading ? 'opacity-50 cursor-not-allowed' : ''}`}
+          className={`btn bg-blue-500 text-white hover:bg-blue-700 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm w-full sm:w-auto px-5 py-2.5 text-center ${loading ? 'opacity-50 cursor-not-allowed' : ''}`}
           disabled={loading}
         >
           {loading ? 'Adding...' : 'Add Brand'}

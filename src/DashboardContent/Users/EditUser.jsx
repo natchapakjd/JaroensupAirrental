@@ -17,13 +17,14 @@ const EditUser = () => {
     date_of_birth: '',
   });
   const [loading, setLoading] = useState(true);
-  const [profileImage, setProfileImage] = useState(null); // Updated state name
+  const [profileImage, setProfileImage] = useState(null);
+  const [submitLoading, setSubmitLoading] = useState(false); // Added submit loading state
 
   useEffect(() => {
     const fetchUser = async () => {
       try {
-        const response = await axios.get(`http://localhost:3000/user/${userId}`);
-        setUser(response.data[0]);
+        const response = await axios.get(`${import.meta.env.VITE_SERVER_URL}/user/${userId}`);
+        setUser(response.data);
         setLoading(false);
       } catch (error) {
         console.error("Error fetching user data:", error);
@@ -42,27 +43,29 @@ const EditUser = () => {
   };
 
   const handleFileChange = (e) => {
-    setProfileImage(e.target.files[0]); // Updated state name
+    setProfileImage(e.target.files[0]);
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    setSubmitLoading(true);
+
     try {
       const formData = new FormData();
-      // Append user data
       Object.keys(user).forEach(key => formData.append(key, user[key]));
-      // Append profile image if available
-      if (profileImage) {
-        formData.append('profile_image', profileImage); // Corrected key to match backend
-      }
-      await axios.put(`http://localhost:3000/user/${userId}`, formData, {
+      if (profileImage) formData.append('profile_image', profileImage);
+
+      await axios.put(`${import.meta.env.VITE_SERVER_URL}/user/${userId}`, formData, {
         headers: {
           'Content-Type': 'multipart/form-data',
         },
       });
+
       navigate(`/dashboard/user/${userId}`);
     } catch (error) {
       console.error("Error updating user data:", error);
+    } finally {
+      setSubmitLoading(false);
     }
   };
 
@@ -71,10 +74,10 @@ const EditUser = () => {
   }
 
   return (
-    <div className=" mx-auto p-6 bg-white rounded-lg shadow-md font-inter">
+    <div className="mx-auto p-6 bg-white rounded-lg shadow-md font-inter">
       <h1 className="text-2xl font-bold mb-4">Edit User</h1>
       <form onSubmit={handleSubmit}>
-        {/* Other input fields remain the same */}
+        {/* Username */}
         <div className="mb-4">
           <label className="block text-gray-700">Username:</label>
           <input
@@ -82,21 +85,21 @@ const EditUser = () => {
             name="username"
             value={user.username}
             onChange={handleChange}
-            className="mt-1 block w-full p-2 border border-gray-300 rounded"
+            className="mt-1 block w-full p-2 border border-gray-300 rounded bg-gray-100"
             readOnly
           />
         </div>
-        {/* Updated file upload field */}
+        {/* Profile Image */}
         <div className="mb-4">
           <label className="block text-gray-700">Profile Picture:</label>
           <input
             type="file"
-            name="profile_image" // Updated name attribute to match backend
+            name="profile_image"
             onChange={handleFileChange}
             className="mt-1 block w-full p-2 border border-gray-300 rounded"
           />
         </div>
-        {/* Other input fields remain the same */}
+        {/* First Name */}
         <div className="mb-4">
           <label className="block text-gray-700">First Name:</label>
           <input
@@ -107,6 +110,7 @@ const EditUser = () => {
             className="mt-1 block w-full p-2 border border-gray-300 rounded"
           />
         </div>
+        {/* Last Name */}
         <div className="mb-4">
           <label className="block text-gray-700">Last Name:</label>
           <input
@@ -117,6 +121,7 @@ const EditUser = () => {
             className="mt-1 block w-full p-2 border border-gray-300 rounded"
           />
         </div>
+        {/* Email */}
         <div className="mb-4">
           <label className="block text-gray-700">Email:</label>
           <input
@@ -127,6 +132,7 @@ const EditUser = () => {
             className="mt-1 block w-full p-2 border border-gray-300 rounded"
           />
         </div>
+        {/* Phone */}
         <div className="mb-4">
           <label className="block text-gray-700">Phone:</label>
           <input
@@ -137,6 +143,7 @@ const EditUser = () => {
             className="mt-1 block w-full p-2 border border-gray-300 rounded"
           />
         </div>
+        {/* Age */}
         <div className="mb-4">
           <label className="block text-gray-700">Age:</label>
           <input
@@ -147,6 +154,7 @@ const EditUser = () => {
             className="mt-1 block w-full p-2 border border-gray-300 rounded"
           />
         </div>
+        {/* Address */}
         <div className="mb-4">
           <label className="block text-gray-700">Address:</label>
           <input
@@ -157,6 +165,7 @@ const EditUser = () => {
             className="mt-1 block w-full p-2 border border-gray-300 rounded"
           />
         </div>
+        {/* Gender */}
         <div className="mb-4">
           <label className="block text-gray-700">Gender:</label>
           <select
@@ -170,6 +179,7 @@ const EditUser = () => {
             <option value="Other">Other</option>
           </select>
         </div>
+        {/* Date of Birth */}
         <div className="mb-4">
           <label className="block text-gray-700">Date of Birth:</label>
           <input
@@ -182,9 +192,10 @@ const EditUser = () => {
         </div>
         <button
           type="submit"
-          className="bg-blue text-white hover:bg-blue py-2 px-4 rounded"
+          className={`bg-blue text-white hover:bg-blue py-2 px-4 rounded ${submitLoading ? 'opacity-50 cursor-not-allowed' : ''}`}
+          disabled={submitLoading}
         >
-          Save Changes
+          {submitLoading ? 'Saving...' : 'Save Changes'}
         </button>
       </form>
     </div>

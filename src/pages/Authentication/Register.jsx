@@ -1,7 +1,6 @@
-import React from "react";
+import React, { useState } from "react";
 import Navbar from "../../components/Navbar";
 import { Link, useNavigate } from "react-router-dom";
-import { useState } from "react";
 import Swal from "sweetalert2";
 import axios from "axios";
 
@@ -14,18 +13,20 @@ const Register = () => {
   const handleUsernameChange = (event) => {
     setUsername(event.target.value);
   };
+
   const handleEmailChange = (event) => {
     setEmail(event.target.value);
   };
+
   const handlePasswordChange = (event) => {
     setPassword(event.target.value);
   };
 
   const handleRegister = async (e) => {
     e.preventDefault();
-    if ((email, password, username)) {
+    if (username && email && password) {
       try {
-        const response = await axios.post("http://localhost:3000/register", {
+        const response = await axios.post(`${import.meta.env.VITE_SERVER_URL}/register`, {
           username,
           password,
           email,
@@ -45,6 +46,7 @@ const Register = () => {
       }
     }
   };
+
   return (
     <>
       <Navbar />
@@ -64,6 +66,7 @@ const Register = () => {
                 id="username"
                 className="input input-bordered w-full bg-white"
                 placeholder="Username"
+                value={username}
                 onChange={handleUsernameChange}
               />
             </div>
@@ -79,6 +82,7 @@ const Register = () => {
                 id="email"
                 className="input input-bordered w-full bg-white"
                 placeholder="Email"
+                value={email}
                 onChange={handleEmailChange}
               />
             </div>
@@ -94,11 +98,13 @@ const Register = () => {
                 id="password"
                 className="input input-bordered w-full bg-white"
                 placeholder="Password"
+                value={password}
                 onChange={handlePasswordChange}
               />
             </div>
             <button
-              className="btn btn bg-blue   hover:bg-blue text-white w-full"
+              type="submit"
+              className="btn bg-blue hover:bg-blue text-white w-full"
             >
               Register
             </button>

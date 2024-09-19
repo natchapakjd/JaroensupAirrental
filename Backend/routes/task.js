@@ -66,32 +66,84 @@ router.post("/tasks", (req, res) => {
     }
   });
 });
-
-
 router.put("/task/:id", (req, res) => {
   const id = req.params.id;
-  const { user_id, description, status, start_date, finish_date, task_type_id } = req.body;
-  const query = "UPDATE tasks SET user_id = ?, description = ?, status = ?, start_date = ?, finish_date = ?, task_type_id = ? WHERE task_id = ?";
+  const {
+    user_id,
+    description,
+    task_type_id,
+    product_id,
+    quantity_used,
+    address,
+    appointment_date,
+    latitude,
+    longitude,
+    status,
+    start_date,
+    finish_date,
+  } = req.body;
 
-  db.query(query, [user_id, description, status, start_date, finish_date, task_type_id, id], (err, result) => {
-    if (err) {
-      console.error("Error updating task: " + err);
-      res.status(500).json({ error: "Failed to update task" });
-    } else if (result.affectedRows === 0) {
-      res.status(404).json({ error: "Task not found" });
-    } else {
-      res.json({
-        task_id: id,
-        user_id,
-        description,
-        status,
-        start_date,
-        finish_date,
-        task_type_id
-      });
+  const query = `
+    UPDATE tasks
+    SET 
+      user_id = ?,
+      description = ?,
+      task_type_id = ?,
+      product_id = ?,
+      quantity_used = ?,
+      address = ?,
+      appointment_date = ?,
+      latitude = ?,
+      longitude = ?,
+      status = ?,
+      start_date = ?,
+      finish_date = ?
+    WHERE task_id = ?`;
+
+  db.query(
+    query,
+    [
+      user_id,
+      description,
+      task_type_id,
+      product_id,
+      quantity_used,
+      address,
+      appointment_date,
+      latitude,
+      longitude,
+      status,
+      start_date,
+      finish_date,
+      id,
+    ],
+    (err, result) => {
+      if (err) {
+        console.error("Error updating task: " + err);
+        res.status(500).json({ error: "Failed to update task" });
+      } else if (result.affectedRows === 0) {
+        res.status(404).json({ error: "Task not found" });
+      } else {
+        res.json({
+          task_id: id,
+          user_id,
+          description,
+          task_type_id,
+          product_id,
+          quantity_used,
+          address,
+          appointment_date,
+          latitude,
+          longitude,
+          status,
+          start_date,
+          finish_date,
+        });
+      }
     }
-  });
+  );
 });
+
 
 router.delete("/task/:id", (req, res) => {
   const id = req.params.id;

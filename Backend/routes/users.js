@@ -17,31 +17,82 @@ const storage = multer.diskStorage({
 const upload = multer({ storage: storage });
 
 router.get("/users", (req, res) => {
-  const query = "SELECT * FROM  users ";
+  const query = "SELECT * FROM users"; // ใช้ SELECT * เพื่อดึงข้อมูลทั้งหมด
 
   db.query(query, (err, result) => {
     if (err) {
       console.error("Error fetching users: " + err);
-      res.status(500).json({ error: "Failed to fetch member" });
-    } else {
-      res.json(result);
+      return res.status(500).send("Failed to fetch users");
     }
+
+    const users = result.map(row => {
+      const imagePathBuffer = row.profile_image;
+      let imageUrl = null;
+
+      if (Buffer.isBuffer(imagePathBuffer)) {
+        const imagePath = imagePathBuffer.toString();
+        const filename = imagePath.split("\\").pop(); 
+        imageUrl = imagePath ? `/uploads/user-image/${filename}`.replace(/\\/g, '/') : null;
+      }
+
+      return {
+        user_id: row.user_id,
+        username: row.username,
+        email: row.email,
+        role: row.role,
+        created_at: row.created_at,
+        profile_image: imageUrl,
+      };
+    });
+
+    res.json(users);
   });
 });
 
 router.get("/user/:id", (req, res) => {
-  const id = req.params.id
-  const query = "SELECT *FROM users WHERE  user_id = ?";
+  const id = req.params.id;
+  const query = "SELECT * FROM users WHERE user_id = ?"; 
 
-  db.query(query,[id] ,(err, result) => {
+  db.query(query, [id], (err, result) => {
     if (err) {
-      console.error("Error fetching users: " + err);
-      res.status(500).json({ error: "Failed to fetch member" });
-    } else {
-      res.json(result);
+      console.error("Error fetching user: " + err);
+      return res.status(500).json({ error: "Failed to fetch user" });
     }
+
+    if (result.length === 0) {
+      return res.status(404).json({ error: "User not found" }); 
+    }
+
+    const row = result[0];
+    const imagePathBuffer = row.profile_image;
+    let imageUrl = null;
+
+    if (Buffer.isBuffer(imagePathBuffer)) {
+      const imagePath = imagePathBuffer.toString();
+      const filename = imagePath.split("\\").pop(); 
+      imageUrl = imagePath ? `/uploads/user-image/${filename}`.replace(/\\/g, '/') : null;
+    }
+
+    const user = {
+      user_id: row.user_id,
+      username: row.username,
+      email: row.email,
+      role: row.role,
+      created_at: row.created_at,
+      profile_image: imageUrl,
+      age: row.age,
+      address :row.address,
+      gender :row.gender,
+      date_of_birth :row.date_of_birth,
+      created_at : row.created_at,
+      firstname: row.firstname,
+      lastname: row.lastname,
+    };
+
+    res.json(user);
   });
 });
+
 
 
 router.post("/change-password",(req,res)=>{
@@ -163,7 +214,12 @@ router.get("/user-image/:id", (req, res) => {
       const imagePathBuffer = result[0].profile_image;
       if (Buffer.isBuffer(imagePathBuffer)) {
         const imagePath = imagePathBuffer.toString();
-        res.sendFile(path.resolve(imagePath));
+        const path = "uploads\\user-image\\1726725686702.png";
+        const filename = path.split("\\").pop();
+        const imageUrl = imagePath ? `/uploads/user-image/${filename}`.replace(/\\/g, '/') : null;
+        console.log(imageUrl)
+
+        res.json({profile_image: imageUrl})
       } else {
         res.status(404).send("Image not found");
       }
@@ -173,24 +229,5 @@ router.get("/user-image/:id", (req, res) => {
   });
 });
 
-
-router.get("/api/getImageData", (req, res) => {
-  const sql = "SELECT user_id, profile_image FROM users";
-
-  db.query(sql, (err, results) => {
-    if (err) {
-      return res.status(500).send(err);
-    }
-
-    const imageObjects = results.map((row) => {
-      if (row.profile_image) {
-        return { user_id: row.user_id, file_data: Buffer.from(row.profile_image).toString("base64") };
-      }
-      return { user_id: row.user_id, file_data: null }; 
-    });
-
-    res.json(imageObjects);
-  });
-});
 
 module.exports = router;

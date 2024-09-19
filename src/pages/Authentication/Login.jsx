@@ -5,7 +5,6 @@ import Swal from "sweetalert2";
 import axios from "axios";
 import Cookies from "universal-cookie";
 import { jwtDecode } from "jwt-decode";
-
 const Login = () => {
   const cookies = new Cookies();
   const [username, setUsername] = useState("");
@@ -23,7 +22,7 @@ const Login = () => {
   const handleLogin = async (e) => {
     e.preventDefault();
     try {
-      const response = await axios.post("http://localhost:3000/login", {
+      const response = await axios.post(`${import.meta.env.VITE_SERVER_URL}/login`, {
         username,
         password,
       });
@@ -34,7 +33,7 @@ const Login = () => {
       const receivedToken = response.data.token;
       cookies.set("authToken", receivedToken, { path: "/" });
       const decodedToken = jwtDecode(receivedToken);
-      decodedToken.role == "admin"
+      decodedToken.role === "admin"
         ? setTimeout(() => {
             navigate("/dashboard");
           }, 800)

@@ -21,6 +21,11 @@ import AttributeContent from '../DashboardContent/Attributes/AttributeContent'
 import DashboardContent from './DashboardContent'
 import ThreeScene from '../DashboardContent/AugmentedReality/ThreeScene'
 import ReportContent from '../DashboardContent/Reports/ReportContent'
+import TaskContent from '../DashboardContent/Tasks/TaskContent'
+import AddTask from '../DashboardContent/Tasks/AddTask'
+import EditTask from '../DashboardContent/Tasks/EditTask'
+import TaskDetails from '../DashboardContent/Tasks/TaskDetails'
+import AssignTask from '../DashboardContent/Tasks/AssignTask'
 const Dashboard = () => {
   return (
       <div className='flex'>
@@ -30,6 +35,11 @@ const Dashboard = () => {
           <Routes>
             <Route path="*" element={<PageNotFound />} />
             <Route path="home" element={<DashboardContent />} />
+            <Route path="tasks" element={<TaskContent />} />
+            <Route path="tasks/assign" element={<AssignTask />} />
+            <Route path="tasks/:taskId" element={<TaskDetails />} />
+            <Route path="tasks/add" element={<AddTask />} />
+            <Route path="tasks/edit/:taskId" element={<EditTask />} />
             <Route path="user" element={<UserContent />} />
             <Route path="brands" element={<BrandContent />} />
             <Route path="augmented-reality" element={<ThreeScene />} />

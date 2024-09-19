@@ -22,8 +22,8 @@ const warehouse = require("./routes/warehouses");
 const path = require("path");
 
 
-app.use("/uploads/product-image", express.static(path.join(__dirname, "uploads/product-image")));
-app.use("/uploads/user-image", express.static(path.join(__dirname, "uploads/user-image")));
+app.use("/uploads/product-image", express.static(path.join(__dirname, "./uploads/product-image")));
+app.use("/uploads/user-image", express.static(path.join(__dirname, "./uploads/user-image")));
 
 app.use(express());
 app.use(cors());

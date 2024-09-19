@@ -1,25 +1,39 @@
 import React, { useState, useEffect } from "react";
-import { Link } from "react-router-dom"; // Import Link
+import { Link } from "react-router-dom"; 
 import Navbar from "../../components/Navbar";
 import Footer from "../../components/Footer";
 import axios from "axios";
-import ProductImage from "../../ImagesComponent/ProductImage";
 
 const Product = () => {
   const [products, setProducts] = useState([]);
+  const [images, setImages] = useState([]); 
+  const [productsWithImages, setProductsWithImages] = useState([]); 
 
   useEffect(() => {
-    fetchProducts();
-  }, []);
+    const fetchData = async () => {
+      try {
+        const productsResponse = await axios.get("http://localhost:3000/products");
+        const imagesResponse = await axios.get("http://localhost:3000/product-image");
 
-  const fetchProducts = async () => {
-    try {
-      const response = await axios.get("http://localhost:3000/products");
-      setProducts(response.data);
-    } catch (error) {
-      console.error("Error fetching products:", error);
-    }
-  };
+        setProducts(productsResponse.data);
+        setImages(imagesResponse.data);
+
+        const updatedProducts = productsResponse.data.map(product => {
+          const productImage = imagesResponse.data.find(img => img.product_id === product.product_id);
+          return {
+            ...product,
+            product_image: productImage ? productImage.product_image : null,
+          };
+        });
+
+        setProductsWithImages(updatedProducts);
+      } catch (error) {
+        console.error("Error fetching data:", error);
+      }
+    };
+
+    fetchData();
+  }, []);
 
   return (
     <>
@@ -36,16 +50,15 @@ const Product = () => {
               </p>
             </div>
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-              {products.map((product) => (
+              {productsWithImages.map(product => (
                 <div
                   key={product.product_id}
                   className="bg-white shadow-lg rounded-lg overflow-hidden"
                 >
                   {product.product_image ? (
-                    <ProductImage
-                      productId={product.product_id}
-                      width={300}
-                      height={300}
+                    <img
+                      src={`${import.meta.env.VITE_SERVER_URL}${product.product_image}`} 
+                      alt={product.name}
                       className="w-full h-48 object-cover"
                     />
                   ) : (
@@ -60,8 +73,8 @@ const Product = () => {
                         "A brief description of the product goes here."}
                     </p>
                     <Link
-                      to={`/product/${product.product_id}`} // Use Link to navigate
-                      className="mt-4 bg-blue text-white py-2 px-4 rounded hover:bg-blue "
+                      to={`/product/${product.product_id}`} 
+                      className="mt-4 bg-blue text-white py-2 px-4 rounded hover:bg-blue"
                     >
                       View Details
                     </Link>

@@ -4,6 +4,7 @@ import { jwtDecode } from "jwt-decode";
 import Navbar from "../../components/Navbar";
 import Footer from "../../components/Footer";
 import Swal from "sweetalert2";
+import axios from "axios";
 
 const ProfileSetting = () => {
   const [profile, setProfile] = useState(null);
@@ -12,6 +13,7 @@ const ProfileSetting = () => {
   const token = cookies.get("authToken");
   const decodedToken = jwtDecode(token);
   const userId = decodedToken.id;
+  const [image, setImage] = useState();
 
   const [formData, setFormData] = useState({
     firstname: "",
@@ -27,27 +29,37 @@ const ProfileSetting = () => {
 
   useEffect(() => {
     fetchProfile();
+    fetchImage();
   }, []);
+
+  const fetchImage = async () => {
+    try {
+      const response = await axios.get(`${import.meta.env.VITE_SERVER_URL}/user-image/${userId}`);
+      if (response.status === 200) {
+        setImage(response.data.profile_image);
+      }
+    } catch (err) {
+      console.log(err);
+    }
+  };
 
   const fetchProfile = async () => {
     try {
-      const response = await fetch(`http://localhost:3000/user/${userId}`);
-      if (!response.ok) {
-        throw new Error("Failed to fetch profile");
+      const response = await axios.get(`${import.meta.env.VITE_SERVER_URL}/user/${userId}`);
+      if (response.status === 200) {
+        const data = response.data; // Assuming response data is in the expected format
+        setProfile(data);
+        setFormData({
+          firstname: data.firstname || "",
+          lastname: data.lastname || "",
+          email: data.email || "",
+          phone: data.phone || "",
+          age: data.age || "",
+          address: data.address || "",
+          gender: data.gender || "",
+          date_of_birth: data.date_of_birth || "",
+        });
       }
-      const data = await response.json();
-     
-      setProfile(data[0]);
-      setFormData({
-        firstname: data.firstname || "",
-        lastname: data.lastname || "",
-        email: data.email || "",
-        phone: data.phone || "",
-        age: data.age || "",
-        address: data.address || "",
-        gender: data.gender || "",
-        date_of_birth: data.date_of_birth || "",
-      });
     } catch (err) {
       setError(err.message);
     }
@@ -71,21 +83,17 @@ const ProfileSetting = () => {
     }
 
     try {
-      const response = await fetch(`http://localhost:3000/user/${userId}`, {
-        method: "PUT",
-        body: formDataToSend,
-      });
-      if (!response.ok) {
-        throw new Error("Failed to update profile");
+      const response = await axios.put(`${import.meta.env.VITE_SERVER_URL}/user/${userId}`, formDataToSend);
+      if (response.status === 200) {
+        const updatedProfile = response.data; 
+        setProfile(updatedProfile);
+        Swal.fire({
+          title: "Success!",
+          text: "Profile updated successfully!",
+          icon: "success",
+          confirmButtonText: "OK",
+        });
       }
-      const updatedProfile = await response.json();
-      setProfile(updatedProfile);
-      Swal.fire({
-        title: "Success!",
-        text: "Profile updated successfully!",
-        icon: "success",
-        confirmButtonText: "OK",
-      });
     } catch (err) {
       setError(err.message);
       Swal.fire({
@@ -110,7 +118,7 @@ const ProfileSetting = () => {
             </h2>
             <div className="flex items-center mb-4">
               <img
-                src={`data:image/jpeg;base64,${profile.profile_image}`} 
+                src={`${import.meta.env.VITE_SERVER_URL}${image}`} 
                 alt={profile.firstname}
                 className="w-24 h-24 rounded-full mr-4"
               />
@@ -188,7 +196,7 @@ const ProfileSetting = () => {
                 onChange={handleFileChange}
                 className="input input-bordered w-full mt-2"
               />
-              <button className="btn bg-blue mt-4 text-white hover:bg-blue" type="submit">
+              <button className="btn bg-blue mt-4 text-white hover:bg-blue-700" type="submit">
                 Save Changes
               </button>
             </form>

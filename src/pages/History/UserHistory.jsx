@@ -18,12 +18,12 @@ const UserHistory = () => {
     const fetchUserData = async () => {
       try {
         const taskResponse = await axios.get(
-          `http://localhost:3000/tasks?id=${user_id}`
+          `${import.meta.env.VITE_SERVER_URL}/tasks?id=${user_id}`
         );
         setTaskHistory(taskResponse.data);
 
         const orderResponse = await axios.get(
-          `http://localhost:3000/api/orders/${user_id}`
+          `${import.meta.env.VITE_SERVER_URL}/api/orders/${user_id}`
         );
         setOrderHistory(orderResponse.data[0].items);
         setDate(new Date(orderResponse.data[0].created_at).toLocaleString());
@@ -59,8 +59,7 @@ const UserHistory = () => {
                   <tr key={task.task_id}>
                     <td>{task.task_id}</td>
                     <td>{task.description}</td>
-                    <td><div class="badge badge-accent text-white">{task.status}</div>
-                    </td>
+                    <td><div className="badge badge-accent text-white">{task.status}</div></td>
                     <td>{new Date(task.appointment_date).toLocaleString()}</td>
                     <td>{new Date(task.created_at).toLocaleString()}</td>
                   </tr>
@@ -91,7 +90,7 @@ const UserHistory = () => {
             <tbody>
               {orderHistory.length > 0 ? (
                 orderHistory.map((order, index) => (
-                  <tr key={index+1}>
+                  <tr key={index + 1}>
                     <td>{index + 1}</td> 
                     <td>{order.product_name}</td>
                     <td>{order.quantity}</td>
@@ -110,7 +109,7 @@ const UserHistory = () => {
           </table>
         </div>
       </div>
-      <Footer/>
+      <Footer />
     </>
   );
 };

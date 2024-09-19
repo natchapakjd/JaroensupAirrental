@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import axios from "axios";
 import { useParams } from "react-router-dom";
-import UserImage from "../../ImagesComponent/UserImage";
+import { format } from 'date-fns'; // Added date-fns for date formatting
 
 const UserDetails = () => {
   const [user, setUser] = useState(null);
@@ -11,7 +11,7 @@ const UserDetails = () => {
   useEffect(() => {
     const fetchUser = async () => {
       try {
-        const response = await axios.get(`http://localhost:3000/user/${userId}`);
+        const response = await axios.get(`${import.meta.env.VITE_SERVER_URL}/user/${userId}`);
         setUser(response.data[0] || response.data);
       } catch (error) {
         console.error("Error fetching user details:", error);
@@ -31,13 +31,15 @@ const UserDetails = () => {
   }
 
   return (
-    <div className="max-w-4xl mx-auto p-8 bg-white rounded-lg shadow-lg border border-gray-200">
+    <div className=" mx-auto p-8 bg-white   h-screen ">
       <h1 className="text-3xl font-bold mb-6 text-gray-800">{user.username}'s Details</h1>
       <div className="flex items-center mb-6">
         {user.profile_image ? (
-          <div className="w-24 h-24 mr-6 ">
-            <UserImage userId={user.user_id} className="w-full h-full object-cover rounded-full" />
-          </div>
+          <img
+            src={`${import.meta.env.VITE_SERVER_URL}${user.profile_image}`}
+            alt={`${user.username}'s profile`}
+            className="w-24 h-24 rounded-full mr-6"
+          />
         ) : (
           <div className="w-24 h-24 mr-6 bg-gray-300 rounded-full"></div>
         )}
@@ -53,9 +55,9 @@ const UserDetails = () => {
         <p className="text-lg font-medium text-gray-700"><strong>Age:</strong> {user.age}</p>
         <p className="text-lg font-medium text-gray-700"><strong>Address:</strong> {user.address}</p>
         <p className="text-lg font-medium text-gray-700"><strong>Gender:</strong> {user.gender}</p>
-        <p className="text-lg font-medium text-gray-700"><strong>Date of Birth:</strong> {user.date_of_birth}</p>
+        <p className="text-lg font-medium text-gray-700"><strong>Date of Birth:</strong> {format(new Date(user.date_of_birth), 'MM/dd/yyyy')}</p> {/* Improved date formatting */}
         <p className="text-lg font-medium text-gray-700"><strong>Role:</strong> {user.role}</p>
-        <p className="text-lg font-medium text-gray-700"><strong>Created At:</strong> {new Date(user.created_at).toLocaleDateString()}</p>
+        <p className="text-lg font-medium text-gray-700"><strong>Created At:</strong> {format(new Date(user.created_at), 'MM/dd/yyyy')}</p> {/* Improved date formatting */}
       </div>
     </div>
   );

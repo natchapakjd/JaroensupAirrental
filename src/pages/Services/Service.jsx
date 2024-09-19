@@ -10,7 +10,7 @@ const Service = () => {
   useEffect(() => {
     const fetchTaskTypes = async () => {
       try {
-        const response = await axios.get("http://localhost:3000/tasktypes");
+        const response = await axios.get(`${import.meta.env.VITE_SERVER_URL}/tasktypes`);
         setTaskTypes(response.data);
       } catch (error) {
         console.error("Error fetching task types:", error);
@@ -57,7 +57,7 @@ const Service = () => {
                           ? "/product" 
                           : `/service/rental/${taskType.task_type_id}`
                         }
-                        className="bg-blue text-white py-2 px-4 rounded hover:bg-blue transition duration-200"
+                        className="bg-blue text-white py-2 px-4 rounded hover:bg-blue-700 transition duration-200"
                       >
                         ดูรายละเอียดเพิ่มเติม
                       </Link>

@@ -9,7 +9,6 @@ const AddCategory = () => {
     name: "",
     description: ""
   });
-  const [categoryIdToDelete, setCategoryIdToDelete] = useState(null);
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -19,12 +18,10 @@ const AddCategory = () => {
     });
   };
 
-  
-
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
-      const response = await axios.post('http://localhost:3000/categories', formData);
+      const response = await axios.post(`${import.meta.env.VITE_SERVER_URL}/categories`, formData);
       if (response.status === 201) {
         Swal.fire({
           title: 'Category added successfully',
@@ -49,12 +46,9 @@ const AddCategory = () => {
     }
   };
 
-  
-
   return (
-    <div className="p-8 rounded-lg shadow-lg w-full mx-auto font-inter h-screen" >
+    <div className="p-8 rounded-lg shadow-lg w-full mx-auto font-inter h-screen">
       <h1 className="text-2xl font-semibold mb-6">Add New Category</h1>
-      <div></div>
       <form onSubmit={handleSubmit}>
         <div className="mb-4">
           <label
@@ -91,12 +85,11 @@ const AddCategory = () => {
         </div>
         <button
           type="submit"
-          className="text-white bg-blue hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm w-full sm:w-auto px-5 py-2.5 text-center"
+          className="text-white bg-blue-500 hover:bg-blue-700 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm w-full sm:w-auto px-5 py-2.5 text-center"
         >
           Add Category
         </button>
       </form>
-
     </div>
   );
 };

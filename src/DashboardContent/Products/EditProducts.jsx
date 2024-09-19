@@ -21,7 +21,7 @@ const EditProduct = () => {
   useEffect(() => {
     const fetchProduct = async () => {
         try {
-          const response = await axios.get(`http://localhost:3000/product/${productId}`);
+          const response = await axios.get(`${import.meta.env.VITE_SERVER_URL}/product/${productId}`);
           setFormData({
             ...response.data[0],
             product_image: null 
@@ -67,7 +67,7 @@ const EditProduct = () => {
 
     try {
       const response = await axios.put(
-        `http://localhost:3000/product/${productId}`,
+        `${import.meta.env.VITE_SERVER_URL}/product/${productId}`,
         formDataToSend,
         {
           headers: {

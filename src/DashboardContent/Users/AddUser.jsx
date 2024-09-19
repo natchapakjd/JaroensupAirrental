@@ -16,6 +16,7 @@ const AddUser = () => {
     date_of_birth: '',
   });
   const [profileImage, setProfileImage] = useState(null);
+  const [loading, setLoading] = useState(false);
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -28,13 +29,14 @@ const AddUser = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    setLoading(true);
 
     const form = new FormData();
     Object.keys(formData).forEach(key => form.append(key, formData[key]));
     if (profileImage) form.append('profile_image', profileImage);
 
     try {
-      const response = await axios.post('http://localhost:3000/user', form, {
+      const response = await axios.post(`${import.meta.env.VITE_SERVER_URL}/user`, form, {
         headers: {
           'Content-Type': 'multipart/form-data',
         },
@@ -46,7 +48,6 @@ const AddUser = () => {
           text: 'User added successfully.',
           icon: 'success',
         });
-        // Clear form after successful submission
         setFormData({
           username: '',
           firstname: '',
@@ -69,6 +70,8 @@ const AddUser = () => {
         text: error.message || 'Something went wrong. Please try again.',
         icon: 'error',
       });
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -204,9 +207,10 @@ const AddUser = () => {
         </div>
         <button
           type="submit"
-          className="bg-blue text-white hover:bg-blue py-2 px-4 rounded"
+          className={`bg-blue text-white hover:bg-blue py-2 px-4 rounded ${loading ? 'opacity-50 cursor-not-allowed' : ''}`}
+          disabled={loading}
         >
-          Add User
+          {loading ? 'Adding...' : 'Add User'}
         </button>
       </form>
     </div>

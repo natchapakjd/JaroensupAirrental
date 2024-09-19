@@ -13,7 +13,7 @@ const PageNotFound = () => {
         <div className="text-gray-600 mb-6">
           The page you are looking for might have been removed or is temporarily unavailable.
         </div>
-        <a href="/" className="btn btn-primary">Go to Home</a>
+        <a href="/" className="btn bg-blue text-white hover:bg-blue">Go to Home</a>
       </div>
     </div>
   );

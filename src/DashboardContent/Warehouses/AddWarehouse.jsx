@@ -15,7 +15,7 @@ const AddWarehouse = () => {
     setLoading(true);
 
     try {
-      const response = await axios.post('http://localhost:3000/warehouses', {
+      const response = await axios.post(`${import.meta.env.VITE_SERVER_URL}/warehouses`, {
         name,
         location,
         capacity: parseInt(capacity, 10), // Convert capacity to integer

@@ -11,7 +11,7 @@ const CategoryContent = () => {
   useEffect(() => {
     const fetchCategories = async () => {
       try {
-        const response = await axios.get('http://localhost:3000/categories');
+        const response = await axios.get(`${import.meta.env.VITE_SERVER_URL}/categories`);
         setCategories(response.data);
       } catch (err) {
         setError('Failed to fetch categories.');
@@ -22,7 +22,7 @@ const CategoryContent = () => {
     };
 
     fetchCategories();
-  }, [categories]);
+  }, []); // Empty dependency array to run only on mount
 
   const handleDelete = async (id) => {
     try {
@@ -37,7 +37,7 @@ const CategoryContent = () => {
       });
 
       if (result.isConfirmed) {
-        await axios.delete(`http://localhost:3000/category/${id}`);
+        await axios.delete(`${import.meta.env.VITE_SERVER_URL}/category/${id}`);
         setCategories(categories.filter(category => category.category_id !== id));
         Swal.fire('Deleted!', 'Your category has been deleted.', 'success');
       }

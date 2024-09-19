@@ -16,8 +16,8 @@ const storage = multer.diskStorage({
 const upload = multer({ storage: storage });
 
 router.get("/products", (req, res) => {
-  const page = parseInt(req.query.page) || 1; 
-  const pageSize = parseInt(req.query.pageSize) || 10; 
+  const page = parseInt(req.query.page) || 1;
+  const pageSize = parseInt(req.query.pageSize) || 10;
 
   const offset = (page - 1) * pageSize;
 
@@ -45,7 +45,6 @@ router.get("/products/count", (req, res) => {
     }
   });
 });
-
 
 router.get("/product/:id", (req, res) => {
   const id = req.params.id;
@@ -87,8 +86,8 @@ router.post("/products", upload.single("product_image"), (req, res) => {
     category_id,
     warehouse_id,
   } = req.body;
-  const productImage = req.file ? req.file.path : null; 
-  
+  const productImage = req.file ? req.file.path : null;
+
   db.query(
     "INSERT INTO products (name, description, price, stock_quantity, brand_id, category_id, warehouse_id, product_image) VALUES (?, ?, ?, ?, ?, ?, ?, ?)",
     [
@@ -111,8 +110,7 @@ router.post("/products", upload.single("product_image"), (req, res) => {
   );
 });
 
-
-router.put("/product/:id", upload.single('product_image'), (req, res) => {
+router.put("/product/:id", upload.single("product_image"), (req, res) => {
   const id = req.params.id;
   console.log("Request body:", req.body); // Debug statement
   console.log("Request file:", req.file); // Debug statement
@@ -127,7 +125,7 @@ router.put("/product/:id", upload.single('product_image'), (req, res) => {
     warehouse_id,
   } = req.body;
 
-  const product_image = req.file ? req.file.path: null;
+  const product_image = req.file ? req.file.path : null;
 
   const query = `UPDATE products
                  SET name = ?, description = ?, price = ?, stock_quantity = ?, brand_id = ?, category_id = ?, warehouse_id = ?, product_image = ?
@@ -173,12 +171,53 @@ router.get("/product-image/:id", (req, res) => {
       const imagePathBuffer = result[0].product_image;
       if (Buffer.isBuffer(imagePathBuffer)) {
         const imagePath = imagePathBuffer.toString();
-        res.sendFile(path.resolve(imagePath));
+        console.log(imagePath);
+
+        // ตัดชื่อไฟล์จาก path
+        const filename = imagePath.split("\\").pop(); // สำหรับ Windows
+        const imageUrl = imagePath
+          ? `/uploads/product-image/${filename}`.replace(/\\/g, "/")
+          : null;
+
+        res.json({ product_image: imageUrl });
       } else {
         res.status(404).send("Image not found");
       }
     } else {
       res.status(404).send("Product not found");
+    }
+  });
+});
+
+router.get("/product-image/", (req, res) => {
+  const query = "SELECT product_image, product_id FROM products";
+
+  db.query(query, (err, result) => {
+    if (err) {
+      console.error("Error fetching images: " + err);
+      res.status(500).send("Failed to fetch images");
+      return;
+    }
+
+    if (result.length > 0) {
+      const images = result.map((row) => {
+        const imagePathBuffer = row.product_image;
+        if (Buffer.isBuffer(imagePathBuffer)) {
+          const imagePath = imagePathBuffer.toString();
+          const filename = imagePath.split("\\").pop(); // สำหรับ Windows
+          const imageUrl = imagePath
+            ? `/uploads/product-image/${filename}`.replace(/\\/g, "/")
+            : null;
+
+          return { product_id: row.product_id, product_image: imageUrl };
+        } else {
+          return { product_id: row.product_id, product_image: null };
+        }
+      });
+
+      res.json(images);
+    } else {
+      res.status(404).send("No products found");
     }
   });
 });

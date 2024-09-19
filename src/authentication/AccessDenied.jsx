@@ -10,7 +10,7 @@ const AccessDenied = () => {
         <div className="text-gray-700 mb-6">
           You do not have permission to access this page.
         </div>
-        <a href="/" className="btn btn-primary">Go to Home</a>
+        <a href="/" className="btn bg-blue text-white hover:bg-blue">Go to Home</a>
       </div>
     </div>
   );
