@@ -7,6 +7,8 @@ import L from 'leaflet';
 import { useParams } from "react-router-dom";
 import { jwtDecode } from "jwt-decode";
 import Cookies from "universal-cookie";
+import Swal from 'sweetalert2'; 
+
 
 const icon = L.icon({
   iconUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-icon.png',
@@ -102,21 +104,34 @@ const RentAC = () => {
         ...formData,
         user_id,
       });
-      console.log("Task created:", response.data);
-      setFormData({
-        user_id: "",
-        description: "",
-        task_type_id: taskTypeId || "",
-        product_id: "",
-        quantity_used: "",
-        address: "",
-        appointment_date: "",
-        latitude: "",
-        longitude: "",
+        
+      Swal.fire({
+        title: 'สำเร็จ!',
+        text: 'แบบฟอร์มถูกส่งเรียบร้อยแล้ว',
+        icon: 'success',
+        timer: 2000, 
+        showConfirmButton: false
+      }).then(() => {
+        setFormData({
+          user_id: "",
+          description: "",
+          task_type_id: taskTypeId || "",
+          product_id: "",
+          quantity_used: "",
+          address: "",
+          appointment_date: "",
+          latitude: "",
+          longitude: "",
+        });
+        setSelectedLocation(null);
       });
-      setSelectedLocation(null);
     } catch (error) {
       console.error("Error creating task:", error);
+      Swal.fire({
+        title: 'เกิดข้อผิดพลาด!',
+        text: 'ไม่สามารถส่งแบบฟอร์มได้ กรุณาลองใหม่อีกครั้ง',
+        icon: 'error',
+      });
     }
   };
 

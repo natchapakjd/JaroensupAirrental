@@ -162,13 +162,14 @@ router.delete("/task/:id", (req, res) => {
 });
 
 router.post('/api/orders', (req, res) => {
-  const { user_id, items } = req.body;
+  const { user_id, items, total_price } = req.body; // Include total_price
 
   if (!items || items.length === 0) {
     return res.status(400).json({ message: 'No items provided' });
   }
 
-  db.query('INSERT INTO orders (user_id) VALUES (?)', [user_id], (err, result) => {
+  // Insert order with total_price
+  db.query('INSERT INTO orders (user_id, total_price) VALUES (?, ?)', [user_id, total_price], (err, result) => {
     if (err) return res.status(500).send(err);
 
     const orderId = result.insertId;
@@ -176,18 +177,20 @@ router.post('/api/orders', (req, res) => {
     const orderItems = items.map(item => [
       orderId,
       item.product_id,
-      item.name,  
+      item.name,
       item.quantity,
+      item.price, // Include price per item
+      item.total_price // Include total price for each item
     ]);
 
-    db.query('INSERT INTO order_items (order_id, product_id, product_name, quantity) VALUES ?', [orderItems], (err) => {
+    // Update the query to insert price and total_price as well
+    db.query('INSERT INTO order_items (order_id, product_id, product_name, quantity, price, total_price) VALUES ?', [orderItems], (err) => {
       if (err) return res.status(500).send(err);
 
       res.status(201).json({ message: 'Order created successfully', orderId });
     });
   });
 });
-
 
 
 

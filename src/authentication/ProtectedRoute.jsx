@@ -1,24 +1,37 @@
 import React from 'react';
 import { jwtDecode } from 'jwt-decode';
 import Cookies from 'universal-cookie';
+import { useLocation } from 'react-router-dom';
 import Login from '../pages/Authentication/Login';
 import AccessDenied from './AccessDenied';
 
-const ProtectedRoute = ({ children}) => {
+const ProtectedRoute = ({ children }) => {
   const cookies = new Cookies();
   const token = cookies.get('authToken');
+  const location = useLocation(); // Get current location
 
   if (token) {
-    const decodedToken = jwtDecode(token);
-    const userRole = decodedToken.role;
+    try {
+      const decodedToken = jwtDecode(token);
+      const userRole = decodedToken.role;
 
-    if ((userRole === 'admin') || (userRole === 'tech')) {
-      return <>{children}</>; 
-    } else {
+      if (userRole === 'admin' || userRole === 'tech') {
+        return <>{children}</>;
+      } else if (userRole === 'client') {
+        if (!location.pathname.startsWith('/dashboard')) {
+          return <>{children}</>;
+        } else {
+          return <AccessDenied />;
+        }
+      } else {
+        return <AccessDenied />;
+      }
+    } catch (error) {
+      console.error('Token decoding failed:', error);
       return <AccessDenied />;
     }
   } else {
-    return <Login />; 
+    return <Login />;
   }
 };
 

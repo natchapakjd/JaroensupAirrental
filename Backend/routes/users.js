@@ -214,17 +214,18 @@ router.get("/user-image/:id", (req, res) => {
       const imagePathBuffer = result[0].profile_image;
       if (Buffer.isBuffer(imagePathBuffer)) {
         const imagePath = imagePathBuffer.toString();
-        const path = "uploads\\user-image\\1726725686702.png";
-        const filename = path.split("\\").pop();
-        const imageUrl = imagePath ? `/uploads/user-image/${filename}`.replace(/\\/g, '/') : null;
-        console.log(imageUrl)
+        const filename = imagePath.split("\\").pop(); 
+          const imageUrl = imagePath
+            ? `/uploads/user-image/${filename}`.replace(/\\/g, "/")
+            : null;
+
 
         res.json({profile_image: imageUrl})
       } else {
         res.status(404).send("Image not found");
       }
     } else {
-      res.status(404).send("Product not found");
+      res.status(404).send("User Image not found");
     }
   });
 });

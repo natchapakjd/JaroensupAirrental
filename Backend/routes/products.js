@@ -3,6 +3,7 @@ const router = express.Router();
 const db = require("../db");
 const multer = require("multer");
 const path = require("path");
+const sharp = require('sharp');
 
 const storage = multer.diskStorage({
   destination: function (req, file, cb) {
@@ -76,7 +77,7 @@ router.delete("/product/:id", (req, res) => {
   });
 });
 
-router.post("/products", upload.single("product_image"), (req, res) => {
+router.post("/products", upload.single("product_image"), async (req, res) => {
   const {
     name,
     description,
@@ -87,6 +88,13 @@ router.post("/products", upload.single("product_image"), (req, res) => {
     warehouse_id,
   } = req.body;
   const productImage = req.file ? req.file.path : null;
+
+  if (productImage) {
+    const compressedImagePath = `compressed-${req.file.filename}`;
+    await sharp(productImage)
+      .resize(800) 
+      .toFile(compressedImagePath);
+  }
 
   db.query(
     "INSERT INTO products (name, description, price, stock_quantity, brand_id, category_id, warehouse_id, product_image) VALUES (?, ?, ?, ?, ?, ?, ?, ?)",
@@ -112,8 +120,6 @@ router.post("/products", upload.single("product_image"), (req, res) => {
 
 router.put("/product/:id", upload.single("product_image"), (req, res) => {
   const id = req.params.id;
-  console.log("Request body:", req.body); // Debug statement
-  console.log("Request file:", req.file); // Debug statement
 
   const {
     name,
@@ -171,10 +177,7 @@ router.get("/product-image/:id", (req, res) => {
       const imagePathBuffer = result[0].product_image;
       if (Buffer.isBuffer(imagePathBuffer)) {
         const imagePath = imagePathBuffer.toString();
-        console.log(imagePath);
-
-        // ตัดชื่อไฟล์จาก path
-        const filename = imagePath.split("\\").pop(); // สำหรับ Windows
+        const filename = imagePath.split("\\").pop(); 
         const imageUrl = imagePath
           ? `/uploads/product-image/${filename}`.replace(/\\/g, "/")
           : null;
@@ -204,7 +207,7 @@ router.get("/product-image/", (req, res) => {
         const imagePathBuffer = row.product_image;
         if (Buffer.isBuffer(imagePathBuffer)) {
           const imagePath = imagePathBuffer.toString();
-          const filename = imagePath.split("\\").pop(); // สำหรับ Windows
+          const filename = imagePath.split("\\").pop();
           const imageUrl = imagePath
             ? `/uploads/product-image/${filename}`.replace(/\\/g, "/")
             : null;

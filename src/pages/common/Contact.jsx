@@ -6,12 +6,17 @@ const Contact = () => {
   return (
     <>
       <Navbar />
-      <div className="bg-gray-100 text-gray-800 font-prompt">
+      <div className="bg-gray-100 text-gray-800 font-prompt  py-8">
         {/* Contact Header */}
-        <div className="bg-blue-600 h-20 mb-8">
-          <p className="text-black text-3xl py-6 text-center font-semibold">Contact Us</p>
-        </div>
-
+        <header className="text-center mb-12">
+            <h1 className="text-4xl font-bold text-gray-800 mb-4 font-prompt">
+              ติดต่อเรา
+            </h1>
+            <p className="text-lg text-gray-600">
+              Explore some of the significant projects and experiences we've had
+              with various companies.
+            </p>
+          </header>
         {/* Google Maps */}
         <div className="container mx-auto px-4 mb-8">
           <iframe

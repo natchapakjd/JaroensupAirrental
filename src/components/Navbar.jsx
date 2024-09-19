@@ -1,20 +1,44 @@
 import React, { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import Cookies from "universal-cookie";
+import { useEffect } from "react";
 import { jwtDecode } from "jwt-decode";
+import axios from "axios";
 // import Swal from "sweetalert2";
 const Navbar = () => {
   const cookies = new Cookies();
   const [isToggle, setIsToggle] = useState(false);
+  const [userId, setUserId] = useState();
+  const [image, setImage] = useState();
   const token = cookies.get("authToken");
   const navigate = useNavigate();
   const toggleNavbar = () => {
     setIsToggle(!isToggle);
   };
 
+  useEffect(() => {
+    if (token) {
+      const decodedToken = jwtDecode(token);
+      setUserId(decodedToken.id);
+      fetchUserimageByID();
+    }
+  }, [userId]);
   const handleLogout = () => {
     cookies.remove("authToken", { path: "/" });
     navigate("/login");
+  };
+
+  const fetchUserimageByID = async () => {
+    try {
+      const response = await axios.get(
+        `${import.meta.env.VITE_SERVER_URL}/user-image/${userId}`
+      );
+      if (response.status === 200) {
+        setImage(response.data.profile_image);
+      }
+    } catch (err) {
+      console.log(err);
+    }
   };
 
   return (
@@ -85,7 +109,7 @@ const Navbar = () => {
               <Link to="/product">สินค้า</Link>
             </li>
             <li className="z-40">
-            <a href="/services">บริการของเรา</a>
+              <a href="/services">บริการของเรา</a>
 
               {/* <details>
                 <summary>บริการของเรา</summary>
@@ -96,7 +120,7 @@ const Navbar = () => {
                   <li>
                     <a>งานซ่อมบำรุง</a>
                   </li> */}
-                {/* </ul> */} 
+              {/* </ul> */}
               {/* </details>  */}
             </li>
             <li>
@@ -126,7 +150,7 @@ const Navbar = () => {
                 <div className="w-10 rounded-full">
                   <img
                     alt="Tailwind CSS Navbar component"
-                    src="https://img.daisyui.com/images/stock/photo-1534528741775-53994a69daeb.webp"
+                    src={`${import.meta.env.VITE_SERVER_URL}${image}`}
                   />
                 </div>
               </div>
@@ -141,7 +165,7 @@ const Navbar = () => {
                       <span className="badge">New</span>
                     </a>
                   </li>
-                  
+
                   <li>
                     <a href="/history">History</a>
                   </li>

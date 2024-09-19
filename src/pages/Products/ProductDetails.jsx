@@ -1,15 +1,14 @@
 import React, { useState, useEffect } from "react";
-import { useParams, useNavigate } from "react-router-dom"; // Import useNavigate
+import { useParams, useNavigate } from "react-router-dom";
 import Navbar from "../../components/Navbar";
 import Footer from "../../components/Footer";
 import axios from "axios";
 
 const ProductDetails = () => {
-  const { id } = useParams(); // Get product ID from URL
+  const { id } = useParams();
   const [product, setProduct] = useState(null);
-  const navigate = useNavigate(); // ใช้ useNavigate
-  const [image,setImage] = useState();
-
+  const navigate = useNavigate();
+  const [image, setImage] = useState();
 
   useEffect(() => {
     fetchProductDetails();
@@ -18,16 +17,16 @@ const ProductDetails = () => {
 
   const fetchProductImageById = async () => {
     try {
-      const response = await axios.get(`http://localhost:3000/product-image/${id}`);
+      const response = await axios.get(`${import.meta.env.VITE_SERVER_URL}/product-image/${id}`);
       setImage(response.data.product_image);
-      console.log(image)
     } catch (error) {
-      console.error("Error fetching product details:", error);
+      console.error("Error fetching product image:", error);
     }
-  }
+  };
+
   const fetchProductDetails = async () => {
     try {
-      const response = await axios.get(`http://localhost:3000/product/${id}`);
+      const response = await axios.get(`${import.meta.env.VITE_SERVER_URL}/product/${id}`);
       setProduct(response.data[0]);
     } catch (error) {
       console.error("Error fetching product details:", error);
@@ -37,25 +36,25 @@ const ProductDetails = () => {
   if (!product) return <p>Loading...</p>;
 
   const handleAddToCart = () => {
-    navigate('/add-to-cart', { state: { product } }); 
+    navigate('/add-to-cart', { state: { product } });
   };
 
   return (
     <>
       <Navbar />
-      <div className="bg-gray-100 min-h-screen flex flex-col font-prompt">
+      <div className="bg-gray min-h-screen flex flex-col font-prompt">
         <main className="flex-grow">
-          <section className="container mx-auto p-6">
-            <div className="flex justify-center mb-6">
+          <section className="container mx-auto p-6 flex flex-wrap">
+            <div className="flex-shrink-0 w-full md:w-1/2 flex justify-center mb-6">
               {product.product_image && (
                 <img
-                src={`${import.meta.env.VITE_SERVER_URL}${image}`} 
+                  src={`${import.meta.env.VITE_SERVER_URL}${image}`}
                   alt={product.name}
-                  className="w-full max-w-lg h-auto rounded-lg shadow-lg"
+                  className="w-full max-w-md h-auto rounded-lg shadow-lg"
                 />
               )}
             </div>
-            <div className="text-center mb-12">
+            <div className="flex-grow w-full md:w-1/2 text-left mb-12 md:pl-6">
               <h1 className="text-4xl font-bold text-gray-800 mb-4">
                 {product.name}
               </h1>
@@ -74,14 +73,14 @@ const ProductDetails = () => {
               <p className="text-sm text-gray-500 mt-1">
                 Stock Quantity: {product.stock_quantity}
               </p>
-            </div>
-            <div className="flex justify-center">
-              <button
-                onClick={handleAddToCart}
-                className="mt-4 bg-blue text-white py-2 px-4 rounded hover:bg-blue transition duration-200"
-              >
-                เพิ่มลงตะกร้า
-              </button>
+              <div className="flex justify-center mt-6">
+                <button
+                  onClick={handleAddToCart}
+                  className="bg-blue text-white py-2 px-4 rounded hover:bg-blue-700 transition duration-200"
+                >
+                  เพิ่มลงตะกร้า
+                </button>
+              </div>
             </div>
           </section>
         </main>

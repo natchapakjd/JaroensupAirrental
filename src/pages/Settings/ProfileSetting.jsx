@@ -108,7 +108,7 @@ const ProfileSetting = () => {
   return (
     <>
       <Navbar />
-      <div className="container mx-auto p-6">
+      <div className="container mx-auto p-6 font-prompt">
         <h1 className="text-2xl font-bold mb-4">Profile Settings</h1>
         {error && <div className="alert alert-error">{error}</div>}
         {profile ? (

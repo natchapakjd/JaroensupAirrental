@@ -38,7 +38,7 @@ const UserHistory = () => {
   return (
     <>
       <Navbar />
-      <div className="container mx-auto mt-10">
+      <div className="container mx-auto mt-10 font-prompt">
         <h2 className="text-2xl font-bold mb-4">User Task and Order History</h2>
 
         <div className="mb-8">

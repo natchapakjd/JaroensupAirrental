@@ -4,6 +4,7 @@ import Navbar from "../../components/Navbar";
 import Footer from "../../components/Footer";
 import Cookies from 'universal-cookie';
 import { jwtDecode } from 'jwt-decode';
+import Swal from 'sweetalert2'; 
 
 const Checkout = () => {
   const location = useLocation();
@@ -17,27 +18,62 @@ const Checkout = () => {
 
   const handleCheckout = async () => {
     console.log("Proceeding to checkout with items:", cartItems);
-    console.log(user_id)
+    console.log(user_id);
+    
+    // Calculate total price
+    const totalPrice = cartItems.reduce((acc, item) => {
+      return acc + (item.price * item.quantity);
+    }, 0).toFixed(2); // Format to two decimal places
+  
+    // Prepare order details
+    const orderDetails = {
+      user_id,
+      items: cartItems.map(item => ({
+        name: item.name,
+        product_id: item.product_id, // Include product_id
+        price: item.price, // This is the price per item
+        quantity: item.quantity,
+        total_price: (item.price * item.quantity).toFixed(2) // Calculate total for each item
+      })),
+      total_price: totalPrice // Include total price
+    };
+  
     try {
-      const response = await fetch('http://localhost:3000/api/orders', {
+      const response = await fetch(`${import.meta.env.VITE_SERVER_URL}/api/orders`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({ user_id, items: cartItems }), 
+        body: JSON.stringify(orderDetails), 
       });
-
+  
       if (!response.ok) {
         throw new Error('Network response was not ok');
       }
-
+  
       const result = await response.json();
       console.log("Order submitted successfully:", result);
-      navigate('/history'); 
+  
+      Swal.fire({
+        title: 'สำเร็จ!',
+        text: 'การชำระเงินของคุณได้ถูกยืนยันแล้ว',
+        icon: 'success',
+        timer: 2000, // หน่วงเวลา 2 วินาทีก่อน redirect
+        showConfirmButton: false
+      }).then(() => {
+        navigate('/history'); 
+      });
+  
     } catch (error) {
       console.error("Error submitting order:", error);
+      Swal.fire({
+        title: 'เกิดข้อผิดพลาด!',
+        text: 'ไม่สามารถส่งคำสั่งซื้อได้ กรุณาลองใหม่อีกครั้ง',
+        icon: 'error',
+      });
     }
   };
+  
 
   const handleContinueShopping = () => {
     navigate('/product'); 
@@ -49,6 +85,11 @@ const Checkout = () => {
     acc[item.name] = (acc[item.name] || 0) + item.quantity; 
     return acc;
   }, {});
+
+  // Calculate total price
+  const totalPrice = cartItems.reduce((acc, item) => {
+    return acc + (item.price * item.quantity); // Sum up price * quantity for each item
+  }, 0).toFixed(2); // Format to two decimal places
 
   return (
     <>
@@ -73,6 +114,10 @@ const Checkout = () => {
                   </div>
                 );
               })}
+              <div className="flex justify-between mt-4 font-bold">
+                <span>Total Price:</span>
+                <span>${totalPrice}</span>
+              </div>
             </div>
             <div className="flex justify-center mt-6">
               <button

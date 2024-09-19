@@ -12,8 +12,8 @@ const Product = () => {
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const productsResponse = await axios.get("http://localhost:3000/products");
-        const imagesResponse = await axios.get("http://localhost:3000/product-image");
+        const productsResponse = await axios.get(`${import.meta.env.VITE_SERVER_URL}/products`);
+        const imagesResponse = await axios.get(`${import.meta.env.VITE_SERVER_URL}/product-image`);
 
         setProducts(productsResponse.data);
         setImages(imagesResponse.data);
@@ -72,12 +72,14 @@ const Product = () => {
                       {product.description ||
                         "A brief description of the product goes here."}
                     </p>
-                    <Link
-                      to={`/product/${product.product_id}`} 
-                      className="mt-4 bg-blue text-white py-2 px-4 rounded hover:bg-blue"
-                    >
-                      View Details
-                    </Link>
+                    <div className="flex justify-end mt-4">
+                      <Link
+                        to={`/product/${product.product_id}`} 
+                        className="bg-blue text-white py-2 px-4 rounded hover:bg-blue"
+                      >
+                        View Details
+                      </Link>
+                    </div>
                   </div>
                 </div>
               ))}
