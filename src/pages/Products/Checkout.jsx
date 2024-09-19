@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import Navbar from "../../components/Navbar";
 import Footer from "../../components/Footer";
@@ -9,7 +9,8 @@ import Swal from 'sweetalert2';
 const Checkout = () => {
   const location = useLocation();
   const navigate = useNavigate();
-  const cartItems = location.state?.cartItems || []; 
+  const initialCartItems = location.state?.cartItems || [];
+  const [cartItems, setCartItems] = useState(initialCartItems); // Manage cart items state
 
   const cookies = new Cookies();
   const token = cookies.get("authToken");
@@ -20,22 +21,18 @@ const Checkout = () => {
     console.log("Proceeding to checkout with items:", cartItems);
     console.log(user_id);
     
-    // Calculate total price
-    const totalPrice = cartItems.reduce((acc, item) => {
-      return acc + (item.price * item.quantity);
-    }, 0).toFixed(2); // Format to two decimal places
+    const totalPrice = cartItems.reduce((acc, item) => acc + (item.price * item.quantity), 0).toFixed(2);
   
-    // Prepare order details
     const orderDetails = {
       user_id,
       items: cartItems.map(item => ({
         name: item.name,
-        product_id: item.product_id, // Include product_id
-        price: item.price, // This is the price per item
+        product_id: item.product_id,
+        price: item.price,
         quantity: item.quantity,
-        total_price: (item.price * item.quantity).toFixed(2) // Calculate total for each item
+        total_price: (item.price * item.quantity).toFixed(2)
       })),
-      total_price: totalPrice // Include total price
+      total_price: totalPrice
     };
   
     try {
@@ -44,12 +41,10 @@ const Checkout = () => {
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify(orderDetails), 
+        body: JSON.stringify(orderDetails),
       });
   
-      if (!response.ok) {
-        throw new Error('Network response was not ok');
-      }
+      if (!response.ok) throw new Error('Network response was not ok');
   
       const result = await response.json();
       console.log("Order submitted successfully:", result);
@@ -58,7 +53,7 @@ const Checkout = () => {
         title: 'สำเร็จ!',
         text: 'การชำระเงินของคุณได้ถูกยืนยันแล้ว',
         icon: 'success',
-        timer: 2000, // หน่วงเวลา 2 วินาทีก่อน redirect
+        timer: 2000,
         showConfirmButton: false
       }).then(() => {
         navigate('/history'); 
@@ -73,7 +68,10 @@ const Checkout = () => {
       });
     }
   };
-  
+
+  const handleRemoveItem = (productId) => {
+    setCartItems(cartItems.filter(item => item.product_id !== productId));
+  };
 
   const handleContinueShopping = () => {
     navigate('/product'); 
@@ -86,10 +84,7 @@ const Checkout = () => {
     return acc;
   }, {});
 
-  // Calculate total price
-  const totalPrice = cartItems.reduce((acc, item) => {
-    return acc + (item.price * item.quantity); // Sum up price * quantity for each item
-  }, 0).toFixed(2); // Format to two decimal places
+  const totalPrice = cartItems.reduce((acc, item) => acc + (item.price * item.quantity), 0).toFixed(2);
 
   return (
     <>
@@ -108,8 +103,14 @@ const Checkout = () => {
                       <p className="text-gray-600">Price: ${item.price.toFixed(2)}</p>
                       <p className="text-gray-500">Stock: {item.stock_quantity}</p>
                     </div>
-                    <div className="self-center">
+                    <div className="self-center flex items-center">
                       <span className="text-lg font-bold text-gray-900">Quantity: {quantity}</span>
+                      <button
+                        onClick={() => handleRemoveItem(item.product_id)}
+                        className="ml-4 text-red-600 hover:text-red-800 transition duration-200"
+                      >
+                        Remove
+                      </button>
                     </div>
                   </div>
                 );

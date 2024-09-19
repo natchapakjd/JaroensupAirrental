@@ -1,17 +1,17 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import Cookies from "universal-cookie";
-import { useEffect } from "react";
 import { jwtDecode } from "jwt-decode";
 import axios from "axios";
-// import Swal from "sweetalert2";
+
 const Navbar = () => {
   const cookies = new Cookies();
   const [isToggle, setIsToggle] = useState(false);
   const [userId, setUserId] = useState();
-  const [image, setImage] = useState();
+  const [image, setImage] = useState(null); // Start as null
   const token = cookies.get("authToken");
   const navigate = useNavigate();
+
   const toggleNavbar = () => {
     setIsToggle(!isToggle);
   };
@@ -20,15 +20,16 @@ const Navbar = () => {
     if (token) {
       const decodedToken = jwtDecode(token);
       setUserId(decodedToken.id);
-      fetchUserimageByID();
+      fetchUserImageByID(decodedToken.id); // Pass the userId directly
     }
-  }, [userId]);
+  }, [token]);
+
   const handleLogout = () => {
     cookies.remove("authToken", { path: "/" });
     navigate("/login");
   };
 
-  const fetchUserimageByID = async () => {
+  const fetchUserImageByID = async (userId) => {
     try {
       const response = await axios.get(
         `${import.meta.env.VITE_SERVER_URL}/user-image/${userId}`
@@ -37,7 +38,8 @@ const Navbar = () => {
         setImage(response.data.profile_image);
       }
     } catch (err) {
-      console.log(err);
+      console.error("Error fetching user image:", err);
+      setImage(null); // Set to null on error
     }
   };
 
@@ -67,10 +69,10 @@ const Navbar = () => {
                 />
               </svg>
             </div>
-            {isToggle ? (
+            {isToggle && (
               <ul
                 tabIndex="0"
-                className="menu menu-sm dropdown-content bg-white text-black rounded-box z-[1] mt-3 w-52 p-2 shadow "
+                className="menu menu-sm dropdown-content bg-white text-black rounded-box z-[1] mt-3 w-52 p-2 shadow"
               >
                 <li>
                   <Link to="/">หน้าหลัก</Link>
@@ -80,14 +82,6 @@ const Navbar = () => {
                 </li>
                 <li>
                   <a>บริการของเรา</a>
-                  {/* <ul className="p-2">
-                    <li>
-                      <a>งานเช่า</a>
-                    </li>
-                    <li>
-                      <a>งานซ่อมบำรุง</a>
-                    </li>
-                  </ul> */}
                 </li>
                 <li>
                   <Link to="/experience">ผลงานของเรา</Link>
@@ -96,7 +90,7 @@ const Navbar = () => {
                   <Link to="/contact">ติดต่อเรา</Link>
                 </li>
               </ul>
-            ) : null}
+            )}
           </div>
           <a className="btn btn-ghost text-xl">Jaroensup</a>
         </div>
@@ -110,18 +104,6 @@ const Navbar = () => {
             </li>
             <li className="z-40">
               <a href="/services">บริการของเรา</a>
-
-              {/* <details>
-                <summary>บริการของเรา</summary>
-                {/* <ul className="p-2 bg-white text-black">
-                  {/* <li>
-                    <a>งานเช่า</a>
-                  </li>
-                  <li>
-                    <a>งานซ่อมบำรุง</a>
-                  </li> */}
-              {/* </ul> */}
-              {/* </details>  */}
             </li>
             <li>
               <Link to="/experience">ผลงานของเรา</Link>
@@ -133,13 +115,13 @@ const Navbar = () => {
         </div>
         <div className="navbar-end ">
           <li className="list-none ">
-            {!token ? (
+            {!token && (
               <Link to="/login" className="text-sm md:text-base">
                 สมัครสมาชิก/เข้าสู่ระบบ
               </Link>
-            ) : null}
+            )}
           </li>
-          {token ? (
+          {token && (
             <div className="dropdown dropdown-end">
               <div
                 tabIndex={0}
@@ -148,13 +130,19 @@ const Navbar = () => {
                 onClick={toggleNavbar}
               >
                 <div className="w-10 rounded-full">
-                  <img
-                    alt="Tailwind CSS Navbar component"
-                    src={`${import.meta.env.VITE_SERVER_URL}${image}`}
-                  />
+                  {image ? (
+                    <img
+                      alt="User Avatar"
+                      src={`${import.meta.env.VITE_SERVER_URL}${image}`}
+                    />
+                  ) : (
+                    <div className="w-10 h-10 bg-gray-200 rounded-full flex items-center justify-center">
+                      <span className="text-gray-500">?</span> {/* Fallback UI */}
+                    </div>
+                  )}
                 </div>
               </div>
-              {isToggle ? (
+              {isToggle && (
                 <ul
                   tabIndex={0}
                   className="menu menu-sm dropdown-content bg-base-100 rounded-box z-[1] mt-3 w-52 p-2 shadow bg-white text-black"
@@ -165,7 +153,6 @@ const Navbar = () => {
                       <span className="badge">New</span>
                     </a>
                   </li>
-
                   <li>
                     <a href="/history">History</a>
                   </li>
@@ -176,9 +163,9 @@ const Navbar = () => {
                     <a onClick={handleLogout}>Logout</a>
                   </li>
                 </ul>
-              ) : null}
+              )}
             </div>
-          ) : null}
+          )}
         </div>
       </div>
     </nav>
