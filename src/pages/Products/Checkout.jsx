@@ -18,54 +18,66 @@ const Checkout = () => {
   const user_id = decodedToken ? decodedToken.id : null;
 
   const handleCheckout = async () => {
-    console.log("Proceeding to checkout with items:", cartItems);
-    console.log(user_id);
-    
     const totalPrice = cartItems.reduce((acc, item) => acc + (item.price * item.quantity), 0).toFixed(2);
+    
+    // Show confirmation dialog
+    const { isConfirmed } = await Swal.fire({
+      title: 'ยืนยันการชำระเงิน',
+      text: `คุณต้องการชำระเงินเป็นจำนวนเงิน ${totalPrice} บาทหรือไม่?`,
+      icon: 'warning',
+      showCancelButton: true,
+      confirmButtonText: 'ใช่',
+      cancelButtonText: 'ยกเลิก'
+    });
   
-    const orderDetails = {
-      user_id,
-      items: cartItems.map(item => ({
-        name: item.name,
-        product_id: item.product_id,
-        price: item.price,
-        quantity: item.quantity,
-        total_price: (item.price * item.quantity).toFixed(2)
-      })),
-      total_price: totalPrice
-    };
+    if (isConfirmed) {
+      console.log("Proceeding to checkout with items:", cartItems);
+      console.log(user_id);
   
-    try {
-      const response = await fetch(`${import.meta.env.VITE_SERVER_URL}/api/orders`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(orderDetails),
-      });
+      const orderDetails = {
+        user_id,
+        items: cartItems.map(item => ({
+          name: item.name,
+          product_id: item.product_id,
+          price: item.price,
+          quantity: item.quantity,
+          total_price: (item.price * item.quantity).toFixed(2)
+        })),
+        total_price: totalPrice
+      };
   
-      if (!response.ok) throw new Error('Network response was not ok');
+      try {
+        const response = await fetch(`${import.meta.env.VITE_SERVER_URL}/api/orders`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify(orderDetails),
+        });
   
-      const result = await response.json();
-      console.log("Order submitted successfully:", result);
+        if (!response.ok) throw new Error('Network response was not ok');
   
-      Swal.fire({
-        title: 'สำเร็จ!',
-        text: 'การชำระเงินของคุณได้ถูกยืนยันแล้ว',
-        icon: 'success',
-        timer: 2000,
-        showConfirmButton: false
-      }).then(() => {
-        navigate('/history'); 
-      });
+        const result = await response.json();
+        console.log("Order submitted successfully:", result);
   
-    } catch (error) {
-      console.error("Error submitting order:", error);
-      Swal.fire({
-        title: 'เกิดข้อผิดพลาด!',
-        text: 'ไม่สามารถส่งคำสั่งซื้อได้ กรุณาลองใหม่อีกครั้ง',
-        icon: 'error',
-      });
+        Swal.fire({
+          title: 'สำเร็จ!',
+          text: 'ออเดอร์ของคุณได้ถูกบันทึกแล้ว',
+          icon: 'success',
+          timer: 2000,
+          showConfirmButton: false
+        }).then(() => {
+          navigate('/history'); 
+        });
+  
+      } catch (error) {
+        console.error("Error submitting order:", error);
+        Swal.fire({
+          title: 'เกิดข้อผิดพลาด!',
+          text: 'ไม่สามารถส่งคำสั่งซื้อได้ กรุณาลองใหม่อีกครั้ง',
+          icon: 'error',
+        });
+      }
     }
   };
 
@@ -77,7 +89,6 @@ const Checkout = () => {
     navigate('/product'); 
   };
 
-  if (cartItems.length === 0) return <p>ไม่มีสินค้าที่จะชำระเงิน</p>;
 
   const itemCounts = cartItems.reduce((acc, item) => {
     acc[item.name] = (acc[item.name] || 0) + item.quantity; 
