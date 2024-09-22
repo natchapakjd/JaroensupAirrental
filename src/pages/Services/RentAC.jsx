@@ -1,17 +1,23 @@
 import React, { useState, useEffect } from "react";
 import axios from "axios";
 import Navbar from "../../components/Navbar";
-import { MapContainer, TileLayer, Marker, Popup, useMapEvents } from 'react-leaflet';
-import 'leaflet/dist/leaflet.css';
-import L from 'leaflet';
+import {
+  MapContainer,
+  TileLayer,
+  Marker,
+  Popup,
+  useMapEvents,
+} from "react-leaflet";
+import "leaflet/dist/leaflet.css";
+import L from "leaflet";
 import { useParams } from "react-router-dom";
 import { jwtDecode } from "jwt-decode";
 import Cookies from "universal-cookie";
-import Swal from 'sweetalert2'; 
-
+import Swal from "sweetalert2";
 
 const icon = L.icon({
-  iconUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-icon.png',
+  iconUrl:
+    "https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-icon.png",
   iconSize: [25, 41],
   iconAnchor: [12, 41],
 });
@@ -23,7 +29,7 @@ const RentAC = () => {
     description: "",
     task_type_id: "",
     product_id: "",
-    quantity_used: "",
+    // quantity_used: "",
     address: "",
     appointment_date: "",
     latitude: "",
@@ -42,7 +48,9 @@ const RentAC = () => {
   useEffect(() => {
     const fetchProducts = async () => {
       try {
-        const response = await axios.get(`${import.meta.env.VITE_SERVER_URL}/products`);
+        const response = await axios.get(
+          `${import.meta.env.VITE_SERVER_URL}/products`
+        );
         setProducts(response.data);
       } catch (error) {
         console.error("Error fetching products:", error);
@@ -51,7 +59,9 @@ const RentAC = () => {
 
     const fetchTaskTypes = async () => {
       try {
-        const response = await axios.get(`${import.meta.env.VITE_SERVER_URL}/tasktypes`);
+        const response = await axios.get(
+          `${import.meta.env.VITE_SERVER_URL}/tasktypes`
+        );
         setTaskTypes(response.data);
       } catch (error) {
         console.error("Error fetching task types:", error);
@@ -68,12 +78,18 @@ const RentAC = () => {
 
   useEffect(() => {
     if (taskTypeId) {
-      setFormData(prevData => ({
+      setFormData((prevData) => ({
         ...prevData,
         task_type_id: taskTypeId,
       }));
     }
   }, [taskTypeId]);
+  const filteredTaskTypes = taskTypes.filter(
+    (taskType) =>
+      taskType.type_name === "งานเช่าเครื่องปรับอากาศ" ||
+      // taskType.type_name === "จำหน่ายสินค้า" ||
+      taskType.type_name === "งานซ่อมบำรุงเครื่องปรับอากาศ"
+  );
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -100,24 +116,27 @@ const RentAC = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
-      const response = await axios.post(`${import.meta.env.VITE_SERVER_URL}/tasks`, {
-        ...formData,
-        user_id,
-      });
-        
+      const response = await axios.post(
+        `${import.meta.env.VITE_SERVER_URL}/tasks`,
+        {
+          ...formData,
+          user_id,
+        }
+      );
+
       Swal.fire({
-        title: 'สำเร็จ!',
-        text: 'แบบฟอร์มถูกส่งเรียบร้อยแล้ว',
-        icon: 'success',
-        timer: 2000, 
-        showConfirmButton: false
+        title: "สำเร็จ!",
+        text: "แบบฟอร์มถูกส่งเรียบร้อยแล้ว",
+        icon: "success",
+        timer: 2000,
+        showConfirmButton: false,
       }).then(() => {
         setFormData({
           user_id: "",
           description: "",
           task_type_id: taskTypeId || "",
           product_id: "",
-          quantity_used: "",
+          // quantity_used: "",
           address: "",
           appointment_date: "",
           latitude: "",
@@ -128,9 +147,9 @@ const RentAC = () => {
     } catch (error) {
       console.error("Error creating task:", error);
       Swal.fire({
-        title: 'เกิดข้อผิดพลาด!',
-        text: 'ไม่สามารถส่งแบบฟอร์มได้ กรุณาลองใหม่อีกครั้ง',
-        icon: 'error',
+        title: "เกิดข้อผิดพลาด!",
+        text: "ไม่สามารถส่งแบบฟอร์มได้ กรุณาลองใหม่อีกครั้ง",
+        icon: "error",
       });
     }
   };
@@ -143,7 +162,10 @@ const RentAC = () => {
         {loading ? (
           <p>Loading...</p>
         ) : (
-          <form onSubmit={handleSubmit} className="bg-white p-6 rounded-lg shadow-md">
+          <form
+            onSubmit={handleSubmit}
+            className="bg-white p-6 rounded-lg shadow-md"
+          >
             <div className="mb-4">
               <label className="block text-gray-700">Task Type</label>
               <select
@@ -154,11 +176,20 @@ const RentAC = () => {
                 className="select select-bordered w-full"
               >
                 <option value="">เลือกประเภทงาน</option>
-                {taskTypes.map((taskType) => (
-                  <option key={taskType.task_type_id} value={taskType.task_type_id}>
-                    {taskType.type_name}
-                  </option>
-                ))}
+                {taskTypes
+                  .filter(
+                    (taskType) =>
+                      taskType.type_name === "งานเช่าเครื่องปรับอากาศ" ||
+                      taskType.type_name === "งานซ่อมบำรุงเครื่องปรับอากาศ"
+                  )
+                  .map((taskType) => (
+                    <option
+                      key={taskType.task_type_id}
+                      value={taskType.task_type_id}
+                    >
+                      {taskType.type_name}
+                    </option>
+                  ))}
               </select>
             </div>
             <div className="mb-4">
@@ -188,7 +219,7 @@ const RentAC = () => {
                 className="textarea textarea-bordered w-full"
               ></textarea>
             </div>
-            <div className="mb-4">
+            {/* <div className="mb-4">
               <label className="block text-gray-700">Quantity Used</label>
               <input
                 type="number"
@@ -198,7 +229,7 @@ const RentAC = () => {
                 required
                 className="input input-bordered w-full"
               />
-            </div>
+            </div> */}
             <div className="mb-4">
               <label className="block text-gray-700">Address</label>
               <input
@@ -221,7 +252,11 @@ const RentAC = () => {
                 className="input input-bordered w-full"
               />
             </div>
-            <MapContainer center={[13.7563, 100.5018]} zoom={10} style={{ height: "400px", width: "100%", maxHeight: "400px" }}>
+            <MapContainer
+              center={[13.7563, 100.5018]}
+              zoom={10}
+              style={{ height: "400px", width: "100%", maxHeight: "400px" }}
+            >
               <TileLayer
                 url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
                 attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
@@ -235,7 +270,10 @@ const RentAC = () => {
                 </Marker>
               )}
             </MapContainer>
-            <button type="submit" className="btn bg-blue hover:bg-blue-700 text-white my-5 w-full">
+            <button
+              type="submit"
+              className="btn bg-blue hover:bg-blue-700 text-white my-5 w-full"
+            >
               Submit
             </button>
           </form>

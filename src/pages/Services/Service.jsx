@@ -27,7 +27,8 @@ const Service = () => {
   const filteredTaskTypes = taskTypes.filter(
     (taskType) =>
       taskType.type_name === "งานเช่าเครื่องปรับอากาศ" ||
-      taskType.type_name === "จำหน่ายสินค้า"
+      // taskType.type_name === "จำหน่ายสินค้า" ||
+      taskType.type_name === "งานซ่อมบำรุงเครื่องปรับอากาศ"
   );
 
   return (

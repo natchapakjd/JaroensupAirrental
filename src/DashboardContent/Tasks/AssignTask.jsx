@@ -64,7 +64,7 @@ const AssignTask = () => {
   };
 
   return (
-    <div className="p-8 rounded-lg shadow-lg w-full mx-auto font-inter">
+    <div className="p-8 rounded-lg shadow-lg w-full mx-auto font-inter h-full">
       <h2 className="text-2xl mb-4">Assign Task</h2>
       <form onSubmit={handleAssign} className="space-y-4">
         <div>
@@ -94,7 +94,7 @@ const AssignTask = () => {
             <option value="">Select Technician</option>
             {technicians.map((tech) => (
               <option key={tech.tech_id} value={tech.tech_id}>
-                {tech.name} 
+                {tech.tech_id} 
               </option>
             ))}
           </select>

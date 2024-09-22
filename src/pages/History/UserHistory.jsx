@@ -61,6 +61,7 @@ const UserHistory = () => {
             <thead>
               <tr>
                 <th>Task ID</th>
+                <th>Task Type</th>
                 <th>Description</th>
                 <th>Address</th>
                 <th>Status</th>
@@ -73,6 +74,7 @@ const UserHistory = () => {
                 taskHistory.map((task) => (
                   <tr key={task.task_id}>
                     <td>{task.task_id}</td>
+                    <td>{task.task_type_id}</td>
                     <td>{task.description}</td>
                     <td>{task.address}</td>
                     <td>

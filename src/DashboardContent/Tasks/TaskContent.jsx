@@ -28,27 +28,21 @@ const TaskContent = () => {
 
   const handleDelete = async (taskId) => {
     try {
-      // Show confirmation dialog
       const result = await Swal.fire({
-        title: 'Are you sure?',
+        title: "Are you sure?",
         text: "You won't be able to revert this!",
-        icon: 'warning',
+        icon: "warning",
         showCancelButton: true,
-        confirmButtonColor: '#3085d6',
-        cancelButtonColor: '#d33',
-        confirmButtonText: 'Yes, delete it!',
-        cancelButtonText: 'Cancel'
+        confirmButtonColor: "#3085d6",
+        cancelButtonColor: "#d33",
+        confirmButtonText: "Yes, delete it!",
+        cancelButtonText: "Cancel",
       });
 
       if (result.isConfirmed) {
         const response = await axios.delete(`${apiUrl}/task/${taskId}`);
-        console.log(response);
         if (response.status === 204) {
-          Swal.fire(
-            'Deleted!',
-            'Your task has been deleted.',
-            'success'
-          );
+          Swal.fire("Deleted!", "Your task has been deleted.", "success");
           setTasks(tasks.filter((task) => task.task_id !== taskId));
         } else {
           throw new Error("Failed to delete task.");
@@ -86,44 +80,58 @@ const TaskContent = () => {
             <th className="border border-gray-300 p-2">ID</th>
             <th className="border border-gray-300 p-2">Type</th>
             <th className="border border-gray-300 p-2">Description</th>
-            <th className="border border-gray-300 p-2">Due Date</th>
+            <th className="border border-gray-300 p-2">Due Date (Date)</th>
+            <th className="border border-gray-300 p-2">Due Date (Time)</th>
             <th className="border border-gray-300 p-2">Status</th>
             <th className="border border-gray-300 p-2">Actions</th>
           </tr>
         </thead>
         <tbody className="text-center">
           {tasks.length > 0 ? (
-            tasks.map((task) => (
-              <tr key={task.task_id}>
-                <td className="border border-gray-300 p-2">{task.task_id}</td>
-                <td className="border border-gray-300 p-2">{task.task_type_id}</td>
-                <td className="border border-gray-300 p-2">{task.description}</td>
-                <td className="border border-gray-300 p-2">{task.appointment_date}</td>
-                <td className="border border-gray-300 p-2">{task.status}</td>
-                <td className="border border-gray-300 p-2">
-                  <div className="flex justify-center gap-2">
-                    <Link to={`/dashboard/tasks/edit/${task.task_id}`}>
-                      <button className="btn btn-success text-white ">Edit</button>
-                    </Link>
-                    <button
-                      onClick={() => handleDelete(task.task_id)}
-                      className="btn bg-red-500 text-white hover:bg-red-600"
-                    >
-                      Delete
-                    </button>
-                    <button
-                      onClick={() => handleViewDetails(task.task_id)} // Navigate to details page
-                      className="btn bg-blue text-white hover:bg-blue"
-                    >
-                      View Details
-                    </button>
-                  </div>
-                </td>
-              </tr>
-            ))
+            tasks.map((task) => {
+              const appointmentDate = new Date(task.appointment_date);
+              const formattedDate = new Intl.DateTimeFormat("th-TH", {
+                year: "numeric",
+                month: "long",
+                day: "numeric",
+              }).format(appointmentDate);
+              const formattedTime = appointmentDate.toLocaleTimeString("th-TH");
+
+              return (
+                <tr key={task.task_id}>
+                  <td className="border border-gray-300 p-2">{task.task_id}</td>
+                  <td className="border border-gray-300 p-2">{task.task_type_id}</td>
+                  <td className="border border-gray-300 p-2">{task.description}</td>
+                  <td className="border border-gray-300 p-2">{formattedDate}</td>
+                  <td className="border border-gray-300 p-2">{formattedTime}</td>
+                  <td className="border border-gray-300 p-2">{task.status}</td>
+                  <td className="border border-gray-300 p-2">
+                    <div className="flex justify-center gap-2">
+                      <Link to={`/dashboard/tasks/edit/${task.task_id}`}>
+                        <button className="btn btn-success text-white">Edit</button>
+                      </Link>
+                      <button
+                        onClick={() => handleDelete(task.task_id)}
+                        className="btn bg-red-500 text-white hover:bg-red-600"
+                      >
+                        Delete
+                      </button>
+                      <button
+                        onClick={() => handleViewDetails(task.task_id)}
+                        className="btn bg-blue text-white hover:bg-blue"
+                      >
+                        View Details
+                      </button>
+                    </div>
+                  </td>
+                </tr>
+              );
+            })
           ) : (
             <tr>
-              <td colSpan="6" className="border border-gray-300 p-4">No tasks available</td>
+              <td colSpan="7" className="border border-gray-300 p-4">
+                No tasks available
+              </td>
             </tr>
           )}
         </tbody>

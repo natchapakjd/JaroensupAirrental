@@ -1,6 +1,21 @@
 const express = require("express");
 const router = express.Router();
 const db = require("../db");
+const cron = require('node-cron');
+
+cron.schedule('0 0 * * *', () => {
+  const query = `
+    DELETE FROM tasks 
+    WHERE isActive = 0 AND updatedAt < NOW() - INTERVAL 30 DAY`;
+
+  db.query(query, (err, result) => {
+    if (err) {
+      console.error("Error deleting old inactive tasks: ", err);
+    } else {
+      console.log(`Deleted ${result.affectedRows} old inactive tasks.`);
+    }
+  });
+});
 
 router.get("/task-paging", (req, res) => {
   const page = parseInt(req.query.page) || 1;
@@ -49,7 +64,7 @@ router.get("/task/:id", (req, res) => {
 });
 
 router.get("/tasks", (req, res) => {
-  const query = "SELECT * FROM tasks";
+  const query = "SELECT * FROM tasks WHERE isActive = 1";
 
   db.query(query, (err, result) => {
     if (err) {
@@ -192,12 +207,12 @@ router.put("/task/:id", (req, res) => {
 
 router.delete("/task/:id", (req, res) => {
   const id = req.params.id;
-  const query = "DELETE FROM tasks WHERE task_id = ?";
+  const query = "UPDATE tasks SET isActive = 0 WHERE task_id = ?";
 
   db.query(query, [id], (err, result) => {
     if (err) {
-      console.error("Error deleting task: " + err);
-      res.status(500).json({ error: "Failed to delete task" });
+      console.error("Error updating task to deleted: " + err);
+      res.status(500).json({ error: "Failed to mark task as deleted" });
     } else if (result.affectedRows === 0) {
       res.status(404).json({ error: "Task not found" });
     } else {
