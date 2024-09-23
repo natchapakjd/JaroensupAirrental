@@ -17,7 +17,7 @@ const AddToCart = () => {
   const handleConfirm = () => {
     Swal.fire({
       title: 'ยืนยันการเพิ่มสินค้า',
-      text: `คุณต้องการเพิ่ม ${product.name} จำนวน ${quantity } ชิ้น ลงในตะกร้าหรือไม่?`,
+      text: `คุณต้องการเพิ่ม ${product.name} จำนวน ${quantity} ชิ้น ลงในตะกร้าหรือไม่?`,
       icon: 'warning',
       showCancelButton: true,
       confirmButtonColor: '#3085d6',
@@ -27,11 +27,12 @@ const AddToCart = () => {
     }).then((result) => {
       if (result.isConfirmed) {
         addToCart(product, quantity);
+        // Reset quantity to 1 after adding to cart
+        setQuantity(1);
         navigate('/checkout', { state: { cartItems: [...cartItems, { ...product, quantity }] } });
       }
     });
   };
-
   if (!product) return <p>No product found.</p>;
 
   const totalPrice = (product.price * quantity).toFixed(2);

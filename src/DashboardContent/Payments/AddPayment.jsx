@@ -1,0 +1,154 @@
+import React, { useEffect, useState } from 'react';
+import axios from 'axios';
+import { useNavigate } from 'react-router-dom';
+import Swal from 'sweetalert2';
+
+const AddPayment = () => {
+  const [amount, setAmount] = useState('');
+  const [userId, setUserId] = useState('');
+  const [paymentMethod, setPaymentMethod] = useState('');
+  const [paymentDate, setPaymentDate] = useState('');
+  const [slipImages, setSlipImages] = useState(null);
+  const [orderId, setOrderId] = useState('');
+  const [taskId, setTaskId] = useState('');
+  const [status, setStatus] = useState('pending');
+  const [users, setUsers] = useState([]);
+  const [tasks, setTasks] = useState([]);
+  const [orders, setOrders] = useState([]);
+  const [selectionMode, setSelectionMode] = useState('task'); // New state for selection mode
+
+  const navigate = useNavigate();
+  const apiUrl = import.meta.env.VITE_SERVER_URL;
+
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        const [usersResponse, tasksResponse, ordersResponse] = await Promise.all([
+          axios.get(`${apiUrl}/users`),
+          axios.get(`${apiUrl}/tasks`),
+          axios.get(`${apiUrl}/v1/orders`),
+        ]);
+        setUsers(usersResponse.data);
+        setTasks(tasksResponse.data);
+        setOrders(ordersResponse.data);
+      } catch (error) {
+        Swal.fire({
+          title: "Error",
+          text: error.message,
+          icon: "error",
+        });
+      }
+    };
+
+    fetchData();
+  }, [apiUrl]);
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+
+    const formData = new FormData();
+    formData.append('amount', amount);
+    formData.append('user_id', userId);
+    formData.append('payment_method', paymentMethod);
+    formData.append('payment_date', paymentDate);
+    if (slipImages) {
+      formData.append('slip_images', slipImages);
+    }
+    formData.append('order_id', selectionMode === 'order' ? orderId : null); // Add only if order mode
+    formData.append('task_id', selectionMode === 'task' ? taskId : null); // Add only if task mode
+    formData.append('status', status);
+
+    try {
+      await axios.post(`${apiUrl}/payments`, formData, {
+        headers: {
+          'Content-Type': 'multipart/form-data',
+        },
+      });
+      Swal.fire({
+        title: "Payment added successfully",
+        icon: "success",
+      });
+      navigate('/dashboard/payments');
+    } catch (error) {
+      Swal.fire({
+        title: "Error",
+        text: error.message,
+        icon: "error",
+      });
+    }
+  };
+
+  return (
+    <div className="p-8 font-inter">
+      <h2 className="text-2xl font-semibold mb-4">Add Payment</h2>
+      <form onSubmit={handleSubmit}>
+      <div className="mb-4">
+          <label className="block mb-2">Select Mode</label>
+          <select value={selectionMode} onChange={(e) => setSelectionMode(e.target.value)} className="input w-full">
+            <option value="task">Task</option>
+            <option value="order">Order</option>
+          </select>
+        </div>
+        {selectionMode === 'task' && (
+          <div className="mb-4">
+            <label className="block mb-2">Task ID</label>
+            <select value={taskId} onChange={(e) => setTaskId(e.target.value)} className="input w-full" required>
+              <option value="">Select Task</option>
+              {tasks.map(task => (
+                <option key={task.task_id} value={task.task_id}>{task.task_id}</option>
+              ))}
+            </select>
+          </div>
+        )}
+        {selectionMode === 'order' && (
+          <div className="mb-4">
+            <label className="block mb-2">Order ID</label>
+            <select value={orderId} onChange={(e) => setOrderId(e.target.value)} className="input w-full" required>
+              <option value="">Select Order</option>
+              {orders.map(order => (
+                <option key={order.id} value={order.id}>{order.id}</option>
+              ))}
+            </select>
+          </div>
+        )}
+        <div className="mb-4">
+          <label className="block mb-2">User ID</label>
+          <select value={userId} onChange={(e) => setUserId(e.target.value)} className="input w-full" required>
+            <option value="">Select User</option>
+            {users.map(user => (
+              <option key={user.user_id} value={user.user_id}>{user.user_id}</option>
+            ))}
+          </select>
+        </div>
+       
+         <div className="mb-4">
+          <label className="block mb-2">Amount</label>
+          <input type="number" value={amount} onChange={(e) => setAmount(e.target.value)} className="input w-full" required />
+        </div>
+        <div className="mb-4">
+          <label className="block mb-2">Payment Method</label>
+          <input type="text" value={paymentMethod} onChange={(e) => setPaymentMethod(e.target.value)} className="input w-full" required />
+        </div>
+        <div className="mb-4">
+          <label className="block mb-2">Payment Date</label>
+          <input type="datetime-local" value={paymentDate} onChange={(e) => setPaymentDate(e.target.value)} className="input w-full" required />
+        </div>
+        <div className="mb-4">
+          <label className="block mb-2">Slip Images</label>
+          <input type="file" onChange={(e) => setSlipImages(e.target.files[0])} className="input w-full" />
+        </div>
+        <div className="mb-4">
+          <label className="block mb-2">Status</label>
+          <select value={status} onChange={(e) => setStatus(e.target.value)} className="input w-full">
+            <option value="pending">Pending</option>
+            <option value="completed">Completed</option>
+            <option value="failed">Failed</option>
+          </select>
+        </div>
+        <button type="submit" className="btn bg-blue text-white">Add Payment</button>
+      </form>
+    </div>
+  );
+};
+
+export default AddPayment;

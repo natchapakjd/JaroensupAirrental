@@ -106,7 +106,7 @@ router.post("/change-password",(req,res)=>{
       console.log(err)
     }else{
       const hashedPassword = await bcrypt.hash(newPassword,10)
-      const updatedQuery = "UPDATE member SET password = ? WHERE username = ?"
+      const updatedQuery = "UPDATE users SET password = ? WHERE username = ?"
       db.query(updatedQuery,[hashedPassword,username],(err,updatedResult)=>{
         if(err){
           console.log(err)

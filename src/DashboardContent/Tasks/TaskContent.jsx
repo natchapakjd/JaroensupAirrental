@@ -62,7 +62,7 @@ const TaskContent = () => {
   };
 
   return (
-    <div className="p-8 rounded-lg shadow-lg w-full mx-auto font-inter">
+    <div className="p-8 rounded-lg shadow-lg w-full mx-auto font-inter h-full">
       <div className="flex justify-between items-center mb-4">
         <h2 className="text-xl font-semibold mt-8">Task List</h2>
         <div className="flex gap-2">

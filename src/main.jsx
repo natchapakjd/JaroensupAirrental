@@ -24,6 +24,7 @@ import { CartProvider } from "./context/CartContext";
 import UserHistory from "./pages/History/UserHistory";
 import ProfileSetting from "./pages/Settings/ProfileSetting";
 import Settings from "./pages/Settings/Settings";
+import ChangePassword from "./pages/Settings/ChangePassword";
 
 const router = createBrowserRouter([
   {
@@ -101,6 +102,10 @@ const router = createBrowserRouter([
   {
     path: "/settings",
     element: <Settings />,
+  },
+  {
+    path: "/change-password",
+    element: <ChangePassword />,
   }
 ]);
 

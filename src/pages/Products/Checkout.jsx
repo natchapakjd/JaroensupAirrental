@@ -11,7 +11,7 @@ const Checkout = () => {
   const navigate = useNavigate();
   const initialCartItems = location.state?.cartItems || [];
   const [cartItems, setCartItems] = useState(initialCartItems); // Manage cart items state
-
+  
   const cookies = new Cookies();
   const token = cookies.get("authToken");
   const decodedToken = token ? jwtDecode(token) : null;
@@ -29,7 +29,7 @@ const Checkout = () => {
       confirmButtonText: 'ใช่',
       cancelButtonText: 'ยกเลิก'
     });
-  
+    
     if (isConfirmed) {
       console.log("Proceeding to checkout with items:", cartItems);
       console.log(user_id);
@@ -47,7 +47,7 @@ const Checkout = () => {
       };
   
       try {
-        const response = await fetch(`${import.meta.env.VITE_SERVER_URL}/api/orders`, {
+        const response = await fetch(`${import.meta.env.VITE_SERVER_URL}/v2/orders`, {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
@@ -60,11 +60,12 @@ const Checkout = () => {
         const result = await response.json();
         console.log("Order submitted successfully:", result);
   
+        console.log(cartItems)
         Swal.fire({
           title: 'สำเร็จ!',
           text: 'ออเดอร์ของคุณได้ถูกบันทึกแล้ว',
           icon: 'success',
-          timer: 2000,
+          timer: 500,
           showConfirmButton: false
         }).then(() => {
           navigate('/history'); 

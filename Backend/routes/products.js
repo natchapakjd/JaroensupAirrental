@@ -21,9 +21,9 @@ router.get("/products", (req, res) => {
   const pageSize = parseInt(req.query.pageSize) || 10;
   const offset = (page - 1) * pageSize;
 
-  const query = "SELECT * FROM products LIMIT ? OFFSET ?";
-
-  db.query(query, [pageSize, offset], (err, result) => {
+  const query = "SELECT * FROM products WHERE product_type = ? LIMIT ? OFFSET ?";
+  
+  db.query(query, ['rental', pageSize, offset], (err, result) => {
     if (err) {
       console.error("Error fetching products: " + err);
       res.status(500).json({ error: "Failed to fetch products" });
@@ -221,6 +221,20 @@ router.get("/product-image/", (req, res) => {
     } else {
       res.status(404).send("No products found");
     }
+  });
+});
+
+router.get("/products/count", (req, res) => {
+  const query = "SELECT COUNT(*) AS total_products FROM products";
+
+  db.query(query, (err, result) => {
+    if (err) {
+      console.error("Error fetching total products: " + err);
+      return res.status(500).json({ error: "Failed to fetch total products " });
+    }
+
+    const totalProduct = result[0].total_products || 0; // Default to 0 if no payments
+    res.status(200).json({ totalProduct });
   });
 });
 

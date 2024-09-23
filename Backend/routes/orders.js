@@ -1,0 +1,315 @@
+const express = require("express");
+const router = express.Router();
+const db = require("../db");
+
+router.get("/v1/orders", (req, res) => {
+    const limit = parseInt(req.query.limit) || 10; // จำนวนรายการต่อหน้า
+    const page = parseInt(req.query.page) || 1; // หน้าเริ่มต้น
+    const offset = (page - 1) * limit; // การคำนวณ offset
+
+    const query = "SELECT * FROM orders LIMIT ? OFFSET ?";
+  
+    db.query(query, [limit, offset], (err, result) => {
+        if (err) {
+            console.error("Error fetching orders: ", err);
+            return res.status(500).json({ error: "Failed to fetching orders" });
+        }
+      
+        // คุณอาจต้องการให้ข้อมูลเกี่ยวกับหน้าที่มีอยู่และจำนวนทั้งหมด
+        const countQuery = "SELECT COUNT(*) AS total FROM orders";
+        db.query(countQuery, (err, countResult) => {
+            if (err) {
+                console.error("Error fetching order count: ", err);
+                return res.status(500).json({ error: "Failed to fetching order count" });
+            }
+
+            const totalCount = countResult[0].total;
+            const totalPages = Math.ceil(totalCount / limit);
+
+            res.status(200).json({
+                totalCount,
+                totalPages,
+                currentPage: page,
+                orders: result,
+            });
+        });
+    });
+});
+
+
+router.get("/v1/orders/:id", (req, res) => {
+    const limit = parseInt(req.query.limit) || 10; // จำนวนรายการต่อหน้า
+    const page = parseInt(req.query.page) || 1; // หน้าเริ่มต้น
+    const offset = (page - 1) * limit; // การคำนวณ offset
+    const userId = req.params.id; // รับ user_id จาก URL parameters
+
+    // สร้างเงื่อนไขสำหรับการค้นหาตาม user_id
+    let query = "SELECT * FROM orders WHERE user_id = ?";
+    const queryParams = [userId];
+
+    query += " LIMIT ? OFFSET ?";
+    queryParams.push(limit, offset);
+
+    db.query(query, queryParams, (err, result) => {
+        if (err) {
+            console.error("Error fetching orders: ", err);
+            return res.status(500).json({ error: "Failed to fetching orders" });
+        }
+
+        // นับจำนวนคำสั่งซื้อที่ตรงกับ user_id
+        const countQuery = "SELECT COUNT(*) AS total FROM orders WHERE user_id = ?";
+        
+        db.query(countQuery, [userId], (err, countResult) => {
+            if (err) {
+                console.error("Error fetching order count: ", err);
+                return res.status(500).json({ error: "Failed to fetching order count" });
+            }
+
+            const totalCount = countResult[0].total;
+            const totalPages = Math.ceil(totalCount / limit);
+
+            res.status(200).json({
+                totalCount,
+                totalPages,
+                currentPage: page,
+                orders: result,
+            });
+        });
+    });
+});
+
+
+router.delete("/v1/orders/:id", (req, res) => {
+    const orderId = req.params.id;
+  
+    db.query("DELETE FROM orders WHERE id = ?", [orderId], (err) => {
+      if (err) {
+        console.error("Error deleting order items: ", err);
+        return res.status(500).json({ error: "Failed to delete order items" });
+      }else{
+        return res.status(200).json({message: "Delete success"})
+      }
+    });
+  });
+  
+
+router.get("/v1/orders/count", (req, res) => {
+    const query = "SELECT COUNT(*) AS total_orders FROM orders";
+  
+    db.query(query, (err, result) => {
+      if (err) {
+        console.error("Error counting orders: ", err);
+        return res.status(500).json({ error: "Failed to count orders" });
+      }
+      
+      const totalOrders = result[0].total_orders;
+      res.status(200).json({ totalOrders });
+    });
+  });
+
+router.post("/v2/orders", (req, res) => {
+    const { user_id, items, total_price } = req.body; // Include total_price
+  
+    if (!items || items.length === 0) {
+      return res.status(400).json({ message: "No items provided" });
+    }
+  
+    // Insert order with total_price
+    db.query(
+      "INSERT INTO orders (user_id, total_price) VALUES (?, ?)",
+      [user_id, total_price],
+      (err, result) => {
+        if (err) return res.status(500).send(err);
+  
+        const orderId = result.insertId;
+  
+        const orderItems = items.map((item) => [
+          orderId,
+          item.product_id,
+          item.name,
+          item.quantity,
+          item.price, // Include price per item
+          item.total_price, // Include total price for each item
+        ]);
+  
+        // Update the query to insert price and total_price as well
+        db.query(
+          "INSERT INTO order_items (order_id, product_id, product_name, quantity, price, total_price) VALUES ?",
+          [orderItems],
+          (err) => {
+            if (err) return res.status(500).send(err);
+  
+            res
+              .status(201)
+              .json({ message: "Order created successfully", orderId });
+          }
+        );
+      }
+    );
+  });
+  
+  router.get("/v2/orders/:id", (req, res) => {
+    const user_id = req.params.id;
+    const page = parseInt(req.query.page) || 1; // Default to page 1
+    const limit = parseInt(req.query.limit) || 10; // Default to 10 items per page
+    const offset = (page - 1) * limit;
+  
+    if (!user_id) {
+      return res.status(400).json({ message: "User ID is required" });
+    }
+  
+    const query = `
+      SELECT o.id AS order_id, o.created_at, oi.product_id, oi.product_name, oi.quantity, oi.total_price
+      FROM orders o
+      JOIN order_items oi ON o.id = oi.order_id
+      WHERE o.user_id = ?
+      LIMIT ? OFFSET ?
+    `;
+  
+    db.query(query, [user_id, limit, offset], (err, result) => {
+      if (err) return res.status(500).send(err);
+  
+      // Get the total count of items in order_items for the specified user
+      db.query(
+        `
+        SELECT COUNT(*) AS total_items 
+        FROM order_items oi
+        JOIN orders o ON oi.order_id = o.id
+        WHERE o.user_id = ?
+      `,
+        [user_id],
+        (err, countResult) => {
+          if (err) return res.status(500).send(err);
+  
+          const totalItems = countResult[0].total_items || 0;
+  
+          // Grouping orders
+          const orders = result.reduce((acc, row) => {
+            const orderId = row.order_id;
+  
+            // Initialize order if not already done
+            if (!acc[orderId]) {
+              acc[orderId] = {
+                order_id: orderId,
+                created_at: row.created_at,
+                items: [],
+              };
+            }
+  
+            // Push item details into the corresponding order
+            acc[orderId].items.push({
+              product_id: row.product_id,
+              product_name: row.product_name,
+              quantity: row.quantity,
+              total_price: row.total_price, // Make sure this field exists
+            });
+  
+            return acc;
+          }, {});
+  
+          // Send back the formatted orders with total count of items
+          res.status(200).json({
+            orders: Object.values(orders),
+            totalItems,
+          });
+        }
+      );
+    });
+  });
+  
+  router.get("/v2/orders", (req, res) => {
+    const orderId = req.query.orderId; // Get the orderId from query params
+    const page = parseInt(req.query.page) || 1; // Default to page 1
+    const limit = parseInt(req.query.limit) || 10; // Default to 10 items per page
+    const offset = (page - 1) * limit;
+  
+    // If an orderId is provided, fetch only that order
+    if (orderId) {
+      const query = `
+        SELECT o.id AS order_id, o.user_id, o.created_at, oi.product_id, oi.product_name, oi.quantity, oi.total_price
+        FROM orders o
+        JOIN order_items oi ON o.id = oi.order_id
+        WHERE o.id = ?
+      `;
+  
+      db.query(query, [orderId], (err, result) => {
+        if (err) return res.status(500).send(err);
+  
+        if (result.length === 0) {
+          return res.status(404).json({ message: "Order not found." });
+        }
+  
+        // Group the order details
+        const order = {
+          order_id: result[0].order_id,
+          user_id: result[0].user_id,
+          created_at: result[0].created_at,
+          items: result.map(row => ({
+            product_id: row.product_id,
+            product_name: row.product_name,
+            quantity: row.quantity,
+            total_price: row.total_price,
+          })),
+        };
+  
+        return res.status(200).json(order);
+      });
+    } else {
+      // If no orderId is provided, return paginated orders
+      const query = `
+        SELECT o.id AS order_id, o.user_id, o.created_at, oi.product_id, oi.product_name, oi.quantity, oi.total_price
+        FROM orders o
+        JOIN order_items oi ON o.id = oi.order_id
+        LIMIT ? OFFSET ?
+      `;
+  
+      db.query(query, [limit, offset], (err, result) => {
+        if (err) return res.status(500).send(err);
+  
+        // Get the total count of items in orders
+        db.query(`SELECT COUNT(*) AS total_items FROM orders`, (err, countResult) => {
+          if (err) return res.status(500).send(err);
+  
+          const totalItems = countResult[0].total_items || 0;
+  
+          // Grouping orders
+          const orders = result.reduce((acc, row) => {
+            const orderId = row.order_id;
+  
+            // Initialize order if not already done
+            if (!acc[orderId]) {
+              acc[orderId] = {
+                order_id: orderId,
+                user_id: row.user_id,
+                created_at: row.created_at,
+                items: [],
+              };
+            }
+  
+            // Push item details into the corresponding order
+            acc[orderId].items.push({
+              product_id: row.product_id,
+              product_name: row.product_name,
+              quantity: row.quantity,
+              total_price: row.total_price,
+            });
+  
+            return acc;
+          }, {});
+  
+          // Send back the formatted orders with total count of items and pagination info
+          res.status(200).json({
+            orders: Object.values(orders),
+            totalItems,
+            currentPage: page,
+            totalPages: Math.ceil(totalItems / limit),
+          });
+        });
+      });
+    }
+  });
+  
+
+
+
+module.exports = router;

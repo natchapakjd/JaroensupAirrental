@@ -21,17 +21,21 @@ const UserHistory = () => {
     try {
       // Fetch task history
       const taskResponse = await axios.get(
-        `${import.meta.env.VITE_SERVER_URL}/task-paging?id=${user_id}&page=${taskPage}&limit=10`
+        `${
+          import.meta.env.VITE_SERVER_URL
+        }/task-paging?id=${user_id}&page=${taskPage}&limit=10`
       );
       setTaskHistory(taskResponse.data.tasks);
       setTotalTasks(taskResponse.data.totalTasks);
 
       // Fetch order history
       const orderResponse = await axios.get(
-        `${import.meta.env.VITE_SERVER_URL}/api/orders/${user_id}?page=${orderPage}&limit=10`
+        `${
+          import.meta.env.VITE_SERVER_URL
+        }/v1/orders/${user_id}?page=${orderPage}&limit=10`
       );
       setOrderHistory(orderResponse.data.orders);
-      setTotalOrders(orderResponse.data.totalItems);
+      setTotalOrders(orderResponse.data.totalCount); // แก้ไขเป็น totalCount
     } catch (error) {
       console.error("Error fetching user history:", error);
     }
@@ -67,6 +71,7 @@ const UserHistory = () => {
                 <th>Status</th>
                 <th>Appointment Date</th>
                 <th>Created At</th>
+                <th>Details</th> {/* คอลัมน์ใหม่ */}
               </tr>
             </thead>
             <tbody>
@@ -77,26 +82,39 @@ const UserHistory = () => {
                     <td>{task.task_type_id}</td>
                     <td>{task.description}</td>
                     <td>{task.address}</td>
-                    <td>
-                      <div className="badge badge-accent text-white">{task.status}</div>
-                    </td>
+                    <td>{task.status}</td>
                     <td>{new Date(task.appointment_date).toLocaleString()}</td>
                     <td>{new Date(task.created_at).toLocaleString()}</td>
+                    <td>
+                      <button onClick={() => handleTaskDetail(task.task_id)}>
+                        View details
+                      </button>
+                    </td>
                   </tr>
                 ))
               ) : (
                 <tr>
-                  <td colSpan="6" className="text-center">No task history found.</td>
+                  <td colSpan="8" className="text-center">
+                    No task history found.
+                  </td>
                 </tr>
               )}
             </tbody>
           </table>
           <div className="flex justify-between mt-4">
-            <button onClick={() => handleTaskPageChange(-1)} disabled={taskPage === 1}>
+            <button
+              onClick={() => handleTaskPageChange(-1)}
+              disabled={taskPage === 1}
+            >
               Previous
             </button>
-            <span>Page {taskPage} of {Math.ceil(totalTasks / 10)}</span>
-            <button onClick={() => handleTaskPageChange(1)} disabled={taskPage >= Math.ceil(totalTasks / 10)}>
+            <span>
+              Page {taskPage} of {Math.ceil(totalTasks / 10)}
+            </span>
+            <button
+              onClick={() => handleTaskPageChange(1)}
+              disabled={taskPage >= Math.ceil(totalTasks / 10)}
+            >
               Next
             </button>
           </div>
@@ -108,40 +126,48 @@ const UserHistory = () => {
             <thead>
               <tr>
                 <th>Order ID</th>
-                <th>Product</th>
-                <th>Quantity</th>
                 <th>Total Price</th>
                 <th>Order Date</th>
+                <th>Details</th> {/* คอลัมน์ใหม่ */}
               </tr>
             </thead>
             <tbody>
               {orderHistory.length > 0 ? (
                 orderHistory.map((order) => (
-                  order.items.map((item, index) => (
-                    <tr key={item.product_id}>
-                      {index === 0 ? (
-                        <td rowSpan={order.items.length}>{order.order_id}</td>
-                      ) : null}
-                      <td>{item.product_name}</td>
-                      <td>{item.quantity}</td>
-                      <td>{item.total_price.toFixed(2)}</td>
-                      <td>{new Date(order.created_at).toLocaleString()}</td>
-                    </tr>
-                  ))
+                  <tr key={order.id}>
+                    <td>{order.id}</td>
+                    <td>{order.total_price.toFixed(2)}</td>
+                    <td>{new Date(order.created_at).toLocaleString()}</td>
+                    <td>
+                      <button onClick={() => handleOrderDetail(order.id)}>
+                        View details
+                      </button>
+                    </td>
+                  </tr>
                 ))
               ) : (
                 <tr>
-                  <td colSpan="5" className="text-center">No order history found.</td>
+                  <td colSpan="5" className="text-center">
+                    No order history found.
+                  </td>
                 </tr>
               )}
             </tbody>
           </table>
           <div className="flex justify-between mt-4">
-            <button onClick={() => handleOrderPageChange(-1)} disabled={orderPage === 1}>
+            <button
+              onClick={() => handleOrderPageChange(-1)}
+              disabled={orderPage === 1}
+            >
               Previous
             </button>
-            <span>Page {orderPage} of {Math.ceil(totalOrders / 10)}</span>
-            <button onClick={() => handleOrderPageChange(1)} disabled={orderPage >= Math.ceil(totalOrders / 10)}>
+            <span>
+              Page {orderPage} of {Math.ceil(totalOrders / 10)}
+            </span>
+            <button
+              onClick={() => handleOrderPageChange(1)}
+              disabled={orderPage >= Math.ceil(totalOrders / 10)}
+            >
               Next
             </button>
           </div>

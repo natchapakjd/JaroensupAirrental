@@ -1,9 +1,9 @@
 const express = require("express");
 const router = express.Router();
 const db = require("../db");
-const cron = require('node-cron');
+const cron = require("node-cron");
 
-cron.schedule('0 0 * * *', () => {
+cron.schedule("0 0 * * *", () => {
   const query = `
     DELETE FROM tasks 
     WHERE isActive = 0 AND updatedAt < NOW() - INTERVAL 30 DAY`;
@@ -218,116 +218,6 @@ router.delete("/task/:id", (req, res) => {
     } else {
       res.status(204).send();
     }
-  });
-});
-
-router.post("/api/orders", (req, res) => {
-  const { user_id, items, total_price } = req.body; // Include total_price
-
-  if (!items || items.length === 0) {
-    return res.status(400).json({ message: "No items provided" });
-  }
-
-  // Insert order with total_price
-  db.query(
-    "INSERT INTO orders (user_id, total_price) VALUES (?, ?)",
-    [user_id, total_price],
-    (err, result) => {
-      if (err) return res.status(500).send(err);
-
-      const orderId = result.insertId;
-
-      const orderItems = items.map((item) => [
-        orderId,
-        item.product_id,
-        item.name,
-        item.quantity,
-        item.price, // Include price per item
-        item.total_price, // Include total price for each item
-      ]);
-
-      // Update the query to insert price and total_price as well
-      db.query(
-        "INSERT INTO order_items (order_id, product_id, product_name, quantity, price, total_price) VALUES ?",
-        [orderItems],
-        (err) => {
-          if (err) return res.status(500).send(err);
-
-          res
-            .status(201)
-            .json({ message: "Order created successfully", orderId });
-        }
-      );
-    }
-  );
-});
-
-router.get("/api/orders/:id", (req, res) => {
-  const user_id = req.params.id;
-  const page = parseInt(req.query.page) || 1; // Default to page 1
-  const limit = parseInt(req.query.limit) || 10; // Default to 10 items per page
-  const offset = (page - 1) * limit;
-
-  if (!user_id) {
-    return res.status(400).json({ message: "User ID is required" });
-  }
-
-  const query = `
-    SELECT o.id AS order_id, o.created_at, oi.product_id, oi.product_name, oi.quantity, oi.total_price
-    FROM orders o
-    JOIN order_items oi ON o.id = oi.order_id
-    WHERE o.user_id = ?
-    LIMIT ? OFFSET ?
-  `;
-
-  db.query(query, [user_id, limit, offset], (err, result) => {
-    if (err) return res.status(500).send(err);
-
-    // Get the total count of items in order_items for the specified user
-    db.query(
-      `
-      SELECT COUNT(*) AS total_items 
-      FROM order_items oi
-      JOIN orders o ON oi.order_id = o.id
-      WHERE o.user_id = ?
-    `,
-      [user_id],
-      (err, countResult) => {
-        if (err) return res.status(500).send(err);
-
-        const totalItems = countResult[0].total_items || 0;
-
-        // Grouping orders
-        const orders = result.reduce((acc, row) => {
-          const orderId = row.order_id;
-
-          // Initialize order if not already done
-          if (!acc[orderId]) {
-            acc[orderId] = {
-              order_id: orderId,
-              created_at: row.created_at,
-              items: [],
-            };
-          }
-
-          // Push item details into the corresponding order
-          acc[orderId].items.push({
-            product_id: row.product_id,
-            product_name: row.product_name,
-            quantity: row.quantity,
-            total_price: row.total_price, // Make sure this field exists
-          });
-
-          return acc;
-        }, {});
-
-        // Send back the formatted orders with total count of items
-        res.status(200).json({
-          orders: Object.values(orders),
-          totalItems,
-        });
-      }
-    );
   });
 });
 

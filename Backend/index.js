@@ -16,14 +16,26 @@ const prodAttr = require("./routes/productsAttr");
 const review = require("./routes/reviews");
 const task = require("./routes/task");
 const taskType = require("./routes/taskType");
+const logs = require("./routes/history_log");
 const tech_applicant = require("./routes/tech_applicants");
 const tech = require("./routes/technicians");
 const warehouse = require("./routes/warehouses");
+const order = require("./routes/orders")
+const payment = require("./routes/payments");
 const path = require("path");
 
-
-app.use("/uploads/product-image", express.static(path.join(__dirname, "./uploads/product-image")));
-app.use("/uploads/user-image", express.static(path.join(__dirname, "./uploads/user-image")));
+app.use(
+  "/uploads/product-image",
+  express.static(path.join(__dirname, "./uploads/product-image"))
+);
+app.use(
+  "/uploads/user-image",
+  express.static(path.join(__dirname, "./uploads/user-image"))
+);
+app.use(
+  "/uploads/payment-image",
+  express.static(path.join(__dirname, "./uploads/payment-image"))
+);
 
 app.use(express());
 app.use(cors());
@@ -44,7 +56,9 @@ app.use(warehouse);
 app.use(user);
 app.use(noti);
 app.use(prod);
-
+app.use(logs);
+app.use(order)
+app.use(payment);
 
 app.listen(port, () => {
   console.log(`App is running at http://localhost:${port}`);

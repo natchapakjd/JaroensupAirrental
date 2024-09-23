@@ -26,6 +26,15 @@ import AddTask from '../DashboardContent/Tasks/AddTask'
 import EditTask from '../DashboardContent/Tasks/EditTask'
 import TaskDetails from '../DashboardContent/Tasks/TaskDetails'
 import AssignTask from '../DashboardContent/Tasks/AssignTask'
+import HistoryLogContent from '../DashboardContent/History-logs/HistoryLogContent'
+import PaymentContent from '../DashboardContent/Payments/PaymentContent'
+import ReviewContent from '../DashboardContent/Reviews/ReviewContent'
+import AddPayment from '../DashboardContent/Payments/AddPayment'
+import EditPayment from '../DashboardContent/Payments/EditPayment'
+import OrderContent from '../DashboardContent/Orders/OrderContent'
+import OrderDetails from '../DashboardContent/Orders/OrderDetails'
+import AddOrder from '../DashboardContent/Orders/AddOrder'
+import EditOrder from '../DashboardContent/Orders/EditOrder'
 const Dashboard = () => {
   return (
       <div className='flex'>
@@ -38,6 +47,15 @@ const Dashboard = () => {
             <Route path="tasks" element={<TaskContent />} />
             <Route path="tasks/assign" element={<AssignTask />} />
             <Route path="tasks/:taskId" element={<TaskDetails />} />
+            <Route path="history-log" element={<HistoryLogContent />} />
+            <Route path="reviews" element={<ReviewContent />} />
+            <Route path="payments" element={<PaymentContent />} />
+            <Route path="payments/add" element={<AddPayment />} />
+            <Route path="payments/edit/:paymentId" element={<EditPayment />} />
+            <Route path="orders" element={<OrderContent />} />
+            <Route path="orders/details/:orderId" element={<OrderDetails/>} />
+            <Route path="orders/add" element={<AddOrder />} />
+            <Route path="orders/edit/:orderId" element={<EditOrder />} />
             <Route path="tasks/add" element={<AddTask />} />
             <Route path="tasks/edit/:taskId" element={<EditTask />} />
             <Route path="user" element={<UserContent />} />

@@ -98,7 +98,7 @@ const EditProduct = () => {
   };
 
   return (
-    <div className="bg-white p-8 rounded-lg shadow-lg w-full mx-auto">
+    <div className="bg-white p-8 rounded-lg shadow-lg w-full mx-auto h-full">
       <h1 className="text-2xl font-semibold mb-6">Edit Product</h1>
       <form onSubmit={handleSubmit}>
         {Object.keys(formData).map((key) => (

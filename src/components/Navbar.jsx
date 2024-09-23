@@ -109,6 +109,9 @@ const Navbar = () => {
               <Link to="/experience">ผลงานของเรา</Link>
             </li>
             <li>
+              <Link to="/contact">ร่วมงานกับเรา</Link>
+            </li>
+            <li>
               <Link to="/contact">ติดต่อเรา</Link>
             </li>
           </ul>
@@ -149,18 +152,21 @@ const Navbar = () => {
                 >
                   <li>
                     <a className="justify-between" href="/profile-setting">
-                      Profile
+                      โปรไฟล์
                       <span className="badge">New</span>
                     </a>
                   </li>
                   <li>
-                    <a href="/history">History</a>
+                    <a href="/history">ประวัติ</a>
                   </li>
                   <li>
-                    <a href="/settings">Settings</a>
+                    <a href="/change-password">เปลี่ยนรหัสผ่าน</a>
                   </li>
                   <li>
-                    <a onClick={handleLogout}>Logout</a>
+                    <a href="/settings">การแจ้งเตือน</a>
+                  </li>
+                  <li>
+                    <a onClick={handleLogout}>ออกจากระบบ</a>
                   </li>
                 </ul>
               )}
