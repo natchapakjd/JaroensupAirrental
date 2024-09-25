@@ -33,7 +33,7 @@ const Login = () => {
       const receivedToken = response.data.token;
       cookies.set("authToken", receivedToken, { path: "/" });
       const decodedToken = jwtDecode(receivedToken);
-      decodedToken.role === "admin"
+      decodedToken.role === 3
         ? setTimeout(() => {
             navigate("/dashboard");
           }, 800)

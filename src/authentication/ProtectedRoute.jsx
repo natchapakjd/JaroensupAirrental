@@ -15,9 +15,9 @@ const ProtectedRoute = ({ children }) => {
       const decodedToken = jwtDecode(token);
       const userRole = decodedToken.role;
 
-      if (userRole === 'admin' || userRole === 'tech') {
+      if (userRole === 3 || userRole === 2) {
         return <>{children}</>;
-      } else if (userRole === 'client') {
+      } else if (userRole === 1) {
         if (!location.pathname.startsWith('/dashboard')) {
           return <>{children}</>;
         } else {

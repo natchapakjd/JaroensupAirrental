@@ -182,6 +182,7 @@ router.post("/user", upload.single('profile_image'), async (req, res) => {
   }
 
   const role = 'client';
+
   const hashedPassword = await bcrypt.hash(password, 10);
   
   const query = `

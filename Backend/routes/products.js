@@ -21,9 +21,9 @@ router.get("/products", (req, res) => {
   const pageSize = parseInt(req.query.pageSize) || 10;
   const offset = (page - 1) * pageSize;
 
-  const query = "SELECT * FROM products WHERE product_type = ? LIMIT ? OFFSET ?";
+  const query = "SELECT * FROM products WHERE product_type_id = ? LIMIT ? OFFSET ?";
   
-  db.query(query, ['rental', pageSize, offset], (err, result) => {
+  db.query(query, [1, pageSize, offset], (err, result) => {
     if (err) {
       console.error("Error fetching products: " + err);
       res.status(500).json({ error: "Failed to fetch products" });
