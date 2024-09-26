@@ -89,16 +89,7 @@ const EditUser = () => {
             readOnly
           />
         </div>
-        {/* Profile Image */}
-        <div className="mb-4">
-          <label className="block text-gray-700">Profile Picture:</label>
-          <input
-            type="file"
-            name="profile_image"
-            onChange={handleFileChange}
-            className="mt-1 block w-full p-2 border border-gray-300 rounded"
-          />
-        </div>
+       
         {/* First Name */}
         <div className="mb-4">
           <label className="block text-gray-700">First Name:</label>
@@ -188,6 +179,16 @@ const EditUser = () => {
             value={user.date_of_birth}
             onChange={handleChange}
             className="mt-1 block w-full p-2 border border-gray-300 rounded"
+          />
+        </div>
+         {/* Profile Image */}
+         <div className="mb-4">
+          <label className="block text-gray-700">Profile Picture:</label>
+          <input
+            type="file"
+            name="profile_image"
+            onChange={handleFileChange}
+            className="mt-1 block w-full p-2  rounded"
           />
         </div>
         <button

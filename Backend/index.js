@@ -1,5 +1,4 @@
 const express = require("express");
-const mysql = require("mysql");
 const bodyParser = require("body-parser");
 const cors = require("cors");
 const auth = require("./routes/auth");
@@ -23,19 +22,8 @@ const warehouse = require("./routes/warehouses");
 const order = require("./routes/orders")
 const payment = require("./routes/payments");
 const path = require("path");
+const roles = require("./routes/roles")
 
-app.use(
-  "/uploads/product-image",
-  express.static(path.join(__dirname, "./uploads/product-image"))
-);
-app.use(
-  "/uploads/user-image",
-  express.static(path.join(__dirname, "./uploads/user-image"))
-);
-app.use(
-  "/uploads/payment-image",
-  express.static(path.join(__dirname, "./uploads/payment-image"))
-);
 
 app.use(express());
 app.use(cors());
@@ -59,6 +47,7 @@ app.use(prod);
 app.use(logs);
 app.use(order)
 app.use(payment);
+app.use(roles)
 
 app.listen(port, () => {
   console.log(`App is running at http://localhost:${port}`);

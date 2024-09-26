@@ -1,13 +1,24 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import axios from 'axios';
 import Swal from 'sweetalert2';
 import Navbar from '../../components/Navbar';
 import Footer from '../../components/Footer';
+import Cookies from 'universal-cookie';
+import { jwtDecode } from 'jwt-decode';
 
 const ChangePassword = () => {
-  const [username, setUsername] = useState('');
+  const [userId, setUserId] = useState(''); // Change to userId
   const [newPassword, setNewPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
+  const cookies = new Cookies();
+  
+  useEffect(() => {
+    const token = cookies.get("authToken");
+    if (token) {
+      const decodedToken = jwtDecode(token);
+      setUserId(decodedToken.id); // Assuming user_id is in the token
+    }
+  }, []);
 
   const handleChangePassword = async (e) => {
     e.preventDefault();
@@ -25,7 +36,7 @@ const ChangePassword = () => {
 
     try {
       await axios.post(`${import.meta.env.VITE_SERVER_URL}/change-password`, {
-        username,
+        user_id: userId, // Send user_id
         newPassword,
       });
       Swal.fire({
@@ -52,18 +63,17 @@ const ChangePassword = () => {
         <div className="bg-white p-8 rounded-lg shadow-md w-full max-w-md">
           <h2 className="text-2xl font-bold text-center mb-6">Change Password</h2>
           <form onSubmit={handleChangePassword} className="space-y-4">
-            <div>
+            {/* <div>
               <label className="label">
-                <span className="label-text">Username</span>
+                <span className="label-text">User ID</span>
               </label>
               <input
                 type="text"
                 className="input input-bordered w-full"
-                value={username}
-                onChange={(e) => setUsername(e.target.value)}
-                required
+                value={userId}
+                readOnly // Make it read-only if you want to prevent changes
               />
-            </div>
+            </div> */}
             <div>
               <label className="label">
                 <span className="label-text">New Password</span>

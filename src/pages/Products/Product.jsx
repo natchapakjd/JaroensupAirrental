@@ -5,28 +5,13 @@ import Footer from "../../components/Footer";
 import axios from "axios";
 
 const Product = () => {
-  const [products, setProducts] = useState([]);
-  const [images, setImages] = useState([]); 
-  const [productsWithImages, setProductsWithImages] = useState([]); 
+  const [products, setProducts] = useState([]); // Only need one state
 
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const productsResponse = await axios.get(`${import.meta.env.VITE_SERVER_URL}/products`);
-        const imagesResponse = await axios.get(`${import.meta.env.VITE_SERVER_URL}/product-image`);
-
-        setProducts(productsResponse.data);
-        setImages(imagesResponse.data);
-
-        const updatedProducts = productsResponse.data.map(product => {
-          const productImage = imagesResponse.data.find(img => img.product_id === product.product_id);
-          return {
-            ...product,
-            product_image: productImage ? productImage.product_image : null,
-          };
-        });
-
-        setProductsWithImages(updatedProducts);
+        const response = await axios.get(`${import.meta.env.VITE_SERVER_URL}/products`);
+        setProducts(response.data); // Set products directly
       } catch (error) {
         console.error("Error fetching data:", error);
       }
@@ -50,20 +35,20 @@ const Product = () => {
               </p>
             </div>
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-              {productsWithImages.map(product => (
+              {products.map(product => (
                 <div
                   key={product.product_id}
                   className="bg-white shadow-lg rounded-lg overflow-hidden"
                 >
-                  {product.product_image ? (
-                    <img
-                      src={`${import.meta.env.VITE_SERVER_URL}${product.product_image}`} 
-                      alt={product.name}
-                      className="w-full h-48 object-cover"
-                    />
-                  ) : (
-                    <p>No image</p>
-                  )}
+                    {product.image_url ? (
+                      <img
+                        src={`${product.image_url}`}
+                        alt={product.name}
+                        className="w-full h-48 object-cover"
+                      />
+                    ) : (
+                      <p>No image</p>
+                    )}
                   <div className="p-6">
                     <h2 className="text-xl font-semibold text-gray-800 mb-2">
                       {product.name}

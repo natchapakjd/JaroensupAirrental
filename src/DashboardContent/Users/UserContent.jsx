@@ -70,9 +70,9 @@ const UserContent = () => {
                   <div className="flex items-center gap-3">
                     <div className="avatar">
                       <div className="mask mask-squircle h-12 w-12">
-                        {user.profile_image ? (
+                        {user.image_url ? (
                           <img
-                            src={`${import.meta.env.VITE_SERVER_URL}${user.profile_image}`}
+                            src={`${user.image_url}`}
                             alt={user.username}
                             className="object-cover w-full h-full"
                           />

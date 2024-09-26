@@ -25,7 +25,9 @@ import UserHistory from "./pages/History/UserHistory";
 import ProfileSetting from "./pages/Settings/ProfileSetting";
 import Settings from "./pages/Settings/Settings";
 import ChangePassword from "./pages/Settings/ChangePassword";
-
+import Review from "./pages/Review/Review";
+import OrderDetails from "./pages/History/OrderDetails";
+import LineProfile from "./pages/Settings/LineProfile";
 const router = createBrowserRouter([
   {
     path: "/",
@@ -106,6 +108,18 @@ const router = createBrowserRouter([
   {
     path: "/change-password",
     element: <ChangePassword />,
+  },
+  {
+    path: "/review/:taskId",  
+    element: <Review/>
+  },
+  {
+    path: "/order-history/:orderId",
+    element: <OrderDetails/>
+  },
+  {
+    path: "/line-profile",
+    element: <LineProfile/>
   }
 ]);
 

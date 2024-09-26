@@ -20,7 +20,7 @@ const Navbar = () => {
     if (token) {
       const decodedToken = jwtDecode(token);
       setUserId(decodedToken.id);
-      fetchUserImageByID(decodedToken.id); // Pass the userId directly
+      fetchUserByID(decodedToken.id);
     }
   }, [token]);
 
@@ -29,17 +29,17 @@ const Navbar = () => {
     navigate("/login");
   };
 
-  const fetchUserImageByID = async (userId) => {
+  const fetchUserByID = async (userId) => {
     try {
       const response = await axios.get(
-        `${import.meta.env.VITE_SERVER_URL}/user-image/${userId}`
+        `${import.meta.env.VITE_SERVER_URL}/user/${userId}`
       );
       if (response.status === 200) {
-        setImage(response.data.profile_image);
+        setImage(response.data.image_url);
       }
     } catch (err) {
       console.error("Error fetching user image:", err);
-      setImage(null); // Set to null on error
+      setImage(null);
     }
   };
 
@@ -134,13 +134,11 @@ const Navbar = () => {
               >
                 <div className="w-10 rounded-full">
                   {image ? (
-                    <img
-                      alt="User Avatar"
-                      src={`${import.meta.env.VITE_SERVER_URL}${image}`}
-                    />
+                    <img alt="User Avatar" src={`${image}`} />
                   ) : (
                     <div className="w-10 h-10 bg-gray-200 rounded-full flex items-center justify-center">
-                      <span className="text-gray-500">?</span> {/* Fallback UI */}
+                      <span className="text-gray-500">?</span>{" "}
+                      {/* Fallback UI */}
                     </div>
                   )}
                 </div>

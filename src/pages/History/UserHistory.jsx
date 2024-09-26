@@ -4,6 +4,8 @@ import Navbar from "../../components/Navbar";
 import Cookies from "universal-cookie";
 import { jwtDecode } from "jwt-decode";
 import Footer from "../../components/Footer";
+import { useNavigate } from "react-router-dom"; // Import useNavigate
+import { MdOutlineStar } from "react-icons/md";
 
 const UserHistory = () => {
   const [taskHistory, setTaskHistory] = useState([]);
@@ -16,26 +18,23 @@ const UserHistory = () => {
   const token = cookies.get("authToken");
   const decodedToken = jwtDecode(token);
   const user_id = decodedToken.id;
+  const navigate = useNavigate(); // Initialize navigate
 
   const fetchUserData = async (taskPage, orderPage) => {
     try {
       // Fetch task history
       const taskResponse = await axios.get(
-        `${
-          import.meta.env.VITE_SERVER_URL
-        }/task-paging?id=${user_id}&page=${taskPage}&limit=10`
+        `${import.meta.env.VITE_SERVER_URL}/task-paging?id=${user_id}&page=${taskPage}&limit=10`
       );
       setTaskHistory(taskResponse.data.tasks);
       setTotalTasks(taskResponse.data.totalTasks);
 
       // Fetch order history
       const orderResponse = await axios.get(
-        `${
-          import.meta.env.VITE_SERVER_URL
-        }/v1/orders/${user_id}?page=${orderPage}&limit=10`
+        `${import.meta.env.VITE_SERVER_URL}/v1/orders/${user_id}?page=${orderPage}&limit=10`
       );
       setOrderHistory(orderResponse.data.orders);
-      setTotalOrders(orderResponse.data.totalCount); // แก้ไขเป็น totalCount
+      setTotalOrders(orderResponse.data.totalCount);
     } catch (error) {
       console.error("Error fetching user history:", error);
     }
@@ -51,6 +50,18 @@ const UserHistory = () => {
 
   const handleOrderPageChange = (direction) => {
     setOrderPage((prev) => Math.max(1, prev + direction));
+  };
+
+  const handleTaskDetail = (taskId) => {
+    navigate(`/task/${taskId}`); // Navigate to task details page
+  };
+
+  const handleOrderDetail = (orderId) => {
+    navigate(`/order-history/${orderId}`); // Navigate to order details page
+  };
+
+  const handleReview = (taskId) => {
+    navigate(`/review/${taskId}`); // Navigate to the review page
   };
 
   return (
@@ -71,7 +82,7 @@ const UserHistory = () => {
                 <th>Status</th>
                 <th>Appointment Date</th>
                 <th>Created At</th>
-                <th>Details</th> {/* คอลัมน์ใหม่ */}
+                <th>Details</th>
               </tr>
             </thead>
             <tbody>
@@ -82,13 +93,25 @@ const UserHistory = () => {
                     <td>{task.task_type_id}</td>
                     <td>{task.description}</td>
                     <td>{task.address}</td>
-                    <td>{task.status}</td>
+                    <td>{task.status_id}</td>
                     <td>{new Date(task.appointment_date).toLocaleString()}</td>
                     <td>{new Date(task.created_at).toLocaleString()}</td>
                     <td>
                       <button onClick={() => handleTaskDetail(task.task_id)}>
                         View details
                       </button>
+                      {/* Render the review button if status_id is 2 */}
+                      {task.status_id === 2 && (
+                        <button
+                          onClick={() => handleReview(task.task_id)}
+                          className="ml-5 text-blue-600"
+                        >
+                          <div className="flex pt-1 mt-1 ">
+                            <MdOutlineStar className="text-yellow-400" />
+                            Rate and Review
+                          </div>
+                        </button>
+                      )}
                     </td>
                   </tr>
                 ))
@@ -128,7 +151,7 @@ const UserHistory = () => {
                 <th>Order ID</th>
                 <th>Total Price</th>
                 <th>Order Date</th>
-                <th>Details</th> {/* คอลัมน์ใหม่ */}
+                <th>Details</th>
               </tr>
             </thead>
             <tbody>

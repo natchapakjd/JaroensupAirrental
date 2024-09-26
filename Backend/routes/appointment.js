@@ -17,7 +17,7 @@ router.get("/appointments", (req, res) => {
 
 router.get("/appointment/:id", (req, res) => {
   const id = req.params.id;
-  const query = "SELECT * FROM taskassignments WHERE appointment_id = ?";
+  const query = "SELECT * FROM taskassignments WHERE task_id = ?";
 
   db.query(query, [id], (err, result) => {
     if (err) {

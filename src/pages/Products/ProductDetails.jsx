@@ -46,9 +46,9 @@ const ProductDetails = () => {
         <main className="flex-grow">
           <section className="container mx-auto p-6 flex flex-wrap">
             <div className="flex-shrink-0 w-full md:w-1/2 flex justify-center mb-6">
-              {product.product_image && (
+              {product.image_url && (
                 <img
-                  src={`${import.meta.env.VITE_SERVER_URL}${image}`}
+                  src={`${product.image_url}`}
                   alt={product.name}
                   className="w-full max-w-md h-auto rounded-lg shadow-lg"
                 />

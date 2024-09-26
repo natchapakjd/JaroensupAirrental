@@ -5,7 +5,6 @@ import Swal from "sweetalert2";
 
 const ProductContent = () => {
   const [products, setProducts] = useState([]);
-  const apiUrl = import.meta.env.VITE_SERVER_URL; // Use environment variable
 
   useEffect(() => {
     fetchProducts();
@@ -13,20 +12,8 @@ const ProductContent = () => {
 
   const fetchProducts = async () => {
     try {
-      const productsResponse = await axios.get(`${apiUrl}/products`);
-      const imagesResponse = await axios.get(`${apiUrl}/product-image`);
-
-      const updatedProducts = productsResponse.data.map((product) => {
-        const productImage = imagesResponse.data.find(
-          (img) => img.product_id === product.product_id
-        );
-        return {
-          ...product,
-          product_image: productImage ? productImage.product_image : null,
-        };
-      });
-
-      setProducts(updatedProducts);
+      const response = await axios.get(`${import.meta.env.VITE_SERVER_URL}/products`);
+      setProducts(response.data); // No separate image fetching required
     } catch (error) {
       console.error("Error fetching products:", error);
       Swal.fire({
@@ -39,7 +26,7 @@ const ProductContent = () => {
 
   const handleDelete = async (productId) => {
     try {
-      const response = await axios.delete(`${apiUrl}/product/${productId}`);
+      const response = await axios.delete(`${import.meta.env.VITE_SERVER_URL}/product/${productId}`);
       if (response.status === 200) {
         Swal.fire({
           title: "Product deleted successfully",
@@ -96,10 +83,10 @@ const ProductContent = () => {
                 <td className="border border-gray-300 p-2">{product.category_id}</td>
                 <td className="border border-gray-300 p-2">{product.warehouse_id}</td>
                 <td className="border border-gray-300 p-2">
-                  {product.product_image ? (
+                  {product.image_url ? (
                     <div className="flex justify-center">
                       <img
-                        src={`${apiUrl}${product.product_image}`}
+                        src={product.image_url}
                         alt={product.name}
                         className="w-32 h-32 object-cover"
                       />

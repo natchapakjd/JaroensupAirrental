@@ -104,7 +104,7 @@ const TaskContent = () => {
                   <td className="border border-gray-300 p-2">{task.description}</td>
                   <td className="border border-gray-300 p-2">{formattedDate}</td>
                   <td className="border border-gray-300 p-2">{formattedTime}</td>
-                  <td className="border border-gray-300 p-2">{task.status}</td>
+                  <td className="border border-gray-300 p-2">{task.status_id}</td>
                   <td className="border border-gray-300 p-2">
                     <div className="flex justify-center gap-2">
                       <Link to={`/dashboard/tasks/edit/${task.task_id}`}>

@@ -34,9 +34,9 @@ const UserDetails = () => {
     <div className=" mx-auto p-8 bg-white   h-screen ">
       <h1 className="text-3xl font-bold mb-6 text-gray-800">{user.username}'s Details</h1>
       <div className="flex items-center mb-6">
-        {user.profile_image ? (
+        {user.image_url ? (
           <img
-            src={`${import.meta.env.VITE_SERVER_URL}${user.profile_image}`}
+            src={`${user.image_url}`}
             alt={`${user.username}'s profile`}
             className="w-24 h-24 rounded-full mr-6"
           />

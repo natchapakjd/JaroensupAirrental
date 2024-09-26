@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import Swal from 'sweetalert2';
 
@@ -14,9 +14,30 @@ const AddUser = () => {
     gender: '',
     password: '',
     date_of_birth: '',
+    role_id: '', // Add role_id to form data
   });
   const [profileImage, setProfileImage] = useState(null);
   const [loading, setLoading] = useState(false);
+  const [roles, setRoles] = useState([]); // State for roles
+
+  // Fetch roles from API
+  useEffect(() => {
+    const fetchRoles = async () => {
+      try {
+        const response = await axios.get(`${import.meta.env.VITE_SERVER_URL}/roles`);
+        setRoles(response.data);
+      } catch (error) {
+        console.error('Error fetching roles:', error);
+        Swal.fire({
+          title: 'Error',
+          text: 'Failed to fetch roles.',
+          icon: 'error',
+        });
+      }
+    };
+
+    fetchRoles();
+  }, []);
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -59,6 +80,7 @@ const AddUser = () => {
           gender: '',
           password: '',
           date_of_birth: '',
+          role_id: '', // Reset role_id as well
         });
         setProfileImage(null);
       } else {
@@ -195,6 +217,24 @@ const AddUser = () => {
             className="mt-1 block w-full border border-gray-300 rounded-lg px-3 py-2 shadow-sm focus:outline-none focus:ring-1 focus:ring-blue-500"
           />
         </div>
+        {/* Role */}
+        <div>
+          <label className="block text-sm font-medium text-gray-700">Role:</label>
+          <select
+            name="role_id"
+            value={formData.role_id}
+            onChange={handleChange}
+            className="mt-1 block w-full border border-gray-300 rounded-lg px-3 py-2 shadow-sm focus:outline-none focus:ring-1 focus:ring-blue-500"
+            required
+          >
+            <option value="">Select role</option>
+            {roles.map((role) => (
+              <option key={role.role_id} value={role.role_id}>
+                {role.role_name}
+              </option>
+            ))}
+          </select>
+        </div>
         {/* Profile Image */}
         <div>
           <label className="block text-sm font-medium text-gray-700">Profile Image:</label>
@@ -202,7 +242,7 @@ const AddUser = () => {
             type="file"
             name="profile_image"
             onChange={handleFileChange}
-            className="mt-1 block w-full border border-gray-300 rounded-lg px-3 py-2 shadow-sm focus:outline-none focus:ring-1 focus:ring-blue-500"
+            className="mt-1 block w-full  rounded-lg px-3 py-2 shadow-sm  "
           />
         </div>
         <button

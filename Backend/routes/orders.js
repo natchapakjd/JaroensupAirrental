@@ -183,11 +183,9 @@ router.post("/v2/orders", (req, res) => {
   
           const totalItems = countResult[0].total_items || 0;
   
-          // Grouping orders
           const orders = result.reduce((acc, row) => {
             const orderId = row.order_id;
   
-            // Initialize order if not already done
             if (!acc[orderId]) {
               acc[orderId] = {
                 order_id: orderId,
@@ -196,18 +194,16 @@ router.post("/v2/orders", (req, res) => {
               };
             }
   
-            // Push item details into the corresponding order
             acc[orderId].items.push({
               product_id: row.product_id,
               product_name: row.product_name,
               quantity: row.quantity,
-              total_price: row.total_price, // Make sure this field exists
+              total_price: row.total_price, 
             });
   
             return acc;
           }, {});
   
-          // Send back the formatted orders with total count of items
           res.status(200).json({
             orders: Object.values(orders),
             totalItems,
@@ -218,12 +214,11 @@ router.post("/v2/orders", (req, res) => {
   });
   
   router.get("/v2/orders", (req, res) => {
-    const orderId = req.query.orderId; // Get the orderId from query params
-    const page = parseInt(req.query.page) || 1; // Default to page 1
-    const limit = parseInt(req.query.limit) || 10; // Default to 10 items per page
+    const orderId = req.query.orderId; 
+    const page = parseInt(req.query.page) || 1; 
+    const limit = parseInt(req.query.limit) || 10; 
     const offset = (page - 1) * limit;
   
-    // If an orderId is provided, fetch only that order
     if (orderId) {
       const query = `
         SELECT o.id AS order_id, o.user_id, o.created_at, oi.product_id, oi.product_name, oi.quantity, oi.total_price
@@ -239,7 +234,6 @@ router.post("/v2/orders", (req, res) => {
           return res.status(404).json({ message: "Order not found." });
         }
   
-        // Group the order details
         const order = {
           order_id: result[0].order_id,
           user_id: result[0].user_id,
@@ -255,7 +249,7 @@ router.post("/v2/orders", (req, res) => {
         return res.status(200).json(order);
       });
     } else {
-      // If no orderId is provided, return paginated orders
+
       const query = `
         SELECT o.id AS order_id, o.user_id, o.created_at, oi.product_id, oi.product_name, oi.quantity, oi.total_price
         FROM orders o
@@ -266,17 +260,14 @@ router.post("/v2/orders", (req, res) => {
       db.query(query, [limit, offset], (err, result) => {
         if (err) return res.status(500).send(err);
   
-        // Get the total count of items in orders
         db.query(`SELECT COUNT(*) AS total_items FROM orders`, (err, countResult) => {
           if (err) return res.status(500).send(err);
   
           const totalItems = countResult[0].total_items || 0;
   
-          // Grouping orders
           const orders = result.reduce((acc, row) => {
             const orderId = row.order_id;
   
-            // Initialize order if not already done
             if (!acc[orderId]) {
               acc[orderId] = {
                 order_id: orderId,
@@ -286,7 +277,6 @@ router.post("/v2/orders", (req, res) => {
               };
             }
   
-            // Push item details into the corresponding order
             acc[orderId].items.push({
               product_id: row.product_id,
               product_name: row.product_name,
@@ -297,7 +287,6 @@ router.post("/v2/orders", (req, res) => {
             return acc;
           }, {});
   
-          // Send back the formatted orders with total count of items and pagination info
           res.status(200).json({
             orders: Object.values(orders),
             totalItems,

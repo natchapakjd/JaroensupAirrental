@@ -4,6 +4,8 @@ const db = require("../db");
 const multer = require("multer");
 const path = require("path");
 const sharp = require('sharp');
+const cloudinary = require('../cloundinary-config');
+const fs = require('fs'); 
 
 const storage = multer.diskStorage({
   destination: function (req, file, cb) {
@@ -85,39 +87,58 @@ router.post("/products", upload.single("product_image"), async (req, res) => {
     brand_id,
     category_id,
     warehouse_id,
+    product_type_id,  // Add this line
   } = req.body;
+
   const productImage = req.file ? req.file.path : null;
 
-  if (productImage) {
-    const compressedImagePath = `compressed-${req.file.filename}`;
-    await sharp(productImage)
-      .resize(800) 
-      .toFile(compressedImagePath);
+  if (!productImage) {
+    return res.status(400).json({ error: "No product image uploaded." });
   }
 
-  db.query(
-    "INSERT INTO products (name, description, price, stock_quantity, brand_id, category_id, warehouse_id, product_image) VALUES (?, ?, ?, ?, ?, ?, ?, ?)",
-    [
-      name,
-      description,
-      price,
-      stock_quantity,
-      brand_id,
-      category_id,
-      warehouse_id,
-      productImage,
-    ],
-    (err, results) => {
-      if (err) {
-        console.error("Error inserting product:", err);
-        return res.status(500).json({ error: "Failed to add product." });
+  try {
+    const compressedImagePath = path.join(__dirname, `compressed-${req.file.filename}`);
+    
+    await sharp(productImage)
+      .resize(800) 
+      .toFile(compressedImagePath); 
+
+    const result = await cloudinary.uploader.upload(compressedImagePath, {
+      folder: "image/product-image", 
+    });
+
+    const cloudinaryImageUrl = result.secure_url;
+
+    fs.unlinkSync(compressedImagePath);
+
+    db.query(
+      "INSERT INTO products (name, description, price, stock_quantity, brand_id, category_id, warehouse_id, product_type_id, image_url) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)",  // Updated SQL statement
+      [
+        name,
+        description,
+        price,
+        stock_quantity,
+        brand_id,
+        category_id,
+        warehouse_id,
+        product_type_id,  // Include product_type_id here
+        cloudinaryImageUrl, 
+      ],
+      (err, results) => {
+        if (err) {
+          console.error("Error inserting product:", err);
+          return res.status(500).json({ error: "Failed to add product." });
+        }
+        res.status(200).json({ message: "Product added successfully!" });
       }
-      res.status(200).json({ message: "Product added successfully!" });
-    }
-  );
+    );
+  } catch (err) {
+    console.error("Error uploading image to Cloudinary:", err);
+    res.status(500).json({ error: "Failed to upload product image." });
+  }
 });
 
-router.put("/product/:id", upload.single("product_image"), (req, res) => {
+router.put("/product/:id", upload.single("product_image"), async (req, res) => {
   const id = req.params.id;
 
   const {
@@ -128,100 +149,63 @@ router.put("/product/:id", upload.single("product_image"), (req, res) => {
     brand_id,
     category_id,
     warehouse_id,
+    product_type_id,  // Add this line
   } = req.body;
+  
+  let productImageUrl = null;
 
-  const product_image = req.file ? req.file.path : null;
+  try {
+    if (req.file) {
+      const productImage = req.file.path;
 
-  const query = `UPDATE products
-                 SET name = ?, description = ?, price = ?, stock_quantity = ?, brand_id = ?, category_id = ?, warehouse_id = ?, product_image = ?
-                 WHERE product_id = ?`;
-  db.query(
-    query,
-    [
-      name,
-      description,
-      price,
-      stock_quantity,
-      brand_id,
-      category_id,
-      warehouse_id,
-      product_image,
-      id,
-    ],
-    (err, result) => {
-      if (err) {
-        console.error("Error updating product: " + err);
-        res.status(500).json({ error: "Failed to update product" });
-      } else if (result.affectedRows === 0) {
-        res.status(404).json({ error: "Product not found" });
-      } else {
-        res.status(200).json({ message: "Product updated successfully" });
-      }
-    }
-  );
-});
+      const compressedImagePath = path.join(__dirname, `compressed-${req.file.filename}`);
+      await sharp(productImage)
+        .resize(800) 
+        .toFile(compressedImagePath); 
 
-router.get("/product-image/:id", (req, res) => {
-  const id = req.params.id;
-  const query = "SELECT product_image FROM products WHERE product_id = ?";
-
-  db.query(query, [id], (err, result) => {
-    if (err) {
-      console.error("Error fetching image: " + err);
-      res.status(500).send("Failed to fetch image");
-      return;
-    }
-
-    if (result.length > 0) {
-      const imagePathBuffer = result[0].product_image;
-      if (Buffer.isBuffer(imagePathBuffer)) {
-        const imagePath = imagePathBuffer.toString();
-        const filename = imagePath.split("\\").pop(); 
-        const imageUrl = imagePath
-          ? `/uploads/product-image/${filename}`.replace(/\\/g, "/")
-          : null;
-
-        res.json({ product_image: imageUrl });
-      } else {
-        res.status(404).send("Image not found");
-      }
-    } else {
-      res.status(404).send("Product not found");
-    }
-  });
-});
-
-router.get("/product-image/", (req, res) => {
-  const query = "SELECT product_image, product_id FROM products";
-
-  db.query(query, (err, result) => {
-    if (err) {
-      console.error("Error fetching images: " + err);
-      res.status(500).send("Failed to fetch images");
-      return;
-    }
-
-    if (result.length > 0) {
-      const images = result.map((row) => {
-        const imagePathBuffer = row.product_image;
-        if (Buffer.isBuffer(imagePathBuffer)) {
-          const imagePath = imagePathBuffer.toString();
-          const filename = imagePath.split("\\").pop();
-          const imageUrl = imagePath
-            ? `/uploads/product-image/${filename}`.replace(/\\/g, "/")
-            : null;
-
-          return { product_id: row.product_id, product_image: imageUrl };
-        } else {
-          return { product_id: row.product_id, product_image: null };
-        }
+      const result = await cloudinary.uploader.upload(compressedImagePath, {
+        folder: "image/product-image",
       });
 
-      res.json(images);
-    } else {
-      res.status(404).send("No products found");
+      productImageUrl = result.secure_url;
+
+      fs.unlinkSync(compressedImagePath);
     }
-  });
+
+    const query = `
+      UPDATE products
+      SET name = ?, description = ?, price = ?, stock_quantity = ?, brand_id = ?, category_id = ?, warehouse_id = ?, product_type_id = ?, image_url = ? WHERE product_id = ?
+    `;
+
+    db.query(
+      query,
+      [
+        name,
+        description,
+        price,
+        stock_quantity,
+        brand_id,
+        category_id,
+        warehouse_id,
+        product_type_id || null,  // Include product_type_id here, set to null if not provided
+        productImageUrl || null, 
+        id,
+      ],
+      (err, result) => {
+        if (err) {
+          console.error("Error updating product: " + err);
+          return res.status(500).json({ error: "Failed to update product" });
+        } else if (result.affectedRows === 0) {
+          return res.status(404).json({ error: "Product not found" });
+        } else {
+          return res.status(200).json({ message: "Product updated successfully" });
+        }
+      }
+    );
+  } catch (err) {
+    console.error("Error processing the product image:", err);
+    res.status(500).json({ error: "Failed to process product image." });
+  }
 });
 
 router.get("/products/count", (req, res) => {
@@ -237,5 +221,26 @@ router.get("/products/count", (req, res) => {
     res.status(200).json({ totalProduct });
   });
 });
+
+router.get("/product-type", (req, res) => {
+  const query = "SELECT * FROM product_type";
+
+  db.query(query, (err, result) => {
+    if (err) {
+      console.error("Error fetching product_types: " + err);
+      return res.status(500).send("Failed to fetch product_types");
+    }
+
+    const product_type = result.map((row) => {
+      return {
+        product_type_id: row.product_type_id,
+        product_type_name: row.product_type_name
+      };
+    });
+
+    res.json(product_type);
+  });
+});
+
 
 module.exports = router;
