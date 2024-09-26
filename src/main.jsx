@@ -28,6 +28,8 @@ import ChangePassword from "./pages/Settings/ChangePassword";
 import Review from "./pages/Review/Review";
 import OrderDetails from "./pages/History/OrderDetails";
 import LineProfile from "./pages/Settings/LineProfile";
+import RegisterToTech from "./pages/Authentication/RegisterToTech";
+
 const router = createBrowserRouter([
   {
     path: "/",
@@ -120,6 +122,10 @@ const router = createBrowserRouter([
   {
     path: "/line-profile",
     element: <LineProfile/>
+  },
+  {
+    path:  "/register-tech",
+    element: <RegisterToTech/>
   }
 ]);
 

@@ -35,6 +35,7 @@ import OrderContent from '../DashboardContent/Orders/OrderContent'
 import OrderDetails from '../DashboardContent/Orders/OrderDetails'
 import AddOrder from '../DashboardContent/Orders/AddOrder'
 import EditOrder from '../DashboardContent/Orders/EditOrder'
+import ApplicantContent from '../DashboardContent/TechnicianApplicants/ApplicantContent'
 const Dashboard = () => {
   return (
       <div className='flex'>
@@ -47,6 +48,7 @@ const Dashboard = () => {
             <Route path="tasks" element={<TaskContent />} />
             <Route path="tasks/assign" element={<AssignTask />} />
             <Route path="tasks/:taskId" element={<TaskDetails />} />
+            <Route path="applicants" element={<ApplicantContent />} />
             <Route path="history-log" element={<HistoryLogContent />} />
             <Route path="reviews" element={<ReviewContent />} />
             <Route path="payments" element={<PaymentContent />} />

@@ -109,7 +109,8 @@ const Navbar = () => {
               <Link to="/experience">ผลงานของเรา</Link>
             </li>
             <li>
-              <Link to="/contact">ร่วมงานกับเรา</Link>
+            <Link to="/register-tech">ร่วมงานกับเรา</Link>
+
             </li>
             <li>
               <Link to="/contact">ติดต่อเรา</Link>
