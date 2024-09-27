@@ -73,7 +73,11 @@ const router = createBrowserRouter([
   },
   {
     path: "/service/rental/:id",
-    element: <RentAC />,
+    element: (
+      <ProtectedRoute>
+        <RentAC />
+      </ProtectedRoute>
+    ), 
   },
   {
     path: "/product/:id",
@@ -85,8 +89,11 @@ const router = createBrowserRouter([
   },
   {
     path: "/add-to-cart",
-    element: <AddToCart />,
-  },
+    element: (
+      <ProtectedRoute>
+        <AddToCart />
+      </ProtectedRoute>
+    ),  },
   {
     path: "/checkout",
     element: (

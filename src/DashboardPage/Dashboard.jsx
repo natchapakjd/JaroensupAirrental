@@ -36,11 +36,12 @@ import OrderDetails from '../DashboardContent/Orders/OrderDetails'
 import AddOrder from '../DashboardContent/Orders/AddOrder'
 import EditOrder from '../DashboardContent/Orders/EditOrder'
 import ApplicantContent from '../DashboardContent/TechnicianApplicants/ApplicantContent'
+import ApplicantDetails from '../DashboardContent/TechnicianApplicants/ApplicantDetails'
 const Dashboard = () => {
   return (
       <div className='flex'>
         <Sidebar />
-        <div className='w-full bg-gray-50'>
+        <div className='w-full '>
           <Header/>
           <Routes>
             <Route path="*" element={<PageNotFound />} />
@@ -49,6 +50,7 @@ const Dashboard = () => {
             <Route path="tasks/assign" element={<AssignTask />} />
             <Route path="tasks/:taskId" element={<TaskDetails />} />
             <Route path="applicants" element={<ApplicantContent />} />
+            <Route path="applicants/:id" element={<ApplicantDetails />} />
             <Route path="history-log" element={<HistoryLogContent />} />
             <Route path="reviews" element={<ReviewContent />} />
             <Route path="payments" element={<PaymentContent />} />

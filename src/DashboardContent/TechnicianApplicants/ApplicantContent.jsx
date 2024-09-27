@@ -1,11 +1,13 @@
 import React, { useEffect, useState } from 'react';
 import axios from 'axios';
+import { useNavigate } from 'react-router-dom';
 import Swal from 'sweetalert2';
 
 const ApplicantContent = () => {
   const [applicants, setApplicants] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const navigate = useNavigate();
 
   useEffect(() => {
     const fetchApplicants = async () => {
@@ -13,7 +15,6 @@ const ApplicantContent = () => {
         const response = await axios.get(`${import.meta.env.VITE_SERVER_URL}/applicants`);
         setApplicants(response.data);
       } catch (err) {
-        console.error("Error fetching applicants: ", err);
         setError('ไม่สามารถโหลดข้อมูลผู้สมัครได้');
       } finally {
         setLoading(false);
@@ -40,7 +41,7 @@ const ApplicantContent = () => {
             title: 'ลบผู้สมัครสำเร็จ!',
             icon: 'success',
           });
-          setApplicants(applicants.filter(applicant => applicant.id !== id));
+          setApplicants(applicants.filter(applicant => applicant.applicant_id !== id));
         } else {
           throw new Error('ไม่สามารถลบผู้สมัครได้');
         }
@@ -54,13 +55,36 @@ const ApplicantContent = () => {
     }
   };
 
+  const handleAccept = async (id) => {
+    try {
+      const response = await axios.post(`${import.meta.env.VITE_SERVER_URL}/applicants/accept/${id}`);
+      if (response.status === 200) {
+        Swal.fire({
+          title: 'ผู้สมัครได้รับการยอมรับ!',
+          icon: 'success',
+        });
+      }
+    } catch (error) {
+      Swal.fire({
+        title: 'เกิดข้อผิดพลาด!',
+        text: error.message,
+        icon: 'error',
+      });
+    }
+  };
+
+  const handleViewDetails = (id) => {
+    navigate(`/dashboard/applicants/${id}`);
+  };
+
   if (loading) return <p>กำลังโหลด...</p>;
   if (error) return <p>{error}</p>;
 
   return (
     <div className="p-8 rounded-lg shadow-lg w-full mx-auto font-inter h-full">
-      <h1 className="text-3xl font-bold mb-6">รายชื่อผู้สมัคร</h1>
-      <table className="w-full border-collapse border border-gray-300">
+        <h2 className="text-xl font-semibold mt-8 mb-5">Applicants list</h2>
+
+        <table className="w-full border-collapse border border-gray-300">
         <thead>
           <tr>
             <th className="border border-gray-300 p-2">Firstname</th>
@@ -73,7 +97,6 @@ const ApplicantContent = () => {
             <th className="border border-gray-300 p-2">Note</th>
             <th className="border border-gray-300 p-2">Action</th>
           </tr>
-          
         </thead>
         <tbody className="text-center">
           {applicants.length > 0 ? (
@@ -88,8 +111,14 @@ const ApplicantContent = () => {
                 <td className="border border-gray-300 p-2">{new Date(applicant.application_date).toLocaleDateString('th-TH')}</td>
                 <td className="border border-gray-300 p-2">{applicant.notes || 'ไม่มีหมายเหตุ'}</td>
                 <td className="border border-gray-300 p-2">
-                  <button className="btn btn-error text-white" onClick={() => handleDelete(applicant.applicant_id)}>
-                    ลบ
+                  <button className="btn btn-success text-white mr-2" onClick={() => handleAccept(applicant.applicant_id)}>
+                    Accept
+                  </button>
+                  <button className="btn btn-info text-white" onClick={() => handleViewDetails(applicant.applicant_id)}>
+                    View details
+                  </button>
+                  <button className="btn btn-error text-white ml-2" onClick={() => handleDelete(applicant.applicant_id)}>
+                    Cancel
                   </button>
                 </td>
               </tr>
@@ -103,6 +132,6 @@ const ApplicantContent = () => {
       </table>
     </div>
   );
-}
+};
 
 export default ApplicantContent;

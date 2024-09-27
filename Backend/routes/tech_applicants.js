@@ -34,7 +34,7 @@ const storage = multer.diskStorage({
 const upload = multer({ storage: storage });
 
 router.get("/applicants", (req, res) => {
-  const query = "SELECT * FROM  technician_applicants ";
+  const query = "SELECT * FROM  technician_applicants WHERE status_id = 1";
 
   db.query(query, (err, result) => {
     if (err) {
@@ -46,7 +46,7 @@ router.get("/applicants", (req, res) => {
   });
 });
 
-router.get("/applicant/:id", (req, res) => {
+router.get("/applicants/:id", (req, res) => {
   const id = req.params.id;
   const query = "SELECT *FROM technician_applicants WHERE  applicant_id = ?";
 
@@ -281,6 +281,23 @@ router.delete("/applicants/:id", (req, res) => {
     } else {
       res.json({ message: "Applicant deleted successfully" });
     }
+  });
+});
+
+
+router.post("/applicants/accept/:id", (req, res) => {
+  const id = req.params.id;
+  const query = "UPDATE technician_applicants SET status_id = ? WHERE applicant_id = ?";
+
+  db.query(query, [7, id], (err, result) => {
+    if (err) {
+      console.error("Error accepting applicant:", err);
+      return res.status(500).json({ error: "Failed to accept applicant" });
+    }
+    if (result.affectedRows === 0) {
+      return res.status(404).json({ error: "Applicant not found" });
+    }
+    res.json({ message: "Applicant accepted successfully" });
   });
 });
 

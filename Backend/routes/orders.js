@@ -93,7 +93,7 @@ router.delete("/v1/orders/:id", (req, res) => {
   });
   
 
-router.get("/v1/orders/count", (req, res) => {
+router.get("/v2/orders/count", (req, res) => {
     const query = "SELECT COUNT(*) AS total_orders FROM orders";
   
     db.query(query, (err, result) => {

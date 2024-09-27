@@ -41,7 +41,7 @@ const Sidebar = () => {
 
   return (
     <div>
-      <aside className="w-64 h-full sticky top-0 border font-inter ">
+      <aside className="w-64 h-full sticky top-0  font-inter ">
         <div className="relative ">
           <p className="text-xl font-semibold mt-8 ml-10 mr-26 mb-9 ">
             Jaroensup

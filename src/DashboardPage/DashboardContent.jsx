@@ -11,7 +11,7 @@ const DashboardContent = () => {
     const fetchDashboardData = async () => {
       try {
         const productResponse = await axios.get(`${import.meta.env.VITE_SERVER_URL}/products/count`);
-        const orderResponse = await axios.get(`${import.meta.env.VITE_SERVER_URL}/v1/orders/count`);
+        const orderResponse = await axios.get(`${import.meta.env.VITE_SERVER_URL}/v2/orders/count`);
         const revenueResponse = await axios.get(`${import.meta.env.VITE_SERVER_URL}/payments/total`);
 
         setTotalProducts(productResponse.data.count || 0);
