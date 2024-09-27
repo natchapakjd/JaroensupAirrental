@@ -7,13 +7,13 @@ import { useNavigate } from "react-router-dom";
 import Cookies from "universal-cookie";
 import { jwtDecode } from "jwt-decode";
 import axios from "axios";
-import Swal from "sweetalert2"; // Import SweetAlert2
+import Swal from "sweetalert2";
 
 const LineProfile = () => {
   const [profile, setProfile] = useState(null);
   const [notificationsEnabled, setNotificationsEnabled] = useState(false);
   const [userId, setUserId] = useState(null);
-
+  
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -37,18 +37,18 @@ const LineProfile = () => {
         setProfile(userProfile);
       }
     } catch (error) {
-      Swal.fire({
-        icon: "error",
-        title: "Error",
-        text: "LIFF initialization failed!",
-      });
+      console.log(error)
     }
   };
 
   const logout = async () => {
     await liff.logout();
     setProfile(null);
-    navigate("/settings");
+    if(isDashboard){
+      navigate("/dashboard/home");
+    }else{
+      navigate("/settings");
+    }
   };
 
   const toggleNotifications = async () => {
@@ -75,9 +75,12 @@ const LineProfile = () => {
     }
   };
 
+  // ตรวจสอบว่าอยู่ที่หน้า dashboard หรือไม่
+  const isDashboard = window.location.pathname.startsWith('/dashboard');
+
   return (
     <div>
-      <Navbar />
+      {!isDashboard && <Navbar />}
       <div className="container mx-auto p-6 font-prompt">
         {profile ? (
           <div className="bg-white shadow-md rounded-lg p-6">
@@ -123,7 +126,7 @@ const LineProfile = () => {
           <div className="text-center">Loading...</div>
         )}
       </div>
-      <Footer />
+      {!isDashboard && <Footer />}
     </div>
   );
 };

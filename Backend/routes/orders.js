@@ -15,7 +15,6 @@ router.get("/v1/orders", (req, res) => {
             return res.status(500).json({ error: "Failed to fetching orders" });
         }
       
-        // คุณอาจต้องการให้ข้อมูลเกี่ยวกับหน้าที่มีอยู่และจำนวนทั้งหมด
         const countQuery = "SELECT COUNT(*) AS total FROM orders";
         db.query(countQuery, (err, countResult) => {
             if (err) {
@@ -36,6 +35,18 @@ router.get("/v1/orders", (req, res) => {
     });
 });
 
+router.get("/v3/orders", (req, res) => {
+  const query = "SELECT * FROM orders";
+
+  db.query(query, (err, result) => {
+    if (err) {
+      console.error("Error fetching orders: " + err);
+      res.status(500).json({ error: "Failed to fetch orders" });
+    } else {
+      res.json(result);
+    }
+  });
+});
 
 router.get("/v1/orders/:id", (req, res) => {
     const limit = parseInt(req.query.limit) || 10; // จำนวนรายการต่อหน้า

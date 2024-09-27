@@ -77,8 +77,18 @@ const Header = () => {
               className="dropdown-content menu p-2 shadow bg-white rounded-box w-48 border border-gray-300 mt-2"
             >
               <li>
-                <a href="/profile" className="hover:bg-gray-100 p-2 rounded">
+                <a href="/dashboard/profile" className="hover:bg-gray-100 p-2 rounded">
                   Profile
+                </a>
+              </li>
+              <li>
+                <a href="/dashboard/change-password" className="hover:bg-gray-100 p-2 rounded">
+                  Change password
+                </a>
+              </li>
+              <li>
+                <a href="/dashboard/line-notification" className="hover:bg-gray-100 p-2 rounded">
+                  Notification
                 </a>
               </li>
               <li>

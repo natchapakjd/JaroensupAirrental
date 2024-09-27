@@ -66,7 +66,6 @@ const WarehouseContent = () => {
           <thead>
             <tr>
               <th className="border border-gray-300 p-2">ID</th>
-              <th className="border border-gray-300 p-2">Name</th>
               <th className="border border-gray-300 p-2">Location</th>
               <th className="border border-gray-300 p-2">Quantity</th>
               <th className="border border-gray-300 p-2">Actions</th>
@@ -76,7 +75,6 @@ const WarehouseContent = () => {
             {warehouses.map(warehouse => (
               <tr key={warehouse.warehouse_id}>
                 <td className="border border-gray-300 p-2">{warehouse.warehouse_id}</td>
-                <td className="border border-gray-300 p-2">{warehouse.name}</td>
                 <td className="border border-gray-300 p-2">{warehouse.location}</td>
                 <td className="border border-gray-300 p-2">{warehouse.capacity}</td>
 

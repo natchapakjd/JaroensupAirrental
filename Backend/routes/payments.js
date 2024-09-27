@@ -4,6 +4,8 @@ const db = require("../db");
 const multer = require("multer");
 const path = require("path");
 const sharp = require('sharp');
+const cloudinary = require("../cloundinary-config");
+
 
 const storage = multer.diskStorage({
   destination: function (req, file, cb) {
@@ -47,45 +49,112 @@ router.get("/payment/:id", (req, res) => {
 
 // Create a new payment
 
-router.post("/payments", upload.single('slip_images'), (req, res) => {
-  const { amount, user_id, task_id, payment_method, payment_date, order_id, status } = req.body;
-  const slipImagePath = req.file ? req.file.path : null; // Path to the uploaded file
-  const query = `
-    INSERT INTO payments (amount, user_id, task_id, payment_method, payment_date, slip_images, order_id, status)
-    VALUES (?, ?, ?, ?, ?, ?, ?, ?)`;
+router.post("/payments", upload.single('slip_images'), async (req, res) => {
+  const { amount, user_id, method_id, payment_date, order_id, task_id, status_id } = req.body;
+  let slipImagePath = null;
+  console.log(req.body)
 
-  db.query(query, [amount, user_id, task_id, payment_method, payment_date, slipImagePath, order_id, status], (err, result) => {
-    if (err) {
-      console.error("Error creating payment: " + err);
-      res.status(500).json({ error: "Failed to create payment" });
-    } else {
-      res.status(201).json({ payment_id: result.insertId });
+  try {
+    // Upload the image to Cloudinary if a file is provided
+    if (req.file) {
+      const uploadResult = await cloudinary.uploader.upload(req.file.path);
+      slipImagePath = uploadResult.secure_url; // Get the secure URL of the uploaded image
     }
-  });
+
+    let query;
+    const values = [
+      amount,
+      user_id,
+      method_id,
+      payment_date,
+      slipImagePath,
+      status_id
+    ];
+    if (task_id == 'null') {
+      query = `
+        INSERT INTO payments (amount, user_id, order_id, method_id, payment_date, image_url, status_id)
+        VALUES (?, ?, ?, ?, ?, ?, ?)`;
+      values.splice(2, 0, order_id); // Insert task_id into the correct position
+    } else if (order_id == 'null') {
+      query = `
+        INSERT INTO payments (amount, user_id, task_id, method_id, payment_date, image_url, status_id)
+        VALUES (?, ?, ?, ?, ?, ?, ?)`;
+      values.splice(2, 0, task_id); // Insert order_id into the correct position
+    } else {
+      return res.status(400).json({ error: "Either task_id or order_id must be provided." });
+    }
+
+    db.query(query, values, (err, result) => {
+      if (err) {
+        console.error("Error creating payment: " + err);
+        return res.status(500).json({ error: "Failed to create payment" });
+      }
+      res.status(201).json({ payment_id: result.insertId });
+    });
+  } catch (error) {
+    console.error("Error uploading to Cloudinary: " + error);
+    res.status(500).json({ error: "Failed to upload image to Cloudinary" });
+  }
 });
 
 // Update a payment
-router.put("/payments/:id", upload.single('slip_images'), (req, res) => {
+router.put("/payments/:id", upload.single('slip_images'), async (req, res) => {
   const id = req.params.id;
-  const { amount, user_id, task_id, payment_method, payment_date, order_id, status } = req.body;
-  const slipImagePath = req.file ? req.file.path : null; // Path to the uploaded file
+  const { amount, user_id, method_id, payment_date, order_id, task_id, status_id } = req.body;
+  console.log(req.body)
 
-  // Update query to include all fields, including the new slip image if provided
-  const query = `
-    UPDATE payments 
-    SET amount = ?, user_id = ?, task_id = ?, payment_method = ?, payment_date = ?, slip_images = ?, order_id = ?, status = ? 
-    WHERE payment_id = ?`;
+  try {
+    let slipImagePath = null;
 
-  db.query(query, [amount, user_id, task_id, payment_method, payment_date, slipImagePath, order_id, status, id], (err, result) => {
-    if (err) {
-      console.error("Error updating payment: " + err);
-      res.status(500).json({ error: "Failed to update payment" });
-    } else {
-      res.json({ message: "Payment updated successfully" });
+    // Upload the image to Cloudinary if a file is provided
+    if (req.file) {
+      const slipImage = req.file.path;
+      const result = await cloudinary.uploader.upload(slipImage, {
+        folder: "image/payment-image",
+      });
+      slipImagePath = result.secure_url; // Get the secure URL of the uploaded image
     }
-  });
-});
 
+    let query;
+    const values = [
+      amount,
+      user_id,
+      method_id,
+      payment_date,
+      slipImagePath,
+      status_id,
+      id
+    ];
+
+    if (task_id === '') {
+      query = `
+        UPDATE payments 
+        SET amount = ?, user_id = ?, order_id = ?, method_id = ?, payment_date = ?, image_url = ?, status_id = ? 
+        WHERE payment_id = ?`;
+      values.splice(2, 0, order_id); // Insert order_id into the correct position
+    } else if (order_id === '') {
+      query = `
+        UPDATE payments 
+        SET amount = ?, user_id = ?, task_id = ?, method_id = ?, payment_date = ?, image_url = ?, status_id = ? 
+        WHERE payment_id = ?`;
+      values.splice(2, 0, task_id); // Insert task_id into the correct position
+    } else {
+      return res.status(400).json({ error: "Either task_id or order_id must be provided." });
+    }
+
+    db.query(query, values, (err, result) => {
+      if (err) {
+        console.error("Error updating payment: " + err);
+        return res.status(500).json({ error: "Failed to update payment" });
+      }
+
+      res.json({ message: "Payment updated successfully" });
+    });
+  } catch (error) {
+    console.error("Error uploading to Cloudinary: " + error);
+    res.status(500).json({ error: "Failed to upload image to Cloudinary" });
+  }
+});
 
 // Delete a payment
 router.delete("/payment/:id", (req, res) => {
@@ -115,5 +184,18 @@ router.get("/payments/total", (req, res) => {
     res.status(200).json({ totalAmount });
   });
 });
+
+router.get('/payment-methods', (req, res) => {
+  const query = 'SELECT * FROM payment_methods';
+  
+  db.query(query, (err, results) => {
+    if (err) {
+      console.error('Error fetching payment methods: ' + err);
+      return res.status(500).json({ error: 'Failed to fetch payment methods' });
+    }
+    res.json(results);
+  });
+});
+
 
 module.exports = router;

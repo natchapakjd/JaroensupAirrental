@@ -23,7 +23,7 @@ const order = require("./routes/orders")
 const payment = require("./routes/payments");
 const roles = require("./routes/roles")
 const borrow_prod = require("./routes/borrow_product")
-
+const status = require("./routes/status")
 app.use(express());
 app.use(cors());
 app.use(bodyParser.json());
@@ -48,6 +48,7 @@ app.use(order)
 app.use(payment);
 app.use(roles)
 app.use(borrow_prod)
+app.use(status)
 
 app.listen(port, () => {
   console.log(`App is running at http://localhost:${port}`);

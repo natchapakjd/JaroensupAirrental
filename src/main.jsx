@@ -8,7 +8,6 @@ import "./index.css";
 import Home from "./pages/common/Home";
 import Login from "./pages/Authentication/Login";
 import Register from "./pages/Authentication/Register";
-import Dashboard from "./DashboardPage/Dashboard";
 import Contact from "./pages/common/Contact";
 import Noti from "./pages/common/Noti";
 import WorkExperience from "./pages/common/WorkExperience";
@@ -29,6 +28,7 @@ import Review from "./pages/Review/Review";
 import OrderDetails from "./pages/History/OrderDetails";
 import LineProfile from "./pages/Settings/LineProfile";
 import RegisterToTech from "./pages/Authentication/RegisterToTech";
+import DashboardRoute from "./DashboardPage/DashboardRoute";
 
 const router = createBrowserRouter([
   {
@@ -51,7 +51,7 @@ const router = createBrowserRouter([
     path: "/dashboard/*",
     element: (
       <ProtectedRoute>
-        <Dashboard />
+        <DashboardRoute />
       </ProtectedRoute>
     ),
   },

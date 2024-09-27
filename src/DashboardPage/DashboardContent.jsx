@@ -27,15 +27,12 @@ const DashboardContent = () => {
 
   return (
     <div className="p-8 bg-white min-h-screen font-inter">
-      {/* Welcome Section */}
       <div className="bg-white p-6 rounded-lg shadow-lg mb-6">
         <h1 className="text-3xl font-bold text-gray-800">Welcome Back, Admin!</h1>
         <p className="text-gray-600 mt-2">Here is a quick overview of your dashboard.</p>
       </div>
 
-      {/* Statistics Section */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-6">
-        {/* Total Products */}
         <div className="bg-white p-6 rounded-lg shadow-lg flex items-center justify-between">
           <div>
             <h2 className="text-xl font-semibold text-gray-700">Total Products</h2>
@@ -48,7 +45,6 @@ const DashboardContent = () => {
           </div>
         </div>
 
-        {/* Total Orders */}
         <div className="bg-white p-6 rounded-lg shadow-lg flex items-center justify-between">
           <div>
             <h2 className="text-xl font-semibold text-gray-700">Total Orders</h2>
@@ -61,7 +57,6 @@ const DashboardContent = () => {
           </div>
         </div>
 
-        {/* Total Revenue */}
         <div className="bg-white p-6 rounded-lg shadow-lg flex items-center justify-between">
           <div>
             <h2 className="text-xl font-semibold text-gray-700">Total Revenue</h2>
@@ -75,7 +70,6 @@ const DashboardContent = () => {
         </div>
       </div>
 
-      {/* Quick Links Section */}
       <div className="bg-white p-6 rounded-lg shadow-lg mb-6">
         <h2 className="text-2xl font-semibold text-gray-800 mb-4">Quick Links</h2>
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
@@ -94,7 +88,6 @@ const DashboardContent = () => {
         </div>
       </div>
 
-      {/* Recent Activity Section */}
       <div className="bg-white p-6 rounded-lg shadow-lg">
         <h2 className="text-2xl font-semibold text-gray-800 mb-4">Recent Activity</h2>
         <ul>

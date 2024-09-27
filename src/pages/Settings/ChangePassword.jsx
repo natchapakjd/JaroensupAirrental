@@ -5,25 +5,26 @@ import Navbar from '../../components/Navbar';
 import Footer from '../../components/Footer';
 import Cookies from 'universal-cookie';
 import { jwtDecode } from 'jwt-decode';
+import { useLocation } from 'react-router-dom'; // นำเข้า useLocation
 
 const ChangePassword = () => {
-  const [userId, setUserId] = useState(''); // Change to userId
+  const [userId, setUserId] = useState('');
   const [newPassword, setNewPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
   const cookies = new Cookies();
-  
+  const location = useLocation(); // ใช้ useLocation
+
   useEffect(() => {
     const token = cookies.get("authToken");
     if (token) {
       const decodedToken = jwtDecode(token);
-      setUserId(decodedToken.id); // Assuming user_id is in the token
+      setUserId(decodedToken.id);
     }
   }, []);
 
   const handleChangePassword = async (e) => {
     e.preventDefault();
 
-    // Check if new password and confirm password match
     if (newPassword !== confirmPassword) {
       Swal.fire({
         title: 'Error!',
@@ -36,7 +37,7 @@ const ChangePassword = () => {
 
     try {
       await axios.post(`${import.meta.env.VITE_SERVER_URL}/change-password`, {
-        user_id: userId, // Send user_id
+        user_id: userId,
         newPassword,
       });
       Swal.fire({
@@ -56,24 +57,16 @@ const ChangePassword = () => {
     }
   };
 
+  // ตรวจสอบว่าอยู่ที่หน้า dashboard หรือไม่
+  const isDashboard = location.pathname.startsWith('/dashboard');
+
   return (
     <>
-      <Navbar />
+      {!isDashboard && <Navbar />}
       <div className="flex items-center justify-center min-h-screen bg-gray-100">
         <div className="bg-white p-8 rounded-lg shadow-md w-full max-w-md">
           <h2 className="text-2xl font-bold text-center mb-6">Change Password</h2>
           <form onSubmit={handleChangePassword} className="space-y-4">
-            {/* <div>
-              <label className="label">
-                <span className="label-text">User ID</span>
-              </label>
-              <input
-                type="text"
-                className="input input-bordered w-full"
-                value={userId}
-                readOnly // Make it read-only if you want to prevent changes
-              />
-            </div> */}
             <div>
               <label className="label">
                 <span className="label-text">New Password</span>
@@ -104,7 +97,7 @@ const ChangePassword = () => {
           </form>
         </div>
       </div>
-      <Footer />
+      {!isDashboard && <Footer />}
     </>
   );
 };
