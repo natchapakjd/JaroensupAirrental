@@ -26,7 +26,7 @@ const ProductContent = () => {
 
   const handleDelete = async (productId) => {
     try {
-      const response = await axios.delete(`${import.meta.env.VITE_SERVER_URL}/product/${productId}`);
+      const response = await axios.delete(`${import.meta.env.VITE_SERVER_URL}/product/${productId}`,{withCredentials: true});
       if (response.status === 200) {
         Swal.fire({
           title: "Product deleted successfully",

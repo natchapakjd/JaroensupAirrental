@@ -7,6 +7,7 @@ const path = require("path");
 const sharp = require("sharp");
 const cloudinary = require("../cloundinary-config");
 const fs = require("fs");
+const isAdmin = require('../middlewares/isAdmin');
 
 const storage = multer.diskStorage({
   destination: function (req, file, cb) {
@@ -19,7 +20,7 @@ const storage = multer.diskStorage({
 
 const upload = multer({ storage: storage });
 
-router.get("/users", (req, res) => {
+router.get("/users",isAdmin, (req, res) => {
   const query = "SELECT * FROM users";
 
   db.query(query, (err, result) => {

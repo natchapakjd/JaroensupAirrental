@@ -6,6 +6,7 @@ const path = require("path");
 const sharp = require('sharp');
 const cloudinary = require('../cloundinary-config');
 const fs = require('fs'); 
+const isAdmin = require('../middlewares/isAdmin');
 
 const storage = multer.diskStorage({
   destination: function (req, file, cb) {
@@ -62,7 +63,7 @@ router.get("/product/:id", (req, res) => {
   });
 });
 
-router.delete("/product/:id", (req, res) => {
+router.delete("/product/:id",isAdmin, (req, res) => {
   const id = req.params.id;
   const query = "DELETE FROM products WHERE product_id = ?";
 

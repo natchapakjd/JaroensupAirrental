@@ -19,14 +19,21 @@ const logs = require("./routes/history_log");
 const tech_applicant = require("./routes/tech_applicants");
 const tech = require("./routes/technicians");
 const warehouse = require("./routes/warehouses");
-const order = require("./routes/orders")
+const order = require("./routes/orders");
 const payment = require("./routes/payments");
-const roles = require("./routes/roles")
-const borrow_prod = require("./routes/borrow_product")
-const status = require("./routes/status")
+const roles = require("./routes/roles");
+const borrow_prod = require("./routes/borrow_product");
+const status = require("./routes/status");
+const isAdmin = require("./middlewares/isAdmin");
+const cookieParser = require("cookie-parser");
+
 app.use(express());
-app.use(cors());
+app.use(cors({
+  origin: 'http://localhost:5173',
+  credentials: true,
+}));
 app.use(bodyParser.json());
+app.use(cookieParser());
 
 app.use(auth);
 app.use(appointment);
@@ -44,11 +51,12 @@ app.use(user);
 app.use(noti);
 app.use(prod);
 app.use(logs);
-app.use(order)
+app.use(order);
 app.use(payment);
-app.use(roles)
-app.use(borrow_prod)
-app.use(status)
+app.use(roles);
+app.use(borrow_prod);
+app.use(status);
+app.use(isAdmin);
 
 app.listen(port, () => {
   console.log(`App is running at http://localhost:${port}`);
