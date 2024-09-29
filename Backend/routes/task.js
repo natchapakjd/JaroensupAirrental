@@ -2,6 +2,7 @@ const express = require("express");
 const router = express.Router();
 const db = require("../db");
 const cron = require("node-cron");
+const isAdmin = require('../middlewares/isAdmin');
 
 cron.schedule("0 0 * * *", () => {
   const query = `
@@ -128,7 +129,7 @@ router.post("/tasks", (req, res) => {
   );
 });
 
-router.put("/task/:id", (req, res) => {
+router.put("/task/:id",(req, res) => {
   const id = req.params.id;
   const {
     user_id,
@@ -206,7 +207,7 @@ router.put("/task/:id", (req, res) => {
   );
 });
 
-router.delete("/task/:id", (req, res) => {
+router.delete("/task/:id",isAdmin,(req, res) => {
   const id = req.params.id;
   const query = "UPDATE tasks SET isActive = 0 WHERE task_id = ?";
 

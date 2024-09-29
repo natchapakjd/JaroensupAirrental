@@ -1,9 +1,10 @@
 const express = require("express");
 const router = express.Router();
 const db = require("../db");
+const isAdmin = require('../middlewares/isAdmin');
 
 router.get("/reviews", (req, res) => {
-  const query = "SELECT * FROM  reviews ";
+  const query = "SELECT * FROM reviews";
 
   db.query(query, (err, result) => {
     if (err) {
@@ -16,22 +17,21 @@ router.get("/reviews", (req, res) => {
 });
 
 router.get("/review/:id", (req, res) => {
-  const id = req.params.id
-  const query = "SELECT *FROM reviews WHERE  review_id = ?";
+  const id = req.params.id;
+  const query = "SELECT * FROM reviews WHERE review_id = ?";
 
-  db.query(query,[id] ,(err, result) => {
+  db.query(query, [id], (err, result) => {
     if (err) {
-      console.error("Error fetching review " + err);
+      console.error("Error fetching review: " + err);
       res.status(500).json({ error: "Failed to fetch review" });
     } else {
-      res.json(result);
+      res.json(result[0]); 
     }
   });
 });
 
 router.post("/review", (req, res) => {
   const { task_id, tech_id, user_id, rating, comment } = req.body;
-
   const query = "INSERT INTO reviews (task_id, tech_id, user_id, rating, comment) VALUES (?, ?, ?, ?, ?)";
   const values = [task_id, tech_id, user_id, rating, comment];
 
@@ -45,6 +45,39 @@ router.post("/review", (req, res) => {
   });
 });
 
+router.put("/review/:id", isAdmin, (req, res) => {
+  const id = req.params.id;
+  const { task_id, tech_id, user_id, rating, comment } = req.body;
+  const query = "UPDATE reviews SET task_id = ?, tech_id = ?, user_id = ?, rating = ?, comment = ? WHERE review_id = ?";
+
+  db.query(query, [task_id, tech_id, user_id, rating, comment, id], (err, result) => {
+    if (err) {
+      console.error("Error updating review: " + err);
+      res.status(500).json({ error: "Failed to update review" });
+    } else if (result.affectedRows === 0) {
+      res.status(404).json({ error: "Review not found" });
+    } else {
+      res.json({ message: "Review updated successfully" });
+    }
+  });
+});
+
+router.delete("/review/:id", isAdmin, (req, res) => {
+  const id = req.params.id;
+  const query = "DELETE FROM reviews WHERE review_id = ?";
+
+  db.query(query, [id], (err, result) => {
+    if (err) {
+      console.error("Error deleting review: " + err);
+      res.status(500).json({ error: "Failed to delete review" });
+    } else if (result.affectedRows === 0) {
+      res.status(404).json({ error: "Review not found" });
+    } else {
+      res.json({ message: "Review deleted successfully" });
+    }
+  });
+});
+
 router.get("/review/:taskId/:userId", (req, res) => {
   const { taskId, userId } = req.params;
   const query = "SELECT * FROM reviews WHERE task_id = ? AND user_id = ?";
@@ -54,7 +87,7 @@ router.get("/review/:taskId/:userId", (req, res) => {
       console.error("Error fetching review: " + err);
       res.status(500).json({ error: "Failed to fetch review" });
     } else {
-      res.json(result[0]); // Return the review if found
+      res.json(result[0]); 
     }
   });
 });

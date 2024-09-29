@@ -1,9 +1,6 @@
 import * as React from "react";
 import * as ReactDOM from "react-dom/client";
-import {
-  createBrowserRouter,
-  RouterProvider,
-} from "react-router-dom";
+import { createBrowserRouter, RouterProvider } from "react-router-dom";
 import "./index.css";
 import Home from "./pages/common/Home";
 import Login from "./pages/Authentication/Login";
@@ -19,7 +16,7 @@ import RentAC from "./pages/Services/RentAC";
 import Checkout from "./pages/Products/Checkout";
 import AddToCart from "./pages/Products/AddToCart";
 import Product from "./pages/Products/Product";
-import { CartProvider } from "./context/CartContext"; 
+import { CartProvider } from "./context/CartContext";
 import UserHistory from "./pages/History/UserHistory";
 import ProfileSetting from "./pages/Settings/ProfileSetting";
 import Settings from "./pages/Settings/Settings";
@@ -29,6 +26,7 @@ import OrderDetails from "./pages/History/OrderDetails";
 import LineProfile from "./pages/Settings/LineProfile";
 import RegisterToTech from "./pages/Authentication/RegisterToTech";
 import DashboardRoute from "./DashboardPage/DashboardRoute";
+import { AuthProvider } from "./context/AuthContext";
 
 const router = createBrowserRouter([
   {
@@ -77,7 +75,7 @@ const router = createBrowserRouter([
       <ProtectedRoute>
         <RentAC />
       </ProtectedRoute>
-    ), 
+    ),
   },
   {
     path: "/product/:id",
@@ -93,7 +91,8 @@ const router = createBrowserRouter([
       <ProtectedRoute>
         <AddToCart />
       </ProtectedRoute>
-    ),  },
+    ),
+  },
   {
     path: "/checkout",
     element: (
@@ -119,28 +118,30 @@ const router = createBrowserRouter([
     element: <ChangePassword />,
   },
   {
-    path: "/review/:taskId",  
-    element: <Review/>
+    path: "/review/:taskId",
+    element: <Review />,
   },
   {
     path: "/order-history/:orderId",
-    element: <OrderDetails/>
+    element: <OrderDetails />,
   },
   {
     path: "/line-profile",
-    element: <LineProfile/>
+    element: <LineProfile />,
   },
   {
-    path:  "/register-tech",
-    element: <RegisterToTech/>
-  }
+    path: "/register-tech",
+    element: <RegisterToTech />,
+  },
 ]);
 
 // Render the application
 ReactDOM.createRoot(document.getElementById("root")).render(
   <React.StrictMode>
     <CartProvider>
-      <RouterProvider router={router} />
+      <AuthProvider>
+        <RouterProvider router={router} />
+      </AuthProvider>
     </CartProvider>
   </React.StrictMode>
 );

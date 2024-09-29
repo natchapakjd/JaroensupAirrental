@@ -1,6 +1,7 @@
 const express = require('express')
 const router = express.Router();
 const db = require("../db");
+const isAdmin = require('../middlewares/isAdmin');
 
 router.get("/area_cals", (req, res) => {
     const query = "SELECT * FROM  area_calculation_history ";

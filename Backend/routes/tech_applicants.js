@@ -7,6 +7,7 @@ const cloudinary = require("cloudinary").v2;
 const fs = require("fs");
 const path = require("path");
 const nodemailer = require("nodemailer");
+const isAdmin = require('../middlewares/isAdmin');
 require("dotenv").config();
 
 const EMAIL_USER =  process.env.EMAIL_USER;

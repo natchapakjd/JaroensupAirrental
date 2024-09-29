@@ -3,7 +3,7 @@ import Cookies from "universal-cookie";
 import { jwtDecode } from "jwt-decode";
 import { useState, useEffect } from "react";
 import { useLocation } from "react-router-dom";
-import { MdSpaceDashboard, MdAddShoppingCart, MdTask, MdPayments, MdEngineering, MdPieChart, MdCategory, MdBrandingWatermark, MdEditAttributes, MdWarehouse, MdRateReview, MdCalculate, MdHistory, MdOutlineSettings } from "react-icons/md";
+import { MdManageAccounts,MdSpaceDashboard, MdAddShoppingCart, MdTask, MdPayments, MdEngineering, MdPieChart, MdCategory, MdBrandingWatermark, MdEditAttributes, MdWarehouse, MdRateReview, MdCalculate, MdHistory, MdOutlineSettings } from "react-icons/md";
 
 const Sidebar = () => {
   const cookies = new Cookies();
@@ -45,6 +45,11 @@ const Sidebar = () => {
                   <li className={`mb-5 hover:rounded-lg hover:py-3 hover:px-4 transition-all duration-300 hover:mx-5 ${isActive("/dashboard/products") ? "bg-blue text-white mx-5 px-4 py-3 rounded-lg" : null}`}>
                     <a className="text-base pl-10 flex gap-1" href="/dashboard/products">
                       <MdAddShoppingCart className="mt-1"/> Products
+                    </a>
+                  </li>
+                  <li className={`mb-5 hover:rounded-lg hover:py-3 hover:px-4 transition-all duration-300 hover:mx-5 ${isActive("/dashboard/user") ? "bg-blue text-white mx-5 px-4 py-3 rounded-lg" : null}`}>
+                    <a className="text-base pl-10 flex gap-1" href="/dashboard/user">
+                      <MdManageAccounts className="mt-1"/> Users
                     </a>
                   </li>
                   <li className={`mb-5 hover:rounded-lg hover:py-3 hover:px-4 transition-all duration-300 hover:mx-5 ${isActive("/dashboard/tasks") ? "bg-blue text-white mx-5 px-4 py-3 rounded-lg" : null}`}>
@@ -102,6 +107,12 @@ const Sidebar = () => {
                       <MdHistory className="mt-1"/> History Log
                     </a>
                   </li>
+{/*                  
+                  <li className={`mb-5 hover:rounded-lg hover:py-3 hover:px-4 transition-all duration-300 hover:mx-5 ${isActive("/dashboard/history-log") ? "bg-blue text-white mx-5 px-4 py-3 rounded-lg" : null}`}>
+                    <a className="text-base pl-10 flex gap-1" href="/dashboard/history-log">
+                      <MdHistory className="mt-1"/> Service area
+                    </a>
+                  </li> */}
                 </>
               )}
 

@@ -4,21 +4,21 @@ import Swal from 'sweetalert2';
 import Navbar from '../../components/Navbar';
 import Footer from '../../components/Footer';
 import Cookies from 'universal-cookie';
-import { jwtDecode } from 'jwt-decode';
 import { useLocation } from 'react-router-dom'; // นำเข้า useLocation
+import { useAuth } from '../../context/AuthContext';
 
 const ChangePassword = () => {
   const [userId, setUserId] = useState('');
   const [newPassword, setNewPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
   const cookies = new Cookies();
-  const location = useLocation(); // ใช้ useLocation
+  const location = useLocation(); 
+  const { user }  = useAuth();
 
   useEffect(() => {
     const token = cookies.get("authToken");
     if (token) {
-      const decodedToken = jwtDecode(token);
-      setUserId(decodedToken.id);
+      setUserId(user.id);
     }
   }, []);
 
@@ -57,7 +57,6 @@ const ChangePassword = () => {
     }
   };
 
-  // ตรวจสอบว่าอยู่ที่หน้า dashboard หรือไม่
   const isDashboard = location.pathname.startsWith('/dashboard');
 
   return (

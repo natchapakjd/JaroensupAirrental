@@ -5,6 +5,7 @@ const multer = require("multer");
 const path = require("path");
 const sharp = require('sharp');
 const cloudinary = require("../cloundinary-config");
+const isAdmin = require('../middlewares/isAdmin');
 
 
 const storage = multer.diskStorage({

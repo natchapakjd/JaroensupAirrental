@@ -1,6 +1,8 @@
 const express = require("express");
 const router = express.Router();
 const db = require("../db");
+const isAdmin = require('../middlewares/isAdmin');
+
 
 router.get("/v1/orders", (req, res) => {
     const limit = parseInt(req.query.limit) || 10; // จำนวนรายการต่อหน้า

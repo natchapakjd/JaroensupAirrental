@@ -1,6 +1,7 @@
 const express = require("express");
 const router = express.Router();
 const db = require("../db");
+const isAdmin = require('../middlewares/isAdmin');
 
 router.get("/categories", (req, res) => {
   const query = "SELECT * FROM categories";
@@ -62,7 +63,7 @@ router.put("/category/:id", (req, res) => {
   });
 });
 
-router.delete("/category/:id", (req, res) => {
+router.delete("/category/:id",isAdmin, (req, res) => {
   const id = req.params.id;
   const query = "DELETE FROM categories WHERE category_id = ?";
 
