@@ -1,23 +1,20 @@
 import React, { useEffect, useState } from "react";
 import axios from "axios";
 import Navbar from "../../components/Navbar";
-import Cookies from "universal-cookie";
-import { jwtDecode } from "jwt-decode";
 import Footer from "../../components/Footer";
 import { useNavigate } from "react-router-dom"; // Import useNavigate
 import { MdOutlineStar } from "react-icons/md";
+import { useAuth } from "../../context/AuthContext";
 
 const UserHistory = () => {
+  const token = useAuth();
   const [taskHistory, setTaskHistory] = useState([]);
   const [orderHistory, setOrderHistory] = useState([]);
   const [totalTasks, setTotalTasks] = useState(0);
   const [totalOrders, setTotalOrders] = useState(0);
   const [taskPage, setTaskPage] = useState(1);
   const [orderPage, setOrderPage] = useState(1);
-  const cookies = new Cookies();
-  const token = cookies.get("authToken");
-  const decodedToken = jwtDecode(token);
-  const user_id = decodedToken.id;
+  const user_id = token.user.id;
   const navigate = useNavigate(); // Initialize navigate
 
   const fetchUserData = async (taskPage, orderPage) => {

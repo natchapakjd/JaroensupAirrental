@@ -1,28 +1,23 @@
 import React from "react";
-import Cookies from "universal-cookie";
-import { jwtDecode } from "jwt-decode";
 import { useState, useEffect } from "react";
 import { useLocation } from "react-router-dom";
 import { MdManageAccounts,MdSpaceDashboard, MdAddShoppingCart, MdTask, MdPayments, MdEngineering, MdPieChart, MdCategory, MdBrandingWatermark, MdEditAttributes, MdWarehouse, MdRateReview, MdCalculate, MdHistory, MdOutlineSettings } from "react-icons/md";
+import { useAuth } from "../context/AuthContext";
 
 const Sidebar = () => {
-  const cookies = new Cookies();
-  const token = cookies.get("authToken");
+  const user = useAuth();
   const [role, setRole] = useState("");
+  const location = useLocation();
+
 
   useEffect(() => {
-    decodedToken();
-  }, []); // Added empty dependency array
+    setRole(user.user.role)
+  },[user,role]); 
 
   const isActive = (path) => {
-    const location = useLocation();
     return location.pathname.startsWith(path);
   };
 
-  const decodedToken = () => {
-    const decodeToken = jwtDecode(token);
-    setRole(decodeToken.role);
-  };
 
   return (
     <div>
@@ -107,12 +102,7 @@ const Sidebar = () => {
                       <MdHistory className="mt-1"/> History Log
                     </a>
                   </li>
-{/*                  
-                  <li className={`mb-5 hover:rounded-lg hover:py-3 hover:px-4 transition-all duration-300 hover:mx-5 ${isActive("/dashboard/history-log") ? "bg-blue text-white mx-5 px-4 py-3 rounded-lg" : null}`}>
-                    <a className="text-base pl-10 flex gap-1" href="/dashboard/history-log">
-                      <MdHistory className="mt-1"/> Service area
-                    </a>
-                  </li> */}
+
                 </>
               )}
 

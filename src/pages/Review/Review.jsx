@@ -2,17 +2,14 @@ import React, { useState, useEffect } from 'react';
 import Navbar from '../../components/Navbar';
 import Footer from '../../components/Footer';
 import axios from 'axios';
-import Cookies from 'universal-cookie';
 import { useParams, useNavigate } from 'react-router-dom';
-import { jwtDecode } from 'jwt-decode';
 import Swal from 'sweetalert2';
+import { useAuth } from '../../context/AuthContext';
 
 const Review = () => {
   const { taskId } = useParams(); 
-  const cookies = new Cookies();
-  const token = cookies.get("authToken");
-  const decodedToken = jwtDecode(token);
-  const user_id = decodedToken.id;
+  const user = useAuth();
+  const user_id = user.user.id;
   const navigate = useNavigate();
 
   const [tech_id, setTechId] = useState(''); 

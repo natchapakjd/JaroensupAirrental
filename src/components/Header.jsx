@@ -1,12 +1,12 @@
 import React, { useEffect, useState } from "react";
-import Cookies from "universal-cookie";
 import { useNavigate } from "react-router-dom";
-import { jwtDecode } from "jwt-decode";
 import axios from "axios";
+import { useAuth } from "../context/AuthContext";
+import Cookies from "universal-cookie";
 
 const Header = () => {
+  const token = useAuth();
   const cookies = new Cookies();
-  const token = cookies.get("authToken");
   const navigate = useNavigate();
   const [user, setUser] = useState(null);
 
@@ -19,8 +19,7 @@ const Header = () => {
 
   useEffect(() => {
     if (token) {
-      const decodedToken = jwtDecode(token);
-      fetchUserByID(decodedToken.id);
+      fetchUserByID(token.user.id);
     }
   }, [token]);
 

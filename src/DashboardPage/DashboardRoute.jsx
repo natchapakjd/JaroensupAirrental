@@ -40,6 +40,7 @@ import ApplicantDetails from '../DashboardContent/TechnicianApplicants/Applicant
 import ChangePassword from '../pages/Settings/ChangePassword'
 import ProfileSetting from '../pages/Settings/ProfileSetting'
 import LineProfile from '../pages/Settings/LineProfile'
+
 const DashboardRoute = () => {
   return (
       <div className='flex'>

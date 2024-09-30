@@ -32,7 +32,7 @@ const HistoryLogContent = () => {
   if (error) return <div className="text-red-500 text-center">{error}</div>;
 
   return (
-    <div className="p-8 rounded-lg shadow-lg w-full mx-auto font-inter">
+    <div className="p-8 rounded-lg shadow-lg w-full mx-auto h-screen">
       <h2 className="text-xl font-semibold mb-4">Admin Logs</h2>
       <table className="w-full border-collapse border border-gray-300">
         <thead>

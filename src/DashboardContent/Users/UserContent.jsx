@@ -90,7 +90,7 @@ const UserContent = () => {
                 <td>{user.username}</td>
                 <td>{user.email}</td>
                 <td>{user.role}</td>
-                <td>{format(new Date(user.created_at), 'MM/dd/yyyy')}</td> {/* Improved date formatting */}
+                <td>{format(new Date(user.created_at), 'MM/dd/yyyy')}</td> 
                 <td>
                   <div className="flex gap-2">
                     <Link to={`/dashboard/user/${user.user_id}`}>

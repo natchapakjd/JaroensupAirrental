@@ -5,17 +5,15 @@ import Footer from "../../components/Footer";
 import Cookies from 'universal-cookie';
 import { jwtDecode } from 'jwt-decode';
 import Swal from 'sweetalert2'; 
+import { useAuth } from '../../context/AuthContext';
 
 const Checkout = () => {
   const location = useLocation();
   const navigate = useNavigate();
   const initialCartItems = location.state?.cartItems || [];
   const [cartItems, setCartItems] = useState(initialCartItems); // Manage cart items state
-  
-  const cookies = new Cookies();
-  const token = cookies.get("authToken");
-  const decodedToken = token ? jwtDecode(token) : null;
-  const user_id = decodedToken ? decodedToken.id : null;
+  const user = useAuth();
+  const user_id = user ? user.user.id : null;
 
   const handleCheckout = async () => {
     const totalPrice = cartItems.reduce((acc, item) => acc + (item.price * item.quantity), 0).toFixed(2);

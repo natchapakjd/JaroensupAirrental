@@ -14,6 +14,7 @@ const ProfileSetting = () => {
   const token = cookies.get("authToken");
   const decodedToken = jwtDecode(token);
   const userId = decodedToken.id;
+  
   const [formData, setFormData] = useState({
     firstname: "",
     lastname: "",

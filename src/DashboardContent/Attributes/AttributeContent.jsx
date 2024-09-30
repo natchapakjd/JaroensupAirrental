@@ -55,7 +55,7 @@ const AttributeContent = () => {
   if (error) return <p>{error}</p>;
 
   return (
-    <div className="p-8 rounded-lg shadow-lg w-full mx-auto font-inter">
+    <div className="p-8 rounded-lg shadow-lg w-full mx-auto h-screen">
       <div className="flex justify-between items-center mb-6">
         <h1 className="text-2xl font-semibold">Attributes</h1>
         <Link to="/dashboard/attribute/add">

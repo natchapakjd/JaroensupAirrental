@@ -1,7 +1,7 @@
 // AuthContext.js
-import React, { createContext, useContext, useEffect, useState } from 'react';
-import Cookies from 'universal-cookie';
-import {jwtDecode} from 'jwt-decode';
+import React, { createContext, useContext, useEffect, useState } from "react";
+import Cookies from "universal-cookie";
+import { jwtDecode } from "jwt-decode";
 
 const AuthContext = createContext();
 
@@ -18,9 +18,7 @@ export const AuthProvider = ({ children }) => {
   }, [token]);
 
   return (
-    <AuthContext.Provider value={{ user }}>
-      {children}
-    </AuthContext.Provider>
+    <AuthContext.Provider value={{ user }}>{children}</AuthContext.Provider>
   );
 };
 

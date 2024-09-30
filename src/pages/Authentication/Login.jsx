@@ -5,6 +5,7 @@ import Swal from "sweetalert2";
 import axios from "axios";
 import Cookies from "universal-cookie";
 import { jwtDecode } from "jwt-decode";
+
 const Login = () => {
   const cookies = new Cookies();
   const [username, setUsername] = useState("");
@@ -33,7 +34,7 @@ const Login = () => {
       const receivedToken = response.data.token;
       cookies.set("authToken", receivedToken, { path: "/" });
       const decodedToken = jwtDecode(receivedToken);
-      decodedToken.role === 3
+      decodedToken.role === 3 || decodedToken.role === 2
         ? setTimeout(() => {
             navigate("/dashboard");
           }, 800)

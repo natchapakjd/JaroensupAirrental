@@ -1,16 +1,20 @@
 import React, { useState, useEffect } from "react";
 import axios from "axios";
-import { Link, useNavigate } from "react-router-dom"; // Import useNavigate
-import Swal from "sweetalert2"; // Import Swal for alerts
+import { Link, useNavigate } from "react-router-dom";
+import Swal from "sweetalert2";
+import { useAuth } from "../../context/AuthContext";
 
 const TaskContent = () => {
   const [tasks, setTasks] = useState([]);
-  const navigate = useNavigate(); // To navigate programmatically
-  const apiUrl = import.meta.env.VITE_SERVER_URL; // Use the environment variable
+  const [role, setRole] = useState();
+  const navigate = useNavigate();
+  const apiUrl = import.meta.env.VITE_SERVER_URL;
+  const user = useAuth();
 
   useEffect(() => {
     fetchTasks();
-  }, []);
+    setRole(user.user.role);
+  }, [tasks,role]);
 
   const fetchTasks = async () => {
     try {
@@ -66,12 +70,20 @@ const TaskContent = () => {
       <div className="flex justify-between items-center mb-4">
         <h2 className="text-xl font-semibold mt-8">Task List</h2>
         <div className="flex gap-2">
-          <Link to="/dashboard/tasks/add">
-            <button className="btn bg-blue text-white hover:bg-blue">Add Task</button>
-          </Link>
-          <Link to="/dashboard/tasks/assign">
-            <button className="btn btn-success text-white">Assign Task</button>
-          </Link>
+          {role === 3 ? (
+            <>
+              <Link to="/dashboard/tasks/add">
+                <button className="btn bg-blue text-white hover:bg-blue">
+                  Add Task
+                </button>
+              </Link>
+              <Link to="/dashboard/tasks/assign">
+                <button className="btn btn-success text-white">
+                  Assign Task
+                </button>
+              </Link>
+            </>
+          ) : null}
         </div>
       </div>
       <table className="w-full border-collapse border border-gray-300">
@@ -100,22 +112,40 @@ const TaskContent = () => {
               return (
                 <tr key={task.task_id}>
                   <td className="border border-gray-300 p-2">{task.task_id}</td>
-                  <td className="border border-gray-300 p-2">{task.task_type_id}</td>
-                  <td className="border border-gray-300 p-2">{task.description}</td>
-                  <td className="border border-gray-300 p-2">{formattedDate}</td>
-                  <td className="border border-gray-300 p-2">{formattedTime}</td>
-                  <td className="border border-gray-300 p-2">{task.status_id}</td>
+                  <td className="border border-gray-300 p-2">
+                    {task.task_type_id}
+                  </td>
+                  <td className="border border-gray-300 p-2">
+                    {task.description}
+                  </td>
+                  <td className="border border-gray-300 p-2">
+                    {formattedDate}
+                  </td>
+                  <td className="border border-gray-300 p-2">
+                    {formattedTime}
+                  </td>
+                  <td className="border border-gray-300 p-2">
+                    {task.status_id}
+                  </td>
                   <td className="border border-gray-300 p-2">
                     <div className="flex justify-center gap-2">
-                      <Link to={`/dashboard/tasks/edit/${task.task_id}`}>
-                        <button className="btn btn-success text-white">Edit</button>
-                      </Link>
-                      <button
-                        onClick={() => handleDelete(task.task_id)}
-                        className="btn bg-red-500 text-white hover:bg-red-600"
-                      >
-                        Delete
-                      </button>
+                      {role === 3 ? (
+                        <>
+                          {" "}
+                          <Link to={`/dashboard/tasks/edit/${task.task_id}`}>
+                            <button className="btn btn-success text-white">
+                              Edit
+                            </button>
+                          </Link>
+                          <button
+                            onClick={() => handleDelete(task.task_id)}
+                            className="btn bg-red-500 text-white hover:bg-red-600"
+                          >
+                            Delete
+                          </button>
+                        </>
+                      ) : null}
+
                       <button
                         onClick={() => handleViewDetails(task.task_id)}
                         className="btn bg-blue text-white hover:bg-blue"

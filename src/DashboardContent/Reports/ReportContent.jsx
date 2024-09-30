@@ -1,4 +1,5 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
+import axios from 'axios';
 import {
   BarChart,
   CartesianGrid,
@@ -47,6 +48,27 @@ const data02 = [
 
 const ReportContent = () => {
   // Combine all data into one array for CSV export
+
+  const [taskCounts, setTaskCounts] = useState([]);
+
+  const api_url = import.meta.env.VITE_SERVER_URL;
+  useEffect(() => {
+    const fetchCounts = async () => {
+      try {
+        const tasksResponse = await axios.get(`${api_url}/api/counts`);
+    
+
+        setTaskCounts(tasksResponse.data);
+        console.log(tasksResponse.data)
+      } catch (error) {
+        console.error("Error fetching counts:", error);
+      }
+    };
+
+    fetchCounts();
+  }, [api_url]);
+
+    
   const combinedData = [...data, ...data01.map((d, i) => ({ ...d, type: "A school" })), ...data02.map((d, i) => ({ ...d, type: "B school" }))];
 
   return (
@@ -64,15 +86,16 @@ const ReportContent = () => {
       
       <div className="bg-white p-4 rounded-lg shadow-md">
         <h2 className="text-xl font-semibold mb-4">Bar Chart</h2>
-        <BarChart width={730} height={250} data={data} className="mx-auto">
+        <BarChart width={730} height={250} data={taskCounts} className="mx-auto">
           <CartesianGrid strokeDasharray="3 3" />
-          <XAxis dataKey="name" />
+          <XAxis dataKey="month" />
           <YAxis />
           <Tooltip />
           <Legend />
-          <Bar dataKey="pv" fill="#8884d8" />
-          <Bar dataKey="uv" fill="#82ca9d" />
-        </BarChart>
+          <Bar dataKey="task_count" fill="#8884d8" />
+          <Bar dataKey="order_count" fill="#82ca9d" />
+          <Bar dataKey="payment_count" fill="#ff7300" />
+          </BarChart>
       </div>
 
       <div className="bg-white p-4 rounded-lg shadow-md">
@@ -80,7 +103,7 @@ const ReportContent = () => {
         <AreaChart
           width={730}
           height={250}
-          data={data}
+          data={taskCounts}
           margin={{ top: 10, right: 30, left: 0, bottom: 0 }}
           className="mx-auto"
         >
@@ -93,24 +116,35 @@ const ReportContent = () => {
               <stop offset="5%" stopColor="#82ca9d" stopOpacity={0.8} />
               <stop offset="95%" stopColor="#82ca9d" stopOpacity={0} />
             </linearGradient>
+            <linearGradient id="colorAv" x1="0" y1="0" x2="0" y2="1">
+              <stop offset="5%" stopColor="#ff7300" stopOpacity={0.8} />
+              <stop offset="95%" stopColor="#ff7300" stopOpacity={0} />
+            </linearGradient>
           </defs>
-          <XAxis dataKey="name" />
+          <XAxis dataKey="month" />
           <YAxis />
           <CartesianGrid strokeDasharray="3 3" />
           <Tooltip />
           <Area
             type="monotone"
-            dataKey="uv"
+            dataKey="task_count"
             stroke="#8884d8"
             fillOpacity={1}
             fill="url(#colorUv)"
           />
           <Area
             type="monotone"
-            dataKey="pv"
+            dataKey="order_count"
             stroke="#82ca9d"
             fillOpacity={1}
             fill="url(#colorPv)"
+          />
+          <Area
+            type="monotone"
+            dataKey="payment_count"
+            stroke="#82ca9d"
+            fillOpacity={1}
+            fill="url(#colorAv)"
           />
         </AreaChart>
       </div>

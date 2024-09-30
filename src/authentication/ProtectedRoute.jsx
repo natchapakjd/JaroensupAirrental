@@ -1,19 +1,16 @@
 import React from 'react';
-import { jwtDecode } from 'jwt-decode';
-import Cookies from 'universal-cookie';
 import { useLocation } from 'react-router-dom';
 import Login from '../pages/Authentication/Login';
 import AccessDenied from './AccessDenied';
+import { useAuth } from '../context/AuthContext';
 
 const ProtectedRoute = ({ children }) => {
-  const cookies = new Cookies();
-  const token = cookies.get('authToken');
+  const user = useAuth();
   const location = useLocation(); // Get current location
 
-  if (token) {
+  if (user) {
     try {
-      const decodedToken = jwtDecode(token);
-      const userRole = decodedToken.role;
+      const userRole = user.user.role;
 
       if (userRole === 3 || userRole === 2) {
         return <>{children}</>;

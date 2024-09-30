@@ -114,7 +114,7 @@ const ApplicantContent = () => {
                   <button className="btn btn-success text-white mr-2" onClick={() => handleAccept(applicant.applicant_id)}>
                     Accept
                   </button>
-                  <button className="btn btn-info text-white" onClick={() => handleViewDetails(applicant.applicant_id)}>
+                  <button className="btn bg-blue hover:bg-blue text-white" onClick={() => handleViewDetails(applicant.applicant_id)}>
                     View details
                   </button>
                   <button className="btn btn-error text-white ml-2" onClick={() => handleDelete(applicant.applicant_id)}>

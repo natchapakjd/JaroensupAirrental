@@ -4,12 +4,12 @@ import liff from "@line/liff";
 import Navbar from "../../components/Navbar";
 import Footer from "../../components/Footer";
 import { useNavigate } from "react-router-dom";
-import Cookies from "universal-cookie";
-import { jwtDecode } from "jwt-decode";
 import axios from "axios";
 import Swal from "sweetalert2";
+import { useAuth } from "../../context/AuthContext";
 
 const LineProfile = () => {
+  const user = useAuth();
   const [profile, setProfile] = useState(null);
   const [notificationsEnabled, setNotificationsEnabled] = useState(false);
   const [userId, setUserId] = useState(null);
@@ -17,12 +17,8 @@ const LineProfile = () => {
   const navigate = useNavigate();
 
   useEffect(() => {
-    const cookies = new Cookies();
-    const token = cookies.get("authToken");
-
-    if (token) {
-      const decodedToken = jwtDecode(token);
-      setUserId(decodedToken.id);
+    if (user) {
+      setUserId(user.user.id);
     }
     login();
   }, []);

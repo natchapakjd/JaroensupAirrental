@@ -24,6 +24,7 @@ const payment = require("./routes/payments");
 const roles = require("./routes/roles");
 const borrow_prod = require("./routes/borrow_product");
 const status = require("./routes/status");
+const chart = require("./routes/chart")
 const isAdmin = require("./middlewares/isAdmin");
 const cookieParser = require("cookie-parser");
 
@@ -56,6 +57,7 @@ app.use(payment);
 app.use(roles);
 app.use(borrow_prod);
 app.use(status);
+app.use(chart)
 app.use(isAdmin);
 
 app.listen(port, () => {

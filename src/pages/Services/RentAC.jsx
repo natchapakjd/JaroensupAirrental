@@ -11,8 +11,7 @@ import {
 import "leaflet/dist/leaflet.css";
 import L from "leaflet";
 import { useParams } from "react-router-dom";
-import { jwtDecode } from "jwt-decode";
-import Cookies from "universal-cookie";
+import { useAuth } from "../../context/AuthContext";
 import Swal from "sweetalert2";
 
 const icon = L.icon({
@@ -40,10 +39,8 @@ const RentAC = () => {
   const [taskTypes, setTaskTypes] = useState([]);
   const [loading, setLoading] = useState(true);
   const [selectedLocation, setSelectedLocation] = useState(null);
-  const cookies = new Cookies();
-  const token = cookies.get("authToken");
-  const decodedToken = jwtDecode(token);
-  const user_id = decodedToken.id; // Set user_id here
+  const user = useAuth();
+  const user_id = user.user.id; // Set user_id here
 
   useEffect(() => {
     const fetchProducts = async () => {
