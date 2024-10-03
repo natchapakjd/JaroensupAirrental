@@ -2,15 +2,18 @@ import React from 'react';
 import { useLocation } from 'react-router-dom';
 import Login from '../pages/Authentication/Login';
 import AccessDenied from './AccessDenied';
-import { useAuth } from '../context/AuthContext';
+import Cookies from 'universal-cookie';
+import { jwtDecode } from "jwt-decode";
 
 const ProtectedRoute = ({ children }) => {
-  const user = useAuth();
-  const location = useLocation(); // Get current location
+  const location = useLocation();
+  const cookies = new Cookies();
+  const token = cookies.get("authToken");
 
-  if (user) {
+  if (token) {
     try {
-      const userRole = user.user.role;
+      const decodedToken = jwtDecode(token);
+      const userRole = decodedToken.role;
 
       if (userRole === 3 || userRole === 2) {
         return <>{children}</>;
@@ -28,6 +31,7 @@ const ProtectedRoute = ({ children }) => {
       return <AccessDenied />;
     }
   } else {
+    // If no token is found, redirect to login
     return <Login />;
   }
 };

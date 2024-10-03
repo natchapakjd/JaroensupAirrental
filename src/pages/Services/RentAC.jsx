@@ -11,8 +11,9 @@ import {
 import "leaflet/dist/leaflet.css";
 import L from "leaflet";
 import { useParams } from "react-router-dom";
-import { useAuth } from "../../context/AuthContext";
 import Swal from "sweetalert2";
+import Cookies from "universal-cookie";
+import { jwtDecode } from "jwt-decode";
 
 const icon = L.icon({
   iconUrl:
@@ -23,6 +24,7 @@ const icon = L.icon({
 
 const RentAC = () => {
   const { taskTypeId } = useParams();
+  const cookies = new Cookies();
   const [formData, setFormData] = useState({
     user_id: "",
     description: "",
@@ -34,13 +36,14 @@ const RentAC = () => {
     latitude: "",
     longitude: "",
   });
-
   const [products, setProducts] = useState([]);
   const [taskTypes, setTaskTypes] = useState([]);
   const [loading, setLoading] = useState(true);
   const [selectedLocation, setSelectedLocation] = useState(null);
-  const user = useAuth();
-  const user_id = user.user.id; // Set user_id here
+  const [profile, setProfile] = useState();
+  const token = cookies.get("authToken");
+  const decodedToken = jwtDecode(token);
+  const userId = decodedToken.id;
 
   useEffect(() => {
     const fetchProducts = async () => {
@@ -69,7 +72,7 @@ const RentAC = () => {
       await Promise.all([fetchProducts(), fetchTaskTypes()]);
       setLoading(false);
     };
-
+    fetchProfile();
     fetchData();
   }, []);
 
@@ -80,7 +83,9 @@ const RentAC = () => {
         task_type_id: taskTypeId,
       }));
     }
+    fetchProfile();
   }, [taskTypeId]);
+
   const filteredTaskTypes = taskTypes.filter(
     (taskType) =>
       taskType.type_name === "งานเช่าเครื่องปรับอากาศ" ||
@@ -88,6 +93,19 @@ const RentAC = () => {
       taskType.type_name === "งานซ่อมบำรุงเครื่องปรับอากาศ"
   );
 
+  const fetchProfile = async () => {
+    try {
+      const response = await axios.get(
+        `${import.meta.env.VITE_SERVER_URL}/user/${userId}`
+      );
+      if (response.status === 200) {
+        const data = response.data;
+        setProfile(data);
+      }
+    } catch (err) {
+      console.log(err);
+    }
+  };
   const handleChange = (e) => {
     const { name, value } = e.target;
     setFormData({
@@ -110,6 +128,25 @@ const RentAC = () => {
     return null;
   };
 
+  const sendMessage = async () => {
+    const messageResponse = await fetch(
+      `${import.meta.env.VITE_SERVER_URL}/send-message`,
+      {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+
+        body: JSON.stringify({
+          userId: profile.linetoken,
+          message: `Your Task has been placed successfully!`,
+        }),
+      }
+    );
+
+    if (!messageResponse.ok) throw new Error("Failed to send message");
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
@@ -117,10 +154,9 @@ const RentAC = () => {
         `${import.meta.env.VITE_SERVER_URL}/tasks`,
         {
           ...formData,
-          user_id,
+          user_id: userId,
         }
       );
-
       Swal.fire({
         title: "สำเร็จ!",
         text: "แบบฟอร์มถูกส่งเรียบร้อยแล้ว",
@@ -139,6 +175,7 @@ const RentAC = () => {
           latitude: "",
           longitude: "",
         });
+        sendMessage();
         setSelectedLocation(null);
       });
     } catch (error) {

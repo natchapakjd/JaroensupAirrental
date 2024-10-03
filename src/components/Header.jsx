@@ -1,14 +1,15 @@
 import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
-import { useAuth } from "../context/AuthContext";
 import Cookies from "universal-cookie";
+import { jwtDecode } from "jwt-decode";
 
 const Header = () => {
-  const token = useAuth();
   const cookies = new Cookies();
   const navigate = useNavigate();
   const [user, setUser] = useState(null);
+  const token = cookies.get("authToken");
+
 
   const handleLogout = () => {
     if (token) {
@@ -19,7 +20,8 @@ const Header = () => {
 
   useEffect(() => {
     if (token) {
-      fetchUserByID(token.user.id);
+      const decodeToken = jwtDecode(token)
+      fetchUserByID(decodeToken.id);
     }
   }, [token]);
 

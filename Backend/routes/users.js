@@ -76,6 +76,7 @@ router.get("/user/:id", (req, res) => {
       created_at: row.created_at,
       firstname: row.firstname,
       lastname: row.lastname,
+      linetoken: row.linetoken,
     };
 
     res.json(user);
