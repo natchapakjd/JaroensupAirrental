@@ -83,16 +83,17 @@ router.post("/tasks", (req, res) => {
     user_id,
     description,
     task_type_id,
-    product_id,
     quantity_used,
     address,
     appointment_date,
     latitude,
     longitude,
+    rental_start_date, 
+    rental_end_date,   
   } = req.body;
 
   const query =
-    "INSERT INTO tasks (user_id, description, task_type_id, product_id, quantity_used, address, appointment_date, latitude, longitude) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)";
+    "INSERT INTO tasks (user_id, description, task_type_id, quantity_used, address, appointment_date, latitude, longitude,isActive) VALUES (?, ?, ?, ?, ?, ?, ?, ?,?)";
 
   db.query(
     query,
@@ -100,34 +101,52 @@ router.post("/tasks", (req, res) => {
       user_id,
       description,
       task_type_id,
-      product_id,
       quantity_used,
       address,
       appointment_date,
       latitude,
       longitude,
+      1
     ],
     (err, result) => {
       if (err) {
         console.error("Error creating task: " + err);
-        res.status(500).json({ error: "Failed to create task" });
-      } else {
-        res.status(201).json({
-          task_id: result.insertId,
-          user_id,
-          description,
-          task_type_id,
-          product_id,
-          quantity_used,
-          address,
-          appointment_date,
-          latitude,
-          longitude,
-        });
+        return res.status(500).json({ error: "Failed to create task" });
       }
+
+      const taskId = result.insertId;
+
+      const rentalQuery =
+        "INSERT INTO rental (task_id, rental_start_date, rental_end_date) VALUES (?, ?, ?)";
+
+      db.query(
+        rentalQuery,
+        [taskId, rental_start_date, rental_end_date],
+        (err) => {
+          if (err) {
+            console.error("Error creating rental record: " + err);
+            return res.status(500).json({ error: "Failed to create rental record" });
+          }
+
+          res.status(201).json({
+            task_id: taskId,
+            user_id,
+            description,
+            task_type_id,
+            quantity_used,
+            address,
+            appointment_date,
+            latitude,
+            longitude,
+            rental_start_date,
+            rental_end_date,
+          });
+        }
+      );
     }
   );
 });
+
 
 router.put("/task/:id",(req, res) => {
   const id = req.params.id;

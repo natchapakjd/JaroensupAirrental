@@ -27,7 +27,7 @@ const Service = () => {
   const filteredTaskTypes = taskTypes.filter(
     (taskType) =>
       taskType.type_name === "งานเช่าเครื่องปรับอากาศ" ||
-      // taskType.type_name === "จำหน่ายสินค้า" ||
+      taskType.type_name === "ขายเครื่องปรับอากาศ" ||
       taskType.type_name === "งานซ่อมบำรุงเครื่องปรับอากาศ"
   );
 
@@ -65,7 +65,7 @@ const Service = () => {
                       <div className="flex justify-end">
                         <Link
                           to={
-                            taskType.type_name === "จำหน่ายสินค้า"
+                            taskType.type_name === "ขายเครื่องปรับอากาศ"
                               ? "/product"
                               : `/service/rental/${taskType.task_type_id}`
                           }

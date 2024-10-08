@@ -2,17 +2,22 @@ import React from "react";
 import { useState, useEffect } from "react";
 import { useLocation } from "react-router-dom";
 import { MdManageAccounts,MdSpaceDashboard, MdAddShoppingCart, MdTask, MdPayments, MdEngineering, MdPieChart, MdCategory, MdBrandingWatermark, MdEditAttributes, MdWarehouse, MdRateReview, MdCalculate, MdHistory, MdOutlineSettings } from "react-icons/md";
-import { useAuth } from "../context/AuthContext";
+import { jwtDecode } from "jwt-decode";
+import Cookies from "universal-cookie";
 
 const Sidebar = () => {
-  const user = useAuth();
+  const cookies = new Cookies();
+  const token = cookies.get("authToken");
   const [role, setRole] = useState("");
   const location = useLocation();
 
 
   useEffect(() => {
-    setRole(user.user.role)
-  },[user,role]); 
+    if (token) {
+      const decodedToken = jwtDecode(token);
+      setRole(decodedToken.role);
+    }
+  }, []);
 
   const isActive = (path) => {
     return location.pathname.startsWith(path);

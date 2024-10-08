@@ -119,47 +119,72 @@ router.get("/v2/orders/count", (req, res) => {
       res.status(200).json({ totalOrders });
     });
   });
-
-router.post("/v2/orders", (req, res) => {
-    const { user_id, items, total_price } = req.body; // Include total_price
+  router.post("/v2/orders", (req, res) => {
+    const { user_id, items, total_price } = req.body; 
   
     if (!items || items.length === 0) {
       return res.status(400).json({ message: "No items provided" });
     }
   
-    // Insert order with total_price
+    const taskData = {
+      user_id: user_id,
+      description: "ซื้อขายอุปกรณ์", 
+      task_type_id: 9,
+      isActive : 1,
+      created_at: new Date(),
+      quantity_used: items.reduce((total, item) => total + item.quantity, 0), 
+    };
+  
     db.query(
-      "INSERT INTO orders (user_id, total_price) VALUES (?, ?)",
-      [user_id, total_price],
-      (err, result) => {
+      "INSERT INTO tasks (user_id, description, created_at, task_type_id, quantity_used) VALUES (?, ?, ?, ?, ?)",
+      [
+        taskData.user_id,
+        taskData.description,
+        taskData.created_at,
+        taskData.task_type_id,
+        taskData.quantity_used,
+      ],
+      (err, taskResult) => {
         if (err) return res.status(500).send(err);
   
-        const orderId = result.insertId;
+        const taskId = taskResult.insertId;
   
-        const orderItems = items.map((item) => [
-          orderId,
-          item.product_id,
-          item.name,
-          item.quantity,
-          item.price, // Include price per item
-          item.total_price, // Include total price for each item
-        ]);
-  
-        // Update the query to insert price and total_price as well
+        // Insert order with total_price and task_id
         db.query(
-          "INSERT INTO order_items (order_id, product_id, product_name, quantity, price, total_price) VALUES ?",
-          [orderItems],
-          (err) => {
+          "INSERT INTO orders (user_id, total_price, task_id) VALUES (?, ?, ?)",
+          [user_id, total_price, taskId],
+          (err, result) => {
             if (err) return res.status(500).send(err);
   
-            res
-              .status(201)
-              .json({ message: "Order created successfully", orderId });
+            const orderId = result.insertId;
+  
+            const orderItems = items.map((item) => [
+              orderId,
+              item.product_id,
+              item.name,
+              item.quantity,
+              item.price, // Include price per item
+              item.total_price, // Include total price for each item
+            ]);
+  
+            // Insert order items
+            db.query(
+              "INSERT INTO order_items (order_id, product_id, product_name, quantity, price, total_price) VALUES ?",
+              [orderItems],
+              (err) => {
+                if (err) return res.status(500).send(err);
+  
+                res
+                  .status(201)
+                  .json({ message: "Order created successfully", orderId });
+              }
+            );
           }
         );
       }
     );
   });
+  
   
   router.get("/v2/orders/:id", (req, res) => {
     const user_id = req.params.id;

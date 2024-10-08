@@ -29,12 +29,12 @@ const RentAC = () => {
     user_id: "",
     description: "",
     task_type_id: "",
-    product_id: "",
-    // quantity_used: "",
     address: "",
     appointment_date: "",
     latitude: "",
     longitude: "",
+    rental_start_date: "", // เพิ่มฟิลด์สำหรับวันที่เริ่มเช่า
+    rental_end_date: "", // เพิ่มฟิลด์สำหรับวันที่สิ้นสุดเช่า
   });
   const [products, setProducts] = useState([]);
   const [taskTypes, setTaskTypes] = useState([]);
@@ -72,6 +72,7 @@ const RentAC = () => {
       await Promise.all([fetchProducts(), fetchTaskTypes()]);
       setLoading(false);
     };
+
     fetchProfile();
     fetchData();
   }, []);
@@ -89,7 +90,6 @@ const RentAC = () => {
   const filteredTaskTypes = taskTypes.filter(
     (taskType) =>
       taskType.type_name === "งานเช่าเครื่องปรับอากาศ" ||
-      // taskType.type_name === "จำหน่ายสินค้า" ||
       taskType.type_name === "งานซ่อมบำรุงเครื่องปรับอากาศ"
   );
 
@@ -106,6 +106,7 @@ const RentAC = () => {
       console.log(err);
     }
   };
+
   const handleChange = (e) => {
     const { name, value } = e.target;
     setFormData({
@@ -136,7 +137,6 @@ const RentAC = () => {
         headers: {
           "Content-Type": "application/json",
         },
-
         body: JSON.stringify({
           userId: profile.linetoken,
           message: `Your Task has been placed successfully!`,
@@ -168,12 +168,12 @@ const RentAC = () => {
           user_id: "",
           description: "",
           task_type_id: taskTypeId || "",
-          product_id: "",
-          // quantity_used: "",
           address: "",
           appointment_date: "",
           latitude: "",
           longitude: "",
+          rental_start_date: "", // รีเซ็ตฟิลด์วันที่เริ่มเช่า
+          rental_end_date: "", // รีเซ็ตฟิลด์วันที่สิ้นสุดเช่า
         });
         sendMessage();
         setSelectedLocation(null);
@@ -210,35 +210,12 @@ const RentAC = () => {
                 className="select select-bordered w-full"
               >
                 <option value="">เลือกประเภทงาน</option>
-                {taskTypes
-                  .filter(
-                    (taskType) =>
-                      taskType.type_name === "งานเช่าเครื่องปรับอากาศ" ||
-                      taskType.type_name === "งานซ่อมบำรุงเครื่องปรับอากาศ"
-                  )
-                  .map((taskType) => (
-                    <option
-                      key={taskType.task_type_id}
-                      value={taskType.task_type_id}
-                    >
-                      {taskType.type_name}
-                    </option>
-                  ))}
-              </select>
-            </div>
-            <div className="mb-4">
-              <label className="block text-gray-700">Product</label>
-              <select
-                name="product_id"
-                value={formData.product_id}
-                onChange={handleChange}
-                required
-                className="select select-bordered w-full"
-              >
-                <option value="">เลือกผลิตภัณฑ์</option>
-                {products.map((product) => (
-                  <option key={product.product_id} value={product.product_id}>
-                    {product.name}
+                {filteredTaskTypes.map((taskType) => (
+                  <option
+                    key={taskType.task_type_id}
+                    value={taskType.task_type_id}
+                  >
+                    {taskType.type_name}
                   </option>
                 ))}
               </select>
@@ -253,17 +230,6 @@ const RentAC = () => {
                 className="textarea textarea-bordered w-full"
               ></textarea>
             </div>
-            {/* <div className="mb-4">
-              <label className="block text-gray-700">Quantity Used</label>
-              <input
-                type="number"
-                name="quantity_used"
-                value={formData.quantity_used}
-                onChange={handleChange}
-                required
-                className="input input-bordered w-full"
-              />
-            </div> */}
             <div className="mb-4">
               <label className="block text-gray-700">Address</label>
               <input
@@ -286,6 +252,29 @@ const RentAC = () => {
                 className="input input-bordered w-full"
               />
             </div>
+            <div className="mb-4">
+              <label className="block text-gray-700">Rental Start Date</label>
+              <input
+                type="date"
+                name="rental_start_date"
+                value={formData.rental_start_date}
+                onChange={handleChange}
+                required
+                className="input input-bordered w-full"
+              />
+            </div>
+            <div className="mb-4">
+              <label className="block text-gray-700">Rental End Date</label>
+              <input
+                type="date"
+                name="rental_end_date"
+                value={formData.rental_end_date}
+                onChange={handleChange}
+                required
+                className="input input-bordered w-full"
+              />
+            </div>
+
             <MapContainer
               center={[13.7563, 100.5018]}
               zoom={10}

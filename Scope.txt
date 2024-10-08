@@ -1,0 +1,24 @@
+services 
+- rental
+- maintenace
+
+product
+พวกอะไหล่ให้ช่างกับแอดมินดูไม่ต้องขาย
+
+Product ตารางtask ออก
+Quantity usedออก
+
+ย้ายproduct_id มาเอา taskassignments
+
+พัดลมไอน้ำ
+
+ตอนdelete taskให้เก็บlog task_daleteion_log
+
+
+due_dateแยกออกสองcol
+
+ช่างเลือกโปรดัคแต่จะใช้กับงานแต่ละงาน 
+เอามาให้เจ้าของดูก่อนว่าเบิกเท่านั้นจริงๆ (ต้องรออนุมัติ)
+พอใช้เสร็จระบบค่อยคืนresourceกลับ
+
+ให้
