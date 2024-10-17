@@ -28,13 +28,17 @@ const chart = require("./routes/chart")
 const isAdmin = require("./middlewares/isAdmin");
 const cookieParser = require("cookie-parser");
 
-app.use(express());
+
+// Middleware setup
 app.use(cors({
-  origin: 'http://localhost:5173',
-  credentials: true,
+  origin: 'http://localhost:5173', // Set your frontend's URL here
+  credentials: true, // Allow credentials to be passed, such as cookies
 }));
+
 app.use(bodyParser.json());
-app.use(cookieParser());
+app.use(bodyParser.urlencoded({ extended: true }));
+
+app.use(cookieParser()); // Correct placement
 
 app.use(auth);
 app.use(appointment);
@@ -59,6 +63,8 @@ app.use(borrow_prod);
 app.use(status);
 app.use(chart)
 app.use(isAdmin);
+
+
 
 app.listen(port, () => {
   console.log(`App is running at http://localhost:${port}`);

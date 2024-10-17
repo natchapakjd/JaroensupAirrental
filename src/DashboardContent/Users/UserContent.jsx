@@ -21,25 +21,39 @@ const UserContent = () => {
   };
 
   const handleDelete = async (userId) => {
-    try {
-      const response = await axios.delete(`${import.meta.env.VITE_SERVER_URL}/user/${userId}`);
-      if (response.status === 200) {
+    const result = await Swal.fire({
+      title: "Are you sure?",
+      text: "You won't be able to revert this!",
+      icon: "warning",
+      showCancelButton: true,
+      confirmButtonColor: "#d33",
+      cancelButtonColor: "#3085d6",
+      confirmButtonText: "Yes, delete it!",
+      cancelButtonText: "Cancel",
+    });
+  
+    if (result.isConfirmed) {
+      try {
+        const response = await axios.delete(`${import.meta.env.VITE_SERVER_URL}/user/${userId}`, { withCredentials: true });
+        if (response.status === 200) {
+          Swal.fire({
+            title: "User deleted successfully",
+            icon: "success",
+          });
+          setUsers(users.filter((user) => user.user_id !== userId));
+        } else {
+          throw new Error("Failed to delete user.");
+        }
+      } catch (error) {
         Swal.fire({
-          title: "User deleted successfully",
-          icon: "success",
+          title: "Error",
+          text: error.response?.data?.message || error.message,
+          icon: "error",
         });
-        setUsers(users.filter((user) => user.user_id !== userId));
-      } else {
-        throw new Error("Failed to delete user.");
       }
-    } catch (error) {
-      Swal.fire({
-        title: "Error",
-        text: error.response?.data?.message || error.message,
-        icon: "error",
-      });
     }
   };
+  
 
   return (
     <div className="font-inter mt-5">

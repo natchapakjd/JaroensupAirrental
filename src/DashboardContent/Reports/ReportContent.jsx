@@ -47,8 +47,6 @@ const data02 = [
 ];
 
 const ReportContent = () => {
-  // Combine all data into one array for CSV export
-
   const [taskCounts, setTaskCounts] = useState([]);
 
   const api_url = import.meta.env.VITE_SERVER_URL;

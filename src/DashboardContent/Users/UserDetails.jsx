@@ -54,7 +54,7 @@ const UserDetails = () => {
       <div className="space-y-4">
         <p className="text-lg font-medium text-gray-700"><strong>Age:</strong> {user.age}</p>
         <p className="text-lg font-medium text-gray-700"><strong>Address:</strong> {user.address}</p>
-        <p className="text-lg font-medium text-gray-700"><strong>Gender:</strong> {user.gender}</p>
+        <p className="text-lg font-medium text-gray-700"><strong>Gender:</strong> {user.gender_id}</p>
         <p className="text-lg font-medium text-gray-700"><strong>Date of Birth:</strong> {format(new Date(user.date_of_birth), 'MM/dd/yyyy')}</p> {/* Improved date formatting */}
         <p className="text-lg font-medium text-gray-700"><strong>Role:</strong> {user.role}</p>
         <p className="text-lg font-medium text-gray-700"><strong>Created At:</strong> {format(new Date(user.created_at), 'MM/dd/yyyy')}</p> {/* Improved date formatting */}

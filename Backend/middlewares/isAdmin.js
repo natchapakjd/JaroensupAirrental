@@ -3,7 +3,6 @@ const jwt = require('jsonwebtoken');
 const isAdmin = (req, res, next) => {
   const cookies = req.cookies;
   const token = cookies.authToken; 
-  
   if (!token) {
     return res.status(403).json({ error: "Access denied. No token provided." });
   }
@@ -20,5 +19,6 @@ const isAdmin = (req, res, next) => {
     return res.status(400).json({ error: "Invalid token." });
   }
 };
+
 
 module.exports = isAdmin;

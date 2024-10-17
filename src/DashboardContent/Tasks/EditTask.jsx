@@ -22,16 +22,17 @@ const EditTask = () => {
   const [appointmentDate, setAppointmentDate] = useState("");
   const [address, setAddress] = useState("");
   const [quantityUsed, setQuantityUsed] = useState("");
-  const [productId, setProductId] = useState("");
+  // const [productId, setProductId] = useState("");
   const [userId, setUserId] = useState("");
   const [latitude, setLatitude] = useState("");
   const [longitude, setLongitude] = useState("");
-  const [status, setStatus] = useState("");
+  const [statusId, setStatusId] = useState(""); // Changed to statusId
   const [startDate, setStartDate] = useState("");
   const [finishDate, setFinishDate] = useState("");
   const [taskTypes, setTaskTypes] = useState([]);
-  const [products, setProducts] = useState([]);
+  // const [products, setProducts] = useState([]);
   const [users, setUsers] = useState([]);
+  const [statuses, setStatuses] = useState([]); // Add statuses state
 
   const navigate = useNavigate();
   const apiUrl = import.meta.env.VITE_SERVER_URL; // Use the environment variable
@@ -47,15 +48,15 @@ const EditTask = () => {
       }
     };
 
-    // Fetch products
-    const fetchProducts = async () => {
-      try {
-        const response = await axios.get(`${apiUrl}/products`);
-        setProducts(response.data);
-      } catch (error) {
-        console.error("Error fetching products:", error);
-      }
-    };
+    // // Fetch products
+    // const fetchProducts = async () => {
+    //   try {
+    //     const response = await axios.get(`${apiUrl}/products`);
+    //     setProducts(response.data);
+    //   } catch (error) {
+    //     console.error("Error fetching products:", error);
+    //   }
+    // };
 
     // Fetch users
     const fetchUsers = async () => {
@@ -64,6 +65,16 @@ const EditTask = () => {
         setUsers(response.data);
       } catch (error) {
         console.error("Error fetching users:", error);
+      }
+    };
+
+    // Fetch statuses
+    const fetchStatuses = async () => {
+      try {
+        const response = await axios.get(`${apiUrl}/statuses`); // Assuming this endpoint provides statuses
+        setStatuses(response.data);
+      } catch (error) {
+        console.error("Error fetching statuses:", error);
       }
     };
 
@@ -77,11 +88,11 @@ const EditTask = () => {
         setAppointmentDate(task.appointment_date);
         setAddress(task.address);
         setQuantityUsed(task.quantity_used);
-        setProductId(task.product_id);
+        // setProductId(task.product_id);
         setUserId(task.user_id);
         setLatitude(task.latitude);
         setLongitude(task.longitude);
-        setStatus(task.status);
+        setStatusId(task.status_id); // Change to statusId
         setStartDate(task.start_date);
         setFinishDate(task.finish_date);
       } catch (error) {
@@ -90,8 +101,9 @@ const EditTask = () => {
     };
 
     fetchTaskTypes();
-    fetchProducts();
+    // fetchProducts();
     fetchUsers();
+    fetchStatuses(); // Fetch statuses
     fetchTask();
   }, [taskId, apiUrl]);
 
@@ -105,11 +117,11 @@ const EditTask = () => {
         appointment_date: appointmentDate,
         address,
         quantity_used: quantityUsed,
-        product_id: productId,
+        // product_id: productId,
         user_id: userId,
         latitude,
         longitude,
-        status,
+        status_id: statusId, // Use statusId in the request
         start_date: startDate,
         finish_date: finishDate,
       });
@@ -164,14 +176,17 @@ const EditTask = () => {
         <div>
           <label className="block mb-2">Status</label>
           <select
-            value={status}
-            onChange={(e) => setStatus(e.target.value)}
+            value={statusId}
+            onChange={(e) => setStatusId(e.target.value)} // Change to statusId
             className="border p-2 w-full"
+            required
           >
             <option value="">Select Status</option>
-            <option value="Success">Success</option>
-            <option value="Pending">Pending</option>
-            <option value="Cancel">Cancel</option>
+            {statuses.map((status) => (
+              <option key={status.status_id} value={status.status_id}>
+                {status.status_name}
+              </option>
+            ))}
           </select>
         </div>
         <div>
@@ -210,7 +225,7 @@ const EditTask = () => {
             className="border p-2 w-full"
           />
         </div>
-        <div>
+        {/* <div>
           <label className="block mb-2">Product</label>
           <select
             value={productId}
@@ -224,7 +239,7 @@ const EditTask = () => {
               </option>
             ))}
           </select>
-        </div>
+        </div> */}
         <div>
           <label className="block mb-2">User</label>
           <select
@@ -241,41 +256,22 @@ const EditTask = () => {
           </select>
         </div>
         <div>
-          <label className="block mb-2">Latitude</label>
-          <input
-            type="text"
-            value={latitude}
-            readOnly
-            className="border p-2 w-full"
-          />
-        </div>
-        <div>
-          <label className="block mb-2">Longitude</label>
-          <input
-            type="text"
-            value={longitude}
-            readOnly
-            className="border p-2 w-full"
-          />
-        </div>
-        <div className="my-4">
+          <label className="block mb-2">Map</label>
           <MapContainer
-            center={[latitude || 13.7563, longitude || 100.5018]} // Default center (Bangkok) if lat/long are empty
+            center={[latitude || 51.505, longitude || -0.09]}
             zoom={13}
-            style={{ height: "400px", width: "100%" }}
+            className="h-64 w-full"
           >
             <TileLayer
               url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
-              attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+              attribution="&copy; OpenStreetMap contributors"
             />
+            {latitude && longitude && <Marker position={[latitude, longitude]} />}
             <MapClickHandler setLatitude={setLatitude} setLongitude={setLongitude} />
-            {latitude && longitude && (
-              <Marker position={[latitude, longitude]} />
-            )}
           </MapContainer>
         </div>
-        <button type="submit" className="bg-blue text-white px-4 py-2 rounded">
-          Update Task
+        <button type="submit" className="bg-blue text-white py-2 px-4 rounded">
+          Save Task
         </button>
       </form>
     </div>

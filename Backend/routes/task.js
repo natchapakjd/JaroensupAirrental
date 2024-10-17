@@ -150,17 +150,17 @@ router.post("/tasks", (req, res) => {
 
 router.put("/task/:id",(req, res) => {
   const id = req.params.id;
+  console.log(req.body)
   const {
     user_id,
     description,
     task_type_id,
-    product_id,
     quantity_used,
     address,
     appointment_date,
     latitude,
     longitude,
-    status,
+    status_id,
     start_date,
     finish_date,
   } = req.body;
@@ -171,13 +171,12 @@ router.put("/task/:id",(req, res) => {
       user_id = ?,
       description = ?,
       task_type_id = ?,
-      product_id = ?,
       quantity_used = ?,
       address = ?,
       appointment_date = ?,
       latitude = ?,
       longitude = ?,
-      status = ?,
+      status_id = ?,
       start_date = ?,
       finish_date = ?
     WHERE task_id = ?`;
@@ -188,13 +187,12 @@ router.put("/task/:id",(req, res) => {
       user_id,
       description,
       task_type_id,
-      product_id,
       quantity_used,
       address,
       appointment_date,
       latitude,
       longitude,
-      status,
+      status_id,
       start_date,
       finish_date,
       id,
@@ -211,13 +209,12 @@ router.put("/task/:id",(req, res) => {
           user_id,
           description,
           task_type_id,
-          product_id,
           quantity_used,
           address,
           appointment_date,
           latitude,
           longitude,
-          status,
+          status_id,
           start_date,
           finish_date,
         });

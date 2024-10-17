@@ -71,7 +71,7 @@ router.get("/user/:id", (req, res) => {
       role: row.role_id,
       age: row.age,
       address: row.address,
-      gender: row.gender,
+      gender_id: row.gender,
       date_of_birth: row.date_of_birth,
       created_at: row.created_at,
       firstname: row.firstname,
@@ -125,7 +125,7 @@ router.put("/user/:id",isAdmin,upload.single("profile_image"), async (req, res) 
     phone,
     age,
     address,
-    gender,
+    gender_id,
     date_of_birth,
   } = req.body;
 
@@ -144,7 +144,7 @@ router.put("/user/:id",isAdmin,upload.single("profile_image"), async (req, res) 
 
     const query = `
       UPDATE users
-      SET firstname = ?, lastname = ?, email = ?, phone = ?, age = ?, address = ?, gender = ?, image_url = ?, date_of_birth = ?
+      SET firstname = ?, lastname = ?, email = ?, phone = ?, age = ?, address = ?, gender_id = ?, image_url = ?, date_of_birth = ?
       WHERE user_id = ?
     `;
 
@@ -157,7 +157,7 @@ router.put("/user/:id",isAdmin,upload.single("profile_image"), async (req, res) 
         phone,
         age,
         address,
-        gender,
+        gender_id,
         imageUrl || null,
         date_of_birth,
         id,
@@ -206,7 +206,7 @@ router.post("/user",isAdmin,upload.single("profile_image"), async (req, res) => 
     phone,
     age,
     address,
-    gender,
+    gender_id,
     password,
     date_of_birth,
     role_id,
@@ -235,7 +235,7 @@ router.post("/user",isAdmin,upload.single("profile_image"), async (req, res) => 
     }
 
     const query = `
-      INSERT INTO users (username, firstname, lastname, email, phone, age, address, gender, password, date_of_birth, image_url,role_id)
+      INSERT INTO users (username, firstname, lastname, email, phone, age, address, gender_id, password, date_of_birth, image_url,role_id)
       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?,?)
     `;
 
@@ -249,7 +249,7 @@ router.post("/user",isAdmin,upload.single("profile_image"), async (req, res) => 
         phone,
         age,
         address,
-        gender,
+        gender_id,
         hashedPassword,
         date_of_birth,
         imageUrl,
@@ -274,5 +274,20 @@ router.post("/user",isAdmin,upload.single("profile_image"), async (req, res) => 
     res.status(500).json({ error: "Failed to process user creation." });
   }
 });
+
+
+router.get('/genders', (req, res) => {
+  const query = 'SELECT * FROM gender';
+
+  db.query(query, (err, results) => {
+      if (err) {
+          console.error('Error fetching gender:', err);
+          res.status(500).json({ error: 'Failed to fetch gender' });
+      } else {
+          res.json(results);
+      }
+  });
+});
+
 
 module.exports = router;

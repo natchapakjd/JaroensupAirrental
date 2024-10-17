@@ -12,7 +12,7 @@ const ProductContent = () => {
   useEffect(() => {
     fetchProducts();
     setRole(user.user.role);
-  }, [products,role]);
+  }, []);
 
   const fetchProducts = async () => {
     try {

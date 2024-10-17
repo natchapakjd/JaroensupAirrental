@@ -14,7 +14,7 @@ const TaskContent = () => {
   useEffect(() => {
     fetchTasks();
     setRole(user.user.role);
-  }, [tasks,role]);
+  }, []);
 
   const fetchTasks = async () => {
     try {
@@ -44,7 +44,7 @@ const TaskContent = () => {
       });
 
       if (result.isConfirmed) {
-        const response = await axios.delete(`${apiUrl}/task/${taskId}`);
+        const response = await axios.delete(`${apiUrl}/task/${taskId}`,{withCredentials:true});
         if (response.status === 204) {
           Swal.fire("Deleted!", "Your task has been deleted.", "success");
           setTasks(tasks.filter((task) => task.task_id !== taskId));

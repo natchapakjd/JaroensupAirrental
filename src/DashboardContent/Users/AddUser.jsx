@@ -11,14 +11,15 @@ const AddUser = () => {
     phone: '',
     age: '',
     address: '',
-    gender: '',
+    gender_id: '', // Changed from 'gender' to 'gender_id'
     password: '',
     date_of_birth: '',
-    role_id: '', // Add role_id to form data
+    role_id: '', 
   });
   const [profileImage, setProfileImage] = useState(null);
   const [loading, setLoading] = useState(false);
-  const [roles, setRoles] = useState([]); // State for roles
+  const [roles, setRoles] = useState([]);
+  const [genders, setGenders] = useState([]); // State for genders
 
   // Fetch roles from API
   useEffect(() => {
@@ -37,6 +38,25 @@ const AddUser = () => {
     };
 
     fetchRoles();
+  }, []);
+
+  // Fetch genders from API
+  useEffect(() => {
+    const fetchGenders = async () => {
+      try {
+        const response = await axios.get(`${import.meta.env.VITE_SERVER_URL}/genders`);
+        setGenders(response.data);
+      } catch (error) {
+        console.error('Error fetching genders:', error);
+        Swal.fire({
+          title: 'Error',
+          text: 'Failed to fetch genders.',
+          icon: 'error',
+        });
+      }
+    };
+
+    fetchGenders();
   }, []);
 
   const handleChange = (e) => {
@@ -61,6 +81,7 @@ const AddUser = () => {
         headers: {
           'Content-Type': 'multipart/form-data',
         },
+        withCredentials : true
       });
 
       if (response.status === 201) {
@@ -77,10 +98,10 @@ const AddUser = () => {
           phone: '',
           age: '',
           address: '',
-          gender: '',
+          gender_id: '', // Reset gender_id
           password: '',
           date_of_birth: '',
-          role_id: '', // Reset role_id as well
+          role_id: '',
         });
         setProfileImage(null);
       } else {
@@ -96,6 +117,7 @@ const AddUser = () => {
       setLoading(false);
     }
   };
+
 
   return (
     <div className="mx-auto p-6 bg-white rounded-lg shadow-md">
@@ -183,15 +205,17 @@ const AddUser = () => {
         <div>
           <label className="block text-sm font-medium text-gray-700">Gender:</label>
           <select
-            name="gender"
-            value={formData.gender}
+            name="gender_id"
+            value={formData.gender_id}
             onChange={handleChange}
             className="mt-1 block w-full border border-gray-300 rounded-lg px-3 py-2 shadow-sm focus:outline-none focus:ring-1 focus:ring-blue-500"
           >
             <option value="">Select gender</option>
-            <option value="male">Male</option>
-            <option value="female">Female</option>
-            <option value="other">Other</option>
+            {genders.map((gender) => (
+              <option key={gender.gender_id} value={gender.gender_id}>
+                {gender.gender_name}
+              </option>
+            ))}
           </select>
         </div>
         {/* Password */}
