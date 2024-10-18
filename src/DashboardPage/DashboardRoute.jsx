@@ -38,7 +38,10 @@ import EditOrder from '../DashboardContent/Orders/EditOrder'
 import ApplicantContent from '../DashboardContent/TechnicianApplicants/ApplicantContent'
 import ApplicantDetails from '../DashboardContent/TechnicianApplicants/ApplicantDetails'
 import ChangePassword from '../pages/Settings/ChangePassword'
+import BorrowProductContent from '../DashboardContent/BorrowProduct/BorrowProductContent'
+import BorrowProductTable from '../DashboardContent/BorrowProduct/BorrowProductTable'
 import ProfileSetting from '../pages/Settings/ProfileSetting'
+import AddTechnician from '../DashboardContent/Users/AddTechnician'
 import LineProfile from '../pages/Settings/LineProfile'
 
 const DashboardRoute = () => {
@@ -63,6 +66,8 @@ const DashboardRoute = () => {
             <Route path="payments" element={<PaymentContent />} />
             <Route path="payments/add" element={<AddPayment />} />
             <Route path="payments/edit/:paymentId" element={<EditPayment />} />
+            <Route path="borrow/:productId" element={<BorrowProductContent />} />
+            <Route path="borrows" element={<BorrowProductTable />} />
             <Route path="orders" element={<OrderContent />} />
             <Route path="orders/details/:orderId" element={<OrderDetails/>} />
             <Route path="orders/add" element={<AddOrder />} />
@@ -79,6 +84,7 @@ const DashboardRoute = () => {
             <Route path="attributes" element={<AttributeContent />} />
             <Route path="attribute/add" element={<AddAttribute />} />
             <Route path="user/add" element={<AddUser />} />
+            <Route path="user/add-tech" element={<AddTechnician />} />
             <Route path="user/edit/:userId" element={<EditUser/>} />
             <Route path="user/:userId" element={<UserDetails/>} />
             <Route path="products" element={<ProductContent />} />

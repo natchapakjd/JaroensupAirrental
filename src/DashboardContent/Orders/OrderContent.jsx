@@ -91,9 +91,9 @@ const OrderContent = () => {
     <div className="p-8 rounded-lg shadow-lg w-full mx-auto font-inter h-full">
       <div className="flex justify-between items-center mb-4">
         <h2 className="text-xl font-semibold">Orders</h2>
-        <Link to="/dashboard/orders/add">
+        {/* <Link to="/dashboard/orders/add">
           <button className="btn bg-blue text-white hover:bg-blue">Add Order</button>
-        </Link>
+        </Link> */}
       </div>
       <table className="w-full border-collapse border border-gray-300">
         <thead>
@@ -116,20 +116,20 @@ const OrderContent = () => {
                 <td className="border border-gray-300 p-2">{new Date(order.created_at).toLocaleString()}</td>
                 <td className="border border-gray-300 p-2">
                   <div className="flex justify-center gap-2">
-                    <Link to={`/dashboard/orders/edit/${order.id}`}>
+                    {/* <Link to={`/dashboard/orders/edit/${order.id}`}>
                       <button className="btn btn-success text-white">Edit</button>
-                    </Link>
+                    </Link> */}
                     <button
                       onClick={() => handleDelete(order.id)}
                       className="btn btn-error text-white"
                     >
-                      Delete
+                      Cancel
                     </button>
                   </div>
                 </td>
                 <td className="border border-gray-300 p-2">
                   <Link to={`/dashboard/orders/details/${order.id}`}>
-                    <button className="btn btn-info text-white">View Details</button>
+                    <button className="btn bg-blue hover:bg-blue text-white">View Details</button>
                   </Link>
                 </td>
               </tr>
@@ -142,22 +142,23 @@ const OrderContent = () => {
         </tbody>
       </table>
       <div className="flex justify-between mt-4">
-        <button 
-          onClick={handlePreviousPage} 
-          disabled={page === 1} 
-          className="btn bg-gray-300 text-black"
-        >
-          Previous
-        </button>
-        <span>Page {page} of {totalPages}</span>
-        <button 
-          onClick={handleNextPage} 
-          disabled={page === totalPages} 
-          className="btn bg-gray-300 text-black"
-        >
-          Next
-        </button>
-      </div>
+  <p 
+    onClick={handlePreviousPage} 
+    className={`cursor-pointer ${page === 1 ? 'text-gray-400' : 'text-black'}`} 
+    style={{ pointerEvents: page === 1 ? 'none' : 'auto' }}
+  >
+    Previous
+  </p>
+  <span>Page {page} of {totalPages}</span>
+  <p 
+    onClick={handleNextPage} 
+    className={`cursor-pointer ${page === totalPages ? 'text-gray-400' : 'text-black'}`} 
+    style={{ pointerEvents: page === totalPages ? 'none' : 'auto' }}
+  >
+    Next
+  </p>
+</div>
+
     </div>
   );
 };

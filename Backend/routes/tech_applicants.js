@@ -153,6 +153,8 @@ router.post(
 
 router.post("/applicant-email/:id", async (req, res) => {
   const id = req.params.id;
+  const { username, password } = req.body; 
+
   const applicantQuery =
     "SELECT * FROM technician_applicants WHERE applicant_id = ?";
 
@@ -162,26 +164,61 @@ router.post("/applicant-email/:id", async (req, res) => {
       return res.status(500).send("Failed to send email");
     }
 
-    const applicants = result.map((row) => {
-      return {
-        email: row.email,
-        first_name: row.first_name,
-        last_name: row.last_name,
-      };
-    });
-    const applicant = applicants[0];
+    if (result.length === 0) {
+      return res.status(404).json({ message: "Applicant not found" });
+    }
+
+    const applicant = result[0]; 
 
     const mailOptions = {
       from: "kookkaball68@gmail.com",
       to: applicant.email,
       subject: "สถานะการสมัครงานของคุณ",
-      text: `สวัสดี ${applicant.first_name} ${applicant.last_name},\n\nขอบคุณที่สมัครงานกับเรา!\n\nขอบคุณ!`,
+      text: `
+        สวัสดี ${applicant.first_name} ${applicant.last_name},
+
+        ขอบคุณที่สมัครงานกับเรา! 
+
+        เราขอแสดงความยินดีที่คุณได้รับการรับรองแล้ว!
+
+        ข้อมูลการเข้าสู่ระบบของคุณคือ:
+        - **Username:** ${username}  
+        - **Password:** ${password}  
+
+        กรุณาเปลี่ยนรหัสผ่านของคุณหลังจากเข้าสู่ระบบครั้งแรก เพื่อความปลอดภัยของบัญชีของคุณ
+
+        หากคุณมีคำถามหรือต้องการข้อมูลเพิ่มเติม กรุณาติดต่อเราที่ [email or phone number].
+
+        ขอบคุณ!
+
+        ทีมงานของเรา
+      `,
+      html: `
+        <p>สวัสดี <strong>${applicant.first_name} ${applicant.last_name}</strong>,</p>
+        <p>ขอบคุณที่สมัครงานกับเรา!</p>
+        <p>เราขอแสดงความยินดีที่คุณได้รับการรับรองแล้ว!</p>
+        <p>ข้อมูลการเข้าสู่ระบบของคุณคือ:</p>
+        <ul>
+          <li><strong>Username:</strong> ${username}</li>  // Use the username from req.body
+          <li><strong>Password:</strong> ${password}</li>  // Use the password from req.body
+        </ul>
+        <p>กรุณาเปลี่ยนรหัสผ่านของคุณหลังจากเข้าสู่ระบบครั้งแรก เพื่อความปลอดภัยของบัญชีของคุณ</p>
+        <p>หากคุณมีคำถามหรือต้องการข้อมูลเพิ่มเติม กรุณาติดต่อเราที่ 085-907-7726.</p>
+        <p>ขอบคุณ!</p>
+        <p>ทีมงานของเรา</p>
+      `,
     };
 
-    transporter.sendMail(mailOptions);
-    res.status(200).json({ message: "Send email success" });
+    transporter.sendMail(mailOptions, (error, info) => {
+      if (error) {
+        console.error("Error sending email: " + error);
+        return res.status(500).send("Failed to send email");
+      }
+      res.status(200).json({ message: "Email sent successfully", info });
+    });
   });
 });
+
 
 router.put(
   "/applicants/:id",

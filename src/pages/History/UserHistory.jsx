@@ -21,14 +21,18 @@ const UserHistory = () => {
     try {
       // Fetch task history
       const taskResponse = await axios.get(
-        `${import.meta.env.VITE_SERVER_URL}/task-paging?id=${user_id}&page=${taskPage}&limit=10`
+        `${
+          import.meta.env.VITE_SERVER_URL
+        }/task-paging/${user_id}&page=${taskPage}&limit=10`
       );
       setTaskHistory(taskResponse.data.tasks);
       setTotalTasks(taskResponse.data.totalTasks);
 
       // Fetch order history
       const orderResponse = await axios.get(
-        `${import.meta.env.VITE_SERVER_URL}/v1/orders/${user_id}?page=${orderPage}&limit=10`
+        `${
+          import.meta.env.VITE_SERVER_URL
+        }/v1/orders/${user_id}?page=${orderPage}&limit=10`
       );
       setOrderHistory(orderResponse.data.orders);
       setTotalOrders(orderResponse.data.totalCount);
@@ -84,34 +88,37 @@ const UserHistory = () => {
             </thead>
             <tbody>
               {taskHistory.length > 0 ? (
-                taskHistory.map((task) => (
-                  <tr key={task.task_id}>
-                    <td>{task.task_id}</td>
-                    <td>{task.task_type_id}</td>
-                    <td>{task.description}</td>
-                    <td>{task.address}</td>
-                    <td>{task.status_id}</td>
-                    <td>{new Date(task.appointment_date).toLocaleString()}</td>
-                    <td>{new Date(task.created_at).toLocaleString()}</td>
-                    <td>
-                      <button onClick={() => handleTaskDetail(task.task_id)}>
-                        View details
-                      </button>
-                      {/* Render the review button if status_id is 2 */}
-                      {task.status_id === 2 && (
-                        <button
-                          onClick={() => handleReview(task.task_id)}
-                          className="ml-5 text-blue-600"
-                        >
-                          <div className="flex pt-1 mt-1 ">
-                            <MdOutlineStar className="text-yellow-400" />
-                            Rate and Review
-                          </div>
+                taskHistory
+                  .filter((task) => task.task_type_id === 1) // Filter tasks with task_type_id = 1
+                  .map((task) => (
+                    <tr key={task.task_id}>
+                      <td>{task.task_id}</td>
+                      <td>{task.task_type_id}</td>
+                      <td>{task.description}</td>
+                      <td>{task.address}</td>
+                      <td>{task.status_id}</td>
+                      <td>
+                        {new Date(task.appointment_date).toLocaleString()}
+                      </td>
+                      <td>{new Date(task.created_at).toLocaleString()}</td>
+                      <td>
+                        <button onClick={() => handleTaskDetail(task.task_id)}>
+                          View details
                         </button>
-                      )}
-                    </td>
-                  </tr>
-                ))
+                        {task.status_id === 2 && (
+                          <button
+                            onClick={() => handleReview(task.task_id)}
+                            className="ml-5 text-blue-600"
+                          >
+                            <div className="flex pt-1 mt-1 ">
+                              <MdOutlineStar className="text-yellow-400" />
+                              Rate and Review
+                            </div>
+                          </button>
+                        )}
+                      </td>
+                    </tr>
+                  ))
               ) : (
                 <tr>
                   <td colSpan="8" className="text-center">
@@ -121,6 +128,7 @@ const UserHistory = () => {
               )}
             </tbody>
           </table>
+
           <div className="flex justify-between mt-4">
             <button
               onClick={() => handleTaskPageChange(-1)}

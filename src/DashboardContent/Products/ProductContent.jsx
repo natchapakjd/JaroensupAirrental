@@ -2,16 +2,18 @@ import React, { useState, useEffect } from "react";
 import axios from "axios";
 import { Link } from "react-router-dom";
 import Swal from "sweetalert2";
-import { useAuth } from "../../context/AuthContext";
+import { jwtDecode } from "jwt-decode";
+import Cookies from "universal-cookie";
 
 const ProductContent = () => {
   const [products, setProducts] = useState([]);
-  const [role, setRole] = useState("");
-  const user = useAuth();
+  const cookies = new Cookies();
+  const token =cookies.get("authToken")
+  const decodedToken = jwtDecode(token)
+  const role = decodedToken.role
 
   useEffect(() => {
     fetchProducts();
-    setRole(user.user.role);
   }, []);
 
   const fetchProducts = async () => {
@@ -60,12 +62,17 @@ const ProductContent = () => {
     <div className="p-8 rounded-lg shadow-lg w-full mx-auto font-inter h-full">
       <div className="flex justify-between items-center mb-4">
         <h2 className="text-xl font-semibold mt-8">Product List</h2>
-        {role === 3 ? (
+        {role === 3 ? (<div>
           <Link to="/dashboard/products/add">
             <button className="btn bg-blue text-white hover:bg-blue">
               Add Product
             </button>
           </Link>
+          
+        </div>
+          
+         
+          
         ) : null}
       </div>
       <table className="w-full border-collapse border border-gray-300">
@@ -142,7 +149,7 @@ const ProductContent = () => {
                       </>
                     ) : <>
                      <Link
-                          to={`/dashboard/products/edit/${product.product_id}`}
+                          to={`/dashboard/borrow/${product.product_id}`}
                         >
                           <button className="btn btn-success text-white">
                             Borrow

@@ -89,16 +89,16 @@ const AddPayment = () => {
       <h2 className="text-2xl font-semibold mb-4">Add Payment</h2>
       <form onSubmit={handleSubmit}>
         <div className="mb-4">
-          <label className="block mb-2">Select Mode</label>
-          <select value={selectionMode} onChange={(e) => setSelectionMode(e.target.value)} className="input w-full">
+          <label className="block mb-2 ">Select Mode</label>
+          <select value={selectionMode} onChange={(e) => setSelectionMode(e.target.value)} className="input w-full border-gray-300">
             <option value="task">Task</option>
-            <option value="order">Order</option>
+            {/* <option value="order">Order</option> */}
           </select>
         </div>
         {selectionMode === 'task' && (
           <div className="mb-4">
             <label className="block mb-2">Task ID</label>
-            <select value={taskId} onChange={(e) => setTaskId(e.target.value)} className="input w-full" required>
+            <select value={taskId} onChange={(e) => setTaskId(e.target.value)} className="input w-full border border-gray-300" required>
               <option value="">Select Task</option>
               {tasks.map(task => (
                 <option key={task.task_id} value={task.task_id}>{task.task_id}</option>
@@ -109,7 +109,7 @@ const AddPayment = () => {
         {selectionMode === 'order' && (
           <div className="mb-4">
             <label className="block mb-2">Order ID</label>
-            <select value={orderId} onChange={(e) => setOrderId(e.target.value)} className="input w-full" required>
+            <select value={orderId} onChange={(e) => setOrderId(e.target.value)} className="input w-full border border-gray-300" required>
               <option value="">Select Order</option>
               {orders.map(order => (
                 <option key={order.id} value={order.id}>{order.id}</option>
@@ -119,7 +119,7 @@ const AddPayment = () => {
         )}
         <div className="mb-4">
           <label className="block mb-2">User ID</label>
-          <select value={userId} onChange={(e) => setUserId(e.target.value)} className="input w-full" required>
+          <select value={userId} onChange={(e) => setUserId(e.target.value)} className="input w-full border-gray-300" required>
             <option value="">Select User</option>
             {users.map(user => (
               <option key={user.user_id} value={user.user_id}>{user.user_id}</option>
@@ -128,11 +128,11 @@ const AddPayment = () => {
         </div>
         <div className="mb-4">
           <label className="block mb-2">Amount</label>
-          <input type="number" value={amount} onChange={(e) => setAmount(e.target.value)} className="input w-full" required />
+          <input type="number" value={amount} onChange={(e) => setAmount(e.target.value)} className="input w-full border-gray-300" required />
         </div>
         <div className="mb-4">
           <label className="block mb-2">Payment Method</label>
-          <select value={paymentMethod} onChange={(e) => setPaymentMethod(e.target.value)} className="input w-full" required>
+          <select value={paymentMethod} onChange={(e) => setPaymentMethod(e.target.value)} className="input w-full border-gray-300" required>
             <option value="">Select Payment Method</option>
             {paymentMethods.map(method => (
               <option key={method.method_id} value={method.method_id}>{method.method_name}</option>
@@ -141,15 +141,15 @@ const AddPayment = () => {
         </div>
         <div className="mb-4">
           <label className="block mb-2">Payment Date</label>
-          <input type="datetime-local" value={paymentDate} onChange={(e) => setPaymentDate(e.target.value)} className="input w-full" required />
+          <input type="datetime-local" value={paymentDate} onChange={(e) => setPaymentDate(e.target.value)} className="input w-full border-gray-300" required />
         </div>
         <div className="mb-4">
           <label className="block mb-2">Slip Images</label>
-          <input type="file" onChange={(e) => setSlipImages(e.target.files[0])} className="input w-full" />
+          <input type="file" onChange={(e) => setSlipImages(e.target.files[0])} className="input w-full border-gray-300" />
         </div>
         <div className="mb-4">
           <label className="block mb-2">Status</label>
-          <select value={status} onChange={(e) => setStatus(e.target.value)} className="input w-full">
+          <select value={status} onChange={(e) => setStatus(e.target.value)} className="input w-full border-gray-300">
             <option value="">Select Status</option>
             {statuses.map(statusOption => (
               <option key={statusOption.status_id} value={statusOption.status_id}>{statusOption.status_name}</option>

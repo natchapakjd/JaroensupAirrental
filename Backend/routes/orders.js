@@ -136,13 +136,14 @@ router.get("/v2/orders/count", (req, res) => {
     };
   
     db.query(
-      "INSERT INTO tasks (user_id, description, created_at, task_type_id, quantity_used) VALUES (?, ?, ?, ?, ?)",
+      "INSERT INTO tasks (user_id, description, created_at, task_type_id, quantity_used,isActive) VALUES (?, ?, ?, ?, ?,?)",
       [
         taskData.user_id,
         taskData.description,
         taskData.created_at,
         taskData.task_type_id,
         taskData.quantity_used,
+        taskData.isActive
       ],
       (err, taskResult) => {
         if (err) return res.status(500).send(err);

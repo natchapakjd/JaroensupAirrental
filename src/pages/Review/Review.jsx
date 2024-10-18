@@ -80,7 +80,7 @@ const Review = () => {
       <div className="container mx-auto mt-10 font-prompt">
         <h2 className="text-2xl font-bold mb-4">Submit Your Review</h2>
         {existingReview ? (
-          <div className="alert alert-warning my-5">
+          <div className="alert alert-success my-5 text-white">
             <strong>You have already submitted a review for this task.</strong>
             <p>Your Review: {existingReview.comment} - Rating: {existingReview.rating}</p>
           </div>
@@ -121,7 +121,7 @@ const Review = () => {
                 className="textarea textarea-bordered w-full"
               />
             </div>
-            <button type="submit" className="btn btn-primary">Submit Review</button>
+            <button type="submit" className="btn bg-blue text-white hover:bg-blue">Submit Review</button>
           </form>
         )}
       </div>

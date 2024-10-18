@@ -75,7 +75,7 @@ const Header = () => {
             </label>
             <ul
               tabIndex={0}
-              className="dropdown-content menu p-2 shadow bg-white rounded-box w-48 border border-gray-300 mt-2"
+              className="dropdown-content menu p-2 shadow bg-white rounded-box w-48 border border-gray-300 mt-2 z-50"
             >
               <li>
                 <a href="/dashboard/profile" className="hover:bg-gray-100 p-2 rounded">

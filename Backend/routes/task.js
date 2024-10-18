@@ -22,6 +22,7 @@ router.get("/task-paging", (req, res) => {
   const page = parseInt(req.query.page) || 1;
   const limit = parseInt(req.query.limit) || 10;
   const offset = (page - 1) * limit;
+  console.log(req.body)
 
   const query = "SELECT * FROM tasks LIMIT ? OFFSET ?";
 
@@ -46,6 +47,49 @@ router.get("/task-paging", (req, res) => {
   });
 });
 
+router.get("/task-paging/:id", (req, res) => {
+  const userId = req.params.id; // Get user_id from URL parameters
+  const limit = parseInt(req.query.limit) || 10; // Number of items per page
+  const page = parseInt(req.query.page) || 1; // Starting page
+  const offset = (page - 1) * limit; // Calculate offset
+
+  // Create the query to fetch tasks for a specific user
+  let query = "SELECT * FROM tasks WHERE user_id = ?"; // Assuming tasks have a user_id field
+  const queryParams = [userId];
+
+  // Add pagination
+  query += " LIMIT ? OFFSET ?";
+  queryParams.push(limit, offset);
+
+  db.query(query, queryParams, (err, result) => {
+    if (err) {
+      console.error("Error fetching tasks: ", err);
+      return res.status(500).json({ error: "Failed to fetch tasks" });
+    }
+
+    // Count the total number of tasks for the specific user
+    const countQuery = "SELECT COUNT(*) AS total FROM tasks WHERE user_id = ?";
+    
+    db.query(countQuery, [userId], (err, countResult) => {
+      if (err) {
+        console.error("Error fetching task count: ", err);
+        return res.status(500).json({ error: "Failed to fetch task count" });
+      }
+
+      const totalCount = countResult[0].total;
+      const totalPages = Math.ceil(totalCount / limit);
+
+      res.status(200).json({
+        totalCount,
+        totalPages,
+        currentPage: page,
+        tasks: result,
+      });
+    });
+  });
+});
+
+
 router.get("/task/:id", (req, res) => {
   const taskId = req.params.id;
 
@@ -64,6 +108,7 @@ router.get("/task/:id", (req, res) => {
     res.status(200).json(result[0]);
   });
 });
+
 
 router.get("/tasks", (req, res) => {
   const query = "SELECT * FROM tasks WHERE isActive = 1";
@@ -239,4 +284,27 @@ router.delete("/task/:id",isAdmin,(req, res) => {
   });
 });
 
+
+router.get("/tasks/assigned/:techId", (req, res) => {
+  const techId = req.params.techId;
+
+  const query = `
+    SELECT t.*, ta.assignment_id, ta.assigned_at
+    FROM tasks t
+    JOIN taskassignments ta ON t.task_id = ta.task_id
+    WHERE ta.tech_id = ?
+  `;
+
+  db.query(query, [techId], (err, results) => {
+    if (err) {
+      console.error("Error fetching assigned tasks: ", err);
+      return res.status(500).json({ error: "Failed to fetch assigned tasks" });
+    }
+
+    res.status(200).json({
+      tasks: results,
+      count: results.length, 
+    });
+  });
+});
 module.exports = router;

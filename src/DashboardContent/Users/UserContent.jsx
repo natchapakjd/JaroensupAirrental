@@ -2,7 +2,7 @@ import axios from "axios";
 import React, { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import Swal from "sweetalert2";
-import { format } from 'date-fns'; // Added date-fns for date formatting
+import { format } from "date-fns"; // Added date-fns for date formatting
 
 const UserContent = () => {
   const [users, setUsers] = useState([]);
@@ -13,7 +13,9 @@ const UserContent = () => {
 
   const fetchUsers = async () => {
     try {
-      const response = await axios.get(`${import.meta.env.VITE_SERVER_URL}/users`);
+      const response = await axios.get(
+        `${import.meta.env.VITE_SERVER_URL}/users`
+      );
       setUsers(response.data);
     } catch (error) {
       console.error("Error fetching users:", error);
@@ -31,10 +33,13 @@ const UserContent = () => {
       confirmButtonText: "Yes, delete it!",
       cancelButtonText: "Cancel",
     });
-  
+
     if (result.isConfirmed) {
       try {
-        const response = await axios.delete(`${import.meta.env.VITE_SERVER_URL}/user/${userId}`, { withCredentials: true });
+        const response = await axios.delete(
+          `${import.meta.env.VITE_SERVER_URL}/user/${userId}`,
+          { withCredentials: true }
+        );
         if (response.status === 200) {
           Swal.fire({
             title: "User deleted successfully",
@@ -53,11 +58,15 @@ const UserContent = () => {
       }
     }
   };
-  
 
   return (
-    <div className="font-inter mt-5">
+    <div className="font-inter mt-5 ">
       <div className="mb-4 flex justify-end mx-16">
+        <Link to="/dashboard/user/add-tech">
+            <button className="btn bg-warning hover:bg-warning text-white">
+              Add Technician
+            </button>
+        </Link>
         <Link to="/dashboard/user/add">
           <button className="btn bg-blue hover:bg-blue text-white">
             Add User
@@ -104,7 +113,7 @@ const UserContent = () => {
                 <td>{user.username}</td>
                 <td>{user.email}</td>
                 <td>{user.role}</td>
-                <td>{format(new Date(user.created_at), 'MM/dd/yyyy')}</td> 
+                <td>{format(new Date(user.created_at), "MM/dd/yyyy")}</td>
                 <td>
                   <div className="flex gap-2">
                     <Link to={`/dashboard/user/${user.user_id}`}>

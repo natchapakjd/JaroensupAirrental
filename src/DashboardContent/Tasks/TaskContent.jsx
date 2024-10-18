@@ -2,26 +2,35 @@ import React, { useState, useEffect } from "react";
 import axios from "axios";
 import { Link, useNavigate } from "react-router-dom";
 import Swal from "sweetalert2";
-import { useAuth } from "../../context/AuthContext";
+import Cookies from "universal-cookie";
+import { jwtDecode } from "jwt-decode";
 
 const TaskContent = () => {
   const [tasks, setTasks] = useState([]);
-  const [role, setRole] = useState();
+  const cookies = new Cookies();
+  const token = cookies.get("authToken");
+  const decodedToken = jwtDecode(token);
+  const role = decodedToken.role;
+  const techId = decodedToken.technicianId; 
+
   const navigate = useNavigate();
   const apiUrl = import.meta.env.VITE_SERVER_URL;
-  const user = useAuth();
 
   useEffect(() => {
     fetchTasks();
-    setRole(user.user.role);
   }, []);
 
   const fetchTasks = async () => {
     try {
-      const tasksResponse = await axios.get(`${apiUrl}/tasks`);
+      let tasksResponse;
+      if (role === 2) {
+        tasksResponse = await axios.get(`${apiUrl}/tasks/assigned/${techId}`);
+      } else {
+        tasksResponse = await axios.get(`${apiUrl}/tasks`);
+      }
 
-      if (Array.isArray(tasksResponse.data)) {
-        setTasks(tasksResponse.data);
+      if (Array.isArray(tasksResponse.data.tasks || tasksResponse.data)) {
+        setTasks(tasksResponse.data.tasks || tasksResponse.data);
       } else {
         console.error("Tasks response is not an array:", tasksResponse.data);
       }
@@ -44,7 +53,7 @@ const TaskContent = () => {
       });
 
       if (result.isConfirmed) {
-        const response = await axios.delete(`${apiUrl}/task/${taskId}`,{withCredentials:true});
+        const response = await axios.delete(`${apiUrl}/task/${taskId}`, { withCredentials: true });
         if (response.status === 204) {
           Swal.fire("Deleted!", "Your task has been deleted.", "success");
           setTasks(tasks.filter((task) => task.task_id !== taskId));
@@ -62,7 +71,7 @@ const TaskContent = () => {
   };
 
   const handleViewDetails = (taskId) => {
-    navigate(`/dashboard/tasks/${taskId}`); // Navigate to TaskDetails page
+    navigate(`/dashboard/tasks/${taskId}`); 
   };
 
   return (
@@ -73,14 +82,10 @@ const TaskContent = () => {
           {role === 3 ? (
             <>
               <Link to="/dashboard/tasks/add">
-                <button className="btn bg-blue text-white hover:bg-blue">
-                  Add Task
-                </button>
+                <button className="btn bg-blue text-white hover:bg-blue">Add Task</button>
               </Link>
               <Link to="/dashboard/tasks/assign">
-                <button className="btn btn-success text-white">
-                  Assign Task
-                </button>
+                <button className="btn btn-success text-white">Assign Task</button>
               </Link>
             </>
           ) : null}
@@ -112,30 +117,17 @@ const TaskContent = () => {
               return (
                 <tr key={task.task_id}>
                   <td className="border border-gray-300 p-2">{task.task_id}</td>
-                  <td className="border border-gray-300 p-2">
-                    {task.task_type_id}
-                  </td>
-                  <td className="border border-gray-300 p-2">
-                    {task.description}
-                  </td>
-                  <td className="border border-gray-300 p-2">
-                    {formattedDate}
-                  </td>
-                  <td className="border border-gray-300 p-2">
-                    {formattedTime}
-                  </td>
-                  <td className="border border-gray-300 p-2">
-                    {task.status_id}
-                  </td>
+                  <td className="border border-gray-300 p-2">{task.task_type_id}</td>
+                  <td className="border border-gray-300 p-2">{task.description}</td>
+                  <td className="border border-gray-300 p-2">{formattedDate}</td>
+                  <td className="border border-gray-300 p-2">{formattedTime}</td>
+                  <td className="border border-gray-300 p-2">{task.status_id}</td>
                   <td className="border border-gray-300 p-2">
                     <div className="flex justify-center gap-2">
                       {role === 3 ? (
                         <>
-                          {" "}
                           <Link to={`/dashboard/tasks/edit/${task.task_id}`}>
-                            <button className="btn btn-success text-white">
-                              Edit
-                            </button>
+                            <button className="btn btn-success text-white">Edit</button>
                           </Link>
                           <button
                             onClick={() => handleDelete(task.task_id)}
@@ -145,7 +137,6 @@ const TaskContent = () => {
                           </button>
                         </>
                       ) : null}
-
                       <button
                         onClick={() => handleViewDetails(task.task_id)}
                         className="btn bg-blue text-white hover:bg-blue"
@@ -159,9 +150,7 @@ const TaskContent = () => {
             })
           ) : (
             <tr>
-              <td colSpan="7" className="border border-gray-300 p-4">
-                No tasks available
-              </td>
+              <td colSpan="7" className="border border-gray-300 p-4">No tasks available</td>
             </tr>
           )}
         </tbody>
