@@ -48,6 +48,19 @@ router.get("/payment/:id", (req, res) => {
   });
 });
 
+  router.get("/payment-task/:id", (req, res) => {
+    const id = req.params.id;
+    const query = "SELECT * FROM payments WHERE task_id = ?";
+
+    db.query(query, [id], (err, result) => {
+      if (err) {
+        console.error("Error fetching payment: " + err);
+        res.status(500).json({ error: "Failed to fetch payment" });
+      } else {
+        res.json(result);
+      }
+    });
+  });
 // Create a new payment
 
 router.post("/payments", upload.single('slip_images'), async (req, res) => {
@@ -198,5 +211,44 @@ router.get('/payment-methods', (req, res) => {
   });
 });
 
+router.put("/payments/:paymentId/slip_image", upload.single('slip_image'), async (req, res) => {
+  const paymentId = req.params.paymentId;
+  let slipImagePath = null;
+  console.log(req.body)
+  console.log(slipImagePath)
+
+  try {
+    if (req.file) {
+      const uploadResult = await cloudinary.uploader.upload(req.file.path);
+      slipImagePath = uploadResult.secure_url;  
+    }
+
+    if (!slipImagePath) {
+      return res.status(400).json({ error: "No image uploaded." });
+    }
+
+    const query = `
+      UPDATE payments 
+      SET image_url = ? 
+      WHERE task_id = ?
+    `;
+    
+    db.query(query, [slipImagePath, paymentId], (err, result) => {
+      if (err) {
+        console.error("Error updating payment slip image: " + err);
+        return res.status(500).json({ error: "Failed to update payment slip image." });
+      }
+
+      if (result.affectedRows === 0) {
+        return res.status(404).json({ error: "Payment not found." });
+      }
+
+      res.status(200).json({ message: "Payment slip image updated successfully." });
+    });
+  } catch (error) {
+    console.error("Error uploading to Cloudinary: " + error);
+    res.status(500).json({ error: "Failed to upload image to Cloudinary" });
+  }
+});
 
 module.exports = router;

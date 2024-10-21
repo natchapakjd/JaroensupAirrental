@@ -82,7 +82,7 @@ const ApplicantDetails = () => {
       </div>
 
       <button onClick={() => navigate(-1)} className="btn bg-blue hover:bg-blue text-white w-full">
-        กลับ
+        Back
       </button>
     </div>
   );

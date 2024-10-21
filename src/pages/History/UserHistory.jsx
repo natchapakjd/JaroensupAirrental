@@ -14,9 +14,11 @@ const UserHistory = () => {
   const [totalOrders, setTotalOrders] = useState(0);
   const [taskPage, setTaskPage] = useState(1);
   const [orderPage, setOrderPage] = useState(1);
+  const [paymentHistory, setPaymentHistory] = useState({}); // Store payment info
   const user_id = token.user.id;
   const navigate = useNavigate(); // Initialize navigate
 
+  // Fetch user data (task history, order history, and payment info)
   const fetchUserData = async (taskPage, orderPage) => {
     try {
       // Fetch task history
@@ -27,7 +29,7 @@ const UserHistory = () => {
       );
       setTaskHistory(taskResponse.data.tasks);
       setTotalTasks(taskResponse.data.totalTasks);
-
+      console.log(taskResponse)
       // Fetch order history
       const orderResponse = await axios.get(
         `${
@@ -36,6 +38,17 @@ const UserHistory = () => {
       );
       setOrderHistory(orderResponse.data.orders);
       setTotalOrders(orderResponse.data.totalCount);
+
+      // Fetch payment history
+      const paymentResponse = await axios.get(
+        `${import.meta.env.VITE_SERVER_URL}/payments/${user_id}`
+      );
+      const payments = paymentResponse.data.reduce((acc, payment) => {
+        acc[payment.task_id] = payment; 
+        return acc;
+      }, {});
+     
+      setPaymentHistory(payments);
     } catch (error) {
       console.error("Error fetching user history:", error);
     }
@@ -44,6 +57,7 @@ const UserHistory = () => {
   useEffect(() => {
     fetchUserData(taskPage, orderPage);
   }, [taskPage, orderPage, user_id]);
+  
 
   const handleTaskPageChange = (direction) => {
     setTaskPage((prev) => Math.max(1, prev + direction));
@@ -63,6 +77,11 @@ const UserHistory = () => {
 
   const handleReview = (taskId) => {
     navigate(`/review/${taskId}`); // Navigate to the review page
+  };
+
+
+  const handlePayment = (paymentId) => {
+    navigate(`/payment/${paymentId}`); // Navigate to the review page
   };
 
   return (
@@ -106,15 +125,31 @@ const UserHistory = () => {
                           View details
                         </button>
                         {task.status_id === 2 && (
-                          <button
-                            onClick={() => handleReview(task.task_id)}
-                            className="ml-5 text-blue-600"
-                          >
-                            <div className="flex pt-1 mt-1 ">
-                              <MdOutlineStar className="text-yellow-400" />
-                              Rate and Review
-                            </div>
-                          </button>
+                          <>
+                            <button
+                              onClick={() => handleReview(task.task_id)}
+                              className="ml-5 text-blue-600"
+                            >
+                              <div className="flex pt-1 mt-1 ">
+                                <MdOutlineStar className="text-yellow-400" />
+                                Rate and Review
+                              </div>
+                            </button>
+
+                          </>
+                        )}
+                        {paymentHistory[task.task_id] && (
+                          <>
+                            <button
+                              onClick={() => handlePayment(task.task_id)}
+                              className="ml-5 text-blue-600"
+                            >
+                              <div className="flex pt-1 mt-1 ">
+                                แนปสลิป
+                              </div>
+                            </button>
+
+                          </>
                         )}
                       </td>
                     </tr>

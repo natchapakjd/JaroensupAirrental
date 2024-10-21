@@ -42,6 +42,7 @@ import BorrowProductContent from '../DashboardContent/BorrowProduct/BorrowProduc
 import BorrowProductTable from '../DashboardContent/BorrowProduct/BorrowProductTable'
 import ProfileSetting from '../pages/Settings/ProfileSetting'
 import AddTechnician from '../DashboardContent/Users/AddTechnician'
+import SendApplicantEmail from '../DashboardContent/TechnicianApplicants/SendApplicantEmail'
 import LineProfile from '../pages/Settings/LineProfile'
 
 const DashboardRoute = () => {
@@ -61,6 +62,7 @@ const DashboardRoute = () => {
             <Route path="tasks/:taskId" element={<TaskDetails />} />
             <Route path="applicants" element={<ApplicantContent />} />
             <Route path="applicants/:id" element={<ApplicantDetails />} />
+            <Route path="applicant/sending-email/:id" element={<SendApplicantEmail />} />
             <Route path="history-log" element={<HistoryLogContent />} />
             <Route path="reviews" element={<ReviewContent />} />
             <Route path="payments" element={<PaymentContent />} />

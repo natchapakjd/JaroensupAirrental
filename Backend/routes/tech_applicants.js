@@ -35,7 +35,7 @@ const storage = multer.diskStorage({
 const upload = multer({ storage: storage });
 
 router.get("/applicants", (req, res) => {
-  const query = "SELECT * FROM  technician_applicants WHERE status_id = 1";
+  const query = "SELECT * FROM  technician_applicants";
 
   db.query(query, (err, result) => {
     if (err) {
@@ -215,6 +215,63 @@ router.post("/applicant-email/:id", async (req, res) => {
         return res.status(500).send("Failed to send email");
       }
       res.status(200).json({ message: "Email sent successfully", info });
+    });
+  });
+});
+
+router.post("/applicant-congratulations/:id", async (req, res) => {
+  const id = req.params.id;
+
+  const applicantQuery = "SELECT * FROM technician_applicants WHERE applicant_id = ?";
+
+  db.query(applicantQuery, [id], (err, result) => {
+    if (err) {
+      console.error("Failed to send email " + err);
+      return res.status(500).send("Failed to send email");
+    }
+
+    if (result.length === 0) {
+      return res.status(404).json({ message: "Applicant not found" });
+    }
+
+    const applicant = result[0];
+
+    const mailOptions = {
+      from: "kookkaball68@gmail.com",
+      to: applicant.email,
+      subject: "สถานะการสมัครงานของคุณ",
+      text: `
+        สวัสดี ${applicant.first_name} ${applicant.last_name},
+
+        ขอบคุณที่สมัครงานกับเรา!
+
+        เราขอแสดงความยินดีที่คุณได้รับการรับรองแล้ว! 
+
+        เราจะส่งข้อมูลการเข้าสู่ระบบของคุณให้เร็วๆ นี้ กรุณารอการติดต่อจากเรา
+
+        หากคุณมีคำถามหรือต้องการข้อมูลเพิ่มเติม กรุณาติดต่อเราที่ 085-907-7726.
+
+        ขอบคุณ!
+
+        ทีมงานของเรา
+      `,
+      html: `
+        <p>สวัสดี <strong>${applicant.first_name} ${applicant.last_name}</strong>,</p>
+        <p>ขอบคุณที่สมัครงานกับเรา!</p>
+        <p>เราขอแสดงความยินดีที่คุณได้รับการรับรองแล้ว!</p>
+        <p>เราจะส่งข้อมูลการเข้าสู่ระบบของคุณให้เร็วๆ นี้ กรุณารอติดต่อจากเรา</p>
+        <p>หากคุณมีคำถามหรือต้องการข้อมูลเพิ่มเติม กรุณาติดต่อเราที่ 085-907-7726.</p>
+        <p>ขอบคุณ!</p>
+        <p>ทีมงานของเรา</p>
+      `,
+    };
+
+    transporter.sendMail(mailOptions, (error, info) => {
+      if (error) {
+        console.error("Error sending email: " + error);
+        return res.status(500).send("Failed to send email");
+      }
+      res.status(200).json({ message: "Congratulatory email sent successfully", info });
     });
   });
 });

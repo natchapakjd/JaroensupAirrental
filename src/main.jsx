@@ -27,7 +27,7 @@ import LineProfile from "./pages/Settings/LineProfile";
 import RegisterToTech from "./pages/Authentication/RegisterToTech";
 import DashboardRoute from "./DashboardPage/DashboardRoute";
 import { AuthProvider } from "./context/AuthContext";
-
+import Payment from "./pages/Payment/Payment";
 const router = createBrowserRouter([
   {
     path: "/",
@@ -132,6 +132,10 @@ const router = createBrowserRouter([
   {
     path: "/register-tech",
     element: <RegisterToTech />,
+  },
+  {
+    path: "/payment/:paymentId",
+    element: <Payment />,
   },
 ]);
 

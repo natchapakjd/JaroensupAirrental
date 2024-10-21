@@ -22,7 +22,6 @@ router.get("/task-paging", (req, res) => {
   const page = parseInt(req.query.page) || 1;
   const limit = parseInt(req.query.limit) || 10;
   const offset = (page - 1) * limit;
-  console.log(req.body)
 
   const query = "SELECT * FROM tasks LIMIT ? OFFSET ?";
 
@@ -48,16 +47,14 @@ router.get("/task-paging", (req, res) => {
 });
 
 router.get("/task-paging/:id", (req, res) => {
-  const userId = req.params.id; // Get user_id from URL parameters
-  const limit = parseInt(req.query.limit) || 10; // Number of items per page
-  const page = parseInt(req.query.page) || 1; // Starting page
-  const offset = (page - 1) * limit; // Calculate offset
+  const userId = req.params.id; 
+  const limit = parseInt(req.query.limit) || 10; 
+  const page = parseInt(req.query.page) || 1; 
+  const offset = (page - 1) * limit; 
 
-  // Create the query to fetch tasks for a specific user
-  let query = "SELECT * FROM tasks WHERE user_id = ?"; // Assuming tasks have a user_id field
+  let query = "SELECT * FROM tasks WHERE user_id = ?"; 
   const queryParams = [userId];
 
-  // Add pagination
   query += " LIMIT ? OFFSET ?";
   queryParams.push(limit, offset);
 
@@ -67,7 +64,6 @@ router.get("/task-paging/:id", (req, res) => {
       return res.status(500).json({ error: "Failed to fetch tasks" });
     }
 
-    // Count the total number of tasks for the specific user
     const countQuery = "SELECT COUNT(*) AS total FROM tasks WHERE user_id = ?";
     
     db.query(countQuery, [userId], (err, countResult) => {
@@ -76,18 +72,15 @@ router.get("/task-paging/:id", (req, res) => {
         return res.status(500).json({ error: "Failed to fetch task count" });
       }
 
-      const totalCount = countResult[0].total;
-      const totalPages = Math.ceil(totalCount / limit);
-
+      const totalTasks = countResult[0].total; 
       res.status(200).json({
-        totalCount,
-        totalPages,
-        currentPage: page,
-        tasks: result,
+        tasks: result,        
+        totalTasks: totalTasks,
       });
     });
   });
 });
+
 
 
 router.get("/task/:id", (req, res) => {
