@@ -44,7 +44,7 @@ const OrderDetails = () => {
             <p>Order Date: {new Date(order.created_at).toLocaleString()}</p>
           </div>
           <h4 className="font-semibold mb-2">Items:</h4>
-          <table className="w-full border-collapse border border-gray-300">
+          <table className="w-full border-collapse border border-gray-300 text-center">
             <thead>
               <tr>
                 <th className="border border-gray-300 p-2">Product ID</th>

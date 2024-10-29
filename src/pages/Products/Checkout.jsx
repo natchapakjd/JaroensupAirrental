@@ -31,6 +31,8 @@ const Checkout = () => {
       if (response.status === 200) {
         const data = response.data;
         setProfile(data);
+        console.log(profile)
+
       }
     } catch (err) {
       console.log(err);
@@ -38,6 +40,7 @@ const Checkout = () => {
   };
 
   const sendMessage = async () => {
+    if (!profile) return; 
     const messageResponse = await fetch(
       `${import.meta.env.VITE_SERVER_URL}/send-message`,
       {
@@ -45,17 +48,16 @@ const Checkout = () => {
         headers: {
           "Content-Type": "application/json",
         },
-
         body: JSON.stringify({
           userId: profile.linetoken,
-          message: `Your Task has been placed successfully!`,
+          message: `สวัสดี ${profile.firstname} ${profile.lastname}!\n\nคำสั่งซื้อของคุณได้ถูกบันทึกเรียบร้อยแล้ว.\n\nขอบคุณที่เลือกใช้บริการของเรา! หากมีข้อสงสัยหรือคำถามเพิ่มเติม กรุณาติดต่อเราได้ทุกเมื่อ.\n\nขอให้คุณมีวันที่ดี!`,
         }),
       }
     );
-
+  
     if (!messageResponse.ok) throw new Error("Failed to send message");
   };
-
+  
   const handleCheckout = async () => {
     const totalPrice = cartItems
       .reduce((acc, item) => acc + item.price * item.quantity, 0)

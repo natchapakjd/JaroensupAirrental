@@ -36,7 +36,7 @@ const Login = () => {
       const decodedToken = jwtDecode(receivedToken);
       decodedToken.role === 3 || decodedToken.role === 2
         ? setTimeout(() => {
-            navigate("/dashboard");
+            navigate("/dashboard/home");
           }, 800)
         : setTimeout(() => {
             navigate("/");

@@ -1,6 +1,7 @@
-import React, { useEffect, useState } from 'react';
-import axios from 'axios';
-import Swal from 'sweetalert2';
+import React, { useEffect, useState } from "react";
+import { Link } from "react-router-dom"; // Import Link for navigation
+import axios from "axios";
+import Swal from "sweetalert2";
 
 const ReviewContent = () => {
   const [reviews, setReviews] = useState([]);
@@ -28,6 +29,42 @@ const ReviewContent = () => {
     fetchReviews();
   }, []);
 
+  const handleDelete = async (reviewId) => {
+    const confirmDelete = await Swal.fire({
+      title: "Are you sure?",
+      text: "This review will be permanently deleted!",
+      icon: "warning",
+      showCancelButton: true,
+      confirmButtonColor: "#d33",
+      cancelButtonColor: "#3085d6",
+      confirmButtonText: "Yes, delete it!",
+    });
+
+    if (confirmDelete.isConfirmed) {
+      try {
+        const response = await axios.delete(`${apiUrl}/review/${reviewId}`, {
+          withCredentials: true,
+        });
+        setReviews((prevReviews) =>
+          prevReviews.filter((review) => review.review_id !== reviewId)
+        );
+
+        await Swal.fire({
+          icon: "success",
+          title: "Deleted!",
+          text: response.data.message,
+        });
+      } catch (err) {
+        console.error("Error deleting review:", err);
+        await Swal.fire({
+          title: "Error",
+          text: "Failed to delete review.",
+          icon: "error",
+        });
+      }
+    }
+  };
+
   if (loading) return <div className="text-center">Loading...</div>;
   if (error) return <div className="text-red-500 text-center">{error}</div>;
 
@@ -43,6 +80,7 @@ const ReviewContent = () => {
             <th className="border border-gray-300 p-2">Comment</th>
             <th className="border border-gray-300 p-2">Rating</th>
             <th className="border border-gray-300 p-2">Date</th>
+            <th className="border border-gray-300 p-2">Actions</th>
           </tr>
         </thead>
         <tbody className="text-center">
@@ -54,12 +92,30 @@ const ReviewContent = () => {
                 <td className="border border-gray-300 p-2">{review.tech_id}</td>
                 <td className="border border-gray-300 p-2">{review.comment}</td>
                 <td className="border border-gray-300 p-2">{review.rating}</td>
-                <td className="border border-gray-300 p-2">{new Date(review.created_at).toLocaleString()}</td>
+                <td className="border border-gray-300 p-2">
+                  {new Date(review.created_at).toLocaleString()}
+                </td>
+                <td className="border border-gray-300 p-2">
+                  <Link
+                    to={`/dashboard/reviews/${review.review_id}`} // Link to the edit page
+                    className="btn bg-blue hover:bg-blue text-white mr-2"
+                  >
+                    Edit
+                  </Link>
+                  <button
+                    onClick={() => handleDelete(review.review_id)}
+                    className="btn btn-error text-white"
+                  >
+                    Delete
+                  </button>
+                </td>
               </tr>
             ))
           ) : (
             <tr>
-              <td colSpan="6" className="border border-gray-300 p-4">No reviews available</td>
+              <td colSpan="7" className="border border-gray-300 p-4">
+                No reviews available
+              </td>
             </tr>
           )}
         </tbody>

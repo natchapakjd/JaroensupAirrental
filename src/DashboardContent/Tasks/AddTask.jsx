@@ -21,7 +21,7 @@ const AddTask = () => {
   const [appointmentDate, setAppointmentDate] = useState("");
   const [address, setAddress] = useState("");
   const [quantityUsed, setQuantityUsed] = useState("");
-  const [productId, setProductId] = useState("");
+  // const [productId, setProductId] = useState("");
   const [userId, setUserId] = useState("");
   const [latitude, setLatitude] = useState("");
   const [longitude, setLongitude] = useState("");
@@ -75,13 +75,20 @@ const AddTask = () => {
         appointment_date: appointmentDate,
         address,
         quantity_used: quantityUsed,
-        product_id: productId,
+        // product_id: productId,
         user_id: userId,
         latitude,
         longitude,
       });
 
       if (response.status === 201) {
+        // Log the addition of a new task
+        await axios.post(`${apiUrl}/task-log`, {
+          task_id: response.data.task_id, // Assuming the response contains the new task ID
+          user_id: userId,
+          action: "เพิ่มงาน",
+        });
+
         navigate("/dashboard/tasks");
       }
     } catch (error) {
@@ -109,7 +116,7 @@ const AddTask = () => {
             ))}
           </select>
         </div>
-        <div>
+        {/* <div>
           <label className="block mb-2">Product</label>
           <select
             value={productId}
@@ -123,7 +130,7 @@ const AddTask = () => {
               </option>
             ))}
           </select>
-        </div>
+        </div> */}
         <div>
           <label className="block mb-2">User</label>
           <select

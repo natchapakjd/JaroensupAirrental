@@ -7,16 +7,17 @@ const isAdmin = require('../middlewares/isAdmin');
 // Uncomment if you want to restrict access
 // router.use(isAdmin);
 
-router.get("/technicians", async (req, res) => {
+router.get("/technicians", (req, res) => {
   const query = "SELECT * FROM technicians";
 
-  try {
-    const [result] = await db.query(query);
-    res.json(result);
-  } catch (err) {
-    console.error("Error fetching technicians: " + err);
-    res.status(500).json({ error: "Failed to fetch technicians" });
-  }
+  db.query(query, (err, result) => {
+    if (err) {
+      console.error("Error fetching technicians: " + err);
+      res.status(500).json({ error: "Failed to fetch technicians" });
+    } else {
+      res.json(result);
+    }
+  });
 });
 
 router.get("/technician/:id", async (req, res) => {

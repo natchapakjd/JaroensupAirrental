@@ -88,7 +88,7 @@ const Header = () => {
                 </a>
               </li>
               <li>
-                <a href="/line-profile" className="hover:bg-gray-100 p-2 rounded">
+                <a href="/settings" className="hover:bg-gray-100 p-2 rounded">
                   Notification
                 </a>
               </li>

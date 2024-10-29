@@ -3,7 +3,8 @@ import axios from 'axios';
 import Swal from 'sweetalert2';
 
 const HistoryLogContent = () => {
-  const [logs, setLogs] = useState([]);
+  const [adminLogs, setAdminLogs] = useState([]);
+  const [taskLogs, setTaskLogs] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const apiUrl = import.meta.env.VITE_SERVER_URL;
@@ -11,8 +12,11 @@ const HistoryLogContent = () => {
   useEffect(() => {
     const fetchLogs = async () => {
       try {
-        const response = await axios.get(`${apiUrl}/adminLogs`);
-        setLogs(response.data);
+        const adminResponse = await axios.get(`${apiUrl}/adminLogs`);
+        setAdminLogs(adminResponse.data);
+
+        const taskResponse = await axios.get(`${apiUrl}/task-log`);
+        setTaskLogs(taskResponse.data);
       } catch (err) {
         setError(err.message);
         Swal.fire({
@@ -34,7 +38,7 @@ const HistoryLogContent = () => {
   return (
     <div className="p-8 rounded-lg shadow-lg w-full mx-auto h-screen">
       <h2 className="text-xl font-semibold mb-4">Admin Logs</h2>
-      <table className="w-full border-collapse border border-gray-300">
+      <table className="w-full border-collapse border border-gray-300 mb-8">
         <thead>
           <tr>
             <th className="border border-gray-300 p-2">Log ID</th>
@@ -44,18 +48,48 @@ const HistoryLogContent = () => {
           </tr>
         </thead>
         <tbody className="text-center">
-          {logs.length > 0 ? (
-            logs.map((log) => (
+          {adminLogs.length > 0 ? (
+            adminLogs.map((log) => (
               <tr key={log.log_id}>
                 <td className="border border-gray-300 p-2">{log.log_id}</td>
                 <td className="border border-gray-300 p-2">{log.admin_id}</td>
                 <td className="border border-gray-300 p-2">{log.action}</td>
-                <td className="border border-gray-300 p-2">{new Date(log.timestamp).toLocaleString()}</td> 
+                <td className="border border-gray-300 p-2">{new Date(log.timestamp).toLocaleString()}</td>
               </tr>
             ))
           ) : (
             <tr>
-              <td colSpan="4" className="border border-gray-300 p-4">No logs available</td>
+              <td colSpan="4" className="border border-gray-300 p-4">No admin logs available</td>
+            </tr>
+          )}
+        </tbody>
+      </table>
+
+      <h2 className="text-xl font-semibold mb-4">Task Logs</h2>
+      <table className="w-full border-collapse border border-gray-300">
+        <thead>
+          <tr>
+            <th className="border border-gray-300 p-2">Log ID</th>
+            <th className="border border-gray-300 p-2">Task ID</th>
+            <th className="border border-gray-300 p-2">User ID</th>
+            <th className="border border-gray-300 p-2">Action</th>
+            <th className="border border-gray-300 p-2">Date</th>
+          </tr>
+        </thead>
+        <tbody className="text-center">
+          {taskLogs.length > 0 ? (
+            taskLogs.map((log) => (
+              <tr key={log.log_id}>
+                <td className="border border-gray-300 p-2">{log.log_id}</td>
+                <td className="border border-gray-300 p-2">{log.task_id}</td>
+                <td className="border border-gray-300 p-2">{log.user_id}</td>
+                <td className="border border-gray-300 p-2">{log.action}</td>
+                <td className="border border-gray-300 p-2">{new Date(log.created_at).toLocaleString()}</td>
+              </tr>
+            ))
+          ) : (
+            <tr>
+              <td colSpan="5" className="border border-gray-300 p-4">No task logs available</td>
             </tr>
           )}
         </tbody>

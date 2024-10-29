@@ -37,6 +37,8 @@ router.get("/users", (req, res) => {
         role: row.role,
         created_at: row.created_at,
         image_url: row.image_url,
+        role_id:row.role_id,
+        gender_id: row.gender_id,
       };
     });
 
@@ -62,6 +64,7 @@ router.get("/user/:id", (req, res) => {
 
     const user = {
       user_id: row.user_id,
+      role_id:row.role_id,
       username: row.username,
       email: row.email,
       role: row.role,
@@ -71,7 +74,7 @@ router.get("/user/:id", (req, res) => {
       role: row.role_id,
       age: row.age,
       address: row.address,
-      gender_id: row.gender,
+      gender_id: row.gender_id,
       date_of_birth: row.date_of_birth,
       created_at: row.created_at,
       firstname: row.firstname,
@@ -116,7 +119,7 @@ router.post("/change-password", (req, res) => {
   });
 });
 
-router.put("/user/:id",isAdmin,upload.single("profile_image"), async (req, res) => {
+router.put("/user/:id",upload.single("profile_image"), async (req, res) => {
   const id = req.params.id;
   const {
     firstname,

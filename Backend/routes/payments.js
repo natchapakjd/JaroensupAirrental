@@ -34,9 +34,9 @@ router.get("/payments", (req, res) => {
 });
 
 // Fetch a single payment by ID
-router.get("/payment/:id", (req, res) => {
+router.get("/payments/:id", (req, res) => {
   const id = req.params.id;
-  const query = "SELECT * FROM payments WHERE payment_id = ?";
+  const query = "SELECT * FROM payments WHERE user_id = ?";
 
   db.query(query, [id], (err, result) => {
     if (err) {

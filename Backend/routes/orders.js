@@ -119,6 +119,7 @@ router.get("/v2/orders/count", (req, res) => {
       res.status(200).json({ totalOrders });
     });
   });
+  
   router.post("/v2/orders", (req, res) => {
     const { user_id, items, total_price } = req.body; 
   

@@ -30,104 +30,77 @@ router.get("/adminLog/:id", (req, res) => {
   });
 });
 
-router.post("/adminLog", (req, res) => {
-  const { admin_id, action } = req.body;
-
-  if (!admin_id || !action) {
-    return res.status(400).json({ error: "admin_id and action are required" });
-  }
-
-  const query = "INSERT INTO adminlogs (admin_id, action) VALUES (?, ?)";
+router.post('/task-log', (req, res) => {
+  const { task_id, user_id, action } = req.body;
+  const query = 'INSERT INTO task_log (task_id, user_id, action) VALUES (?, ?, ?)';
   
-  db.query(query, [admin_id, action], (err, result) => {
+  db.query(query, [task_id, user_id, action], (err, result) => {
     if (err) {
-      console.error("Error logging admin action: " + err);
-      res.status(500).json({ error: "Failed to log admin action" });
-    } else {
-      res.status(201).json({ message: "Admin action logged successfully", log_id: result.insertId });
+      console.error('Error creating task log:', err);
+      return res.status(500).json({ error: 'Failed to create task log' });
     }
+    res.status(201).json({ log_id: result.insertId, message: 'Task log created successfully' });
   });
 });
 
-
-
-router.get("/borrowingLogs", (req, res) => {
-  const query = "SELECT * FROM equipment_borrowing_log";
-
-  db.query(query, (err, result) => {
-    if (err) {
-      console.error("Error fetching borrowing logs: " + err);
-      res.status(500).json({ error: "Failed to fetch borrowing logs" });
-    } else {
-      res.json(result);
-    }
-  });
-});
-
-router.get("/borrowingLog/:id", (req, res) => {
-  const id = req.params.id;
-  const query = "SELECT * FROM equipment_borrowing_log WHERE log_id = ?";
-
-  db.query(query, [id], (err, result) => {
-    if (err) {
-      console.error("Error fetching borrowing log: " + err);
-      res.status(500).json({ error: "Failed to fetch borrowing log" });
-    } else {
-      res.json(result[0]); 
-    }
-  });
-});
-
-router.post("/borrowingLog", isAdmin, (req, res) => {
-  const { borrowing_id, action, quantity, tech_id } = req.body;
-
-  if (!borrowing_id || !action || quantity === undefined || !tech_id) {
-    return res.status(400).json({ error: "borrowing_id, action, quantity, and tech_id are required" });
-  }
-
-  const query = "INSERT INTO equipment_borrowing_log (borrowing_id, action, quantity, tech_id) VALUES (?, ?, ?, ?)";
+router.get('/task-log', (req, res) => {
+  const query = 'SELECT * FROM task_log';
   
-  db.query(query, [borrowing_id, action, quantity, tech_id], (err, result) => {
+  db.query(query, (err, results) => {
     if (err) {
-      console.error("Error logging borrowing action: " + err);
-      res.status(500).json({ error: "Failed to log borrowing action" });
-    } else {
-      res.status(201).json({ message: "Borrowing action logged successfully", log_id: result.insertId });
+      console.error('Error fetching task logs:', err);
+      return res.status(500).json({ error: 'Failed to fetch task logs' });
     }
+    res.json(results);
   });
 });
 
-router.put("/borrowingLog/:id", isAdmin, (req, res) => {
-  const id = req.params.id;
-  const { borrowing_id, action, quantity, tech_id } = req.body;
-
-  const query = "UPDATE equipment_borrowing_log SET borrowing_id = ?, action = ?, quantity = ?, tech_id = ? WHERE log_id = ?";
-
-  db.query(query, [borrowing_id, action, quantity, tech_id, id], (err, result) => {
+router.get('/task-log/:id', (req, res) => {
+  const logId = req.params.id;
+  const query = 'SELECT * FROM task_log WHERE log_id = ?';
+  
+  db.query(query, [logId], (err, results) => {
     if (err) {
-      console.error("Error updating borrowing log: " + err);
-      res.status(500).json({ error: "Failed to update borrowing log" });
-    } else if (result.affectedRows === 0) {
-      res.status(404).json({ error: "Borrowing log not found" });
-    } else {
-      res.json({ message: "Borrowing log updated successfully" });
+      console.error('Error fetching task log:', err);
+      return res.status(500).json({ error: 'Failed to fetch task log' });
     }
+    if (results.length === 0) {
+      return res.status(404).json({ error: 'Task log not found' });
+    }
+    res.json(results[0]);
   });
 });
 
-router.delete("/borrowingLog/:id", isAdmin, (req, res) => {
-  const id = req.params.id;
-  const query = "DELETE FROM equipment_borrowing_log WHERE log_id = ?";
+router.put('/task-log/:id', (req, res) => {
+  const logId = req.params.id;
+  const { task_id, user_id, action } = req.body;
+  const query = 'UPDATE task_log SET task_id = ?, user_id = ?, action = ? WHERE log_id = ?';
 
-  db.query(query, [id], (err, result) => {
+  db.query(query, [task_id, user_id, action, logId], (err, result) => {
     if (err) {
-      console.error("Error deleting borrowing log: " + err);
-      res.status(500).json({ error: "Failed to delete borrowing log" });
-    } else if (result.affectedRows === 0) {
-      res.status(404).json({ error: "Borrowing log not found" });
-    } else {
-      res.json({ message: "Borrowing log deleted successfully" });
+      console.error('Error updating task log:', err);
+      return res.status(500).json({ error: 'Failed to update task log' });
     }
+    if (result.affectedRows === 0) {
+      return res.status(404).json({ error: 'Task log not found' });
+    }
+    res.json({ message: 'Task log updated successfully' });
+  });
+});
+
+router.delete('/task-log/:id', (req, res) => {
+  const logId = req.params.id;
+  const query = 'DELETE FROM task_log WHERE log_id = ?';
+
+  db.query(query, [logId], (err, result) => {
+    if (err) {
+      console.error('Error deleting task log:', err);
+      return res.status(500).json({ error: 'Failed to delete task log' });
+    }
+    if (result.affectedRows === 0) {
+      return res.status(404).json({ error: 'Task log not found' });
+    }
+    res.json({ message: 'Task log deleted successfully' });
   });
 });
 

@@ -47,7 +47,7 @@ const BorrowProductContent = () => {
   };
 
   return (
-    <div className="p-6 max-w-lg mx-auto bg-white rounded-xl shadow-md">
+    <div className="p-6 max-w-lg mx-auto bg-white rounded-xl shadow-md my-5">
       <h2 className="text-2xl font-bold mb-4">Borrow Equipment</h2>
       <form onSubmit={handleSubmit}>
         <div className="mb-4">

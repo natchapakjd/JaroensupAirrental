@@ -130,6 +130,8 @@ const RentAC = () => {
   };
 
   const sendMessage = async () => {
+    if (!profile) return; // Ensure profile is loaded
+  
     const messageResponse = await fetch(
       `${import.meta.env.VITE_SERVER_URL}/send-message`,
       {
@@ -139,14 +141,14 @@ const RentAC = () => {
         },
         body: JSON.stringify({
           userId: profile.linetoken,
-          message: `Your Task has been placed successfully!`,
+          message: `สวัสดี ${profile.firstname} ${profile.lastname}!\n\nงานของคุณได้ถูกบันทึกเรียบร้อยแล้ว.\n\nขอบคุณที่เลือกใช้บริการของเรา! หากมีข้อสงสัยหรือคำถามเพิ่มเติม กรุณาติดต่อเราได้ทุกเมื่อ.\n\nขอให้คุณมีวันที่ดี!`,
         }),
       }
     );
-
+  
     if (!messageResponse.ok) throw new Error("Failed to send message");
   };
-
+  
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {

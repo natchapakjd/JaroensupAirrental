@@ -92,7 +92,7 @@ const ReportContent = () => {
           <Legend />
           <Bar dataKey="task_count" fill="#8884d8" />
           <Bar dataKey="order_count" fill="#82ca9d" />
-          <Bar dataKey="payment_count" fill="#ff7300" />
+          <Bar dataKey="payment_count" fill="#82cacd" />
           </BarChart>
       </div>
 
@@ -115,8 +115,8 @@ const ReportContent = () => {
               <stop offset="95%" stopColor="#82ca9d" stopOpacity={0} />
             </linearGradient>
             <linearGradient id="colorAv" x1="0" y1="0" x2="0" y2="1">
-              <stop offset="5%" stopColor="#ff7300" stopOpacity={0.8} />
-              <stop offset="95%" stopColor="#ff7300" stopOpacity={0} />
+              <stop offset="5%" stopColor="#82cacd" stopOpacity={0.8} />
+              <stop offset="95%" stopColor="#82cacd" stopOpacity={0} />
             </linearGradient>
           </defs>
           <XAxis dataKey="month" />
@@ -146,7 +146,7 @@ const ReportContent = () => {
           />
         </AreaChart>
       </div>
-
+{/* 
       <div className="bg-white p-4 rounded-lg shadow-md">
         <h2 className="text-xl font-semibold mb-4">Scatter Chart</h2>
         <ScatterChart
@@ -175,7 +175,7 @@ const ReportContent = () => {
           <Scatter name="A school" data={data01} fill="#8884d8" />
           <Scatter name="B school" data={data02} fill="#82ca9d" />
         </ScatterChart>
-      </div>
+      </div> */}
 
       
     </div>

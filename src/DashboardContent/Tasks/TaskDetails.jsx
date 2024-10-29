@@ -43,18 +43,15 @@ const TaskDetails = () => {
     <div className="p-8 rounded-lg shadow-lg w-full mx-auto font-inter h-screen">
       <h2 className="text-2xl mb-4">Task Details: {task.title}</h2>
       <div className="mb-4">
-        <p><strong>ID:</strong> {task.task_id}</p>
-        <p><strong>Title:</strong> {task.title}</p>
-        <p><strong>Description:</strong> {task.description}</p>
-        <p><strong>Due Date:</strong> {task.due_date}</p>
-        <p><strong>Status:</strong> {task.status}</p>
-        <p><strong>Created At:</strong> {task.created_at}</p>
-        <p><strong>Start Date:</strong> {task.start_date}</p>
-        <p><strong>Finish Date:</strong> {task.finish_date}</p>
-        <p><strong>Address:</strong> {task.address}</p>
-        <p><strong>Quantity Used:</strong> {task.quantity_used}</p>
-        <p><strong>Product ID:</strong> {task.product_id}</p>
-        <p><strong>User ID:</strong> {task.user_id}</p>
+        {task.task_id && <p><strong>ID:</strong> {task.task_id}</p>}
+        {task.description && <p><strong>Description:</strong> {task.description}</p>}
+        {task.status_id && <p><strong>Status:</strong> {task.status_id}</p>}
+        {task.created_at && <p><strong>Created At:</strong> {new Date(task.created_at).toLocaleString()}</p>}
+        {task.start_date && <p><strong>Start Date:</strong> {new Date(task.start_date).toLocaleString()}</p>}
+        {task.finish_date && <p><strong>Finish Date:</strong> {new Date(task.finish_date).toLocaleString()}</p>}
+        {task.address && <p><strong>Address:</strong> {task.address}</p>}
+        {task.quantity_used && <p><strong>Quantity Used:</strong> {task.quantity_used}</p>}
+        {task.user_id && <p><strong>User ID:</strong> {task.user_id}</p>}
       </div>
 
       {/* Map Section */}

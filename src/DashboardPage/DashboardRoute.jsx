@@ -44,7 +44,7 @@ import ProfileSetting from '../pages/Settings/ProfileSetting'
 import AddTechnician from '../DashboardContent/Users/AddTechnician'
 import SendApplicantEmail from '../DashboardContent/TechnicianApplicants/SendApplicantEmail'
 import LineProfile from '../pages/Settings/LineProfile'
-
+import EditReview from '../DashboardContent/Reviews/EditReview'
 const DashboardRoute = () => {
   return (
       <div className='flex'>
@@ -65,6 +65,7 @@ const DashboardRoute = () => {
             <Route path="applicant/sending-email/:id" element={<SendApplicantEmail />} />
             <Route path="history-log" element={<HistoryLogContent />} />
             <Route path="reviews" element={<ReviewContent />} />
+            <Route path="reviews/:id" element={<EditReview />} />
             <Route path="payments" element={<PaymentContent />} />
             <Route path="payments/add" element={<AddPayment />} />
             <Route path="payments/edit/:paymentId" element={<EditPayment />} />
@@ -73,7 +74,7 @@ const DashboardRoute = () => {
             <Route path="orders" element={<OrderContent />} />
             <Route path="orders/details/:orderId" element={<OrderDetails/>} />
             <Route path="orders/add" element={<AddOrder />} />
-            <Route path="orders/edit/:orderId" element={<EditOrder />} />
+            {/* <Route path="orders/edit/:orderId" element={<EditOrder />} /> */}
             <Route path="tasks/add" element={<AddTask />} />
             <Route path="tasks/edit/:taskId" element={<EditTask />} />
             <Route path="user" element={<UserContent />} />

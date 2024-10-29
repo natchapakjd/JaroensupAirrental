@@ -128,6 +128,12 @@ const EditTask = () => {
 
       if (response.status === 200) {
         navigate("/dashboard/tasks");
+        await axios.post(`${apiUrl}/taskLog`, {
+          task_id: taskId,
+          user_id: userId,
+          action: "Updated Task",
+          created_at: new Date().toISOString(),
+        });
       }
     } catch (error) {
       console.error("Error updating task:", error);

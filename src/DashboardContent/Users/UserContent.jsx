@@ -17,6 +17,7 @@ const UserContent = () => {
         `${import.meta.env.VITE_SERVER_URL}/users`
       );
       setUsers(response.data);
+      console.log(users)
     } catch (error) {
       console.error("Error fetching users:", error);
     }
@@ -63,7 +64,7 @@ const UserContent = () => {
     <div className="font-inter mt-5 ">
       <div className="mb-4 flex justify-end mx-16">
         <Link to="/dashboard/user/add-tech">
-            <button className="btn bg-warning hover:bg-warning text-white">
+            <button className="btn bg-success hover:bg-success text-white">
               Add Technician
             </button>
         </Link>
@@ -106,13 +107,13 @@ const UserContent = () => {
                     </div>
                     <div>
                       <div className="font-bold">{user.username}</div>
-                      <div className="text-sm opacity-50">{user.role}</div>
+                      <div className="text-sm opacity-50">{user.firstname}</div>
                     </div>
                   </div>
                 </td>
                 <td>{user.username}</td>
                 <td>{user.email}</td>
-                <td>{user.role}</td>
+                <td>{user.role_id}</td>
                 <td>{format(new Date(user.created_at), "MM/dd/yyyy")}</td>
                 <td>
                   <div className="flex gap-2">

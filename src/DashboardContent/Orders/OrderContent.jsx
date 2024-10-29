@@ -91,9 +91,9 @@ const OrderContent = () => {
     <div className="p-8 rounded-lg shadow-lg w-full mx-auto font-inter h-full">
       <div className="flex justify-between items-center mb-4">
         <h2 className="text-xl font-semibold">Orders</h2>
-        {/* <Link to="/dashboard/orders/add">
+        <Link to="/dashboard/orders/add">
           <button className="btn bg-blue text-white hover:bg-blue">Add Order</button>
-        </Link> */}
+        </Link>
       </div>
       <table className="w-full border-collapse border border-gray-300">
         <thead>
@@ -103,7 +103,6 @@ const OrderContent = () => {
             <th className="border border-gray-300 p-2">Total Amount</th>
             <th className="border border-gray-300 p-2">Order Date</th>
             <th className="border border-gray-300 p-2">Actions</th>
-            <th className="border border-gray-300 p-2">Details</th>
           </tr>
         </thead>
         <tbody className="text-center">
@@ -125,13 +124,12 @@ const OrderContent = () => {
                     >
                       Cancel
                     </button>
+                    <Link to={`/dashboard/orders/details/${order.id}`}>
+                    <button className="btn btn-success  text-white">View Details</button>
+                  </Link>
                   </div>
                 </td>
-                <td className="border border-gray-300 p-2">
-                  <Link to={`/dashboard/orders/details/${order.id}`}>
-                    <button className="btn bg-blue hover:bg-blue text-white">View Details</button>
-                  </Link>
-                </td>
+               
               </tr>
             ))
           ) : (
