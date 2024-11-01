@@ -1,81 +1,361 @@
 import React from "react";
-import { AiFillDashboard } from "react-icons/ai";
+import { useState, useEffect } from "react";
+import { useLocation } from "react-router-dom";
+import {
+  MdManageAccounts,
+  MdSpaceDashboard,
+  MdAddShoppingCart,
+  MdTask,
+  MdPayments,
+  MdEngineering,
+  MdPieChart,
+  MdCategory,
+  MdBrandingWatermark,
+  MdEditAttributes,
+  MdWarehouse,
+  MdRateReview,
+  MdCalculate,
+  MdHistory,
+  MdOutlineSettings,
+} from "react-icons/md";
+import { jwtDecode } from "jwt-decode";
+import Cookies from "universal-cookie";
+import { IoReorderFour } from "react-icons/io5";
+
 
 const Sidebar = () => {
+  const cookies = new Cookies();
+  const token = cookies.get("authToken");
+  const [role, setRole] = useState("");
+  const location = useLocation();
+
+  useEffect(() => {
+    if (token) {
+      const decodedToken = jwtDecode(token);
+      setRole(decodedToken.role);
+    }
+  }, []);
+
+  const isActive = (path) => {
+    return location.pathname.startsWith(path);
+  };
+
   return (
     <div>
-      <aside class="w-64 h-screen sticky top-0 border bg-gray-100">
-        <div class="relative">
-          <p class="text-xl font-bold mt-8 ml-10 mr-26 mb-14 text-black">
+      <aside className="w-64 h-full sticky top-0  border font-inter min-h-screen">
+        <div className="relative">
+          <p className="text-xl font-semibold mt-8 ml-10 mr-26 mb-9">
             Jaroensup
           </p>
-          <div class="flex flex-col  w-full ">
-            <ul class="flex flex-col  ml-10 mb-16">
-              <li class="mb-8 ">
-                <a class="text-base font-semibold"></a>
-              </li>
-
-              <li class="mb-8">
-                <a class="text-base font-semibold">
-                  <div class="flex">
-                    {/* <AiFillDashboard className="mt-1" />  */}Dashboard
-                  </div>
+          <hr className="w-4/5 mx-auto" />
+          <div className="flex flex-col w-full text-gray">
+            <ul className="flex flex-col pt-10 w-full">
+              <li
+                className={`mb-5 hover:rounded-lg hover:py-3 hover:px-4 transition-all duration-300 hover:mx-5 ${
+                  isActive("/dashboard/home")
+                    ? "bg-blue text-white mx-5 px-4 py-3 rounded-lg"
+                    : null
+                }`}
+              >
+                <a
+                  className="text-base pl-10 flex gap-1"
+                  href="/dashboard/home"
+                >
+                  <MdSpaceDashboard className="mt-1" /> Dashboard
                 </a>
               </li>
 
-              <li class="mb-8">
-                <a class="text-base   font-semibold">  Users</a>
-              </li>
-              <li class="mb-8">
-                <a class="text-base  font-semibold">
-                  <div class="flex">Tasks</div>
-                </a>
-              </li>
-              <li class="mb-8">
-                <a class="text-base   font-semibold">
-                  <div class="flex">Categories</div>
-                </a>
-              </li>
-            </ul>
+              {role === 3 && (
+                <>
+                  <li
+                    className={`mb-5 hover:rounded-lg hover:py-3 hover:px-4 transition-all duration-300 hover:mx-5 ${
+                      isActive("/dashboard/tasks")
+                        ? "bg-blue text-white mx-5 px-4 py-3 rounded-lg"
+                        : null
+                    }`}
+                  >
+                    <a
+                      className="text-base pl-10 flex gap-1"
+                      href="/dashboard/tasks"
+                    >
+                      <MdTask className="mt-1" /> Tasks
+                    </a>
+                  </li>
+                  
+                  <li
+                    className={`mb-5 hover:rounded-lg hover:py-3 hover:px-4 transition-all duration-300 hover:mx-5 ${
+                      isActive("/dashboard/borrows")
+                        ? "bg-blue text-white mx-5 px-4 py-3 rounded-lg"
+                        : null
+                    }`}
+                  >
+                    <a
+                      className="text-base pl-10 flex gap-1"
+                      href="/dashboard/borrows"
+                    >
+                      <MdTask className="mt-1" /> Borrowing
+                    </a>
+                  </li>
+                  <li
+                    className={`mb-5 hover:rounded-lg hover:py-3 hover:px-4 transition-all duration-300 hover:mx-5 ${
+                      isActive("/dashboard/products")
+                        ? "bg-blue text-white mx-5 px-4 py-3 rounded-lg"
+                        : null
+                    }`}
+                  >
+                    <a
+                      className="text-base pl-10 flex gap-1"
+                      href="/dashboard/products"
+                    >
+                      <MdAddShoppingCart className="mt-1" /> Products
+                    </a>
+                  </li>
+                  <li
+                    className={`mb-5 hover:rounded-lg hover:py-3 hover:px-4 transition-all duration-300 hover:mx-5 ${
+                      isActive("/dashboard/orders")
+                        ? "bg-blue text-white mx-5 px-4 py-3 rounded-lg"
+                        : null
+                    }`}
+                  >
+                    <a
+                      className="text-base pl-10 flex gap-1"
+                      href="/dashboard/orders"
+                    >
+                      <IoReorderFour className="mt-1" /> Orders
+                    </a>
+                  </li>
 
-            <ul class="flex flex-col ml-10 mb-16">
-              <li class="mb-8">
-                <a class="text-base  font-semibold">
-                  <div class="flex">WareHouse</div>
-                </a>
-              </li>
-              <li class="mb-8">
-                <a class="text-base   font-semibold">
-                  <div class="flex">Product</div>
-                </a>
-              </li>
-              <li class="mb-8">
-                <a class="text-base   font-semibold">
-                  <div class="flex">Profile</div>
-                </a>
-              </li>
-              <li class="mb-8">
-                <a class="text-base   font-semibold">
-                  <div class="flex">Report</div>
-                </a>
-              </li>
-              <li class="mb-8">
-                <a class="text-base   font-semibold">
-                  <div class="flex">Guide Book</div>
-                </a>
-              </li>
-              
-            </ul>
+                  <li
+                    className={`mb-5 hover:rounded-lg hover:py-3 hover:px-4 transition-all duration-300 hover:mx-5 ${
+                      isActive("/dashboard/user")
+                        ? "bg-blue text-white mx-5 px-4 py-3 rounded-lg"
+                        : null
+                    }`}
+                  >
+                    <a
+                      className="text-base pl-10 flex gap-1"
+                      href="/dashboard/user"
+                    >
+                      <MdManageAccounts className="mt-1" /> Users
+                    </a>
+                  </li>
 
-            <ul class="flex flex-col ml-10">
-            <li class="mb-8">
-                <a class="text-base   font-semibold">
-                  <div class="flex">Setting</div>
-                </a>
-              </li>
-              <li class="mb-8">
-                <a class="text-base   font-semibold">
-                  <div class="flex">Logout</div>
+                  <li
+                    className={`mb-5 hover:rounded-lg hover:py-3 hover:px-4 transition-all duration-300 hover:mx-5 ${
+                      isActive("/dashboard/payments")
+                        ? "bg-blue text-white mx-5 px-4 py-3 rounded-lg"
+                        : null
+                    }`}
+                  >
+                    <a
+                      className="text-base pl-10 flex gap-1"
+                      href="/dashboard/payments"
+                    >
+                      <MdPayments className="mt-1" /> Payments
+                    </a>
+                  </li>
+                  <li
+                    className={`mb-5 hover:rounded-lg hover:py-3 hover:px-4 transition-all duration-300 hover:mx-5 ${
+                      isActive("/dashboard/applicants")
+                        ? "bg-blue text-white mx-5 px-4 py-3 rounded-lg"
+                        : null
+                    }`}
+                  >
+                    <a
+                      className="text-base pl-10 flex gap-1"
+                      href="/dashboard/applicants"
+                    >
+                      <MdEngineering className="mt-1" /> Applicants
+                    </a>
+                  </li>
+                  <li
+                    className={`mb-5 hover:rounded-lg hover:py-3 hover:px-4 transition-all duration-300 hover:mx-5 ${
+                      isActive("/dashboard/analytics")
+                        ? "bg-blue text-white mx-5 px-4 py-3 rounded-lg"
+                        : null
+                    }`}
+                  >
+                    <a
+                      className="text-base pl-10 flex gap-1"
+                      href="/dashboard/analytics"
+                    >
+                      <MdPieChart className="mt-1" /> Analytics
+                    </a>
+                  </li>
+                  <li
+                    className={`mb-5 hover:rounded-lg hover:py-3 hover:px-4 transition-all duration-300 hover:mx-5 ${
+                      isActive("/dashboard/categories")
+                        ? "bg-blue text-white mx-5 px-4 py-3 rounded-lg"
+                        : null
+                    }`}
+                  >
+                    <a
+                      className="text-base pl-10 flex gap-1"
+                      href="/dashboard/categories"
+                    >
+                      <MdCategory className="mt-1" /> Categories
+                    </a>
+                  </li>
+                  <li
+                    className={`mb-5 hover:rounded-lg hover:py-3 hover:px-4 transition-all duration-300 hover:mx-5 ${
+                      isActive("/dashboard/brands")
+                        ? "bg-blue text-white mx-5 px-4 py-3 rounded-lg"
+                        : null
+                    }`}
+                  >
+                    <a
+                      className="text-base pl-10 flex gap-1"
+                      href="/dashboard/brands"
+                    >
+                      <MdBrandingWatermark className="mt-1" /> Brands
+                    </a>
+                  </li>
+                  <li
+                    className={`mb-5 hover:rounded-lg hover:py-3 hover:px-4 transition-all duration-300 hover:mx-5 ${
+                      isActive("/dashboard/attributes")
+                        ? "bg-blue text-white mx-5 px-4 py-3 rounded-lg"
+                        : null
+                    }`}
+                  >
+                    <a
+                      className="text-base pl-10 flex gap-1"
+                      href="/dashboard/attributes"
+                    >
+                      <MdEditAttributes className="mt-1" /> Attributes
+                    </a>
+                  </li>
+                  <li
+                    className={`mb-5 hover:rounded-lg hover:py-3 hover:px-4 transition-all duration-300 hover:mx-5 ${
+                      isActive("/dashboard/warehouses")
+                        ? "bg-blue text-white mx-5 px-4 py-3 rounded-lg"
+                        : null
+                    }`}
+                  >
+                    <a
+                      className="text-base pl-10 flex gap-1"
+                      href="/dashboard/warehouses"
+                    >
+                      <MdWarehouse className="mt-1" /> Warehouses
+                    </a>
+                  </li>
+                  <li
+                    className={`mb-5 hover:rounded-lg hover:py-3 hover:px-4 transition-all duration-300 hover:mx-5 ${
+                      isActive("/dashboard/reviews")
+                        ? "bg-blue text-white mx-5 px-4 py-3 rounded-lg"
+                        : null
+                    }`}
+                  >
+                    <a
+                      className="text-base pl-10 flex gap-1"
+                      href="/dashboard/reviews"
+                    >
+                      <MdRateReview className="mt-1" /> Reviews
+                    </a>
+                  </li>
+                  <li
+                    className={`mb-5 hover:rounded-lg hover:py-3 hover:px-4 transition-all duration-300 hover:mx-5 ${
+                      isActive("/dashboard/augmented-reality")
+                        ? "bg-blue text-white mx-5 px-4 py-3 rounded-lg"
+                        : null
+                    }`}
+                  >
+                    <a
+                      className="text-base pl-10 flex gap-1"
+                      href="/dashboard/augmented-reality"
+                    >
+                      <MdCalculate className="mt-1" /> Area Calculation
+                    </a>
+                  </li>
+                  <li
+                    className={`mb-5 hover:rounded-lg hover:py-3 hover:px-4 transition-all duration-300 hover:mx-5 ${
+                      isActive("/dashboard/history-log")
+                        ? "bg-blue text-white mx-5 px-4 py-3 rounded-lg"
+                        : null
+                    }`}
+                  >
+                    <a
+                      className="text-base pl-10 flex gap-1"
+                      href="/dashboard/history-log"
+                    >
+                      <MdHistory className="mt-1" /> History Log
+                    </a>
+                  </li>
+                </>
+              )}
+
+              {role === 2 && (
+                <>
+                  <li
+                    className={`mb-5 hover:rounded-lg hover:py-3 hover:px-4 transition-all duration-300 hover:mx-5 ${
+                      isActive("/dashboard/products")
+                        ? "bg-blue text-white mx-5 px-4 py-3 rounded-lg"
+                        : null
+                    }`}
+                  >
+                    <a
+                      className="text-base pl-10 flex gap-1"
+                      href="/dashboard/products"
+                    >
+                      <MdAddShoppingCart className="mt-1" /> Products
+                    </a>
+                  </li>
+                  <li
+                    className={`mb-5 hover:rounded-lg hover:py-3 hover:px-4 transition-all duration-300 hover:mx-5 ${
+                      isActive("/dashboard/tasks")
+                        ? "bg-blue text-white mx-5 px-4 py-3 rounded-lg"
+                        : null
+                    }`}
+                  >
+                    <a
+                      className="text-base pl-10 flex gap-1"
+                      href="/dashboard/tasks"
+                    >
+                      <MdTask className="mt-1" /> Tasks
+                    </a>
+                  </li>
+                  <li
+                    className={`mb-5 hover:rounded-lg hover:py-3 hover:px-4 transition-all duration-300 hover:mx-5 ${
+                      isActive("/dashboard/borrows")
+                        ? "bg-blue text-white mx-5 px-4 py-3 rounded-lg"
+                        : null
+                    }`}
+                  >
+                    <a
+                      className="text-base pl-10 flex gap-1"
+                      href="/dashboard/borrows"
+                    >
+                      <MdTask className="mt-1" /> Borrowing
+                    </a>
+                  </li>
+                  <li
+                    className={`mb-5 hover:rounded-lg hover:py-3 hover:px-4 transition-all duration-300 hover:mx-5 ${
+                      isActive("/dashboard/analytics")
+                        ? "bg-blue text-white mx-5 px-4 py-3 rounded-lg"
+                        : null
+                    }`}
+                  >
+                    <a
+                      className="text-base pl-10 flex gap-1"
+                      href="/dashboard/analytics"
+                    >
+                      <MdPieChart className="mt-1" /> Analytics
+                    </a>
+                  </li>
+                </>
+              )}
+
+              <li
+                className={`mb-10 hover:rounded-lg hover:py-3 hover:px-4 transition-all duration-300 hover:mx-5 ${
+                  isActive("/dashboard/settings")
+                    ? "bg-gray-300 text-gray-800 mx-5 px-4 py-3 rounded-lg"
+                    : "bg-gray-100 text-gray-600 mx-5 px-4 py-3 rounded-lg"
+                }`}
+              >
+                <a
+                  className="text-base pl-10 flex gap-1"
+                  href="/dashboard/settings"
+                >
+                  <MdOutlineSettings className="mt-1" /> Settings
                 </a>
               </li>
             </ul>

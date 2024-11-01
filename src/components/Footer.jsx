@@ -2,7 +2,7 @@ import React from "react";
 const Footer = () => {
   return (
     <>
-      <footer className="footer bg-base-200 text-base-content p-10 font-prompt">
+      <footer className="footer bg-gray-200 text-base-content p-10 font-prompt">
         <nav>
           <h6 className="footer-title">Services</h6>
           <a className="link link-hover">Branding</a>
@@ -24,7 +24,7 @@ const Footer = () => {
           <a className="link link-hover">Cookie policy</a>
         </nav>
       </footer>
-      <footer className="footer bg-black text-white  text-base-content border-base-300 border-t px-10 py-4 font-prompt">
+      <footer className="footer bg-black text-white  text-base-content   px-10 py-4 font-prompt">
         <aside className="grid-flow-col items-center">
           <svg
             width="24"

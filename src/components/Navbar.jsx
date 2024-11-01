@@ -1,24 +1,48 @@
-import React, { useState } from "react";
-import { Link ,useNavigate} from "react-router-dom";
+import React, { useState, useEffect } from "react";
+import { Link, useNavigate } from "react-router-dom";
 import Cookies from "universal-cookie";
-// import Swal from "sweetalert2";
+import { jwtDecode } from "jwt-decode";
+import axios from "axios";
+
 const Navbar = () => {
   const cookies = new Cookies();
   const [isToggle, setIsToggle] = useState(false);
+  const [userId, setUserId] = useState();
+  const [image, setImage] = useState(null); // Start as null
   const token = cookies.get("authToken");
   const navigate = useNavigate();
+
   const toggleNavbar = () => {
     setIsToggle(!isToggle);
   };
 
+  useEffect(() => {
+    if (token) {
+      const decodedToken = jwtDecode(token);
+      setUserId(decodedToken.id);
+      fetchUserByID(decodedToken.id);
+    }
+  }, [token]);
+
   const handleLogout = () => {
     cookies.remove("authToken", { path: "/" });
-    // Swal.fire({
-    //   title: "ออกจากระบบสำเร็จ",
-    //   icon: "success",
-    // });
     navigate("/login");
   };
+
+  const fetchUserByID = async (userId) => {
+    try {
+      const response = await axios.get(
+        `${import.meta.env.VITE_SERVER_URL}/user/${userId}`
+      );
+      if (response.status === 200) {
+        setImage(response.data.image_url);
+      }
+    } catch (err) {
+      console.error("Error fetching user image:", err);
+      setImage(null);
+    }
+  };
+
   return (
     <nav>
       <div className="navbar bg-white text-black font-prompt ">
@@ -45,10 +69,10 @@ const Navbar = () => {
                 />
               </svg>
             </div>
-            {isToggle ? (
+            {isToggle && (
               <ul
                 tabIndex="0"
-                className="menu menu-sm dropdown-content bg-white text-black rounded-box z-[1] mt-3 w-52 p-2 shadow "
+                className="menu menu-sm dropdown-content bg-white text-black rounded-box z-[1] mt-3 w-52 p-2 shadow"
               >
                 <li>
                   <Link to="/">หน้าหลัก</Link>
@@ -58,23 +82,15 @@ const Navbar = () => {
                 </li>
                 <li>
                   <a>บริการของเรา</a>
-                  <ul className="p-2">
-                    <li>
-                      <a>งานเช่า</a>
-                    </li>
-                    <li>
-                      <a>งานซ่อมบำรุง</a>
-                    </li>
-                  </ul>
                 </li>
                 <li>
-                  <Link to="/reward">ผลงานของเรา</Link>
+                  <Link to="/experience">ผลงานของเรา</Link>
                 </li>
                 <li>
                   <Link to="/contact">ติดต่อเรา</Link>
                 </li>
               </ul>
-            ) : null}
+            )}
           </div>
           <a className="btn btn-ghost text-xl">Jaroensup</a>
         </div>
@@ -86,36 +102,30 @@ const Navbar = () => {
             <li>
               <Link to="/product">สินค้า</Link>
             </li>
-            <li className="z-40" >
-              <details>
-                <summary>บริการของเรา</summary>
-                <ul className="p-2 bg-white text-black">
-                  <li>
-                    <a>งานเช่า</a>
-                  </li>
-                  <li>
-                    <a>งานซ่อมบำรุง</a>
-                  </li>
-                </ul>
-              </details>
+            <li className="z-40">
+              <a href="/services">บริการของเรา</a>
             </li>
             <li>
-              <Link to="/reward">ผลงานของเรา</Link>
+              <Link to="/experience">ผลงานของเรา</Link>
+            </li>
+            <li>
+            <Link to="/register-tech">ร่วมงานกับเรา</Link>
+
             </li>
             <li>
               <Link to="/contact">ติดต่อเรา</Link>
             </li>
           </ul>
         </div>
-        <div className="navbar-end">
-          <li className="list-none">
-            {!token ? (
+        <div className="navbar-end ">
+          <li className="list-none ">
+            {!token && (
               <Link to="/login" className="text-sm md:text-base">
                 สมัครสมาชิก/เข้าสู่ระบบ
               </Link>
-            ) : null}
+            )}
           </li>
-          {token ? (
+          {token && (
             <div className="dropdown dropdown-end">
               <div
                 tabIndex={0}
@@ -124,33 +134,43 @@ const Navbar = () => {
                 onClick={toggleNavbar}
               >
                 <div className="w-10 rounded-full">
-                  <img
-                    alt="Tailwind CSS Navbar component"
-                    src="https://img.daisyui.com/images/stock/photo-1534528741775-53994a69daeb.webp"
-                  />
+                  {image ? (
+                    <img alt="User Avatar" src={`${image}`} />
+                  ) : (
+                    <div className="w-10 h-10 bg-gray-200 rounded-full flex items-center justify-center">
+                      <span className="text-gray-500">?</span>{" "}
+                      {/* Fallback UI */}
+                    </div>
+                  )}
                 </div>
               </div>
-              {isToggle ? (
+              {isToggle && (
                 <ul
                   tabIndex={0}
-                  className="menu menu-sm dropdown-content bg-base-100 rounded-box z-[1] mt-3 w-52 p-2 shadow"
+                  className="menu menu-sm dropdown-content bg-base-100 rounded-box z-[1] mt-3 w-52 p-2 shadow bg-white text-black"
                 >
                   <li>
-                    <a className="justify-between">
-                      Profile
+                    <a className="justify-between" href="/profile-setting">
+                      โปรไฟล์
                       <span className="badge">New</span>
                     </a>
                   </li>
                   <li>
-                    <a>Settings</a>
+                    <a href="/history">ประวัติ</a>
                   </li>
                   <li>
-                    <a onClick={handleLogout}>Logout</a>
+                    <a href="/change-password">เปลี่ยนรหัสผ่าน</a>
+                  </li>
+                  <li>
+                    <a href="/settings">การแจ้งเตือน</a>
+                  </li>
+                  <li>
+                    <a onClick={handleLogout}>ออกจากระบบ</a>
                   </li>
                 </ul>
-              ) : null}
+              )}
             </div>
-          ) : null}
+          )}
         </div>
       </div>
     </nav>
