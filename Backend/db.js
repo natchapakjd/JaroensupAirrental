@@ -1,11 +1,11 @@
 const mysql = require("mysql");
 
 const db = mysql.createConnection({
-  host: "localhost", // Only the hostname
-  port: 8889, // Port number specified separately
-  user: "root",
-  password: "root",
-  database: "jaroensup",
+  host: "bv9lnhqaqmmb6bfuzy5v-mysql.services.clever-cloud.com", // Only the hostname
+  port: 3306, // Port number specified separately
+  user: "uwmk2ws5wtqlof85",
+  password: "lLYtxiy56swzgDuumDNw",
+  database: "bv9lnhqaqmmb6bfuzy5v",
 });
 
 db.connect((err) => {

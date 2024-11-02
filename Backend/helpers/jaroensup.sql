@@ -2,8 +2,8 @@
 -- version 5.1.2
 -- https://www.phpmyadmin.net/
 --
--- Host: localhost:8889
--- Generation Time: Oct 08, 2024 at 01:42 PM
+-- Host: localhost:51576
+-- Generation Time: Nov 02, 2024 at 07:33 AM
 -- Server version: 5.7.24
 -- PHP Version: 8.3.1
 
@@ -141,6 +141,25 @@ CREATE TABLE `equipment_borrowing` (
 -- --------------------------------------------------------
 
 --
+-- Table structure for table `gender`
+--
+
+CREATE TABLE `gender` (
+  `gender_id` int(11) NOT NULL,
+  `gender_name` varchar(50) NOT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+
+--
+-- Dumping data for table `gender`
+--
+
+INSERT INTO `gender` (`gender_id`, `gender_name`) VALUES
+(1, 'Male'),
+(2, 'Female');
+
+-- --------------------------------------------------------
+
+--
 -- Table structure for table `orders`
 --
 
@@ -151,6 +170,15 @@ CREATE TABLE `orders` (
   `total_price` decimal(10,2) DEFAULT '0.00',
   `task_id` int(11) DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+
+--
+-- Dumping data for table `orders`
+--
+
+INSERT INTO `orders` (`id`, `created_at`, `user_id`, `total_price`, `task_id`) VALUES
+(5, '2024-10-29 13:36:11', 6, '555.00', 92),
+(27, '2024-10-29 17:57:50', 6, '1110.00', 115),
+(28, '2024-10-29 17:58:06', 6, '2665.00', 116);
 
 -- --------------------------------------------------------
 
@@ -167,6 +195,16 @@ CREATE TABLE `order_items` (
   `product_id` int(11) DEFAULT NULL,
   `total_price` decimal(10,2) NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+
+--
+-- Dumping data for table `order_items`
+--
+
+INSERT INTO `order_items` (`id`, `order_id`, `product_name`, `quantity`, `price`, `product_id`, `total_price`) VALUES
+(6, 5, 'น้ำยาถังแอร์', 1, '555.00', 3, '555.00'),
+(23, 27, 'น้ำยาถังแอร์', 2, '555.00', 3, '1110.00'),
+(24, 28, 'สายส่ง O2', 2, '500.00', 7, '1000.00'),
+(25, 28, 'น้ำยาถังแอร์', 3, '555.00', 3, '1665.00');
 
 -- --------------------------------------------------------
 
@@ -192,7 +230,9 @@ CREATE TABLE `payments` (
 --
 
 INSERT INTO `payments` (`payment_id`, `user_id`, `task_id`, `amount`, `payment_date`, `order_id`, `status_id`, `image_url`, `method_id`, `created_at`) VALUES
-(1, 6, 26, '500.00', '2024-09-20 20:00:00', NULL, 5, NULL, 1, '2024-09-30 18:49:37');
+(1, 6, 26, '500.00', '2024-09-20 20:00:00', NULL, 5, 'https://res.cloudinary.com/dq8euhi61/image/upload/v1729492971/kelby2ttopkfpcwikyxw.png', 1, '2024-09-30 18:49:37'),
+(2, 2, 12, '500.00', '2024-10-25 10:41:00', NULL, 4, 'https://res.cloudinary.com/dq8euhi61/image/upload/v1729147278/bt8334ter8wywhrlbfyx.jpg', 1, '2024-10-17 06:41:16'),
+(4, 6, 92, '5000.00', '2024-10-29 13:40:07', 5, 1, NULL, 1, '2024-10-29 13:40:07');
 
 -- --------------------------------------------------------
 
@@ -258,9 +298,8 @@ CREATE TABLE `products` (
 --
 
 INSERT INTO `products` (`product_id`, `name`, `description`, `price`, `stock_quantity`, `brand_id`, `category_id`, `warehouse_id`, `product_type_id`, `image_url`) VALUES
-(3, 'น้ำยาถังแอร์', 'น้ำยาถังแอร์', '555.00', 6, 1, 1, 1, 1, 'https://res.cloudinary.com/dq8euhi61/image/upload/v1727333157/image/product-image/qzggzwnxchcfrmt4pmqw.jpg'),
-(7, 'พัดลมไอน้ำ', 'พัดลมไอน้ำ', '500.00', 2, 1, 3, 1, 1, 'https://res.cloudinary.com/dq8euhi61/image/upload/v1728394918/image/product-image/ptozqgegyub8qfis5aom.jpg'),
-(10, 'asdasd', 'asdasd', '5.00', 2, 1, 2, 1, 1, 'https://res.cloudinary.com/dq8euhi61/image/upload/v1727544639/image/product-image/qi9282ozqb736mpn0v1i.jpg');
+(3, 'น้ำยาถังแอร์', 'น้ำยาถังแอร์', '555.00', 10, 1, 1, 1, 1, 'https://res.cloudinary.com/dq8euhi61/image/upload/v1730205391/image/product-image/jfeg1fb3vk90fu9yexqt.jpg'),
+(7, 'สายส่ง O2', 'สายส่ง O2', '500.00', 10, 1, 2, 1, 1, 'https://res.cloudinary.com/dq8euhi61/image/upload/v1730205436/image/product-image/gllrjvg4f3ua0if2gofx.jpg');
 
 -- --------------------------------------------------------
 
@@ -296,6 +335,13 @@ CREATE TABLE `rental` (
   `rental_end_date` date DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
+--
+-- Dumping data for table `rental`
+--
+
+INSERT INTO `rental` (`rental_id`, `task_id`, `product_id`, `rental_start_date`, `rental_end_date`) VALUES
+(9, 93, NULL, NULL, NULL);
+
 -- --------------------------------------------------------
 
 --
@@ -317,8 +363,7 @@ CREATE TABLE `reviews` (
 --
 
 INSERT INTO `reviews` (`review_id`, `task_id`, `user_id`, `tech_id`, `rating`, `comment`, `created_at`) VALUES
-(1, 26, 6, 1, 5, 'ทำงานได้ดี', '2024-09-23 05:56:52'),
-(5, 12, 6, 1, 5, 'ฟหก', '2024-09-26 07:37:21');
+(1, 26, 6, 1, 5, 'ทำงานได้ดี', '2024-09-23 05:56:52');
 
 -- --------------------------------------------------------
 
@@ -384,7 +429,8 @@ INSERT INTO `status` (`status_id`, `status_name`) VALUES
 (6, 'inactive'),
 (7, 'hiring'),
 (8, 'interviewed'),
-(9, 'rejected');
+(9, 'rejected'),
+(10, 'ิborrowing');
 
 -- --------------------------------------------------------
 
@@ -437,7 +483,32 @@ CREATE TABLE `tasks` (
 
 INSERT INTO `tasks` (`task_id`, `user_id`, `description`, `created_at`, `start_date`, `finish_date`, `task_type_id`, `quantity_used`, `address`, `appointment_date`, `latitude`, `longitude`, `isActive`, `updatedAt`, `status_id`) VALUES
 (12, 6, 'งานเช่าแอร์ตัน', '2024-09-18 12:43:30', NULL, NULL, 1, NULL, 'กรุงเทพ พหลโยธิน ', '2024-09-25 19:42:00', '13.64198320', '100.72608948', 1, '2024-10-08 13:13:50', 2),
-(26, 6, 'งานเช่าพัดลมไอน้ำ', '2024-09-22 16:35:29', NULL, NULL, 1, NULL, 'กรุงเทพ พหลโยธิน', '2024-09-19 23:35:00', '13.80674218', '100.50052643', 1, '2024-10-08 13:13:48', 1);
+(26, 6, 'งานเช่าพัดลมไอน้ำ', '2024-09-22 16:35:29', NULL, NULL, 1, NULL, 'กรุงเทพ พหลโยธิน', '2024-09-19 23:35:00', '13.80674218', '100.50052643', 1, '2024-10-18 08:34:46', 2),
+(92, 6, 'ซื้อขายอุปกรณ์', '2024-10-29 13:36:11', NULL, NULL, 9, 1, NULL, NULL, NULL, NULL, 1, '2024-10-29 13:36:11', 1),
+(93, 6, 'asdad', '2024-10-29 16:38:43', NULL, NULL, 1, 1, 'asdasd', '2024-10-17 14:38:00', '13.75410216', '100.48562648', 0, '2024-10-29 16:39:02', 1),
+(94, 6, 'ซื้อขายอุปกรณ์', '2024-10-29 17:09:19', NULL, NULL, 9, 5, NULL, NULL, NULL, NULL, 1, '2024-10-29 17:09:18', 1),
+(95, 6, 'ซื้อขายอุปกรณ์', '2024-10-29 17:11:14', NULL, NULL, 9, 2, NULL, NULL, NULL, NULL, 1, '2024-10-29 17:11:13', 1),
+(96, 6, 'ซื้อขายอุปกรณ์', '2024-10-29 17:19:40', NULL, NULL, 9, 5, NULL, NULL, NULL, NULL, 1, '2024-10-29 17:19:39', 1),
+(97, 6, 'ซื้อขายอุปกรณ์', '2024-10-29 17:21:10', NULL, NULL, 9, 2, NULL, NULL, NULL, NULL, 1, '2024-10-29 17:21:10', 1),
+(98, 6, 'ซื้อขายอุปกรณ์', '2024-10-29 17:27:17', NULL, NULL, 9, 9, NULL, NULL, NULL, NULL, 1, '2024-10-29 17:27:17', 1),
+(99, 6, 'ซื้อขายอุปกรณ์', '2024-10-29 17:43:51', NULL, NULL, 9, 7, NULL, NULL, NULL, NULL, 1, '2024-10-29 17:43:51', 1),
+(100, 6, 'ซื้อขายอุปกรณ์', '2024-10-29 17:43:58', NULL, NULL, 9, 7, NULL, NULL, NULL, NULL, 1, '2024-10-29 17:43:57', 1),
+(101, 6, 'ซื้อขายอุปกรณ์', '2024-10-29 17:44:04', NULL, NULL, 9, 7, NULL, NULL, NULL, NULL, 1, '2024-10-29 17:44:04', 1),
+(102, 6, 'ซื้อขายอุปกรณ์', '2024-10-29 17:44:21', NULL, NULL, 9, 7, NULL, NULL, NULL, NULL, 1, '2024-10-29 17:44:21', 1),
+(103, 6, 'ซื้อขายอุปกรณ์', '2024-10-29 17:44:32', NULL, NULL, 9, 7, NULL, NULL, NULL, NULL, 1, '2024-10-29 17:44:31', 1),
+(104, 6, 'ซื้อขายอุปกรณ์', '2024-10-29 17:44:37', NULL, NULL, 9, 6, NULL, NULL, NULL, NULL, 1, '2024-10-29 17:44:36', 1),
+(105, 6, 'ซื้อขายอุปกรณ์', '2024-10-29 17:44:45', NULL, NULL, 9, 6, NULL, NULL, NULL, NULL, 1, '2024-10-29 17:44:45', 1),
+(106, 6, 'ซื้อขายอุปกรณ์', '2024-10-29 17:44:53', NULL, NULL, 9, 6, NULL, NULL, NULL, NULL, 1, '2024-10-29 17:44:52', 1),
+(107, 6, 'ซื้อขายอุปกรณ์', '2024-10-29 17:45:31', NULL, NULL, 9, 3, NULL, NULL, NULL, NULL, 1, '2024-10-29 17:45:30', 1),
+(108, 6, 'ซื้อขายอุปกรณ์', '2024-10-29 17:45:39', NULL, NULL, 9, 1, NULL, NULL, NULL, NULL, 1, '2024-10-29 17:45:39', 1),
+(109, 6, 'ซื้อขายอุปกรณ์', '2024-10-29 17:47:14', NULL, NULL, 9, 3, NULL, NULL, NULL, NULL, 1, '2024-10-29 17:47:14', 1),
+(110, 6, 'ซื้อขายอุปกรณ์', '2024-10-29 17:48:48', NULL, NULL, 9, 5, NULL, NULL, NULL, NULL, 1, '2024-10-29 17:48:48', 1),
+(111, 6, 'ซื้อขายอุปกรณ์', '2024-10-29 17:50:29', NULL, NULL, 9, 3, NULL, NULL, NULL, NULL, 1, '2024-10-29 17:50:28', 1),
+(112, 6, 'ซื้อขายอุปกรณ์', '2024-10-29 17:52:43', NULL, NULL, 9, 2, NULL, NULL, NULL, NULL, 1, '2024-10-29 17:52:42', 1),
+(113, 6, 'ซื้อขายอุปกรณ์', '2024-10-29 17:52:57', NULL, NULL, 9, 5, NULL, NULL, NULL, NULL, 1, '2024-10-29 17:52:57', 1),
+(114, 6, 'ซื้อขายอุปกรณ์', '2024-10-29 17:53:48', NULL, NULL, 9, 2, NULL, NULL, NULL, NULL, 1, '2024-10-29 17:53:48', 1),
+(115, 6, 'ซื้อขายอุปกรณ์', '2024-10-29 17:57:50', NULL, NULL, 9, 2, NULL, NULL, NULL, NULL, 1, '2024-10-29 17:57:50', 1),
+(116, 6, 'ซื้อขายอุปกรณ์', '2024-10-29 17:58:06', NULL, NULL, 9, 5, NULL, NULL, NULL, NULL, 1, '2024-10-29 17:58:06', 1);
 
 -- --------------------------------------------------------
 
@@ -457,7 +528,7 @@ CREATE TABLE `tasktypes` (
 
 INSERT INTO `tasktypes` (`task_type_id`, `type_name`, `description`) VALUES
 (1, 'งานเช่าเครื่องปรับอากาศ', 'เช่าเครื่องปรับอากาศ พร้อมติดตั้ง'),
-(9, 'ขายเครื่องปรับอากาศ', 'ขายเครื่องปรับอากาศ'),
+(9, 'ขายสินค้า', 'ขายอุปกรณ์เครื่องปรับอากาศ'),
 (11, 'ยืมอุปกรณ์', 'ยืมอุปกรณ์');
 
 -- --------------------------------------------------------
@@ -473,6 +544,13 @@ CREATE TABLE `task_log` (
   `action` varchar(255) NOT NULL,
   `created_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+
+--
+-- Dumping data for table `task_log`
+--
+
+INSERT INTO `task_log` (`log_id`, `task_id`, `user_id`, `action`, `created_at`) VALUES
+(1, 93, 6, 'Created task', '2024-10-29 16:38:43');
 
 -- --------------------------------------------------------
 
@@ -539,7 +617,7 @@ CREATE TABLE `technician_applicants` (
 --
 
 INSERT INTO `technician_applicants` (`applicant_id`, `date_of_birth`, `address`, `email`, `phone_number`, `application_date`, `position_applied`, `notes`, `interview_date`, `interviewer`, `first_name`, `last_name`, `status_id`, `id_card_image_url`, `driver_license_image_url`, `criminal_record_image_url`, `additional_image_url`) VALUES
-(1, '2003-09-03', 'กทม', 'natchapakjd@gmail.com', '0641160893', '2024-09-23 06:11:35', 'ช่างซ่อมบำรุง', 'โน้ตเพิ่มเติม', '2024-09-25', 'admin', 'ช่าง', 'ในระบบ', 1, NULL, NULL, NULL, NULL);
+(1, '2003-09-03', 'กทม', 'natchapakjd@gmail.com', '0641160893', '2024-09-23 06:11:35', 'ช่างซ่อมบำรุง', 'โน้ตเพิ่มเติม', '2024-09-25', 'admin', 'ช่าง', 'ในระบบ', 7, NULL, NULL, NULL, NULL);
 
 -- --------------------------------------------------------
 
@@ -557,22 +635,23 @@ CREATE TABLE `users` (
   `phone` varchar(15) DEFAULT NULL,
   `age` int(11) DEFAULT NULL,
   `address` varchar(255) DEFAULT NULL,
-  `gender` enum('male','female') DEFAULT NULL,
   `created_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
   `linetoken` text,
   `date_of_birth` date DEFAULT NULL,
   `image_url` varchar(255) DEFAULT NULL,
-  `role_id` int(11) NOT NULL DEFAULT '1'
+  `role_id` int(11) NOT NULL DEFAULT '1',
+  `gender_id` int(11) DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 --
 -- Dumping data for table `users`
 --
 
-INSERT INTO `users` (`user_id`, `username`, `password`, `firstname`, `lastname`, `email`, `phone`, `age`, `address`, `gender`, `created_at`, `linetoken`, `date_of_birth`, `image_url`, `role_id`) VALUES
-(2, 'admin', '$2b$10$ThT9xSLUiZ4ZwAYZshVf6ulBktjc6tImodfFr8Uf9IME1SDI.Q.XW', 'firstname', 'lastname', 'admin@gmail.com', '0641159783', 5, 'กทม', 'female', '2024-09-11 12:32:23', NULL, '2024-09-19', 'https://res.cloudinary.com/dq8euhi61/image/upload/v1727462309/image/user-image/czf9574soadtxq378hjz.jpg', 3),
-(3, 'tech', '$2b$10$ltJ786G/tiUyM/bIJ1z/LeSyAqzCstfaGZsTNipj.1X0n3yZPd/S6', 'ช่าง', 'ในระบบ', 'tech@gmail.com', '0641159783', 7, 'กทม', 'female', '2024-09-12 07:18:25', NULL, '2024-09-17', NULL, 2),
-(6, 'member', '$2b$10$FaSFGRxhPP0dH2IYi9D5kOhiBz0He.to1V8UQQYMVqE8K0aQT4rue', 'ลูกค้า', 'ในระบบ', 'asdasdas@gmailcom', '0641159783', 25, 'กทม', 'male', '2024-09-13 11:58:33', 'U9cb564155dddeaa549d97a8747eed534', '2024-09-19', 'https://res.cloudinary.com/dq8euhi61/image/upload/v1727331372/image/user-image/b3gsanuh4utc3dvgnxoj.jpg', 1);
+INSERT INTO `users` (`user_id`, `username`, `password`, `firstname`, `lastname`, `email`, `phone`, `age`, `address`, `created_at`, `linetoken`, `date_of_birth`, `image_url`, `role_id`, `gender_id`) VALUES
+(2, 'admin', '$2b$10$ThT9xSLUiZ4ZwAYZshVf6ulBktjc6tImodfFr8Uf9IME1SDI.Q.XW', 'firstname', 'lastname', 'admin@gmail.com', '0641159783', 5, 'กทม', '2024-09-11 12:32:23', NULL, '2024-09-19', 'https://res.cloudinary.com/dq8euhi61/image/upload/v1727462309/image/user-image/czf9574soadtxq378hjz.jpg', 3, 1),
+(3, 'tech', '$2b$10$ltJ786G/tiUyM/bIJ1z/LeSyAqzCstfaGZsTNipj.1X0n3yZPd/S6', 'ช่าง', 'ในระบบ', 'tech@gmail.com', '0641159783', 7, 'กทม', '2024-09-12 07:18:25', NULL, '2024-09-17', NULL, 2, 1),
+(6, 'member', '$2b$10$FaSFGRxhPP0dH2IYi9D5kOhiBz0He.to1V8UQQYMVqE8K0aQT4rue', 'ลูกค้า', 'ในระบบ', 'asdasdas@gmailcom', '0641159783', 25, 'กทม', '2024-09-13 11:58:33', 'U9cb564155dddeaa549d97a8747eed534', '2024-09-19', 'https://res.cloudinary.com/dq8euhi61/image/upload/v1727331372/image/user-image/b3gsanuh4utc3dvgnxoj.jpg', 1, 1),
+(7, 'test', '$2b$10$TkFQUUGGsgRYrmVKHDYiZe2Qk30s4QnhC0SAgj8sNH.bZyNcRGGKq', 'test', 'test', 'test@gmail.com', '0641159783', 5, 'กรุงเทพ พหลโยธิน', '2024-10-18 08:57:22', NULL, '2024-10-16', NULL, 2, 1);
 
 -- --------------------------------------------------------
 
@@ -636,7 +715,14 @@ ALTER TABLE `categories`
 -- Indexes for table `equipment_borrowing`
 --
 ALTER TABLE `equipment_borrowing`
+  ADD PRIMARY KEY (`borrowing_id`),
   ADD KEY `fk_task` (`task_id`);
+
+--
+-- Indexes for table `gender`
+--
+ALTER TABLE `gender`
+  ADD PRIMARY KEY (`gender_id`);
 
 --
 -- Indexes for table `orders`
@@ -785,7 +871,8 @@ ALTER TABLE `users`
   ADD PRIMARY KEY (`user_id`),
   ADD UNIQUE KEY `username` (`username`),
   ADD UNIQUE KEY `email` (`email`),
-  ADD KEY `fk_role_id` (`role_id`);
+  ADD KEY `fk_role_id` (`role_id`),
+  ADD KEY `fk_gender` (`gender_id`);
 
 --
 -- Indexes for table `warehouses`
@@ -828,22 +915,34 @@ ALTER TABLE `categories`
   MODIFY `category_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=4;
 
 --
+-- AUTO_INCREMENT for table `equipment_borrowing`
+--
+ALTER TABLE `equipment_borrowing`
+  MODIFY `borrowing_id` int(11) NOT NULL AUTO_INCREMENT;
+
+--
+-- AUTO_INCREMENT for table `gender`
+--
+ALTER TABLE `gender`
+  MODIFY `gender_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=3;
+
+--
 -- AUTO_INCREMENT for table `orders`
 --
 ALTER TABLE `orders`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=98;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=29;
 
 --
 -- AUTO_INCREMENT for table `order_items`
 --
 ALTER TABLE `order_items`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=151;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=26;
 
 --
 -- AUTO_INCREMENT for table `payments`
 --
 ALTER TABLE `payments`
-  MODIFY `payment_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=8;
+  MODIFY `payment_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=5;
 
 --
 -- AUTO_INCREMENT for table `payment_methods`
@@ -861,7 +960,7 @@ ALTER TABLE `productattributes`
 -- AUTO_INCREMENT for table `products`
 --
 ALTER TABLE `products`
-  MODIFY `product_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=11;
+  MODIFY `product_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=8;
 
 --
 -- AUTO_INCREMENT for table `product_type`
@@ -873,13 +972,13 @@ ALTER TABLE `product_type`
 -- AUTO_INCREMENT for table `rental`
 --
 ALTER TABLE `rental`
-  MODIFY `rental_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=4;
+  MODIFY `rental_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=10;
 
 --
 -- AUTO_INCREMENT for table `reviews`
 --
 ALTER TABLE `reviews`
-  MODIFY `review_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=6;
+  MODIFY `review_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=2;
 
 --
 -- AUTO_INCREMENT for table `roles`
@@ -897,7 +996,7 @@ ALTER TABLE `service_areas`
 -- AUTO_INCREMENT for table `status`
 --
 ALTER TABLE `status`
-  MODIFY `status_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=10;
+  MODIFY `status_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=11;
 
 --
 -- AUTO_INCREMENT for table `taskassignments`
@@ -909,7 +1008,7 @@ ALTER TABLE `taskassignments`
 -- AUTO_INCREMENT for table `tasks`
 --
 ALTER TABLE `tasks`
-  MODIFY `task_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=60;
+  MODIFY `task_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=117;
 
 --
 -- AUTO_INCREMENT for table `tasktypes`
@@ -921,7 +1020,7 @@ ALTER TABLE `tasktypes`
 -- AUTO_INCREMENT for table `task_log`
 --
 ALTER TABLE `task_log`
-  MODIFY `log_id` int(11) NOT NULL AUTO_INCREMENT;
+  MODIFY `log_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=2;
 
 --
 -- AUTO_INCREMENT for table `technicians`
@@ -939,7 +1038,7 @@ ALTER TABLE `technician_applicants`
 -- AUTO_INCREMENT for table `users`
 --
 ALTER TABLE `users`
-  MODIFY `user_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=7;
+  MODIFY `user_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=8;
 
 --
 -- AUTO_INCREMENT for table `warehouses`
@@ -1069,6 +1168,7 @@ ALTER TABLE `technician_applicants`
 -- Constraints for table `users`
 --
 ALTER TABLE `users`
+  ADD CONSTRAINT `fk_gender` FOREIGN KEY (`gender_id`) REFERENCES `gender` (`gender_id`),
   ADD CONSTRAINT `fk_role_id` FOREIGN KEY (`role_id`) REFERENCES `roles` (`role_id`) ON DELETE CASCADE ON UPDATE CASCADE;
 COMMIT;
 

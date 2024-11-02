@@ -65,7 +65,7 @@ const Service = () => {
                       <div className="flex justify-end">
                         <Link
                           to={
-                            taskType.type_name === "ขายเครื่องปรับอากาศ"
+                            taskType.type_name === "ขายสินค้า"
                               ? "/product"
                               : `/service/rental/${taskType.task_type_id}`
                           }
