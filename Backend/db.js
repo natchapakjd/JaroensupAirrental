@@ -9,6 +9,7 @@ const db = mysql.createConnection({
   database: process.env.DB_NAME, 
 });
 
+console.log(db)
 // const db = mysql.createConnection({
 //   host: "localhost", 
 //   port: "51579", 
