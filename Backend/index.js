@@ -31,8 +31,8 @@ const cookieParser = require("cookie-parser");
 
 // Middleware setup
 app.use(cors({
-  origin: 'http://localhost:5173', // Set your frontend's URL here
-  credentials: true, // Allow credentials to be passed, such as cookies
+  origin: 'https://jaroensup-airrental-frontend.vercel.app', 
+  credentials: true, 
 }));
 
 app.use(bodyParser.json());
