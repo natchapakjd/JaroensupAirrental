@@ -34,9 +34,10 @@ const cookieParser = require("cookie-parser");
 //   origin: 'https://jaroensup-airrental-frontend.vercel.app', 
 //   credentials: true, 
 // }));
-app.use(cors())
+
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
+app.use(cors())
 
 app.use(cookieParser()); // Correct placement
 
