@@ -30,13 +30,14 @@ const cookieParser = require("cookie-parser");
 
 
 // Middleware setup
-app.use(cors({
-  origin: 'https://jaroensup-airrental-frontend.vercel.app', 
-  credentials: true, 
-}));
+// app.use(cors({
+//   origin: 'https://jaroensup-airrental-frontend.vercel.app', 
+//   credentials: true, 
+// }));
 
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
+app.use(cors())
 
 app.use(cookieParser()); // Correct placement
 
@@ -62,7 +63,6 @@ app.use(roles);
 app.use(borrow_prod);
 app.use(status);
 app.use(chart)
-app.use(isAdmin);
 
 
 
