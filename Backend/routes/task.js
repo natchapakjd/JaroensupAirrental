@@ -300,4 +300,40 @@ router.get("/tasks/assigned/:techId", (req, res) => {
     });
   });
 });
+
+
+router.put("/task-tech/:id", (req, res) => {
+  const id = req.params.id;
+  const { status_id, start_date, finish_date } = req.body;
+  const query = `
+    UPDATE tasks
+    SET 
+      status_id = ?,
+      start_date = ?,
+      finish_date = ?
+    WHERE task_id = ?`;
+
+  // Execute query with parameter values
+  db.query(
+    query,
+    [status_id, start_date, finish_date, id],
+    (err, result) => {
+      if (err) {
+        console.error("Error updating task: " + err);
+        res.status(500).json({ error: "Failed to update task" });
+      } else if (result.affectedRows === 0) {
+        res.status(404).json({ error: "Task not found" });
+      } else {
+        res.json({
+          message: "Task updated successfully",
+          task_id: id,
+          status_id,
+          start_date,
+          finish_date,
+        });
+      }
+    }
+  );
+});
+
 module.exports = router;

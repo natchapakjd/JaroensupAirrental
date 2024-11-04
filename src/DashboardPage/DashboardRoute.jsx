@@ -45,6 +45,8 @@ import AddTechnician from '../DashboardContent/Users/AddTechnician'
 import SendApplicantEmail from '../DashboardContent/TechnicianApplicants/SendApplicantEmail'
 import LineProfile from '../pages/Settings/LineProfile'
 import EditReview from '../DashboardContent/Reviews/EditReview'
+import AddBorrowProduct from '../DashboardContent/BorrowProduct/AddBorrowProduct'
+import UpdateTaskTech from '../DashboardContent/Tasks/UpdateTaskTech'
 const DashboardRoute = () => {
   return (
       <div className='flex'>
@@ -60,6 +62,7 @@ const DashboardRoute = () => {
             <Route path="tasks" element={<TaskContent />} />
             <Route path="tasks/assign" element={<AssignTask />} />
             <Route path="tasks/:taskId" element={<TaskDetails />} />
+            <Route path="tasks-tech/edit/:taskId" element={<UpdateTaskTech />} />
             <Route path="applicants" element={<ApplicantContent />} />
             <Route path="applicants/:id" element={<ApplicantDetails />} />
             <Route path="applicant/sending-email/:id" element={<SendApplicantEmail />} />
@@ -69,8 +72,9 @@ const DashboardRoute = () => {
             <Route path="payments" element={<PaymentContent />} />
             <Route path="payments/add" element={<AddPayment />} />
             <Route path="payments/edit/:paymentId" element={<EditPayment />} />
-            <Route path="borrow/:productId" element={<BorrowProductContent />} />
+            <Route path="borrows/:productId" element={<BorrowProductContent />} />
             <Route path="borrows" element={<BorrowProductTable />} />
+            <Route path="borrows/add" element={<AddBorrowProduct />} />
             <Route path="orders" element={<OrderContent />} />
             <Route path="orders/details/:orderId" element={<OrderDetails/>} />
             <Route path="orders/add" element={<AddOrder />} />

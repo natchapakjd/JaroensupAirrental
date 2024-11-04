@@ -137,6 +137,13 @@ const TaskContent = () => {
                           </button>
                         </>
                       ) : null}
+                      {role === 2? (
+                        <>
+                          <Link to={`/dashboard/tasks-tech/edit/${task.task_id}`}>
+                            <button className="btn btn-success text-white">Edit</button>
+                          </Link>
+                        </>
+                      ) : null}
                       <button
                         onClick={() => handleViewDetails(task.task_id)}
                         className="btn bg-blue text-white hover:bg-blue"

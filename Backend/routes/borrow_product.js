@@ -2,6 +2,22 @@ const express = require("express");
 const router = express.Router();
 const db = require("../db");
 const isAdmin = require("../middlewares/isAdmin");
+const multer = require("multer");
+const path = require("path");
+const sharp = require("sharp");
+const cloudinary = require("../cloundinary-config");
+const fs = require("fs");
+
+const storage = multer.diskStorage({
+  destination: function (req, file, cb) {
+    cb(null, "uploads/borrowed-equipment-image");
+  },
+  filename: function (req, file, cb) {
+    cb(null, Date.now() + path.extname(file.originalname));
+  },
+});
+
+const upload = multer({ storage: storage });
 
 router.get("/equipment-borrowings", (req, res) => {
   const query = `
@@ -41,12 +57,28 @@ router.get("/equipment-borrowing/:techId", (req, res) => {
   });
 });
 
-router.post("/equipment-borrowing", async (req, res) => {
-  const { tech_id, product_id, borrow_date, return_date ,user_id} = req.body;
-  console.log(req.body);
+router.post("/equipment-borrowing", upload.single("id_card_image"), async (req, res) => {
+  const { tech_id, product_id, borrow_date, return_date, user_id } = req.body;
+  let imageUrl = null;
+
   try {
-    const taskQuery =
-      "INSERT INTO tasks (task_type_id, description,isActive,user_id) VALUES (?, ?,?,?)";
+    // Upload ID card image if provided
+    if (req.file) {
+      const idCardImage = req.file.path;
+
+      // Upload image to Cloudinary
+      const result = await cloudinary.uploader.upload(idCardImage, {
+        folder: "image/borrowed-equipment",
+      });
+
+      imageUrl = result.secure_url;
+    }
+
+    // First, create a new task
+    const taskQuery = `
+      INSERT INTO tasks (task_type_id, description, isActive, user_id)
+      VALUES (?, ?, ?, ?)
+    `;
     const taskValues = [11, "ยืมอุปกรณฺ์", 1, user_id];
 
     db.query(taskQuery, taskValues, (taskError, taskResults) => {
@@ -55,34 +87,34 @@ router.post("/equipment-borrowing", async (req, res) => {
       }
       const task_id = taskResults.insertId; // Get the generated task_id
 
-      const borrowingQuery =
-        "INSERT INTO equipment_borrowing (tech_id, product_id, borrow_date, return_date, task_id) VALUES (?, ?, ?, ?, ?)";
+      // Then, insert the equipment borrowing record
+      const borrowingQuery = `
+        INSERT INTO equipment_borrowing (tech_id, product_id, borrow_date, return_date, task_id, image_url)
+        VALUES (?, ?, ?, ?, ?, ?)
+      `;
       const borrowingValues = [
         tech_id,
         product_id,
         borrow_date,
         return_date,
         task_id,
+        imageUrl,
       ];
 
-      db.query(
-        borrowingQuery,
-        borrowingValues,
-        (borrowingError, borrowingResults) => {
-          if (borrowingError) {
-            return res.status(500).json({ error: "Error borrowing equipment" });
-          }
-          res
-            .status(200)
-            .json({ message: "Equipment borrowed successfully", task_id });
+      db.query(borrowingQuery, borrowingValues, (borrowingError, borrowingResults) => {
+        if (borrowingError) {
+          return res.status(500).json({ error: "Error borrowing equipment" });
         }
-      );
+
+        res.status(200).json({ message: "Equipment borrowed successfully", task_id });
+      });
     });
   } catch (error) {
     console.error("Error:", error);
     res.status(500).json({ error: "Server error" });
   }
 });
+
 
 router.put("/equipment-borrowing/approve/:taskId", async (req, res) => {
   const taskId = req.params.taskId;

@@ -3,35 +3,32 @@ import axios from "axios";
 import Swal from "sweetalert2";
 import Cookies from "universal-cookie";
 import { jwtDecode } from "jwt-decode";
-
+import { Link } from "react-router-dom";
 const BorrowProductTable = () => {
   const [borrowingData, setBorrowingData] = useState([]);
   const cookies = new Cookies();
   const token = cookies.get("authToken");
-  const decodedToken = jwtDecode(token)
-  const techId = decodedToken.id
-  const role = decodedToken.role
+  const decodedToken = jwtDecode(token);
+  const techId = decodedToken.id;
+  const role = decodedToken.role;
 
   useEffect(() => {
-      fetchBorrowingData(techId);
+    fetchBorrowingData(techId);
   }, []);
 
-  const fetchBorrowingData = async ( techId ) => {
+  const fetchBorrowingData = async (techId) => {
     try {
-        if(role === 3){
-            const response = await axios.get(
-                `${import.meta.env.VITE_SERVER_URL}/equipment-borrowings`
-              );
-              setBorrowingData(response.data);
-
-        }else if(role ===2){
-            const response = await axios.get(
-                `${import.meta.env.VITE_SERVER_URL}/equipment-borrowing/${techId}`
-              );
-              setBorrowingData(response.data);
-
-        }
-    
+      if (role === 3) {
+        const response = await axios.get(
+          `${import.meta.env.VITE_SERVER_URL}/equipment-borrowings`
+        );
+        setBorrowingData(response.data);
+      } else if (role === 2) {
+        const response = await axios.get(
+          `${import.meta.env.VITE_SERVER_URL}/equipment-borrowing/${techId}`
+        );
+        setBorrowingData(response.data);
+      }
     } catch (error) {
       console.error("Error fetching borrowing data:", error);
       Swal.fire({
@@ -41,16 +38,16 @@ const BorrowProductTable = () => {
       });
     }
   };
-  
+
   const handleReturn = async (taskId) => {
     try {
       // Check the status of the task
       const statusResponse = await axios.get(
         `${import.meta.env.VITE_SERVER_URL}/approve/${taskId}`
       );
-  
+
       const statusId = statusResponse.data.status_id; // Assuming your API returns the status_id
-  
+
       // Check if the status_id is 4 (approved)
       if (statusId !== 4) {
         Swal.fire({
@@ -60,12 +57,14 @@ const BorrowProductTable = () => {
         });
         return;
       }
-  
+
       // If approved, proceed to return the equipment
       const response = await axios.put(
-        `${import.meta.env.VITE_SERVER_URL}/equipment-borrowing/return/${taskId}`
+        `${
+          import.meta.env.VITE_SERVER_URL
+        }/equipment-borrowing/return/${taskId}`
       );
-  
+
       if (response.status === 200) {
         Swal.fire({
           title: "Equipment returned successfully",
@@ -84,13 +83,14 @@ const BorrowProductTable = () => {
     }
   };
 
-  const handleApprove= async (taskId) => {
+  const handleApprove = async (taskId) => {
     try {
-    
       const response = await axios.put(
-        `${import.meta.env.VITE_SERVER_URL}/equipment-borrowing/approve/${taskId}`
+        `${
+          import.meta.env.VITE_SERVER_URL
+        }/equipment-borrowing/approve/${taskId}`
       );
-  
+
       if (response.status === 200) {
         Swal.fire({
           title: "Equipment returned successfully",
@@ -108,13 +108,15 @@ const BorrowProductTable = () => {
       });
     }
   };
-
 
   const handleCancel = async (borrowing_id) => {
     try {
       const response = await axios.delete(
-        `${import.meta.env.VITE_SERVER_URL}/equipment-borrowing/${borrowing_id}`
-      ,{withCredentials:true});
+        `${
+          import.meta.env.VITE_SERVER_URL
+        }/equipment-borrowing/${borrowing_id}`,
+        { withCredentials: true }
+      );
 
       if (response.status === 200) {
         Swal.fire({
@@ -138,7 +140,15 @@ const BorrowProductTable = () => {
     <div className="p-8 rounded-lg shadow-lg w-full mx-auto font-inter h-full">
       <div className="flex justify-between items-center mb-4">
         <h2 className="text-xl font-semibold mt-8">Borrowed Equipment List</h2>
+        {role === 3 ? (
+          <Link to="/dashboard/borrows/add">
+            <button className="btn bg-blue text-white hover:bg-blue">
+              Create borrowing task
+            </button>
+          </Link>
+        ) : null}
       </div>
+
       <table className="w-full border-collapse border border-gray-300">
         <thead>
           <tr>
@@ -173,15 +183,15 @@ const BorrowProductTable = () => {
                 <td className="border border-gray-300 p-2">{item.task_id}</td>
                 <td className="border border-gray-300 p-2">
                   <div className="flex justify-center gap-2">
-                  {role === 2 ? (
+                    {role === 2 ? (
                       <button
-                      onClick={() => handleReturn(item.task_id)}
-                      className="btn btn-error text-white"
-                    >
-                      Return
-                    </button>
+                        onClick={() => handleReturn(item.task_id)}
+                        className="btn btn-error text-white"
+                      >
+                        Return
+                      </button>
                     ) : null}
-                    
+
                     {role === 3 ? (
                       <button
                         onClick={() => handleApprove(item.task_id)}

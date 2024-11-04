@@ -185,19 +185,18 @@ router.delete("/payment/:id", (req, res) => {
   });
 });
 
-router.get("/payments/total", (req, res) => {
+router.get("/payments-sum/total", (req, res) => {
   const query = "SELECT SUM(amount) AS total_amount FROM payments";
 
   db.query(query, (err, result) => {
     if (err) {
-      console.error("Error fetching total amount: " + err);
+      console.error("Error fetching total amount: ", err);
       return res.status(500).json({ error: "Failed to fetch total amount" });
     }
-
-    const totalAmount = result[0].total_amount || 0; // Default to 0 if no payments
-    res.status(200).json({ totalAmount });
+    res.status(200).json(result[0]);
   });
 });
+
 
 router.get('/payment-methods', (req, res) => {
   const query = 'SELECT * FROM payment_methods';

@@ -1,37 +1,61 @@
 import React, { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import axios from 'axios';
-
+import Cookies from 'universal-cookie';
+import { jwtDecode } from 'jwt-decode';
 const DashboardContent = () => {
   const [totalProducts, setTotalProducts] = useState(0);
   const [totalOrders, setTotalOrders] = useState(0);
   const [totalRevenue, setTotalRevenue] = useState(0);
+  const cookies = new Cookies();
+  const [user, setUser] = useState(null);
+  const token = cookies.get("authToken");
+  const decodeToken = jwtDecode(token)
+  const id =  decodeToken.id
+
 
   useEffect(() => {
     const fetchDashboardData = async () => {
       try {
         const productResponse = await axios.get(`${import.meta.env.VITE_SERVER_URL}/products/count`);
         const orderResponse = await axios.get(`${import.meta.env.VITE_SERVER_URL}/v2/orders/count`);
-        const revenueResponse = await axios.get(`${import.meta.env.VITE_SERVER_URL}/payments/total`);
+        const revenueResponse = await axios.get(`${import.meta.env.VITE_SERVER_URL}/payments-sum/total`);
 
         setTotalProducts(productResponse.data.count || 0);
         setTotalOrders(orderResponse.data.totalOrders || 0);
-        setTotalRevenue(revenueResponse.data.totalAmount || 0);
+        setTotalRevenue(revenueResponse.data.total_amount || 0);
       } catch (error) {
         console.error('Error fetching dashboard data:', error);
       }
     };
 
+    fetchUserByID(id)
     fetchDashboardData();
-  }, []);
+  },[]);
+  
+  const fetchUserByID = async (userId) => {
+    try {
+      const response = await axios.get(
+        `${import.meta.env.VITE_SERVER_URL}/user/${userId}`
+      );
+      if (response.status === 200) {
+        setUser(response.data);
+        console.log(user)
+      }
+    } catch (err) {
+      console.error("Error fetching user image:", err);
+      setUser(null); // Reset user state on error
+    }
+  };
 
   return (
     <div className="p-8 bg-white min-h-screen font-inter">
       <div className="bg-white p-6 rounded-lg shadow-lg mb-6">
-        <h1 className="text-3xl font-bold text-gray-800">Welcome Back, Admin!</h1>
+        <h1 className="text-3xl font-bold text-gray-800">
+          Welcome Back, {user ? `${user.firstname} ${user.lastname}` : 'User'}!
+        </h1>
         <p className="text-gray-600 mt-2">Here is a quick overview of your dashboard.</p>
       </div>
-
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-6">
         <div className="bg-white p-6 rounded-lg shadow-lg flex items-center justify-between">
           <div>

@@ -8,9 +8,9 @@ import Cookies from "universal-cookie";
 const ProductContent = () => {
   const [products, setProducts] = useState([]);
   const cookies = new Cookies();
-  const token =cookies.get("authToken")
-  const decodedToken = jwtDecode(token)
-  const role = decodedToken.role
+  const token = cookies.get("authToken");
+  const decodedToken = jwtDecode(token);
+  const role = decodedToken.role;
 
   useEffect(() => {
     fetchProducts();
@@ -62,17 +62,14 @@ const ProductContent = () => {
     <div className="p-8 rounded-lg shadow-lg w-full mx-auto font-inter h-full">
       <div className="flex justify-between items-center mb-4">
         <h2 className="text-xl font-semibold mt-8">Product List</h2>
-        {role === 3 ? (<div>
-          <Link to="/dashboard/products/add">
-            <button className="btn bg-blue text-white hover:bg-blue">
-              Add Product
-            </button>
-          </Link>
-          
-        </div>
-          
-         
-          
+        {role === 3 ? (
+          <div>
+            <Link to="/dashboard/products/add">
+              <button className="btn bg-blue text-white hover:bg-blue">
+                Add Product
+              </button>
+            </Link>
+          </div>
         ) : null}
       </div>
       <table className="w-full border-collapse border border-gray-300">
@@ -147,15 +144,15 @@ const ProductContent = () => {
                           Delete
                         </button>
                       </>
-                    ) : <>
-                     <Link
-                          to={`/dashboard/borrow/${product.product_id}`}
-                        >
+                    ) : (
+                      <>
+                        <Link to={`/dashboard/borrows/${product.product_id}`}>
                           <button className="btn btn-success text-white">
                             Borrow
                           </button>
                         </Link>
-                    </>}
+                      </>
+                    )}
                   </div>
                 </td>
               </tr>

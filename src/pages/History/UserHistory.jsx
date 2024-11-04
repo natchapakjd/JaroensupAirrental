@@ -4,10 +4,9 @@ import Navbar from "../../components/Navbar";
 import Footer from "../../components/Footer";
 import { useNavigate } from "react-router-dom"; // Import useNavigate
 import { MdOutlineStar } from "react-icons/md";
-import { useAuth } from "../../context/AuthContext";
-
+import { jwtDecode } from "jwt-decode";
+import Cookies from "universal-cookie";
 const UserHistory = () => {
-  const token = useAuth();
   const [taskHistory, setTaskHistory] = useState([]);
   const [orderHistory, setOrderHistory] = useState([]);
   const [totalTasks, setTotalTasks] = useState(0);
@@ -15,19 +14,32 @@ const UserHistory = () => {
   const [taskPage, setTaskPage] = useState(1);
   const [orderPage, setOrderPage] = useState(1);
   const [paymentHistory, setPaymentHistory] = useState({}); // Store payment info
-  const user_id = token.user.id;
   const navigate = useNavigate(); // Initialize navigate
+  const cookies = new Cookies();
+  const token = cookies.get("authToken");
+  const decodeToken = jwtDecode(token);
+  const user_id = decodeToken.id;
 
   const fetchUserData = async (taskPage, orderPage) => {
     try {
       const taskResponse = await axios.get(
-        `${import.meta.env.VITE_SERVER_URL}/task-paging/${user_id}&page=${taskPage}&limit=10`
+        `${
+          import.meta.env.VITE_SERVER_URL
+        }/task-paging/${user_id}?page=${taskPage}&limit=10`
       );
-      setTaskHistory(taskResponse.data.tasks);
-      setTotalTasks(taskResponse.data.totalTasks);
+
+      // Filter tasks by task_type_id after fetching
+      const filteredTasks = taskResponse.data.tasks.filter(
+        (task) => task.task_type_id === 1
+      );
+
+      setTaskHistory(filteredTasks);
+      setTotalTasks(filteredTasks.length); // Set totalTasks based on filtered tasks
 
       const orderResponse = await axios.get(
-        `${import.meta.env.VITE_SERVER_URL}/v1/orders/${user_id}?page=${orderPage}&limit=10`
+        `${
+          import.meta.env.VITE_SERVER_URL
+        }/v1/orders/${user_id}?page=${orderPage}&limit=10`
       );
       setOrderHistory(orderResponse.data.orders);
       setTotalOrders(orderResponse.data.totalCount);
@@ -141,24 +153,24 @@ const UserHistory = () => {
               )}
             </tbody>
           </table>
-
-          <div className="flex justify-between mt-4">
-            <button
-              onClick={() => handleTaskPageChange(-1)}
-              disabled={taskPage === 1}
-            >
-              Previous
-            </button>
-            <span>
-              Page {taskPage} of {Math.ceil(totalTasks / 10)}
-            </span>
-            <button
-              onClick={() => handleTaskPageChange(1)}
-              disabled={taskPage >= Math.ceil(totalTasks / 10)}
-            >
-              Next
-            </button>
-          </div>
+        </div>
+        <div className="flex justify-between mt-4">
+          <button
+            onClick={() => handleTaskPageChange(-1)}
+            disabled={taskPage === 1}
+          >
+            Previous
+          </button>
+          <span>
+            Page {taskPage} of {Math.ceil(totalTasks / 10) || 1}{" "}
+            {/* Prevent division by zero */}
+          </span>
+          <button
+            onClick={() => handleTaskPageChange(1)}
+            disabled={taskPage >= Math.ceil(totalTasks / 10)}
+          >
+            Next
+          </button>
         </div>
 
         <div className="mb-5">
@@ -184,13 +196,13 @@ const UserHistory = () => {
                         View details
                       </button>
                       {paymentHistory[order.task_id] && (
-                          <button
-                            onClick={() => handlePaymentSlip(order.task_id)}
-                            className="ml-5 text-blue-600"
-                          >
-                            <div className="flex pt-1 mt-1">แนบสลิป</div>
-                          </button>
-                        )}
+                        <button
+                          onClick={() => handlePaymentSlip(order.task_id)}
+                          className="ml-5 text-blue-600"
+                        >
+                          <div className="flex pt-1 mt-1">แนบสลิป</div>
+                        </button>
+                      )}
                     </td>
                   </tr>
                 ))
