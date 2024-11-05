@@ -31,7 +31,7 @@ const AddAttribute = () => {
   };
 
   return (
-    <div className="p-8 rounded-lg shadow-lg w-full mx-auto max-w-md">
+    <div className="p-8 rounded-lg shadow-lg w-full mx-auto max-w-md mt-5">
       <h1 className="text-2xl font-semibold mb-6">Add New Attribute</h1>
       <form onSubmit={handleSubmit}>
         <div className="mb-4">
@@ -47,7 +47,7 @@ const AddAttribute = () => {
         </div>
         <button
           type="submit"
-          className={`btn bg-blue-500 text-white hover:bg-blue-700 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm w-full sm:w-auto px-5 py-2.5 text-center ${loading ? 'opacity-50 cursor-not-allowed' : ''}`}
+          className={`btn bg-blue text-white hover:bg-blue focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm w-full sm:w-auto px-5 py-2.5 text-center ${loading ? 'opacity-50 cursor-not-allowed' : ''}`}
           disabled={loading}
         >
           {loading ? 'Adding...' : 'Add Attribute'}

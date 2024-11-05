@@ -70,7 +70,13 @@ const ReviewContent = () => {
 
   return (
     <div className="p-8 rounded-lg shadow-lg w-full mx-auto h-screen">
-      <h2 className="text-xl font-semibold mb-4">Reviews</h2>
+       <div className="flex justify-between items-center mb-6">
+        <h1 className="text-2xl font-semibold">Reviews</h1>
+        <Link to="/dashboard/reviews/add" className="btn bg-blue text-white hover:bg-blue">
+          Add Review
+        </Link>
+      </div>
+      
       <table className="w-full border-collapse border border-gray-300">
         <thead>
           <tr>
@@ -98,7 +104,7 @@ const ReviewContent = () => {
                 <td className="border border-gray-300 p-2">
                   <Link
                     to={`/dashboard/reviews/${review.review_id}`} // Link to the edit page
-                    className="btn bg-blue hover:bg-blue text-white mr-2"
+                    className="btn btn-success  text-white mr-2"
                   >
                     Edit
                   </Link>

@@ -11,7 +11,7 @@ const BrandContent = () => {
   useEffect(() => {
     const fetchBrands = async () => {
       try {
-        const response = await axios.get('http://localhost:3000/brands');
+        const response = await axios.get(`${import.meta.env.VITE_SERVER_URL}/brands`);
         setBrands(response.data);
       } catch (err) {
         setError('Failed to fetch brands.');
@@ -22,7 +22,7 @@ const BrandContent = () => {
     };
 
     fetchBrands();
-  }, [brands]);
+  }, []);
 
   const handleDelete = async (id) => {
     try {
@@ -37,8 +37,8 @@ const BrandContent = () => {
       });
 
       if (result.isConfirmed) {
-        await axios.delete(`http://localhost:3000/brand/${id}`);
-        setBrands(brands.filter(brand => brand.id !== id));
+        await axios.delete(`${import.meta.env.VITE_SERVER_URL}/brand/${id}`);
+        setBrands(brands.filter((brand) => brand.id !== id));
         Swal.fire('Deleted!', 'Your brand has been deleted.', 'success');
       }
     } catch (err) {
@@ -53,8 +53,8 @@ const BrandContent = () => {
     <div className="p-8 rounded-lg shadow-lg w-full mx-auto h-screen">
       <div className="flex justify-between items-center mb-6">
         <h1 className="text-2xl font-semibold">Brands</h1>
-        <Link to="/dashboard/brand/add">
-          <button className="btn bg-blue text-white hover:bg-blue-700">
+        <Link to="/dashboard/brands/add">
+          <button className="btn bg-blue text-white hover:bg-blue">
             Add Brand
           </button>
         </Link>
@@ -78,6 +78,12 @@ const BrandContent = () => {
                 <td className="border border-gray-300 p-2">{brand.name}</td>
                 <td className="border border-gray-300 p-2">{brand.description}</td>
                 <td className="border border-gray-300 p-2">
+                  <Link
+                    to={`/dashboard/brands/edit/${brand.brand_id}`}
+                    className="btn btn-success text-white mr-2"
+                  >
+                    Edit
+                  </Link>
                   <button
                     onClick={() => handleDelete(brand.brand_id)}
                     className="btn btn-error text-white"
