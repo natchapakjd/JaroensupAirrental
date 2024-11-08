@@ -141,7 +141,7 @@ const AddTask = () => {
             <option value="">Select User</option>
             {users.map((user) => (
               <option key={user.user_id} value={user.user_id}>
-                {user.username}
+                {user.firstname} {user.lastname}
               </option>
             ))}
           </select>

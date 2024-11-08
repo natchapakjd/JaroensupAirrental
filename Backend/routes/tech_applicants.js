@@ -35,7 +35,7 @@ const storage = multer.diskStorage({
 const upload = multer({ storage: storage });
 
 router.get("/applicants", (req, res) => {
-  const query = "SELECT * FROM  technician_applicants";
+  const query = "SELECT ta.*,st.status_name FROM  technician_applicants ta JOIN status st ON ta.status_id = st.status_id";
 
   db.query(query, (err, result) => {
     if (err) {
@@ -49,7 +49,7 @@ router.get("/applicants", (req, res) => {
 
 router.get("/applicants/:id", (req, res) => {
   const id = req.params.id;
-  const query = "SELECT *FROM technician_applicants WHERE  applicant_id = ?";
+  const query = "SELECT ta.*,st.status_name  FROM technician_applicants ta JOIN status st ON ta.status_id = st.status_id WHERE  applicant_id = ?";
 
   db.query(query, [id], (err, result) => {
     if (err) {
@@ -187,7 +187,7 @@ router.post("/applicant-email/:id", async (req, res) => {
 
         กรุณาเปลี่ยนรหัสผ่านของคุณหลังจากเข้าสู่ระบบครั้งแรก เพื่อความปลอดภัยของบัญชีของคุณ
 
-        หากคุณมีคำถามหรือต้องการข้อมูลเพิ่มเติม กรุณาติดต่อเราที่ [email or phone number].
+        หากคุณมีคำถามหรือต้องการข้อมูลเพิ่มเติม กรุณาติดต่อเราที่ 086-975-0664.
 
         ขอบคุณ!
 
@@ -199,11 +199,11 @@ router.post("/applicant-email/:id", async (req, res) => {
         <p>เราขอแสดงความยินดีที่คุณได้รับการรับรองแล้ว!</p>
         <p>ข้อมูลการเข้าสู่ระบบของคุณคือ:</p>
         <ul>
-          <li><strong>Username:</strong> ${username}</li>  // Use the username from req.body
-          <li><strong>Password:</strong> ${password}</li>  // Use the password from req.body
+          <li><strong>Username:</strong> ${username}</li>  
+          <li><strong>Password:</strong> ${password}</li> 
         </ul>
         <p>กรุณาเปลี่ยนรหัสผ่านของคุณหลังจากเข้าสู่ระบบครั้งแรก เพื่อความปลอดภัยของบัญชีของคุณ</p>
-        <p>หากคุณมีคำถามหรือต้องการข้อมูลเพิ่มเติม กรุณาติดต่อเราที่ 085-907-7726.</p>
+        <p>หากคุณมีคำถามหรือต้องการข้อมูลเพิ่มเติม กรุณาติดต่อเราที่ 086-975-0664.</p>
         <p>ขอบคุณ!</p>
         <p>ทีมงานของเรา</p>
       `,
@@ -249,7 +249,7 @@ router.post("/applicant-congratulations/:id", async (req, res) => {
 
         เราจะส่งข้อมูลการเข้าสู่ระบบของคุณให้เร็วๆ นี้ กรุณารอการติดต่อจากเรา
 
-        หากคุณมีคำถามหรือต้องการข้อมูลเพิ่มเติม กรุณาติดต่อเราที่ 085-907-7726.
+        หากคุณมีคำถามหรือต้องการข้อมูลเพิ่มเติม กรุณาติดต่อเราที่ 086-975-0664.
 
         ขอบคุณ!
 
@@ -260,7 +260,7 @@ router.post("/applicant-congratulations/:id", async (req, res) => {
         <p>ขอบคุณที่สมัครงานกับเรา!</p>
         <p>เราขอแสดงความยินดีที่คุณได้รับการรับรองแล้ว!</p>
         <p>เราจะส่งข้อมูลการเข้าสู่ระบบของคุณให้เร็วๆ นี้ กรุณารอติดต่อจากเรา</p>
-        <p>หากคุณมีคำถามหรือต้องการข้อมูลเพิ่มเติม กรุณาติดต่อเราที่ 085-907-7726.</p>
+        <p>หากคุณมีคำถามหรือต้องการข้อมูลเพิ่มเติม กรุณาติดต่อเราที่ 086-975-0664.</p>
         <p>ขอบคุณ!</p>
         <p>ทีมงานของเรา</p>
       `,

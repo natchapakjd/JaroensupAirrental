@@ -23,6 +23,7 @@ const order = require("./routes/orders");
 const payment = require("./routes/payments");
 const roles = require("./routes/roles");
 const borrow_prod = require("./routes/borrow_product");
+const cal_area = require('./routes/area_cal')
 const status = require("./routes/status");
 const chart = require("./routes/chart")
 const isAdmin = require("./middlewares/isAdmin");
@@ -62,6 +63,7 @@ app.use(payment);
 app.use(roles);
 app.use(borrow_prod);
 app.use(status);
+app.use(cal_area)
 app.use(chart)
 
 

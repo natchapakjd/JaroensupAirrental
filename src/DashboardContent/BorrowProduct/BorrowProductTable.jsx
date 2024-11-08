@@ -153,11 +153,11 @@ const BorrowProductTable = () => {
         <thead>
           <tr>
             <th className="border border-gray-300 p-2">Borrowing ID</th>
-            <th className="border border-gray-300 p-2">Technician ID</th>
-            <th className="border border-gray-300 p-2">Product ID</th>
+            <th className="border border-gray-300 p-2">Technician Name</th>
+            <th className="border border-gray-300 p-2">Product Name</th>
             <th className="border border-gray-300 p-2">Borrow Date</th>
             <th className="border border-gray-300 p-2">Return Date</th>
-            <th className="border border-gray-300 p-2">Task ID</th>
+            <th className="border border-gray-300 p-2">Task Type</th>
             <th className="border border-gray-300 p-2">Actions</th>
           </tr>
         </thead>
@@ -168,9 +168,9 @@ const BorrowProductTable = () => {
                 <td className="border border-gray-300 p-2">
                   {item.borrowing_id}
                 </td>
-                <td className="border border-gray-300 p-2">{item.tech_id}</td>
+                <td className="border border-gray-300 p-2">{item.firstname} {item.lastname}</td>
                 <td className="border border-gray-300 p-2">
-                  {item.product_id}
+                  {item.product_name}
                 </td>
                 <td className="border border-gray-300 p-2">
                   {new Date(item.borrow_date).toLocaleString()}
@@ -180,7 +180,7 @@ const BorrowProductTable = () => {
                     ? new Date(item.return_date).toLocaleString()
                     : "Not Returned"}
                 </td>
-                <td className="border border-gray-300 p-2">{item.task_id}</td>
+                <td className="border border-gray-300 p-2">{item.task_desc}</td>
                 <td className="border border-gray-300 p-2">
                   <div className="flex justify-center gap-2">
                     {role === 2 ? (

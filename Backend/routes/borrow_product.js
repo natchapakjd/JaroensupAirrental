@@ -21,10 +21,22 @@ const upload = multer({ storage: storage });
 
 router.get("/equipment-borrowings", (req, res) => {
   const query = `
-    SELECT eb.*, t.user_id 
-    FROM equipment_borrowing eb 
-    JOIN tasks t ON eb.task_id = t.task_id
-    WHERE t.status_id = 1
+    SELECT 
+      eb.*, 
+      t.user_id, 
+      t.description as task_desc,
+      u.*,
+      p.name as product_name
+    FROM 
+      equipment_borrowing eb 
+    JOIN 
+      tasks t ON eb.task_id = t.task_id
+    JOIN 
+      users u ON t.user_id = u.user_id
+    JOIN 
+      products p ON eb.product_id = p.product_id
+    WHERE 
+      t.status_id = 1
   `;
 
   db.query(query, (err, result) => {
@@ -39,13 +51,25 @@ router.get("/equipment-borrowings", (req, res) => {
 
 router.get("/equipment-borrowing/:techId", (req, res) => {
   const techId = req.params.techId;
-
   const query = `
-    SELECT eb.*, t.user_id 
-    FROM equipment_borrowing eb 
-    JOIN tasks t ON eb.task_id = t.task_id 
-    WHERE t.user_id = ? AND t.status_id = 1
-  `;
+  SELECT 
+    eb.*, 
+    t.user_id, 
+    t.description as task_desc,
+    u.*,
+    p.name as product_name
+  FROM 
+    equipment_borrowing eb 
+  JOIN 
+    tasks t ON eb.task_id = t.task_id
+  JOIN 
+    users u ON t.user_id = u.user_id
+  JOIN 
+    products p ON eb.product_id = p.product_id
+     WHERE t.user_id = ? AND t.status_id = 1
+
+`;
+  
 
   db.query(query, [techId], (err, result) => {
     if (err) {

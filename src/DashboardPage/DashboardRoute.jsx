@@ -52,7 +52,7 @@ import EditWarehouse from '../DashboardContent/Warehouses/EditWarehouse'
 import AddReview from '../DashboardContent/Reviews/AddReview'
 import EditAttribute from '../DashboardContent/Attributes/EditAttribute'
 import EditCategory from '../DashboardContent/Categories/EditCategory'
-
+import EditAssignmentTask from '../DashboardContent/Tasks/EditAssignmentTask'
 const DashboardRoute = () => {
   return (
       <div className='flex'>
@@ -67,6 +67,7 @@ const DashboardRoute = () => {
             <Route path="line-notification" element={<LineProfile />} />
             <Route path="tasks" element={<TaskContent />} />
             <Route path="tasks/assign" element={<AssignTask />} />
+            <Route path="tasks/assign/edit/:assignmentId" element={<EditAssignmentTask />} />
             <Route path="tasks/:taskId" element={<TaskDetails />} />
             <Route path="tasks-tech/edit/:taskId" element={<UpdateTaskTech />} />
             <Route path="applicants" element={<ApplicantContent />} />

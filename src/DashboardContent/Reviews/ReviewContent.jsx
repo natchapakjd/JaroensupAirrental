@@ -81,8 +81,8 @@ const ReviewContent = () => {
         <thead>
           <tr>
             <th className="border border-gray-300 p-2">Review ID</th>
-            <th className="border border-gray-300 p-2">User ID</th>
-            <th className="border border-gray-300 p-2">Tech ID</th>
+            <th className="border border-gray-300 p-2">User</th>
+            <th className="border border-gray-300 p-2">Tech</th>
             <th className="border border-gray-300 p-2">Comment</th>
             <th className="border border-gray-300 p-2">Rating</th>
             <th className="border border-gray-300 p-2">Date</th>
@@ -94,8 +94,8 @@ const ReviewContent = () => {
             reviews.map((review) => (
               <tr key={review.review_id}>
                 <td className="border border-gray-300 p-2">{review.review_id}</td>
-                <td className="border border-gray-300 p-2">{review.user_id}</td>
-                <td className="border border-gray-300 p-2">{review.tech_id}</td>
+                <td className="border border-gray-300 p-2">{review.member_firstname} {review.member_lastname}</td>
+                <td className="border border-gray-300 p-2">{review.tech_firstname} {review.tech_lastname}</td>
                 <td className="border border-gray-300 p-2">{review.comment}</td>
                 <td className="border border-gray-300 p-2">{review.rating}</td>
                 <td className="border border-gray-300 p-2">

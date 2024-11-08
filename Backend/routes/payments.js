@@ -19,9 +19,8 @@ const storage = multer.diskStorage({
 
 const upload = multer({ storage });
 
-// Fetch all payments
 router.get("/payments", (req, res) => {
-  const query = "SELECT * FROM payments";
+  const query = "SELECT pm.*,t.description as task_desc, u.firstname, u.lastname, pmt.method_name FROM payments pm JOIN users u ON pm.user_id = u.user_id JOIN tasks t ON pm.task_id = t.task_id JOIN payment_methods pmt ON pm.method_id = pmt.method_id ";
 
   db.query(query, (err, result) => {
     if (err) {
@@ -33,7 +32,6 @@ router.get("/payments", (req, res) => {
   });
 });
 
-// Fetch a single payment by ID
 router.get("/payments/:id", (req, res) => {
   const id = req.params.id;
   const query = "SELECT * FROM payments WHERE user_id = ?";
@@ -61,18 +59,33 @@ router.get("/payments/:id", (req, res) => {
       }
     });
   });
-// Create a new payment
+
+  router.get("/payment-payment/:id", (req, res) => {
+    const id = req.params.id;
+    const query = "SELECT * FROM payments WHERE payment_id = ?";
+
+    db.query(query, [id], (err, result) => {
+      if (err) {
+        console.error("Error fetching payment: " + err);
+        res.status(500).json({ error: "Failed to fetch payment" });
+      } else {
+        res.json(result);
+      }
+    });
+  });
+
 
 router.post("/payments", upload.single('slip_images'), async (req, res) => {
   const { amount, user_id, method_id, payment_date, order_id, task_id, status_id } = req.body;
   let slipImagePath = null;
-  console.log(req.body)
 
   try {
-    // Upload the image to Cloudinary if a file is provided
     if (req.file) {
-      const uploadResult = await cloudinary.uploader.upload(req.file.path);
-      slipImagePath = uploadResult.secure_url; // Get the secure URL of the uploaded image
+      const slipImage = req.file.path;
+      const result = await cloudinary.uploader.upload(slipImage, {
+        folder: "image/payment-image",
+      });
+      slipImagePath = result.secure_url;
     }
 
     let query;
@@ -115,8 +128,6 @@ router.post("/payments", upload.single('slip_images'), async (req, res) => {
 router.put("/payments/:id", upload.single('slip_images'), async (req, res) => {
   const id = req.params.id;
   const { amount, user_id, method_id, payment_date, order_id, task_id, status_id } = req.body;
-  console.log(req.body)
-
   try {
     let slipImagePath = null;
 
@@ -213,13 +224,14 @@ router.get('/payment-methods', (req, res) => {
 router.put("/payments/:paymentId/slip_image", upload.single('slip_image'), async (req, res) => {
   const paymentId = req.params.paymentId;
   let slipImagePath = null;
-  console.log(req.body)
-  console.log(slipImagePath)
 
   try {
     if (req.file) {
-      const uploadResult = await cloudinary.uploader.upload(req.file.path);
-      slipImagePath = uploadResult.secure_url;  
+      const slipImage = req.file.path;
+      const result = await cloudinary.uploader.upload(slipImage, {
+        folder: "image/payment-image",
+      });
+      slipImagePath = result.secure_url;
     }
 
     if (!slipImagePath) {

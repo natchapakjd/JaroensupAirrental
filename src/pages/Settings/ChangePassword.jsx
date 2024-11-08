@@ -62,7 +62,7 @@ const ChangePassword = () => {
   return (
     <>
       {!isDashboard && <Navbar />}
-      <div className="flex items-center justify-center min-h-screen bg-gray-100">
+      <div className="flex items-center justify-center min-h-screen bg-white">
         <div className="bg-white p-8 rounded-lg shadow-md w-full max-w-md">
           <h2 className="text-2xl font-bold text-center mb-6">Change Password</h2>
           <form onSubmit={handleChangePassword} className="space-y-4">

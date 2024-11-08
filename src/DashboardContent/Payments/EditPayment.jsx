@@ -33,7 +33,7 @@ const EditPayment = () => {
           statusesResponse,
           paymentMethodsResponse,
         ] = await Promise.all([
-          axios.get(`${apiUrl}/payment/${paymentId}`), // Fetch payment details
+          axios.get(`${apiUrl}/payment-payment/${paymentId}`), // Fetch payment details
           axios.get(`${apiUrl}/users`),
           axios.get(`${apiUrl}/tasks`),
           axios.get(`${apiUrl}/v3/orders`),
@@ -116,6 +116,7 @@ const EditPayment = () => {
               value={taskId}
               onChange={(e) => setTaskId(e.target.value)}
               className="input w-full"
+              disabled
               required
             >
               <option value="">Select Task</option>

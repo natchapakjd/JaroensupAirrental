@@ -81,11 +81,14 @@ const Navbar = () => {
                   <Link to="/product">สินค้า</Link>
                 </li>
                 <li>
-                  <a>บริการของเรา</a>
+                  <Link to="/services">บริการของเรา</Link>
                 </li>
                 <li>
                   <Link to="/experience">ผลงานของเรา</Link>
                 </li>
+                <li>
+                    <Link to="/register-tech">ร่วมงานกับเรา</Link>
+                  </li>
                 <li>
                   <Link to="/contact">ติดต่อเรา</Link>
                 </li>
@@ -109,8 +112,7 @@ const Navbar = () => {
               <Link to="/experience">ผลงานของเรา</Link>
             </li>
             <li>
-            <Link to="/register-tech">ร่วมงานกับเรา</Link>
-
+              <Link to="/register-tech">ร่วมงานกับเรา</Link>
             </li>
             <li>
               <Link to="/contact">ติดต่อเรา</Link>

@@ -25,7 +25,7 @@ const UserHistory = () => {
       const taskResponse = await axios.get(
         `${
           import.meta.env.VITE_SERVER_URL
-        }/task-paging/${user_id}?page=${taskPage}&limit=10`
+        }/task-paging/${user_id}?page=${taskPage}&limit=100`
       );
 
       // Filter tasks by task_type_id after fetching
@@ -39,7 +39,7 @@ const UserHistory = () => {
       const orderResponse = await axios.get(
         `${
           import.meta.env.VITE_SERVER_URL
-        }/v1/orders/${user_id}?page=${orderPage}&limit=10`
+        }/v1/orders/${user_id}?page=${orderPage}&limit=100`
       );
       setOrderHistory(orderResponse.data.orders);
       setTotalOrders(orderResponse.data.totalCount);
@@ -113,10 +113,10 @@ const UserHistory = () => {
                   .map((task) => (
                     <tr key={task.task_id}>
                       <td>{task.task_id}</td>
-                      <td>{task.task_type_id}</td>
+                      <td>{task.type_name}</td>
                       <td>{task.description}</td>
                       <td>{task.address}</td>
-                      <td>{task.status_id}</td>
+                      <td>{task.status_name}</td>
                       <td>
                         {new Date(task.appointment_date).toLocaleString()}
                       </td>

@@ -8,7 +8,17 @@ const isAdmin = require('../middlewares/isAdmin');
 // router.use(isAdmin);
 
 router.get("/technicians", (req, res) => {
-  const query = "SELECT * FROM technicians";
+  const query = `
+    SELECT 
+      technicians.*,
+      users.*
+    FROM 
+      technicians
+    INNER JOIN 
+      users 
+    ON 
+      technicians.user_id = users.user_id
+  `;
 
   db.query(query, (err, result) => {
     if (err) {
@@ -19,6 +29,7 @@ router.get("/technicians", (req, res) => {
     }
   });
 });
+
 
 router.get("/technician/:id", async (req, res) => {
   const id = req.params.id;

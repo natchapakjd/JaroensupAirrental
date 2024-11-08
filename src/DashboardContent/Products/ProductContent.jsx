@@ -80,9 +80,9 @@ const ProductContent = () => {
             <th className="border border-gray-300 p-2">Description</th>
             <th className="border border-gray-300 p-2">Price</th>
             <th className="border border-gray-300 p-2">Stock Quantity</th>
-            <th className="border border-gray-300 p-2">Brand ID</th>
-            <th className="border border-gray-300 p-2">Category ID</th>
-            <th className="border border-gray-300 p-2">Warehouse ID</th>
+            <th className="border border-gray-300 p-2">Brand</th>
+            <th className="border border-gray-300 p-2">Category</th>
+            <th className="border border-gray-300 p-2">Warehouse</th>
             <th className="border border-gray-300 p-2">Product Image</th>
             <th className="border border-gray-300 p-2">Actions</th>
           </tr>
@@ -103,13 +103,13 @@ const ProductContent = () => {
                   {product.stock_quantity}
                 </td>
                 <td className="border border-gray-300 p-2">
-                  {product.brand_id}
+                  {product.brand_name}
                 </td>
                 <td className="border border-gray-300 p-2">
-                  {product.category_id}
+                  {product.category_name}
                 </td>
                 <td className="border border-gray-300 p-2">
-                  {product.warehouse_id}
+                  {product.location}
                 </td>
                 <td className="border border-gray-300 p-2">
                   {product.image_url ? (

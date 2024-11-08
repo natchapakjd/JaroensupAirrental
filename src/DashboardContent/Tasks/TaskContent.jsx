@@ -28,9 +28,13 @@ const TaskContent = () => {
       } else {
         tasksResponse = await axios.get(`${apiUrl}/tasks`);
       }
-
-      if (Array.isArray(tasksResponse.data.tasks || tasksResponse.data)) {
-        setTasks(tasksResponse.data.tasks || tasksResponse.data);
+  
+      const fetchedTasks = tasksResponse.data.tasks || tasksResponse.data;
+  
+      const filteredTasks = fetchedTasks.filter((task) => task.task_type_id === 1);
+  
+      if (Array.isArray(filteredTasks)) {
+        setTasks(filteredTasks); 
       } else {
         console.error("Tasks response is not an array:", tasksResponse.data);
       }
@@ -38,6 +42,7 @@ const TaskContent = () => {
       console.error("Error fetching tasks:", error);
     }
   };
+  
 
   const handleDelete = async (taskId) => {
     try {
@@ -104,7 +109,7 @@ const TaskContent = () => {
           </tr>
         </thead>
         <tbody className="text-center">
-          {tasks.length > 0 ? (
+          {tasks.length > 0 ?(
             tasks.map((task) => {
               const appointmentDate = new Date(task.appointment_date);
               const formattedDate = new Intl.DateTimeFormat("th-TH", {
@@ -117,11 +122,11 @@ const TaskContent = () => {
               return (
                 <tr key={task.task_id}>
                   <td className="border border-gray-300 p-2">{task.task_id}</td>
-                  <td className="border border-gray-300 p-2">{task.task_type_id}</td>
+                  <td className="border border-gray-300 p-2">{task.type_name}</td>
                   <td className="border border-gray-300 p-2">{task.description}</td>
                   <td className="border border-gray-300 p-2">{formattedDate}</td>
                   <td className="border border-gray-300 p-2">{formattedTime}</td>
-                  <td className="border border-gray-300 p-2">{task.status_id}</td>
+                  <td className="border border-gray-300 p-2">{task.status_name}</td>
                   <td className="border border-gray-300 p-2">
                     <div className="flex justify-center gap-2">
                       {role === 3 ? (
@@ -137,13 +142,13 @@ const TaskContent = () => {
                           </button>
                         </>
                       ) : null}
-                      {role === 2? (
+                      {/* {role === 2? (
                         <>
                           <Link to={`/dashboard/tasks-tech/edit/${task.task_id}`}>
                             <button className="btn btn-success text-white">Edit</button>
                           </Link>
                         </>
-                      ) : null}
+                      ) : null} */}
                       <button
                         onClick={() => handleViewDetails(task.task_id)}
                         className="btn bg-blue text-white hover:bg-blue"
