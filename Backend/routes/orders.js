@@ -9,7 +9,7 @@ router.get("/v1/orders", (req, res) => {
     const page = parseInt(req.query.page) || 1; // หน้าเริ่มต้น
     const offset = (page - 1) * limit; // การคำนวณ offset
 
-    const query = "SELECT * FROM orders LIMIT ? OFFSET ?";
+    const query = "SELECT o.*,u.firstname,u.lastname FROM orders o JOIN users u ON o.user_id = u.user_id LIMIT ? OFFSET ?";
   
     db.query(query, [limit, offset], (err, result) => {
         if (err) {
@@ -199,7 +199,7 @@ router.get("/v2/orders/count", (req, res) => {
     }
   
     const query = `
-      SELECT o.id AS order_id, o.created_at, oi.product_id, oi.product_name, oi.quantity, oi.total_price
+      SELECT o.id AS order_id, o.created_at, oi.product_id, oi.product_name, oi.quantity, oi.total_price,
       FROM orders o
       JOIN order_items oi ON o.id = oi.order_id
       WHERE o.user_id = ?
@@ -261,9 +261,10 @@ router.get("/v2/orders/count", (req, res) => {
   
     if (orderId) {
       const query = `
-        SELECT o.id AS order_id, o.user_id, o.created_at, oi.product_id, oi.product_name, oi.quantity, oi.total_price
+        SELECT o.id AS order_id, o.user_id, o.created_at, oi.product_id, oi.product_name, oi.quantity, oi.total_price,u.firstname,u.lastname
         FROM orders o
         JOIN order_items oi ON o.id = oi.order_id
+        JOIN users u ON o.user_id = u.user_id
         WHERE o.id = ?
       `;
   
@@ -277,6 +278,8 @@ router.get("/v2/orders/count", (req, res) => {
         const order = {
           order_id: result[0].order_id,
           user_id: result[0].user_id,
+          firstname: result[0].firstname,
+          lastname: result[0].lastname,
           created_at: result[0].created_at,
           items: result.map(row => ({
             product_id: row.product_id,

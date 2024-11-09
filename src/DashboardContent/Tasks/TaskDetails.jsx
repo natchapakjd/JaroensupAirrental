@@ -45,13 +45,13 @@ const TaskDetails = () => {
       <div className="mb-4">
         {task.task_id && <p><strong>ID:</strong> {task.task_id}</p>}
         {task.description && <p><strong>Description:</strong> {task.description}</p>}
-        {task.status_id && <p><strong>Status:</strong> {task.status_id}</p>}
+        {task.status_id && <p><strong>Status:</strong> {task.status_name}</p>}
         {task.created_at && <p><strong>Created At:</strong> {new Date(task.created_at).toLocaleString()}</p>}
         {task.start_date && <p><strong>Start Date:</strong> {new Date(task.start_date).toLocaleString()}</p>}
         {task.finish_date && <p><strong>Finish Date:</strong> {new Date(task.finish_date).toLocaleString()}</p>}
         {task.address && <p><strong>Address:</strong> {task.address}</p>}
         {task.quantity_used && <p><strong>Quantity Used:</strong> {task.quantity_used}</p>}
-        {task.user_id && <p><strong>User ID:</strong> {task.user_id}</p>}
+        {task.user_id && <p><strong>Name:</strong> {task.firstname} {task.lastname} </p>}
       </div>
 
       {/* Map Section */}

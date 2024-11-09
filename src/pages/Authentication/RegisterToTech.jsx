@@ -100,6 +100,7 @@ const RegisterToTech = () => {
               <label className="block text-gray-700" htmlFor="phone_number">หมายเลขโทรศัพท์</label>
               <input type="tel" name="phone_number" id="phone_number" className="border rounded w-full py-2 px-3" required onChange={handleChange} />
             </div>
+            //dropdown
             <div className="mb-4">
               <label className="block text-gray-700" htmlFor="position_applied">ตำแหน่งที่สมัคร</label>
               <input type="text" name="position_applied" id="position_applied" className="border rounded w-full py-2 px-3" required onChange={handleChange} />

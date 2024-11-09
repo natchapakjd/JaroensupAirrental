@@ -109,7 +109,7 @@ const AddBorrowProduct = () => {
             <option value="" disabled>Select a technician</option>
             {technicians.map((technician) => (
               <option key={technician.tech_id} value={technician.tech_id}>
-                {technician.tech_id} 
+                  {technician.firstname} {technician.lastname}
               </option>
             ))}
           </select>
@@ -129,7 +129,7 @@ const AddBorrowProduct = () => {
             <option value="" disabled>Select a product</option>
             {products.map((product) => (
               <option key={product.product_id} value={product.product_id}>
-                {product.name} {/* Adjust according to the property that holds product's name */}
+                {product.name}
               </option>
             ))}
           </select>

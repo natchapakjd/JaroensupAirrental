@@ -101,7 +101,7 @@ const AddPayment = () => {
             <select value={taskId} onChange={(e) => setTaskId(e.target.value)} className="input w-full border border-gray-300" required>
               <option value="">Select Task</option>
               {tasks.map(task => (
-                <option key={task.task_id} value={task.task_id}>{task.task_id}</option>
+                <option key={task.task_id} value={task.task_id}>{task.task_id}. {task.description}</option>
               ))}
             </select>
           </div>
@@ -122,7 +122,7 @@ const AddPayment = () => {
           <select value={userId} onChange={(e) => setUserId(e.target.value)} className="input w-full border-gray-300" required>
             <option value="">Select User</option>
             {users.map(user => (
-              <option key={user.user_id} value={user.user_id}>{user.user_id}</option>
+              <option key={user.user_id} value={user.user_id}>{user.firstname} {user.lastname}</option>
             ))}
           </select>
         </div>

@@ -106,6 +106,7 @@ const ApplicantContent = () => {
       <table className="w-full border-collapse border border-gray-300">
         <thead>
           <tr>
+            <th className="border border-gray-300 p-2">Applicant ID</th>
             <th className="border border-gray-300 p-2">Firstname</th>
             <th className="border border-gray-300 p-2">Lastname</th>
             <th className="border border-gray-300 p-2">Date of birth</th>
@@ -121,12 +122,13 @@ const ApplicantContent = () => {
           {applicants.length > 0 ? (
             applicants.map(applicant => (
               <tr key={applicant.applicant_id}>
+                <td className="border border-gray-300 p-2">{applicant.applicant_id}</td>
                 <td className="border border-gray-300 p-2">{applicant.first_name}</td>
                 <td className="border border-gray-300 p-2">{applicant.last_name}</td>
                 <td className="border border-gray-300 p-2">{new Date(applicant.date_of_birth).toLocaleDateString('en-GB')}</td>
                 <td className="border border-gray-300 p-2">{applicant.email}</td>
                 <td className="border border-gray-300 p-2">{applicant.position_applied}</td>
-                <td className="border border-gray-300 p-2">{applicant.status_id}</td>
+                <td className="border border-gray-300 p-2">{applicant.status_name}</td>
                 <td className="border border-gray-300 p-2">{new Date(applicant.application_date).toLocaleDateString('en-GB')}</td>
                 <td className="border border-gray-300 p-2">{applicant.notes || 'No notes'}</td>
                 <td className="border border-gray-300 p-2">

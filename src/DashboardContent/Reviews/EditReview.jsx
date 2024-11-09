@@ -109,7 +109,6 @@ const EditReview = () => {
             min="1"
             max="5"
             required
-            disabled
             className="input input-bordered w-full"
           />
         </div>

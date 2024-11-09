@@ -1,7 +1,8 @@
 import React, { useState, useEffect } from "react";
 import axios from "axios";
 import { useNavigate } from "react-router-dom";
-import { Link } from "react-router-dom";
+import { FaEdit, FaTrash } from "react-icons/fa"; // Import icons for edit and delete
+import Swal from "sweetalert2";
 
 const AssignTask = () => {
   const [tasks, setTasks] = useState([]);
@@ -9,8 +10,9 @@ const AssignTask = () => {
   const [assignedTasks, setAssignedTasks] = useState([]);
   const [selectedTaskId, setSelectedTaskId] = useState("");
   const [selectedTechId, setSelectedTechId] = useState("");
+  const [linetoken, setLineToken] = useState(""); // State to hold Line token
   const navigate = useNavigate();
-  const apiUrl = import.meta.env.VITE_SERVER_URL; // Use the environment variable
+  const apiUrl = import.meta.env.VITE_SERVER_URL;
 
   useEffect(() => {
     const fetchTasks = async () => {
@@ -43,7 +45,7 @@ const AssignTask = () => {
     fetchTasks();
     fetchTechnicians();
     fetchAssignedTasks();
-  }, [apiUrl]);
+  }, [assignedTasks]); // Dependency is `apiUrl` to ensure fetch logic runs correctly
 
   const handleAssign = async (e) => {
     e.preventDefault();
@@ -56,12 +58,81 @@ const AssignTask = () => {
       if (response.status === 201) {
         const updatedAssignedTasks = await axios.get(`${apiUrl}/appointments`);
         setAssignedTasks(updatedAssignedTasks.data);
-        navigate("/dashboard/tasks");
+
+        const lineTokenResponse = await axios.get(`${apiUrl}/linetoken-tech/${selectedTechId}`);
+        setLineToken(lineTokenResponse.data[0].linetoken); 
+        const messageResponse = await axios.post(
+          `${apiUrl}/send-message`,
+          {
+            userId: lineTokenResponse.data[0].linetoken, 
+            message: `แจ้งเตือนจากระบบ:\n\nคุณได้รับมอบหมายงานใหม่จากแอดมินในระบบ.\n\nกรุณาตรวจสอบและดำเนินการตามความเหมาะสม.\n\nขอบคุณที่เลือกใช้บริการของเรา!`,
+          },
+          {
+            headers: {
+              "Content-Type": "application/json",
+            },
+          }
+        );
+  
+        if (messageResponse.status === 200) {
+          console.log("Message sent successfully!");
+        } else {
+          throw new Error("Failed to send message");
+        }
+      
+        // Redirect to the task assignment page
+        navigate("/dashboard/tasks/assign");
       }
     } catch (error) {
       console.error("Error assigning task:", error);
     }
   };
+
+  
+  const handleDelete = async (assignmentId) => {
+    // Show SweetAlert confirmation dialog
+    const result = await Swal.fire({
+      title: 'Are you sure?',
+      text: 'You won\'t be able to revert this!',
+      icon: 'warning',
+      showCancelButton: true,
+      confirmButtonColor: '#3085d6',
+      cancelButtonColor: '#d33',
+      confirmButtonText: 'Yes, delete it!',
+    });
+
+    // Proceed with delete if user confirms
+    if (result.isConfirmed) {
+      try {
+        const response = await axios.delete(`${apiUrl}/appointment/${assignmentId}`);
+        if (response.status === 200) {
+          const updatedAssignedTasks = await axios.get(`${apiUrl}/appointments`);
+          setAssignedTasks(updatedAssignedTasks.data);
+          Swal.fire(
+            'Deleted!',
+            'The task has been deleted.',
+            'success'
+          );
+        }
+      } catch (error) {
+        console.error("Error deleting task:", error);
+        Swal.fire(
+          'Error!',
+          'There was an issue deleting the task.',
+          'error'
+        );
+      }
+    }
+  };
+
+  const handleEdit = (assignmentId) => {
+    navigate(`/dashboard/tasks/assign/edit/${assignmentId}`);
+  };
+
+  // Filter out tasks that are already assigned
+  const unassignedTasks = tasks.filter(
+    (task) => !assignedTasks.some((assigned) => assigned.task_id === task.task_id)
+  );
 
   return (
     <div className="p-8 rounded-lg shadow-lg w-full mx-auto font-inter h-full">
@@ -76,9 +147,9 @@ const AssignTask = () => {
             required
           >
             <option value="">Select Task</option>
-            {tasks.map((task) => (
+            {unassignedTasks.map((task) => (
               <option key={task.task_id} value={task.task_id}>
-                {task.description}
+                {task.task_id}. {task.description}
               </option>
             ))}
           </select>
@@ -94,7 +165,7 @@ const AssignTask = () => {
             <option value="">Select Technician</option>
             {technicians.map((tech) => (
               <option key={tech.tech_id} value={tech.tech_id}>
-                {tech.tech_id} 
+                {tech.tech_id}. {tech.firstname} {tech.lastname}
               </option>
             ))}
           </select>
@@ -107,8 +178,9 @@ const AssignTask = () => {
         <table className="w-full border-collapse border border-gray-300">
           <thead>
             <tr>
-              <th className="border border-gray-300 p-2">Task ID</th>
-              <th className="border border-gray-300 p-2">Technician ID</th>
+              <th className="border border-gray-300 p-2">Appointment ID</th>
+              <th className="border border-gray-300 p-2">Task</th>
+              <th className="border border-gray-300 p-2">Technician Name</th>
               <th className="border border-gray-300 p-2">Action</th>
             </tr>
           </thead>
@@ -116,21 +188,27 @@ const AssignTask = () => {
             {assignedTasks.length > 0 ? (
               assignedTasks.map((assignment) => (
                 <tr key={assignment.assignment_id}>
-                  <td className="border border-gray-300 p-2">{assignment.task_id}</td>
-                  <td className="border border-gray-300 p-2">{assignment.tech_id}</td>
+                  <td className="border border-gray-300 p-2">{assignment.assignment_id}</td>
+                  <td className="border border-gray-300 p-2">{assignment.description}</td>
+                  <td className="border border-gray-300 p-2">{assignment.firstname} {assignment.lastname}</td>
                   <td className="border border-gray-300 p-2">
-                    <Link
-                      to={`/dashboard/tasks/${assignment.task_id}`}
-                      className="text-blue-500 hover:underline"
-                    >
-                      View Details
-                    </Link>
+                    <div className="flex justify-center gap-2">
+                    <FaEdit
+                      className="text-yellow-500 hover:text-yellow-700"
+                      onClick={() => handleEdit(assignment.assignment_id)}
+                    />
+                    
+                    <FaTrash
+                      className="text-red-500 hover:text-red-700"
+                      onClick={() => handleDelete(assignment.assignment_id)}
+                    />
+                    </div>
                   </td>
                 </tr>
               ))
             ) : (
               <tr>
-                <td colSpan="3" className="border border-gray-300 p-4">No assigned tasks</td>
+                <td colSpan="4" className="border border-gray-300 p-4">No assigned tasks</td>
               </tr>
             )}
           </tbody>

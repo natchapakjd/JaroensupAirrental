@@ -21,7 +21,7 @@ const storage = multer.diskStorage({
 const upload = multer({ storage: storage });
 
 router.get("/users", (req, res) => {
-  const query = "SELECT * FROM users";
+  const query = "SELECT u.*, r.role_name  FROM users u JOIN roles r ON u.role_id = r.role_id";
 
   db.query(query, (err, result) => {
     if (err) {
@@ -33,12 +33,15 @@ router.get("/users", (req, res) => {
       return {
         user_id: row.user_id,
         username: row.username,
+        firstname:row.firstname,
+        lastname:row.lastname,
         email: row.email,
         role: row.role,
         created_at: row.created_at,
         image_url: row.image_url,
         role_id:row.role_id,
         gender_id: row.gender_id,
+        role_name:row.role_name
       };
     });
 
@@ -48,7 +51,7 @@ router.get("/users", (req, res) => {
 
 router.get("/user/:id", (req, res) => {
   const id = req.params.id;
-  const query = "SELECT * FROM users WHERE user_id = ?";
+  const query = "SELECT u.*, gd.gender_name, r.role_name FROM users u JOIN gender gd ON u.gender_id = gd.gender_id JOIN roles r ON u.role_id = r.role_id WHERE user_id = ?";
 
   db.query(query, [id], (err, result) => {
     if (err) {
@@ -80,6 +83,8 @@ router.get("/user/:id", (req, res) => {
       firstname: row.firstname,
       lastname: row.lastname,
       linetoken: row.linetoken,
+      gender_name: row.gender_name,
+      role_name: row.role_name
     };
 
     res.json(user);
@@ -291,6 +296,21 @@ router.get('/genders', (req, res) => {
       }
   });
 });
+
+router.get('/linetoken-tech/:id', (req, res) => {
+  const id  = req.params.id;
+  const query = 'SELECT u.linetoken FROM technicians t JOIN users u ON t.user_id = u.user_id  WHERE t.tech_id = ?';
+
+  db.query(query, [id] ,(err, results) => {
+      if (err) {
+          console.error('Error fetching token:', err);
+          res.status(500).json({ error: 'Failed to fetch token' });
+      } else {
+          res.json(results);
+      }
+  });
+});
+
 
 
 module.exports = router;

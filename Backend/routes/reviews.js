@@ -4,8 +4,23 @@ const db = require("../db");
 const isAdmin = require('../middlewares/isAdmin');
 
 router.get("/reviews", (req, res) => {
-  const query = "SELECT * FROM reviews";
-
+  const query = `
+  SELECT 
+    rv.*, 
+    u.firstname AS member_firstname, 
+    u.lastname AS member_lastname, 
+    t.tech_id, 
+    u2.firstname AS tech_firstname, 
+    u2.lastname AS tech_lastname
+  FROM 
+    reviews rv
+  JOIN 
+    users u ON rv.user_id = u.user_id  -- Join to get the reviewer's name
+  JOIN 
+    technicians t ON rv.tech_id = t.tech_id  -- Join to get the technician's tech_id
+  JOIN 
+    users u2 ON t.user_id = u2.user_id 
+`;
   db.query(query, (err, result) => {
     if (err) {
       console.error("Error fetching reviews: " + err);
@@ -18,7 +33,24 @@ router.get("/reviews", (req, res) => {
 
 router.get("/review/:id", (req, res) => {
   const id = req.params.id;
-  const query = "SELECT * FROM reviews WHERE review_id = ?";
+  const query = `
+  SELECT 
+    rv.*, 
+    u.firstname AS member_firstname, 
+    u.lastname AS member_lastname, 
+    t.tech_id, 
+    u2.firstname AS tech_firstname, 
+    u2.lastname AS tech_lastname
+  FROM 
+    reviews rv
+  JOIN 
+    users u ON rv.user_id = u.user_id  -- Join to get the reviewer's name
+  JOIN 
+    technicians t ON rv.tech_id = t.tech_id  -- Join to get the technician's tech_id
+  JOIN 
+    users u2 ON t.user_id = u2.user_id 
+  WHERE rv.review_id  = ?
+`;
 
   db.query(query, [id], (err, result) => {
     if (err) {

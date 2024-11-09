@@ -138,7 +138,7 @@ const AddOrder = () => {
             <option value="" disabled>Select a user</option>
             {users.map(user => (
               <option key={user.user_id} value={user.user_id}>
-                {user.username}
+                {user.firstname} {user.lastname}
               </option>
             ))}
           </select>
@@ -159,7 +159,7 @@ const AddOrder = () => {
                 <option value="" disabled>Select a product</option>
                 {products.map(product => (
                   <option key={product.product_id} value={product.product_id}>
-                    {product.product_id}
+                    {product.product_id}. {product.name}
                   </option>
                 ))}
               </select>

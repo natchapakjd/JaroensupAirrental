@@ -21,10 +21,23 @@ const upload = multer({ storage: storage });
 
 router.get("/equipment-borrowings", (req, res) => {
   const query = `
-    SELECT eb.*, t.user_id 
-    FROM equipment_borrowing eb 
-    JOIN tasks t ON eb.task_id = t.task_id
-    WHERE t.status_id = 1
+    SELECT 
+      eb.*, 
+      t.user_id, 
+      t.description as task_desc,
+      t.status_id as status_id,
+      u.*,
+      st.status_name,
+      p.name as product_name
+    FROM 
+      equipment_borrowing eb 
+    JOIN 
+      tasks t ON eb.task_id = t.task_id
+    JOIN 
+      users u ON t.user_id = u.user_id
+    JOIN 
+      products p ON eb.product_id = p.product_id
+    JOIN status st ON t.status_id = st.status_id
   `;
 
   db.query(query, (err, result) => {
@@ -39,13 +52,29 @@ router.get("/equipment-borrowings", (req, res) => {
 
 router.get("/equipment-borrowing/:techId", (req, res) => {
   const techId = req.params.techId;
-
   const query = `
-    SELECT eb.*, t.user_id 
-    FROM equipment_borrowing eb 
-    JOIN tasks t ON eb.task_id = t.task_id 
-    WHERE t.user_id = ? AND t.status_id = 1
-  `;
+  SELECT 
+    eb.*, 
+    t.user_id, 
+    t.description as task_desc,
+    t.status_id as status_id,
+    st.status_name,
+    u.*,
+    p.name as product_name
+  FROM 
+    equipment_borrowing eb 
+  JOIN 
+    tasks t ON eb.task_id = t.task_id
+  JOIN 
+    users u ON t.user_id = u.user_id
+  JOIN 
+    products p ON eb.product_id = p.product_id
+  JOIN 
+    status st ON t.status_id = st.status_id
+    WHERE t.user_id = ?
+
+`;
+  
 
   db.query(query, [techId], (err, result) => {
     if (err) {
@@ -216,7 +245,7 @@ router.put("/equipment-borrowing/return/:taskId", async (req, res) => {
       const approveQuery = `
         UPDATE equipment_borrowing eb
         JOIN tasks t ON eb.task_id = t.task_id
-        SET  t.status_id = 10
+        SET  t.status_id = 2
         WHERE t.task_id = ?
       `;
 

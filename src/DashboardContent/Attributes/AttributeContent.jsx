@@ -58,7 +58,7 @@ const AttributeContent = () => {
     <div className="p-8 rounded-lg shadow-lg w-full mx-auto h-screen">
       <div className="flex justify-between items-center mb-6">
         <h1 className="text-2xl font-semibold">Attributes</h1>
-        <Link to="/dashboard/attribute/add">
+        <Link to="/dashboard/attributes/add">
           <button className="btn bg-blue text-white hover:bg-blue">Add Attribute</button>
         </Link>
       </div>
@@ -75,7 +75,14 @@ const AttributeContent = () => {
             <tr key={attribute.attribute_id}>
               <td className="border border-gray-300 p-2">{attribute.attribute_id}</td>
               <td className="border border-gray-300 p-2">{attribute.name}</td>
+                 
               <td className="border border-gray-300 p-2">
+                  <Link
+                  to={`/dashboard/attributes/edit/${attribute.attribute_id}`}
+                  className="btn btn-success text-white mr-2"
+                >
+                  Edit
+                </Link>
                 <button
                   onClick={() => handleDelete(attribute.attribute_id)}
                   className="btn btn-error text-white"

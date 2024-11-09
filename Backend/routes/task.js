@@ -7,7 +7,7 @@ const isAdmin = require('../middlewares/isAdmin');
 cron.schedule("0 0 * * *", () => {
   const query = `
     DELETE FROM tasks 
-    WHERE isActive = 0 AND updatedAt < NOW() - INTERVAL 30 DAY`;
+    WHERE isActive = 1 AND updatedAt < NOW() - INTERVAL 1 DAY`;
 
   db.query(query, (err, result) => {
     if (err) {
@@ -23,7 +23,7 @@ router.get("/task-paging", (req, res) => {
   const limit = parseInt(req.query.limit) || 10;
   const offset = (page - 1) * limit;
 
-  const query = "SELECT * FROM tasks LIMIT ? OFFSET ?";
+  const query = "SELECT t.*,tt.type_name ,st.status_name FROM tasks t JOIN status st ON t.status_id = st.status_id JOIN tasktypes tt ON t.task_type_id = tt.task_type_id LIMIT ? OFFSET ?";
 
   db.query(query, [limit, offset], (err, result) => {
     if (err) {
@@ -52,7 +52,7 @@ router.get("/task-paging/:id", (req, res) => {
   const page = parseInt(req.query.page) || 1; 
   const offset = (page - 1) * limit; 
 
-  let query = "SELECT * FROM tasks WHERE user_id = ?"; 
+  let query = "SELECT t.*,tt.type_name ,st.status_name FROM tasks t JOIN status st ON t.status_id = st.status_id JOIN tasktypes tt ON t.task_type_id = tt.task_type_id WHERE user_id = ?"; 
   const queryParams = [userId];
 
   query += " LIMIT ? OFFSET ?";
@@ -86,7 +86,23 @@ router.get("/task-paging/:id", (req, res) => {
 router.get("/task/:id", (req, res) => {
   const taskId = req.params.id;
 
-  const query = "SELECT * FROM tasks WHERE task_id = ?";
+  const query = `
+    SELECT 
+      tasks.*, 
+      users.*,
+      tasktypes.*,
+      status.*
+    FROM 
+      tasks
+    INNER JOIN 
+      users ON tasks.user_id = users.user_id
+    INNER JOIN 
+      status ON tasks.status_id = status.status_id
+    INNER JOIN 
+      tasktypes ON tasks.task_type_id = tasktypes.task_type_id
+    WHERE 
+      tasks.task_id = ?
+  `;
 
   db.query(query, [taskId], (err, result) => {
     if (err) {
@@ -104,7 +120,23 @@ router.get("/task/:id", (req, res) => {
 
 
 router.get("/tasks", (req, res) => {
-  const query = "SELECT * FROM tasks WHERE isActive = 1";
+  const query = `
+    SELECT 
+      tasks.*, 
+      users.*,
+      tasktypes.*,
+      status.*
+    FROM 
+      tasks
+    INNER JOIN 
+      users ON tasks.user_id = users.user_id
+    INNER JOIN 
+      status ON tasks.status_id = status.status_id
+    INNER JOIN 
+      tasktypes ON tasks.task_type_id = tasktypes.task_type_id
+    WHERE 
+      tasks.isActive = 1
+  `;
 
   db.query(query, (err, result) => {
     if (err) {
@@ -115,6 +147,7 @@ router.get("/tasks", (req, res) => {
     res.status(200).json(result);
   });
 });
+
 
 router.post("/tasks", (req, res) => {
   const {
@@ -131,7 +164,7 @@ router.post("/tasks", (req, res) => {
   } = req.body;
 
   const query =
-    "INSERT INTO tasks (user_id, description, task_type_id, quantity_used, address, appointment_date, latitude, longitude,isActive) VALUES (?, ?, ?, ?, ?, ?, ?, ?,?)";
+    "INSERT INTO tasks (user_id, description, task_type_id, quantity_used, address, appointment_date, latitude,longitude,isActive) VALUES (?, ?, ?, ?, ?, ?, ?,?,?)";
 
   db.query(
     query,
@@ -282,9 +315,11 @@ router.get("/tasks/assigned/:techId", (req, res) => {
   const techId = req.params.techId;
 
   const query = `
-    SELECT t.*, ta.assignment_id, ta.assigned_at
+    SELECT t.*, ta.assignment_id, ta.assigned_at,tt.*,st.status_name
     FROM tasks t
     JOIN taskassignments ta ON t.task_id = ta.task_id
+    JOIN tasktypes tt ON t.task_type_id = tt.task_type_id
+    JOIN status st ON t.status_id  = st.status_id
     WHERE ta.tech_id = ?
   `;
 

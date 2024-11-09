@@ -160,7 +160,16 @@ const EditProduct = () => {
               >
                 {key.replace("_", " ")}:
               </label>
-              {key === "description" ? (
+              {key === "product_id" ? (
+                <textarea
+                  id={key}
+                  name={key}
+                  value={formData[key] || ""}
+                  onChange={handleChange}
+                  className="w-full p-2 border border-gray-300 rounded-lg"
+                  disabled
+                /> ) :
+              key === "description" ? (
                 <textarea
                   id={key}
                   name={key}

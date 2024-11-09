@@ -65,10 +65,10 @@ const ProductDetails = () => {
                 Price: ${product.price.toFixed(2)}
               </p>
               <p className="text-sm text-gray-500 mt-1">
-                Brand ID: {product.brand_id}
+                Brand: {product.brand_name}
               </p>
               <p className="text-sm text-gray-500 mt-1">
-                Category ID: {product.category_id}
+                Category: {product.category_name}
               </p>
               <p className="text-sm text-gray-500 mt-1">
                 Stock Quantity: {product.stock_quantity}

@@ -47,6 +47,12 @@ import LineProfile from '../pages/Settings/LineProfile'
 import EditReview from '../DashboardContent/Reviews/EditReview'
 import AddBorrowProduct from '../DashboardContent/BorrowProduct/AddBorrowProduct'
 import UpdateTaskTech from '../DashboardContent/Tasks/UpdateTaskTech'
+import EditBrand from '../DashboardContent/Brands/EditBrand'
+import EditWarehouse from '../DashboardContent/Warehouses/EditWarehouse'
+import AddReview from '../DashboardContent/Reviews/AddReview'
+import EditAttribute from '../DashboardContent/Attributes/EditAttribute'
+import EditCategory from '../DashboardContent/Categories/EditCategory'
+import EditAssignmentTask from '../DashboardContent/Tasks/EditAssignmentTask'
 const DashboardRoute = () => {
   return (
       <div className='flex'>
@@ -61,6 +67,7 @@ const DashboardRoute = () => {
             <Route path="line-notification" element={<LineProfile />} />
             <Route path="tasks" element={<TaskContent />} />
             <Route path="tasks/assign" element={<AssignTask />} />
+            <Route path="tasks/assign/edit/:assignmentId" element={<EditAssignmentTask />} />
             <Route path="tasks/:taskId" element={<TaskDetails />} />
             <Route path="tasks-tech/edit/:taskId" element={<UpdateTaskTech />} />
             <Route path="applicants" element={<ApplicantContent />} />
@@ -68,6 +75,7 @@ const DashboardRoute = () => {
             <Route path="applicant/sending-email/:id" element={<SendApplicantEmail />} />
             <Route path="history-log" element={<HistoryLogContent />} />
             <Route path="reviews" element={<ReviewContent />} />
+            <Route path="reviews/add" element={<AddReview />} />
             <Route path="reviews/:id" element={<EditReview />} />
             <Route path="payments" element={<PaymentContent />} />
             <Route path="payments/add" element={<AddPayment />} />
@@ -82,21 +90,25 @@ const DashboardRoute = () => {
             <Route path="tasks/add" element={<AddTask />} />
             <Route path="tasks/edit/:taskId" element={<EditTask />} />
             <Route path="user" element={<UserContent />} />
-            <Route path="brands" element={<BrandContent />} />
             <Route path="augmented-reality" element={<ThreeScene />} />
             <Route path="analytics" element={<ReportContent />} />
-            <Route path="brand/add" element={<AddBrand />} />
+            <Route path="brands" element={<BrandContent />} />
+            <Route path="brands/add" element={<AddBrand />} />
+            <Route path="brands/edit/:brandId" element={<EditBrand />} />
             <Route path="warehouses" element={<WarehouseContent />} />
-            <Route path="warehouse/add" element={<AddWarehouse />} />
+            <Route path="warehouses/add" element={<AddWarehouse />} />
+            <Route path="warehouses/edit/:warehouseId" element={<EditWarehouse />} />
             <Route path="attributes" element={<AttributeContent />} />
-            <Route path="attribute/add" element={<AddAttribute />} />
+            <Route path="attributes/add" element={<AddAttribute />} />
+            <Route path="attributes/edit/:attributeId" element={<EditAttribute />} />
             <Route path="user/add" element={<AddUser />} />
             <Route path="user/add-tech" element={<AddTechnician />} />
             <Route path="user/edit/:userId" element={<EditUser/>} />
             <Route path="user/:userId" element={<UserDetails/>} />
             <Route path="products" element={<ProductContent />} />
             <Route path="categories" element={<CategoryContent />} />
-            <Route path="category/add" element={<AddCategory />} />
+            <Route path="categories/add" element={<AddCategory />} />
+            <Route path="categories/edit/:categoryId" element={<EditCategory />} />
             <Route path="products/add" element={<AddProduct />} />
             <Route path="products/edit/:productId" element={<EditProduct />} /> 
           </Routes>

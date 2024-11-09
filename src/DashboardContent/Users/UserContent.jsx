@@ -113,7 +113,7 @@ const UserContent = () => {
                 </td>
                 <td>{user.username}</td>
                 <td>{user.email}</td>
-                <td>{user.role_id}</td>
+                <td>{user.role_name}</td>
                 <td>{format(new Date(user.created_at), "MM/dd/yyyy")}</td>
                 <td>
                   <div className="flex gap-2">

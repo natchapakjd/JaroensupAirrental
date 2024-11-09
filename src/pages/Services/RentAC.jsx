@@ -14,7 +14,7 @@ import { useParams } from "react-router-dom";
 import Swal from "sweetalert2";
 import Cookies from "universal-cookie";
 import { jwtDecode } from "jwt-decode";
-
+import { useNavigate } from "react-router-dom";
 const icon = L.icon({
   iconUrl:
     "https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-icon.png",
@@ -25,12 +25,13 @@ const icon = L.icon({
 const RentAC = () => {
   const { taskTypeId } = useParams();
   const cookies = new Cookies();
+  const navigate = useNavigate();
   const [formData, setFormData] = useState({
     user_id: "",
     description: "",
     task_type_id: "",
     address: "",
-    appointment_date: "",
+    // appointment_date: "",
     latitude: "",
     longitude: "",
     rental_start_date: "", // เพิ่มฟิลด์สำหรับวันที่เริ่มเช่า
@@ -130,7 +131,7 @@ const RentAC = () => {
   };
 
   const sendMessage = async () => {
-    if (!profile) return; // Ensure profile is loaded
+    if (!profile) return; 
   
     const messageResponse = await fetch(
       `${import.meta.env.VITE_SERVER_URL}/send-message`,
@@ -140,8 +141,8 @@ const RentAC = () => {
           "Content-Type": "application/json",
         },
         body: JSON.stringify({
-          userId: profile.linetoken,
-          message: `สวัสดี ${profile.firstname} ${profile.lastname}!\n\nงานของคุณได้ถูกบันทึกเรียบร้อยแล้ว.\n\nขอบคุณที่เลือกใช้บริการของเรา! หากมีข้อสงสัยหรือคำถามเพิ่มเติม กรุณาติดต่อเราได้ทุกเมื่อ.\n\nขอให้คุณมีวันที่ดี!`,
+          userId: "U9cb564155dddeaa549d97a8747eed534",
+          message: `แจ้งเตือนจากระบบ:\n\nคุณ ${profile.firstname} ${profile.lastname} ได้แจ้งงานเช่าเครื่องปรับอากาศ เข้ามาในระบบเรียบร้อยแล้ว.\n\nกรุณาตรวจสอบและดำเนินการตามความเหมาะสม.\n\nขอบคุณที่เลือกใช้บริการของเรา!`,
         }),
       }
     );
@@ -179,6 +180,7 @@ const RentAC = () => {
         });
         sendMessage();
         setSelectedLocation(null);
+        navigate("/history")
       });
     } catch (error) {
       console.error("Error creating task:", error);
@@ -243,7 +245,7 @@ const RentAC = () => {
                 className="input input-bordered w-full"
               />
             </div>
-            <div className="mb-4">
+            {/* <div className="mb-4">
               <label className="block text-gray-700">Appointment Date</label>
               <input
                 type="datetime-local"
@@ -253,7 +255,7 @@ const RentAC = () => {
                 required
                 className="input input-bordered w-full"
               />
-            </div>
+            </div> */}
             <div className="mb-4">
               <label className="block text-gray-700">Rental Start Date</label>
               <input

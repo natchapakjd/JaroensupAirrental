@@ -35,7 +35,7 @@ const Contact = () => {
             <p className="text-lg mb-2">เลขที่ 425 ถ.นาคนิวาศ แขวงลาดพร้าว เขตลาดพร้าว กรุงเทพฯ 10230</p>
             <h3 className="text-xl font-semibold mb-2">ช่องทางการติดต่อ</h3>
             <ul className="list-disc list-inside text-gray-700">
-              <li>โทรศัพท์: 085-907-7726</li>
+              <li>โทรศัพท์: 086-975-0664</li>
               <li>อีเมล: contact@example.com</li>
               <li>เว็บไซต์: <a href="https://www.example.com" className="text-blue-500 hover:underline">www.example.com</a></li>
             </ul>

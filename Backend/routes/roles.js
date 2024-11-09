@@ -4,7 +4,7 @@ const db = require("../db");
 const isAdmin = require('../middlewares/isAdmin');
 
 
-router.get("/api/roles", (req, res) => {
+router.get("/roles", (req, res) => {
   const query = "SELECT * FROM roles";
 
   db.query(query, (err, result) => {

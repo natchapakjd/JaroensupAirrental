@@ -48,17 +48,17 @@ router.post("/warehouses", (req, res) => {
 
 router.put("/warehouse/:id", (req, res) => {
   const id = req.params.id;
-  const { name, location, capacity } = req.body;
-  const query = "UPDATE warehouses SET name = ?, location = ?, capacity = ? WHERE warehouse_id = ?";
+  const { location, capacity } = req.body;
+  const query = "UPDATE warehouses SET location = ?, capacity = ? WHERE warehouse_id = ?";
 
-  db.query(query, [name, location, capacity, id], (err, result) => {
+  db.query(query, [location, capacity, id], (err, result) => {
     if (err) {
       console.error("Error updating warehouse: " + err);
       res.status(500).json({ error: "Failed to update warehouse" });
     } else if (result.affectedRows === 0) {
       res.status(404).json({ error: "Warehouse not found" });
     } else {
-      res.json({ warehouse_id: id, name, location, capacity });
+      res.json({ warehouse_id: id, location, capacity });
     }
   });
 });

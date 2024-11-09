@@ -12,7 +12,7 @@ const DashboardContent = () => {
   const token = cookies.get("authToken");
   const decodeToken = jwtDecode(token)
   const id =  decodeToken.id
-
+  const role = decodeToken.role
 
   useEffect(() => {
     const fetchDashboardData = async () => {
@@ -56,7 +56,7 @@ const DashboardContent = () => {
         </h1>
         <p className="text-gray-600 mt-2">Here is a quick overview of your dashboard.</p>
       </div>
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-6">
+      {role === 3 ? (<div><div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-6">
         <div className="bg-white p-6 rounded-lg shadow-lg flex items-center justify-between">
           <div>
             <h2 className="text-xl font-semibold text-gray-700">Total Products</h2>
@@ -128,7 +128,8 @@ const DashboardContent = () => {
             <p className="text-gray-600">Added on September 13, 2024</p>
           </li>
         </ul>
-      </div>
+      </div></div>):null}
+      
     </div>
   );
 };

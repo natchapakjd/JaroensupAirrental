@@ -99,7 +99,7 @@ const OrderContent = () => {
         <thead>
           <tr>
             <th className="border border-gray-300 p-2">Order ID</th>
-            <th className="border border-gray-300 p-2">User ID</th>
+            <th className="border border-gray-300 p-2">User</th>
             <th className="border border-gray-300 p-2">Total Amount</th>
             <th className="border border-gray-300 p-2">Order Date</th>
             <th className="border border-gray-300 p-2">Actions</th>
@@ -110,7 +110,7 @@ const OrderContent = () => {
             orders.map((order) => (
               <tr key={order.id}>
                 <td className="border border-gray-300 p-2">{order.id}</td>
-                <td className="border border-gray-300 p-2">{order.user_id}</td>
+                <td className="border border-gray-300 p-2">{order.firstname} {order.lastname}</td>
                 <td className="border border-gray-300 p-2">{order.total_price}</td>
                 <td className="border border-gray-300 p-2">{new Date(order.created_at).toLocaleString()}</td>
                 <td className="border border-gray-300 p-2">

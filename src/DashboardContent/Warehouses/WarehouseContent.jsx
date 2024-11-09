@@ -79,13 +79,18 @@ const WarehouseContent = () => {
                 <td className="border border-gray-300 p-2">{warehouse.capacity}</td>
 
                 <td className="border border-gray-300 p-2">
-                  <button
-                    onClick={() => handleDelete(warehouse.warehouse_id)}
-                    className="btn btn-error text-white"
-                  >
-                    Delete
+                <Link to={`/dashboard/warehouses/edit/${warehouse.warehouse_id}`}>
+                  <button className="btn btn-success text-white mr-2">
+                    Edit
                   </button>
-                </td>
+                </Link>
+                <button
+                  onClick={() => handleDelete(warehouse.warehouse_id)}
+                  className="btn btn-error text-white"
+                >
+                  Delete
+                </button>
+              </td>
               </tr>
             ))}
           </tbody>

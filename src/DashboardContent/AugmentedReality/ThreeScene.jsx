@@ -1,155 +1,279 @@
-// import React, { useRef, useEffect, useState } from 'react';
-// import * as THREE from 'three';
+import React, { useState, useEffect } from "react";
+import Swal from "sweetalert2";
+import axios from "axios";
 
-// const ThreeScene = () => {
-//   const mountRef = useRef(null);
-//   const [width, setWidth] = useState(5); // Default width of grid
-//   const [height, setHeight] = useState(5); // Default height of grid
-//   const [scene, setScene] = useState(null); // Track scene object
-//   const [renderer, setRenderer] = useState(null); // Track renderer object
-//   const [camera, setCamera] = useState(null); // Track camera object
+const roomTypeOptions = [
+  { value: 750, label: "ห้องนอนปกติ - ไม่โดนแดดโดยตรง" },
+  { value: 800, label: "ห้องนอนปกติ - โดนแดดมาก" },
+  { value: 850, label: "ห้องทำงาน - ไม่โดนแดดโดยตรง" },
+  { value: 900, label: "ห้องทำงาน - โดนแดดมาก" },
+  { value: 950, label: "ร้านอาหาร/ร้านค้า - ไม่โดนแดด" },
+  { value: 1000, label: "ร้านอาหาร/ร้านค้า - โดนแดดมาก" },
+  { value: 1100, label: "ห้องประชุม/ร้านอาหารที่มีหม้อหรือเตาความร้อน" },
+];
 
-//   useEffect(() => {
-//     // Set up scene
-//     const newScene = new THREE.Scene();
-//     setScene(newScene);
+const ThreeScence = () => {
+  const [appointments, setAppointments] = useState([]);
+  const [selectedAppointment, setSelectedAppointment] = useState(null);
+  const [customLocationName, setCustomLocationName] = useState("");
+  const [width, setWidth] = useState(8);
+  const [height, setHeight] = useState(6);
+  const [roomType, setRoomType] = useState(750);
+  const [grid, setGrid] = useState([]);
+  const [result, setResult] = useState("");
+  const [scaleWidth,setScaleWidth] =useState("");
+  const [scaleHeight,setScaleHeight] = useState("");
+  useEffect(() => {
+    fetchAppointments();
+    calculateBTU();
+  }, [width, height, roomType]);
 
-//     // Set up camera
-//     const newCamera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
-//     newCamera.position.z = 20; // Adjust as needed to view the entire grid
-//     setCamera(newCamera);
+  const fetchAppointments = async () => {
+    try {
+      const response = await axios.get(
+        `${import.meta.env.VITE_SERVER_URL}/appointments`
+      );
+      setAppointments(response.data);
+    } catch (error) {
+      console.error("Error fetching appointments:", error);
+    }
+  };
 
-//     // Set up renderer
-//     const newRenderer = new THREE.WebGLRenderer({ antialias: true });
-//     newRenderer.setSize(window.innerWidth, window.innerHeight);
-//     mountRef.current.appendChild(newRenderer.domElement);
-//     setRenderer(newRenderer);
+  const allowDrop = (ev) => ev.preventDefault();
 
-//     // Handle window resize
-//     const handleResize = () => {
-//       if (newCamera) {
-//         newCamera.aspect = window.innerWidth / window.innerHeight;
-//         newCamera.updateProjectionMatrix();
-//       }
-//       if (newRenderer) {
-//         newRenderer.setSize(window.innerWidth, window.innerHeight);
-//       }
-//     };
-//     window.addEventListener('resize', handleResize);
+  const drag = (ev) => {
+    ev.dataTransfer.setData("text", ev.target.id);
+  };
 
-//     // Cleanup function
-//     return () => {
-//       window.removeEventListener('resize', handleResize);
-//       if (newRenderer && mountRef.current) {
-//         mountRef.current.removeChild(newRenderer.domElement);
-//       }
-//     };
-//   }, []);
+  const drop = (ev, cellIndex) => {
+    ev.preventDefault();
+    const newGrid = [...grid];
+    if (!newGrid[cellIndex].hasAC) {
+      newGrid[cellIndex].hasAC = true;
+      createCoolingArea(cellIndex, newGrid);
+    }
+    setGrid(newGrid);
+  };
 
-//   useEffect(() => {
-//     if (scene && renderer && camera) {
-//       // Function to create a grid of cubes with outlines
-//       const createGrid = (width, height) => {
-//         const grid = new THREE.Group();
-//         const cubeSize = 1; // Size of each cube
-//         const spacing = 0.2; // Slight spacing to separate cubes visually
-//         const borderColor = 0x000000; // Color for the borders
+  const createCoolingArea = (index, gridCopy) => {
+    const coolingAreaSize = 20;
+    const gridWidth = width;
+    const startRow = Math.floor(index / gridWidth);
+    const startCol = index % gridWidth;
 
-//         const material = new THREE.MeshStandardMaterial({ color: 0x00ff00, flatShading: true }); // Better material for shading
-//         const borderMaterial = new THREE.LineBasicMaterial({ color: borderColor }); // Border color
+    for (let i = 0; i < coolingAreaSize; i++) {
+      const coolingCellIndex =
+        (startRow + Math.floor(i / gridWidth)) * gridWidth + (startCol + (i % gridWidth));
+      if (gridCopy[coolingCellIndex]) gridCopy[coolingCellIndex].isCoolingArea = true;
+    }
+  };
 
-//         for (let i = 0; i < width; i++) {
-//           for (let j = 0; j < height; j++) {
-//             // Create cube
-//             const geometry = new THREE.BoxGeometry(cubeSize, cubeSize, cubeSize);
-//             const cube = new THREE.Mesh(geometry, material);
-//             cube.position.set(
-//               i * (cubeSize + spacing) - (width * (cubeSize + spacing)) / 2, // Center the grid
-//               j * (cubeSize + spacing) - (height * (cubeSize + spacing)) / 2,
-//               0
-//             );
-//             grid.add(cube);
+  const removeAC = (cellIndex) => {
+    const newGrid = [...grid];
+    newGrid[cellIndex].hasAC = false;
+    removeCoolingArea(cellIndex, newGrid);
+    setGrid(newGrid);
+  };
 
-//             // Create outline
-//             const edges = new THREE.EdgesGeometry(geometry);
-//             const lineSegments = new THREE.LineSegments(edges, borderMaterial);
-//             lineSegments.position.copy(cube.position);
-//             grid.add(lineSegments);
-//           }
-//         }
+  const removeCoolingArea = (index, gridCopy) => {
+    const coolingAreaSize = 20;
+    const gridWidth = width;
+    const startRow = Math.floor(index / gridWidth);
+    const startCol = index % gridWidth;
 
-//         return grid;
-//       };
+    for (let i = 0; i < coolingAreaSize; i++) {
+      const coolingCellIndex =
+        (startRow + Math.floor(i / gridWidth)) * gridWidth + (startCol + (i % gridWidth));
+      if (gridCopy[coolingCellIndex]) gridCopy[coolingCellIndex].isCoolingArea = false;
+    }
+  };
 
-//       // Create grid and add to scene
-//       const grid = createGrid(width, height);
-//       scene.clear(); // Remove previous objects
-//       scene.add(grid);
+  const calculateBTU = () => {
+    const area = width * height;
+    
+    const BTU = area * roomType;
+    const numAC = Math.ceil(BTU / 12000);
+    setResult(`จำนวนแอร์ที่ต้องใช้: ${numAC} ตัว (BTU ที่ต้องใช้: ${BTU} BTU)`);
 
-//       // Add a light to improve visual appeal
-//       const light = new THREE.DirectionalLight(0xffffff, 1);
-//       light.position.set(10, 10, 10);
-//       scene.add(light);
-//       const ambientLight = new THREE.AmbientLight(0x404040); // Ambient light
-//       scene.add(ambientLight);
+    const cells = Array.from({ length: width * height }, (_, i) => ({
+      id: i,
+      hasAC: false,
+      isCoolingArea: false,
+    }));
+    setGrid(cells);
+  };
 
-//       // Render loop
-//       const animate = () => {
-//         requestAnimationFrame(animate);
-//         // Apply rotation
-//         grid.rotation.y += 0.01;
-//         grid.rotation.x += 0.01;
-//         renderer.render(scene, camera);
-//       };
-//       animate();
-//     }
-//   }, [scene, renderer, camera, width, height]); // Depend on scene, renderer, camera, width, and height
+  const handleSave = async () => {
+    const selectedRoomType = roomTypeOptions.find(
+      (option) => option.value === roomType
+    );
+    const data = {
+      assignment_id: selectedAppointment,
+      location_name: customLocationName || "พื้นที่ที่กำหนด",
+      width,
+      height,
+      air_conditioners_needed: Math.ceil((width * height * roomType) / 12000),
+      area_type: selectedRoomType.label,
+    };
 
-//   return (
-//     <div>
-//       <div
-//         ref={mountRef}
-//         style={{
-//           width: '80%',
-//           height: '80vh',
-//           display: 'block',
-//           backgroundColor: '#f0f0f0',
-//         }}
-//       />
-//       <div style={{ padding: '10px', background: '#fff' }}>
-//         <label htmlFor="widthInput">Width: </label>
-//         <input
-//           id="widthInput"
-//           type="number"
-//           value={width}
-//           onChange={(e) => setWidth(parseInt(e.target.value, 10))}
-//           min="1"
-//           style={{ marginLeft: '10px' }}
-//         />
-//         <br />
-//         <label htmlFor="heightInput">Height: </label>
-//         <input
-//           id="heightInput"
-//           type="number"
-//           value={height}
-//           onChange={(e) => setHeight(parseInt(e.target.value, 10))}
-//           min="1"
-//           style={{ marginLeft: '10px' }}
-//         />
-//       </div>
-//     </div>
-//   );
-// };
+    try {
+      await axios.post(`${import.meta.env.VITE_SERVER_URL}/area_cal`, data);
+      Swal.fire({
+        icon: "success",
+        title: "บันทึกสำเร็จ",
+        text: "ข้อมูลถูกบันทึกเรียบร้อยแล้ว!",
+        confirmButtonText: "ตกลง",
+        backdrop: true,
+      });
+    } catch (error) {
+      Swal.fire({
+        icon: "error",
+        title: "เกิดข้อผิดพลาด",
+        text: "ไม่สามารถบันทึกข้อมูลได้",
+        confirmButtonText: "ลองใหม่อีกครั้ง",
+      });
+    }
+  };
 
-// export default ThreeScene;
-
-
-import React from 'react'
-
-const ThreeScene = () => {
   return (
-    <div>ThreeScene</div>
-  )
-}
+    <div className="p-5 font-inter">
+      <h1 className="text-2xl font-bold ">ระบบประเมินพื้นที่และ BTU</h1>
+      <div className="mt-4">
+        <label className="block">
+          เลือกการนัดหมาย:
+          <select
+            className="border rounded p-1 w-full"
+            value={selectedAppointment || ""}
+            onChange={(e) => setSelectedAppointment(e.target.value)}
+          >
+            <option value="">-- โปรดเลือกการนัดหมาย --</option>
+            {appointments.map((appointment) => (
+              <option
+                key={appointment.assignment_id}
+                value={appointment.assignment_id}
+              >
+                {appointment.assignment_id}. {appointment.description}
+              </option>
+            ))}
+          </select>
+        </label>
+      </div>
 
-export default ThreeScene
+      <div className="mt-4">
+        <label className="block">
+          ชื่อสถานที่:
+          <input
+            type="text"
+            className="border rounded p-1 w-full"
+            value={customLocationName}
+            onChange={(e) => setCustomLocationName(e.target.value)}
+            placeholder="กรอกชื่อสถานที่ (ถ้ามี)"
+          />
+        </label>
+      </div>
+      <div className="mt-4">
+        <label className="block">
+          ความกว้าง (เมตร):{" "}
+          <input
+            type="number"
+            className="border rounded p-1 w-20"
+            min="1"
+            value={width}
+            onChange={(e) => setWidth(parseInt(e.target.value))}
+          />
+        </label>
+      </div>
+
+      <div className="mt-2">
+        <label className="block">
+          ความยาว (เมตร):
+          <input
+            type="number"
+            className="border rounded p-1 w-20"
+            min="1"
+            value={height}
+            onChange={(e) => setHeight(parseInt(e.target.value))}
+          />
+        </label>
+      </div>
+
+      <div className="mt-2">
+        <label className="block">
+          ประเภทห้อง:
+          <select
+            className="border rounded p-1"
+            value={roomType}
+            onChange={(e) => setRoomType(parseFloat(e.target.value))}
+          >
+            {roomTypeOptions.map((option) => (
+              <option key={option.value} value={option.value}>
+                {option.label}
+              </option>
+            ))}
+          </select>
+        </label>
+      </div>
+      {/* 
+      <button onClick={calculateBTU} className="mt-4 px-4 py-2 bg-blue text-white rounded">
+        คำนวณจำนวนแอร์และแสดงพื้นที่
+      </button> */}
+
+      <p className="mt-4 text-lg">{result}</p>
+
+      <div
+        id="grid-container"
+        className="grid mt-4 gap-1"
+        style={{
+          gridTemplateColumns: `repeat(${width},30px)`,
+          gridTemplateRows: `repeat(${height}, 30px)`,
+        }}
+      >
+        {grid.map((cell, index) => (
+          <div
+            key={cell.id}
+            className={`w-8 h-8 border ${
+              cell.isCoolingArea ? "bg-blue-200" : "bg-green-200"
+            } relative`}
+            onDrop={(e) => drop(e, index)}
+            onDragOver={allowDrop}
+          >
+            {cell.hasAC && (
+              <>
+                <div className="w-8 h-8 bg-orange-400 border-2 border-black">
+                  AC
+                </div>
+                <button
+                  className="absolute bottom-0 right-0 w-6 h-4 bg-red-500 text-white text-xs rounded"
+                  onClick={() => removeAC(index)}
+                >
+                  ลบ
+                </button>
+              </>
+            )}
+          </div>
+        ))}
+      </div>
+
+      <h3 className="mt-6 text-xl font-bold">เครื่องปรับอากาศ</h3>
+      <div
+        id="ac-template"
+        className="w-8 h-8 bg-orange-500 border-2 border-black rounded-md cursor-grab hover:bg-orange-600 hover:shadow-lg transition-transform transform hover:scale-105 flex items-center justify-center"
+        draggable="true"
+        onDragStart={drag}
+        onDragEnd={(e) => e.currentTarget.classList.remove("cursor-grabbing")}
+        onMouseDown={(e) => e.currentTarget.classList.add("cursor-grabbing")}
+      >
+        <span className="text-xs font-bold text-black">AC</span>
+      </div>
+
+      <button
+        onClick={handleSave}
+        className="mt-4 px-4 py-2 bg-blue text-white rounded hover:bg-blue"
+      >
+        บันทึก
+      </button>
+    </div>
+  );
+};
+
+export default ThreeScence;

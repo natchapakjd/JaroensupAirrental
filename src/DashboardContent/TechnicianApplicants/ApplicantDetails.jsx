@@ -40,7 +40,7 @@ const ApplicantDetails = () => {
           <li><strong>วันเกิด:</strong> {new Date(applicant.date_of_birth).toLocaleDateString('th-TH')}</li>
           <li><strong>อีเมล:</strong> {applicant.email}</li>
           <li><strong>ตำแหน่งที่สมัคร:</strong> {applicant.position_applied}</li>
-          <li><strong>สถานะ:</strong> {applicant.status_id}</li>
+          <li><strong>สถานะ:</strong> {applicant.status_name}</li>
           <li><strong>วันที่สมัคร:</strong> {new Date(applicant.application_date).toLocaleDateString('th-TH')}</li>
           <li><strong>หมายเหตุ:</strong> {applicant.notes || 'ไม่มีหมายเหตุ'}</li>
         </ul>
