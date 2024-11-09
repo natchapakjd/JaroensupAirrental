@@ -25,7 +25,9 @@ router.get("/equipment-borrowings", (req, res) => {
       eb.*, 
       t.user_id, 
       t.description as task_desc,
+      t.status_id as status_id,
       u.*,
+      st.status_name,
       p.name as product_name
     FROM 
       equipment_borrowing eb 
@@ -35,8 +37,7 @@ router.get("/equipment-borrowings", (req, res) => {
       users u ON t.user_id = u.user_id
     JOIN 
       products p ON eb.product_id = p.product_id
-    WHERE 
-      t.status_id = 1
+    JOIN status st ON t.status_id = st.status_id
   `;
 
   db.query(query, (err, result) => {
@@ -56,6 +57,8 @@ router.get("/equipment-borrowing/:techId", (req, res) => {
     eb.*, 
     t.user_id, 
     t.description as task_desc,
+    t.status_id as status_id,
+    st.status_name,
     u.*,
     p.name as product_name
   FROM 
@@ -66,7 +69,9 @@ router.get("/equipment-borrowing/:techId", (req, res) => {
     users u ON t.user_id = u.user_id
   JOIN 
     products p ON eb.product_id = p.product_id
-     WHERE t.user_id = ? AND t.status_id = 1
+  JOIN 
+    status st ON t.status_id = st.status_id
+    WHERE t.user_id = ?
 
 `;
   
@@ -240,7 +245,7 @@ router.put("/equipment-borrowing/return/:taskId", async (req, res) => {
       const approveQuery = `
         UPDATE equipment_borrowing eb
         JOIN tasks t ON eb.task_id = t.task_id
-        SET  t.status_id = 10
+        SET  t.status_id = 2
         WHERE t.task_id = ?
       `;
 

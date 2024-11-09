@@ -14,7 +14,7 @@ const BorrowProductTable = () => {
 
   useEffect(() => {
     fetchBorrowingData(techId);
-  }, []);
+  }, [borrowingData]);
 
   const fetchBorrowingData = async (techId) => {
     try {
@@ -157,6 +157,7 @@ const BorrowProductTable = () => {
             <th className="border border-gray-300 p-2">Product Name</th>
             <th className="border border-gray-300 p-2">Borrow Date</th>
             <th className="border border-gray-300 p-2">Return Date</th>
+            <th className="border border-gray-300 p-2">Status</th>
             <th className="border border-gray-300 p-2">Task Type</th>
             <th className="border border-gray-300 p-2">Actions</th>
           </tr>
@@ -180,10 +181,11 @@ const BorrowProductTable = () => {
                     ? new Date(item.return_date).toLocaleString()
                     : "Not Returned"}
                 </td>
+                <td className="border border-gray-300 p-2">{item.status_name}</td>
                 <td className="border border-gray-300 p-2">{item.task_desc}</td>
                 <td className="border border-gray-300 p-2">
                   <div className="flex justify-center gap-2">
-                    {role === 2 ? (
+                    {role === 2 && item.status_id === 4? (
                       <button
                         onClick={() => handleReturn(item.task_id)}
                         className="btn btn-error text-white"
@@ -192,7 +194,7 @@ const BorrowProductTable = () => {
                       </button>
                     ) : null}
 
-                    {role === 3 ? (
+                    {role === 3 && item.status_id !== 4? (
                       <button
                         onClick={() => handleApprove(item.task_id)}
                         className="btn btn-success text-white"

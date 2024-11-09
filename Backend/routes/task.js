@@ -149,7 +149,6 @@ router.get("/tasks", (req, res) => {
 });
 
 
-// appointment_date ซ่อนไว้ก่อน
 router.post("/tasks", (req, res) => {
   const {
     user_id,
@@ -157,7 +156,7 @@ router.post("/tasks", (req, res) => {
     task_type_id,
     quantity_used,
     address,
-    // appointment_date,
+    appointment_date,
     latitude,
     longitude,
     rental_start_date, 
@@ -165,7 +164,7 @@ router.post("/tasks", (req, res) => {
   } = req.body;
 
   const query =
-    "INSERT INTO tasks (user_id, description, task_type_id, quantity_used, address, latitude, longitude,isActive) VALUES (?, ?, ?, ?, ?, ?, ?,?)";
+    "INSERT INTO tasks (user_id, description, task_type_id, quantity_used, address, appointment_date, latitude,longitude,isActive) VALUES (?, ?, ?, ?, ?, ?, ?,?,?)";
 
   db.query(
     query,
@@ -175,7 +174,7 @@ router.post("/tasks", (req, res) => {
       task_type_id,
       quantity_used,
       address,
-      // appointment_date,
+      appointment_date,
       latitude,
       longitude,
       1
@@ -207,7 +206,7 @@ router.post("/tasks", (req, res) => {
             task_type_id,
             quantity_used,
             address,
-            // appointment_date,
+            appointment_date,
             latitude,
             longitude,
             rental_start_date,

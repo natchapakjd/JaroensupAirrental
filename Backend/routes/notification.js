@@ -12,7 +12,7 @@ const headers = {
   Authorization: `Bearer ${LINE_CHANNEL_ACCESS_TOKEN}`,
 };
 router.post("/send-message", async (req, res) => {
-  const { userId, message,lineToken} = req.body;
+  const { userId, message} = req.body;
   const body = {
     to: userId,
     messages: [

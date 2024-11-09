@@ -327,7 +327,7 @@ const Sidebar = () => {
                       <MdTask className="mt-1" /> Borrowing
                     </a>
                   </li>
-                  <li
+                  {/* <li
                     className={`mb-5 hover:rounded-lg hover:py-3 hover:px-4 transition-all duration-300 hover:mx-5 ${
                       isActive("/dashboard/analytics")
                         ? "bg-blue text-white mx-5 px-4 py-3 rounded-lg"
@@ -340,7 +340,7 @@ const Sidebar = () => {
                     >
                       <MdPieChart className="mt-1" /> Analytics
                     </a>
-                  </li>
+                  </li> */}
                 </>
               )}
 

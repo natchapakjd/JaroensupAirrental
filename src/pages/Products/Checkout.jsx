@@ -49,8 +49,8 @@ const Checkout = () => {
           "Content-Type": "application/json",
         },
         body: JSON.stringify({
-          userId: profile.linetoken,
-          message: `สวัสดี ${profile.firstname} ${profile.lastname}!\n\nคำสั่งซื้อของคุณได้ถูกบันทึกเรียบร้อยแล้ว.\n\nขอบคุณที่เลือกใช้บริการของเรา! หากมีข้อสงสัยหรือคำถามเพิ่มเติม กรุณาติดต่อเราได้ทุกเมื่อ.\n\nขอให้คุณมีวันที่ดี!`,
+          userId: "U9cb564155dddeaa549d97a8747eed534",
+          message: `แจ้งเตือนจากระบบ:คุณ ${profile.firstname} ${profile.lastname}!\n\nได้สั่งซื้อสินค้าของคุณ\n\nกรุณาตรวจสอบและดำเนินการตามความเหมาะสม.\n\nขอบคุณที่เลือกใช้บริการของเรา!\n\nขอให้คุณมีวันที่ดี!`,
         }),
       }
     );

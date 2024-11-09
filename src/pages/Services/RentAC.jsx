@@ -31,7 +31,7 @@ const RentAC = () => {
     description: "",
     task_type_id: "",
     address: "",
-    appointment_date: "",
+    // appointment_date: "",
     latitude: "",
     longitude: "",
     rental_start_date: "", // เพิ่มฟิลด์สำหรับวันที่เริ่มเช่า
@@ -131,7 +131,7 @@ const RentAC = () => {
   };
 
   const sendMessage = async () => {
-    if (!profile || !taskType) return; 
+    if (!profile) return; 
   
     const messageResponse = await fetch(
       `${import.meta.env.VITE_SERVER_URL}/send-message`,
@@ -141,8 +141,8 @@ const RentAC = () => {
           "Content-Type": "application/json",
         },
         body: JSON.stringify({
-          userId: profile.linetoken,
-          message: `แจ้งเตือนจากระบบ:\n\nคุณ ${profile.firstname} ${profile.lastname} ได้แจ้งงานประเภท "${taskType}" เข้ามาในระบบเรียบร้อยแล้ว.\n\nกรุณาตรวจสอบและดำเนินการตามความเหมาะสม.\n\nขอบคุณที่เลือกใช้บริการของเรา!`,
+          userId: "U9cb564155dddeaa549d97a8747eed534",
+          message: `แจ้งเตือนจากระบบ:\n\nคุณ ${profile.firstname} ${profile.lastname} ได้แจ้งงานเช่าเครื่องปรับอากาศ เข้ามาในระบบเรียบร้อยแล้ว.\n\nกรุณาตรวจสอบและดำเนินการตามความเหมาะสม.\n\nขอบคุณที่เลือกใช้บริการของเรา!`,
         }),
       }
     );
