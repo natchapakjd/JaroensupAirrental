@@ -63,7 +63,7 @@ router.put("/category/:id", (req, res) => {
   });
 });
 
-router.delete("/category/:id",isAdmin, (req, res) => {
+router.delete("/category/:id", (req, res) => {
   const id = req.params.id;
   const query = "DELETE FROM categories WHERE category_id = ?";
 

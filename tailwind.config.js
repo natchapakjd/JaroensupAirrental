@@ -14,8 +14,9 @@ export default {
         'blue' : '#2984FF',
         'greyCustom' : '#A8AFBD',
         'black' : '#101010',
-        'orange' : '#FE774E',
+        'orange' : '#f97316',
         'white' : '#FFFFFF',
+        'custom': '#3182ce;'
       },
       textColor:{
         'blue' : '#2984FF',
@@ -23,6 +24,8 @@ export default {
         'black' : '#101010',
         'orange' : '#FE774E',
         'white' : '#FFFFFF',
+        'custom': '#3182ce;'
+
       }
     },
   },

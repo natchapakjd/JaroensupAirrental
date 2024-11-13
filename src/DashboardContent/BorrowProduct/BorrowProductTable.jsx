@@ -149,41 +149,41 @@ const BorrowProductTable = () => {
         ) : null}
       </div>
 
-      <table className="w-full border-collapse border border-gray-300">
-        <thead>
+      <table className="table w-full border-collapse border border-gray-300">
+        <thead className="sticky-top bg-gray-200">
           <tr>
-            <th className="border border-gray-300 p-2">Borrowing ID</th>
-            <th className="border border-gray-300 p-2">Technician Name</th>
-            <th className="border border-gray-300 p-2">Product Name</th>
-            <th className="border border-gray-300 p-2">Borrow Date</th>
-            <th className="border border-gray-300 p-2">Return Date</th>
-            <th className="border border-gray-300 p-2">Status</th>
-            <th className="border border-gray-300 p-2">Task Type</th>
-            <th className="border border-gray-300 p-2">Actions</th>
+            <th className="border p-2 text-center">Borrowing ID</th>
+            <th className="border p-2 text-center">Technician Name</th>
+            <th className="border p-2 text-center">Product Name</th>
+            <th className="border p-2 text-center">Borrow Date</th>
+            <th className="border p-2 text-center">Return Date</th>
+            <th className="border p-2 text-center">Status</th>
+            <th className="border p-2 text-center">Task Type</th>
+            <th className="border p-2 text-center">Actions</th>
           </tr>
         </thead>
         <tbody className="text-center">
           {borrowingData.length > 0 ? (
             borrowingData.map((item) => (
               <tr key={item.borrowing_id}>
-                <td className="border border-gray-300 p-2">
+                <td className="border p-2 text-center">
                   {item.borrowing_id}
                 </td>
-                <td className="border border-gray-300 p-2">{item.firstname} {item.lastname}</td>
-                <td className="border border-gray-300 p-2">
+                <td className="border p-2 text-center">{item.firstname} {item.lastname}</td>
+                <td className="border p-2 text-center">
                   {item.product_name}
                 </td>
-                <td className="border border-gray-300 p-2">
+                <td className="border p-2 text-center">
                   {new Date(item.borrow_date).toLocaleString()}
                 </td>
-                <td className="border border-gray-300 p-2">
+                <td className="border p-2 text-center">
                   {item.return_date
                     ? new Date(item.return_date).toLocaleString()
                     : "Not Returned"}
                 </td>
-                <td className="border border-gray-300 p-2">{item.status_name}</td>
-                <td className="border border-gray-300 p-2">{item.task_desc}</td>
-                <td className="border border-gray-300 p-2">
+                <td className="border p-2 text-center">{item.status_name}</td>
+                <td className="border p-2 text-center">{item.task_desc}</td>
+                <td className="border p-2 text-center">
                   <div className="flex justify-center gap-2">
                     {role === 2 && item.status_id === 4? (
                       <button
@@ -193,8 +193,16 @@ const BorrowProductTable = () => {
                         Return
                       </button>
                     ) : null}
+                    {role === 3 && item.status_id !== 2? (
+                      <button
+                        onClick={() => handleReturn(item.task_id)}
+                        className="btn bg-blue text-white hover:bg-blue"
+                      >
+                        Return
+                      </button>
+                    ) : null}
 
-                    {role === 3 && item.status_id !== 4? (
+                    {role === 3 && item.status_id !== 4 && item.status_id !== 2?(
                       <button
                         onClick={() => handleApprove(item.task_id)}
                         className="btn btn-success text-white"

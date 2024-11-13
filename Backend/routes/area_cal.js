@@ -72,7 +72,7 @@ router.put("/area_cal/:id", (req, res) => {
 });
 
 // Delete area calculation by ID
-router.delete("/area_cal/:id", isAdmin, (req, res) => {
+router.delete("/area_cal/:id", (req, res) => {
     const id = req.params.id;
     const query = "DELETE FROM area_calculation_history WHERE calculation_id = ?";
   

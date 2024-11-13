@@ -31,10 +31,10 @@ const RentAC = () => {
     description: "",
     task_type_id: "",
     address: "",
-    // appointment_date: "",
+    appointment_date: "",
     latitude: "",
     longitude: "",
-    rental_start_date: "", // เพิ่มฟิลด์สำหรับวันที่เริ่มเช่า
+    // rental_start_date: "", // เพิ่มฟิลด์สำหรับวันที่เริ่มเช่า
     rental_end_date: "", // เพิ่มฟิลด์สำหรับวันที่สิ้นสุดเช่า
   });
   const [products, setProducts] = useState([]);
@@ -245,9 +245,10 @@ const RentAC = () => {
                 className="input input-bordered w-full"
               />
             </div>
-            {/* <div className="mb-4">
-              <label className="block text-gray-700">Appointment Date</label>
+            <div className="mb-4">
+              <label className="block text-gray-700">Rental Start Date</label>
               <input
+              
                 type="datetime-local"
                 name="appointment_date"
                 value={formData.appointment_date}
@@ -255,8 +256,8 @@ const RentAC = () => {
                 required
                 className="input input-bordered w-full"
               />
-            </div> */}
-            <div className="mb-4">
+            </div>
+            {/* <div className="mb-4">
               <label className="block text-gray-700">Rental Start Date</label>
               <input
                 type="date"
@@ -266,7 +267,7 @@ const RentAC = () => {
                 required
                 className="input input-bordered w-full"
               />
-            </div>
+            </div> */}
             <div className="mb-4">
               <label className="block text-gray-700">Rental End Date</label>
               <input

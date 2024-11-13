@@ -1,10 +1,9 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import Navbar from "../../components/Navbar";
 import Footer from "../../components/Footer";
 import Swal from "sweetalert2";
 import axios from "axios";
-import { useEffect } from "react";
 import Cookies from "universal-cookie";
 import { jwtDecode } from "jwt-decode";
 
@@ -13,14 +12,17 @@ const Checkout = () => {
   const navigate = useNavigate();
   const cookies = new Cookies();
   const initialCartItems = location.state?.cartItems || [];
-  const [cartItems, setCartItems] = useState(initialCartItems); // Manage cart items state
+  const [cartItems, setCartItems] = useState(initialCartItems);
   const [profile, setProfile] = useState();
+  const [paymentMethods, setPaymentMethods] = useState([]);
+  const [selectedPaymentMethod, setSelectedPaymentMethod] = useState(null);
   const token = cookies.get("authToken");
   const decodedToken = jwtDecode(token);
   const userId = decodedToken.id;
 
   useEffect(() => {
     fetchProfile();
+    fetchPaymentMethods(); // Fetch payment methods when the component mounts
   }, []);
 
   const fetchProfile = async () => {
@@ -29,10 +31,21 @@ const Checkout = () => {
         `${import.meta.env.VITE_SERVER_URL}/user/${userId}`
       );
       if (response.status === 200) {
-        const data = response.data;
-        setProfile(data);
-        console.log(profile)
+        setProfile(response.data);
+      }
+    } catch (err) {
+      console.log(err);
+    }
+  };
 
+  // Fetch payment methods
+  const fetchPaymentMethods = async () => {
+    try {
+      const response = await axios.get(
+        `${import.meta.env.VITE_SERVER_URL}/payment-methods`
+      );
+      if (response.status === 200) {
+        setPaymentMethods(response.data); // Set payment methods in the state
       }
     } catch (err) {
       console.log(err);
@@ -40,7 +53,7 @@ const Checkout = () => {
   };
 
   const sendMessage = async () => {
-    if (!profile) return; 
+    if (!profile) return;
     const messageResponse = await fetch(
       `${import.meta.env.VITE_SERVER_URL}/send-message`,
       {
@@ -54,10 +67,23 @@ const Checkout = () => {
         }),
       }
     );
-  
+
     if (!messageResponse.ok) throw new Error("Failed to send message");
   };
-  
+
+  const formatDateTimeForInput = (date) => {
+    const d = new Date(date);
+    d.setHours(d.getHours());
+
+    const year = d.getFullYear();
+    const month = String(d.getMonth() + 1).padStart(2, "0");
+    const day = String(d.getDate()).padStart(2, "0");
+    const hours = String(d.getHours()).padStart(2, "0");
+    const minutes = String(d.getMinutes()).padStart(2, "0");
+
+    return `${year}-${month}-${day}T${hours}:${minutes}`;
+  };
+
   const handleCheckout = async () => {
     const totalPrice = cartItems
       .reduce((acc, item) => acc + item.price * item.quantity, 0)
@@ -86,7 +112,7 @@ const Checkout = () => {
       };
 
       try {
-        const response = await fetch(
+        const orderResponse = await fetch(
           `${import.meta.env.VITE_SERVER_URL}/v2/orders`,
           {
             method: "POST",
@@ -97,13 +123,36 @@ const Checkout = () => {
           }
         );
 
-        if (!response.ok) throw new Error("Network response was not ok");
+        if (!orderResponse.ok) throw new Error("Failed to create order");
 
-        const result = await response.json();
+        const orderResult = await orderResponse.json();
+
+        const paymentDetails = {
+          amount: totalPrice,
+          user_id: userId,
+          order_id: 'null',
+          method_id: selectedPaymentMethod, // Use selected payment method
+          payment_date: formatDateTimeForInput(new Date()),
+          status_id: 1, 
+          task_id: orderResult.taskId || null,
+        };
+
+        const paymentResponse = await fetch(
+          `${import.meta.env.VITE_SERVER_URL}/payments`,
+          {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify(paymentDetails),
+          }
+        );
+
+        if (!paymentResponse.ok) throw new Error("Failed to create payment");
 
         Swal.fire({
           title: "สำเร็จ!",
-          text: "ออเดอร์ของคุณได้ถูกบันทึกแล้ว",
+          text: "การชำระเงินของคุณได้รับการบันทึกแล้ว",
           icon: "success",
           timer: 500,
           showConfirmButton: false,
@@ -112,10 +161,10 @@ const Checkout = () => {
           navigate("/history");
         });
       } catch (error) {
-        console.error("Error submitting order or sending message:", error);
+        console.error("Error:", error);
         Swal.fire({
           title: "เกิดข้อผิดพลาด!",
-          text: "ไม่สามารถส่งคำสั่งซื้อหรือข้อความได้ กรุณาลองใหม่อีกครั้ง",
+          text: "ไม่สามารถดำเนินการชำระเงินได้ กรุณาลองใหม่อีกครั้ง",
           icon: "error",
         });
       }
@@ -179,26 +228,51 @@ const Checkout = () => {
                   </div>
                 );
               })}
-              <div className="flex justify-between mt-4 font-bold">
-                <span>Total Price:</span>
-                <span>${totalPrice}</span>
+
+              {/* Payment Method Selection */}
+              <div className="mb-4">
+                <label
+                  htmlFor="paymentMethod"
+                  className="block text-sm font-medium text-gray-700"
+                >
+                  วิธีการชำระเงิน
+                </label>
+                <select
+                  id="paymentMethod"
+                  className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-1 focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
+                  value={selectedPaymentMethod}
+                  onChange={(e) => setSelectedPaymentMethod(e.target.value)}
+                >
+                  <option value="">เลือกวิธีการชำระเงิน</option>
+                  {paymentMethods.map((method) => (
+                    <option key={method.method_id} value={method.method_id}>
+                      {method.method_name}
+                    </option>
+                  ))}
+                </select>
               </div>
-            </div>
-            <div className="flex justify-center mt-6">
-              <button
-                onClick={handleCheckout}
-                className="bg-blue text-white py-2 px-4 rounded hover:bg-blue transition duration-200"
-              >
-                ยืนยันการชำระเงิน
-              </button>
-            </div>
-            <div className="flex justify-center mt-4">
-              <button
-                onClick={handleContinueShopping}
-                className="bg-gray-500 text-white py-2 px-4 rounded hover:bg-gray-600 transition duration-200"
-              >
-                เลือกสินค้าต่อ
-              </button>
+
+              <div className="flex justify-between">
+                <div>
+                  <h3 className="text-lg font-semibold text-gray-800">
+                    Total: {totalPrice}
+                  </h3>
+                </div>
+                <div className="flex space-x-4">
+                  <button
+                    onClick={handleContinueShopping}
+                    className="bg-gray-500 text-white px-4 py-2 rounded-md hover:bg-gray-600 transition duration-200"
+                  >
+                    Continue Shopping
+                  </button>
+                  <button
+                    onClick={handleCheckout}
+                    className="bg-blue text-white px-4 py-2 rounded-md hover:bg-blue transition duration-200"
+                  >
+                    Checkout
+                  </button>
+                </div>
+              </div>
             </div>
           </section>
         </main>

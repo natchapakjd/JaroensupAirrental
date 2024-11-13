@@ -30,7 +30,7 @@ router.get("/productAttr/:id", (req, res) => {
   });
 });
 
-router.post("/productAttrs", isAdmin, (req, res) => {
+router.post("/productAttrs", (req, res) => {
   const { attribute_id, product_id, value } = req.body;
   const query = "INSERT INTO productattrbutes (attribute_id, product_id, value) VALUES (?, ?, ?)";
 
@@ -44,7 +44,7 @@ router.post("/productAttrs", isAdmin, (req, res) => {
   });
 });
 
-router.put("/productAttr/:id", isAdmin, (req, res) => {
+router.put("/productAttr/:id", (req, res) => {
   const id = req.params.id;
   const { attribute_id, product_id, value } = req.body;
   const query = "UPDATE productattrbutes SET attribute_id = ?, product_id = ?, value = ? WHERE product_attribute_id = ?";
@@ -61,7 +61,7 @@ router.put("/productAttr/:id", isAdmin, (req, res) => {
   });
 });
 
-router.delete("/productAttr/:id", isAdmin, (req, res) => {
+router.delete("/productAttr/:id", (req, res) => {
   const id = req.params.id;
   const query = "DELETE FROM productattrbutes WHERE product_attribute_id = ?";
 

@@ -53,8 +53,8 @@ const WarehouseContent = () => {
     <div className="p-8 rounded-lg shadow-lg w-full mx-auto h-screen">
       <div className="flex justify-between items-center mb-6">
         <h1 className="text-2xl font-semibold">Warehouses</h1>
-        <Link to="/dashboard/warehouse/add">
-          <button className="btn bg-blue text-white hover:bg-blue-700">
+        <Link to="/dashboard/warehouses/add">
+          <button className="btn bg-blue text-white hover:bg-blue">
             Add Warehouse
           </button>
         </Link>
@@ -62,23 +62,23 @@ const WarehouseContent = () => {
       {warehouses.length === 0 ? (
         <p>No warehouses available</p>
       ) : (
-        <table className="w-full border-collapse border border-gray-300 text-center font-inter">
-          <thead>
+        <table className="table w-full border-collapse border border-gray-300 text-center font-inter">
+          <thead className='sticky-top bg-gray-200'>
             <tr>
-              <th className="border border-gray-300 p-2">ID</th>
-              <th className="border border-gray-300 p-2">Location</th>
-              <th className="border border-gray-300 p-2">Quantity</th>
-              <th className="border border-gray-300 p-2">Actions</th>
+              <th className="border p-2 text-center">ID</th>
+              <th className="border p-2 text-center">Location</th>
+              <th className="border p-2 text-center">Quantity</th>
+              <th className="border p-2 text-center">Actions</th>
             </tr>
           </thead>
           <tbody>
             {warehouses.map(warehouse => (
               <tr key={warehouse.warehouse_id}>
-                <td className="border border-gray-300 p-2">{warehouse.warehouse_id}</td>
-                <td className="border border-gray-300 p-2">{warehouse.location}</td>
-                <td className="border border-gray-300 p-2">{warehouse.capacity}</td>
+                <td className="border p-2 text-center">{warehouse.warehouse_id}</td>
+                <td className="border p-2 text-center">{warehouse.location}</td>
+                <td className="border p-2 text-center">{warehouse.capacity}</td>
 
-                <td className="border border-gray-300 p-2">
+                <td className="border p-2 text-center">
                 <Link to={`/dashboard/warehouses/edit/${warehouse.warehouse_id}`}>
                   <button className="btn btn-success text-white mr-2">
                     Edit

@@ -42,7 +42,7 @@ const ProductDetails = () => {
   return (
     <>
       <Navbar />
-      <div className="bg-gray min-h-screen flex flex-col font-prompt">
+      <div className="bg-gray-100 min-h-screen flex flex-col font-prompt">
         <main className="flex-grow">
           <section className="container mx-auto p-6 flex flex-wrap">
             <div className="flex-shrink-0 w-full md:w-1/2 flex justify-center mb-6">
@@ -62,7 +62,7 @@ const ProductDetails = () => {
                 {product.description}
               </p>
               <p className="text-lg font-bold text-gray-900 mt-2">
-                Price: ${product.price.toFixed(2)}
+                Price: {product.price.toFixed(2)}
               </p>
               <p className="text-sm text-gray-500 mt-1">
                 Brand: {product.brand_name}

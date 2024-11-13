@@ -62,21 +62,21 @@ const AttributeContent = () => {
           <button className="btn bg-blue text-white hover:bg-blue">Add Attribute</button>
         </Link>
       </div>
-      <table className="w-full border-collapse border border-gray-300 text-center">
-        <thead>
+      <table className="table w-full border-collapse border border-gray-300 text-center">
+        <thead className='sticky-top bg-gray-200'>
           <tr>
-            <th className="border border-gray-300 p-2">ID</th>
-            <th className="border border-gray-300 p-2">Name</th>
-            <th className="border border-gray-300 p-2">Actions</th>
+            <th className="border p-2 text-center">ID</th>
+            <th className="border p-2 text-center">Name</th>
+            <th className="border p-2 text-center">Actions</th>
           </tr>
         </thead>
         <tbody>
           {attributes.map(attribute => (
             <tr key={attribute.attribute_id}>
-              <td className="border border-gray-300 p-2">{attribute.attribute_id}</td>
-              <td className="border border-gray-300 p-2">{attribute.name}</td>
+              <td className="border p-2 text-center">{attribute.attribute_id}</td>
+              <td className="border p-2 text-center">{attribute.name}</td>
                  
-              <td className="border border-gray-300 p-2">
+              <td className="border p-2 text-center">
                   <Link
                   to={`/dashboard/attributes/edit/${attribute.attribute_id}`}
                   className="btn btn-success text-white mr-2"

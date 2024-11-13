@@ -59,7 +59,7 @@ router.put("/attribute/:id", (req, res) => {
 });
 
 
-router.delete("/attribute/:id", isAdmin,(req, res) => {
+router.delete("/attribute/:id",(req, res) => {
   const id = req.params.id;
   const query = "DELETE FROM attributes WHERE attribute_id = ?";
 

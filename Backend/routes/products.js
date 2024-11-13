@@ -25,9 +25,9 @@ router.get("/products", (req, res) => {
   const offset = (page - 1) * pageSize;
 
   const query =
-    "SELECT pd.*,ct.name as category_name,wh.location,b.name as brand_name FROM products pd  JOIN brands b ON pd.brand_id = b.brand_id JOIN categories ct ON pd.category_id = ct.category_id JOIN warehouses wh ON pd.warehouse_id = wh.warehouse_id WHERE pd.product_type_id = ? LIMIT ? OFFSET ?";
+    "SELECT pd.*,ct.name as category_name,wh.location,b.name as brand_name FROM products pd  JOIN brands b ON pd.brand_id = b.brand_id JOIN categories ct ON pd.category_id = ct.category_id JOIN warehouses wh ON pd.warehouse_id = wh.warehouse_id  LIMIT ? OFFSET ?";
 
-  db.query(query, [1, pageSize, offset], (err, result) => {
+  db.query(query, [pageSize, offset], (err, result) => {
     if (err) {
       console.error("Error fetching products: " + err);
       res.status(500).json({ error: "Failed to fetch products" });
@@ -79,7 +79,7 @@ router.get("/product/:id", (req, res) => {
   });
 });
 
-router.delete("/product/:id", isAdmin, (req, res) => {
+router.delete("/product/:id", (req, res) => {
   const id = req.params.id;
   const query = "DELETE FROM products WHERE product_id = ?";
 

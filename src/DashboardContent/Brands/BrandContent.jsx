@@ -62,22 +62,22 @@ const BrandContent = () => {
       {brands.length === 0 ? (
         <p>No brands available</p>
       ) : (
-        <table className="w-full border-collapse border border-gray-300 text-center font-inter">
-          <thead>
+        <table className="table w-full border-collapse border border-gray-300 text-center font-inter">
+          <thead className='sticky-top bg-gray-200'>
             <tr>
-              <th className="border border-gray-300 p-2">ID</th>
-              <th className="border border-gray-300 p-2">Name</th>
-              <th className="border border-gray-300 p-2">Description</th>
-              <th className="border border-gray-300 p-2">Actions</th>
+              <th className="border p-2 text-center">ID</th>
+              <th className="border p-2 text-center">Name</th>
+              <th className="border p-2 text-center">Description</th>
+              <th className="border p-2 text-center">Actions</th>
             </tr>
           </thead>
           <tbody>
             {brands.map(brand => (
               <tr key={brand.brand_id}>
-                <td className="border border-gray-300 p-2">{brand.brand_id}</td>
-                <td className="border border-gray-300 p-2">{brand.name}</td>
-                <td className="border border-gray-300 p-2">{brand.description}</td>
-                <td className="border border-gray-300 p-2">
+                <td className="border p-2 text-center">{brand.brand_id}</td>
+                <td className="border p-2 text-center">{brand.name}</td>
+                <td className="border p-2 text-center">{brand.description}</td>
+                <td className="border p-2 text-center">
                   <Link
                     to={`/dashboard/brands/edit/${brand.brand_id}`}
                     className="btn btn-success text-white mr-2"

@@ -2,14 +2,22 @@ import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
 import Cookies from "universal-cookie";
-import { jwtDecode } from "jwt-decode";
+import {jwtDecode} from "jwt-decode";
 
 const Header = () => {
   const cookies = new Cookies();
   const navigate = useNavigate();
   const [user, setUser] = useState(null);
+  const [loading, setLoading] = useState(true); // Loading state
   const token = cookies.get("authToken");
+  let id = null;
 
+  try {
+    const decodeToken = jwtDecode(token);
+    id = decodeToken.id;
+  } catch (err) {
+    console.error("Error decoding token:", err);
+  }
 
   const handleLogout = () => {
     if (token) {
@@ -19,11 +27,10 @@ const Header = () => {
   };
 
   useEffect(() => {
-    if (token) {
-      const decodeToken = jwtDecode(token)
-      fetchUserByID(decodeToken.id);
+    if (id) {
+      fetchUserByID(id);
     }
-  }, [token]);
+  }, [id]);
 
   const fetchUserByID = async (userId) => {
     try {
@@ -34,30 +41,42 @@ const Header = () => {
         setUser(response.data);
       }
     } catch (err) {
-      console.error("Error fetching user image:", err);
-      setUser(null); // Reset user state on error
+      console.error("Error fetching user:", err);
+      setUser(null);
+    } finally {
+      setLoading(false); // Data loading is complete
     }
   };
 
   return (
-    <div className="grid grid-cols-2 px-2 py-2 border-none font-inter bg-gray-100">
+    <div
+      className={`grid grid-cols-2 px-2 py-2 border-none font-inter ${
+        loading ? "bg-none" : user?.role === 2 ? "bg-blue" : "bg-success"
+      }`}
+    >
       <div>
-        <p className="text-xl ml-11 font-semibold">Hello, {user ? user.firstname : 'admin'}</p>
-        <p className="text-sm text-gray-600 ml-11 font-normal">Have a nice day</p>
+        <p className="text-xl ml-11 font-semibold text-white">
+          Hello, {user ? user.firstname : "admin"}
+        </p>
+        <p className="text-sm text-white ml-11 font-normal">Have a nice day</p>
       </div>
       <div className="flex justify-end items-center px-2">
         <div className="border border-l-6 h-full bg-gray-600 mr-6"></div>
         <img
-          className="h-12 w-12 bg-gray-500 border rounded-full inline-block mr-5"
+          className="h-12 w-12 bg-gray-500 border border-none rounded-full inline-block mr-5"
           alt="Admin Avatar"
-          src={user && user.image_url ? user.image_url : "https://img.daisyui.com/images/stock/photo-1534528741775-53994a69daeb.webp"}
+          src={
+            user && user.image_url
+              ? user.image_url
+              : "https://img.daisyui.com/images/stock/photo-1534528741775-53994a69daeb.webp"
+          }
         />
         <div className="relative">
           <div className="dropdown dropdown-end">
             <label tabIndex={0} className="btn bg-white flex items-center">
               <div>
-                <p className="text-base ">{user ? user.firstname  : 'admin'}</p>
-                <p className="text-xs ">{user ? user.lastname  : 'admin'}</p>
+                <p className="text-base ">{user ? user.firstname : "admin"}</p>
+                <p className="text-xs ">{user ? user.lastname : "admin"}</p>
               </div>
               <svg
                 className="h-5 w-5 ml-2"
@@ -83,7 +102,10 @@ const Header = () => {
                 </a>
               </li>
               <li>
-                <a href="/dashboard/change-password" className="hover:bg-gray-100 p-2 rounded">
+                <a
+                  href="/dashboard/change-password"
+                  className="hover:bg-gray-100 p-2 rounded"
+                >
                   Change password
                 </a>
               </li>

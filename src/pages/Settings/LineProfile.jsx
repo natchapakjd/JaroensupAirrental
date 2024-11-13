@@ -6,10 +6,14 @@ import Footer from "../../components/Footer";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
 import Swal from "sweetalert2";
-import { useAuth } from "../../context/AuthContext";
+import Cookies from "universal-cookie";
+import { jwtDecode } from "jwt-decode";
 
 const LineProfile = () => {
-  const user = useAuth();
+  const cookies = new Cookies();
+  const token = cookies.get("authToken");
+  const decodeToken = jwtDecode(token);
+  const id = decodeToken.id;
   const [profile, setProfile] = useState(null);
   const [notificationsEnabled, setNotificationsEnabled] = useState(false);
   const [userId, setUserId] = useState(null);
@@ -17,9 +21,7 @@ const LineProfile = () => {
   const navigate = useNavigate();
 
   useEffect(() => {
-    if (user) {
-      setUserId(user.user.id);
-    }
+    setUserId(id);
     login();
   }, []);
 

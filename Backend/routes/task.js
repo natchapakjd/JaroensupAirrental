@@ -294,7 +294,7 @@ router.put("/task/:id",(req, res) => {
   );
 });
 
-router.delete("/task/:id",isAdmin,(req, res) => {
+router.delete("/task/:id",(req, res) => {
   const id = req.params.id;
   const query = "UPDATE tasks SET isActive = 0 WHERE task_id = ?";
 

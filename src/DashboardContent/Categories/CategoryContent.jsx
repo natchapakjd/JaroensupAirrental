@@ -66,26 +66,26 @@ const CategoryContent = () => {
       {categories.length === 0 ? (
         <p>No categories available</p>
       ) : (
-        <table className="w-full border-collapse border border-gray-300 text-center font-inter">
-          <thead>
+        <table className="table w-full border-collapse border border-gray-300 text-center font-inter">
+          <thead className="sticky-top bg-gray-200">
             <tr>
-              <th className="border border-gray-300 p-2">ID</th>
-              <th className="border border-gray-300 p-2">Name</th>
-              <th className="border border-gray-300 p-2">Description</th>
-              <th className="border border-gray-300 p-2">Actions</th>
+              <th className="border p-2 text-center">ID</th>
+              <th className="border p-2 text-center">Name</th>
+              <th className="border p-2 text-center">Description</th>
+              <th className="border p-2 text-center">Actions</th>
             </tr>
           </thead>
           <tbody>
             {categories.map((category) => (
               <tr key={category.category_id}>
-                <td className="border border-gray-300 p-2">
+                <td className="border p-2 text-center">
                   {category.category_id}
                 </td>
-                <td className="border border-gray-300 p-2">{category.name}</td>
-                <td className="border border-gray-300 p-2">
+                <td className="border p-2 text-center">{category.name}</td>
+                <td className="border p-2 text-center">
                   {category.description}
                 </td>
-                <td className="border border-gray-300 p-2">
+                <td className="border p-2 text-center">
                   <Link
                     to={`/dashboard/categories/edit/${category.category_id}`}
                   >

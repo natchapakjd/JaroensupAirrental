@@ -88,7 +88,7 @@ const OrderContent = () => {
   if (error) return <div className="text-red-500 text-center">{error}</div>;
 
   return (
-    <div className="p-8 rounded-lg shadow-lg w-full mx-auto font-inter h-full">
+    <div className="table p-8 rounded-lg shadow-lg w-full mx-auto font-inter h-full">
       <div className="flex justify-between items-center mb-4">
         <h2 className="text-xl font-semibold">Orders</h2>
         <Link to="/dashboard/orders/add">
@@ -96,24 +96,24 @@ const OrderContent = () => {
         </Link>
       </div>
       <table className="w-full border-collapse border border-gray-300">
-        <thead>
+        <thead className='sticky-top bg-gray-200'>
           <tr>
-            <th className="border border-gray-300 p-2">Order ID</th>
-            <th className="border border-gray-300 p-2">User</th>
-            <th className="border border-gray-300 p-2">Total Amount</th>
-            <th className="border border-gray-300 p-2">Order Date</th>
-            <th className="border border-gray-300 p-2">Actions</th>
+            <th className="border p-2 text-center">Order ID</th>
+            <th className="border p-2 text-center">User</th>
+            <th className="border p-2 text-center">Total Amount</th>
+            <th className="border p-2 text-center">Order Date</th>
+            <th className="border p-2 text-center">Actions</th>
           </tr>
         </thead>
         <tbody className="text-center">
           {orders.length > 0 ? (
             orders.map((order) => (
               <tr key={order.id}>
-                <td className="border border-gray-300 p-2">{order.id}</td>
-                <td className="border border-gray-300 p-2">{order.firstname} {order.lastname}</td>
-                <td className="border border-gray-300 p-2">{order.total_price}</td>
-                <td className="border border-gray-300 p-2">{new Date(order.created_at).toLocaleString()}</td>
-                <td className="border border-gray-300 p-2">
+                <td className="border p-2 text-center">{order.id}</td>
+                <td className="border p-2 text-center">{order.firstname} {order.lastname}</td>
+                <td className="border p-2 text-center">{order.total_price}</td>
+                <td className="border p-2 text-center">{new Date(order.created_at).toLocaleString()}</td>
+                <td className="border p-2 text-center">
                   <div className="flex justify-center gap-2">
                     {/* <Link to={`/dashboard/orders/edit/${order.id}`}>
                       <button className="btn btn-success text-white">Edit</button>

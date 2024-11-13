@@ -195,6 +195,7 @@ const UserHistory = () => {
                       <button onClick={() => handleOrderDetail(order.id)}>
                         View details
                       </button>
+                      {}
                       {paymentHistory[order.task_id] && (
                         <button
                           onClick={() => handlePaymentSlip(order.task_id)}

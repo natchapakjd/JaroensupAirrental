@@ -63,7 +63,6 @@ const AddPayment = () => {
     formData.append('order_id', selectionMode === 'order' ? orderId : null);
     formData.append('task_id', selectionMode === 'task' ? taskId : null);
     formData.append('status_id', status);
-
     try {
       await axios.post(`${apiUrl}/payments`, formData, {
         headers: {

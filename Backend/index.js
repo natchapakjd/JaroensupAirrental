@@ -28,7 +28,7 @@ const status = require("./routes/status");
 const chart = require("./routes/chart")
 const isAdmin = require("./middlewares/isAdmin");
 const cookieParser = require("cookie-parser");
-
+const shipping = require('./routes/shipping')
 
 // Middleware setup
 app.use(cors({
@@ -65,7 +65,7 @@ app.use(borrow_prod);
 app.use(status);
 app.use(cal_area)
 app.use(chart)
-
+app.use(shipping)
 
 
 app.listen(port, () => {

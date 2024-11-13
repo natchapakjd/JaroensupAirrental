@@ -63,7 +63,7 @@ router.put("/brand/:id", (req, res) => {
   });
 });
 
-router.delete("/brand/:id", isAdmin,(req, res) => {
+router.delete("/brand/:id",(req, res) => {
   const id = req.params.id;
   const query = "DELETE FROM brands WHERE brand_id = ?";
 

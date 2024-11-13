@@ -20,7 +20,7 @@ const storage = multer.diskStorage({
 const upload = multer({ storage });
 
 router.get("/payments", (req, res) => {
-  const query = "SELECT pm.*,t.description as task_desc, u.firstname, u.lastname, pmt.method_name FROM payments pm JOIN users u ON pm.user_id = u.user_id JOIN tasks t ON pm.task_id = t.task_id JOIN payment_methods pmt ON pm.method_id = pmt.method_id ";
+  const query = "SELECT pm.*,t.description as task_desc, u.firstname, u.lastname, pmt.method_name, st.status_name FROM payments pm JOIN users u ON pm.user_id = u.user_id JOIN tasks t ON pm.task_id = t.task_id JOIN payment_methods pmt ON pm.method_id = pmt.method_id JOIN status st ON pm.status_id = st.status_id";
 
   db.query(query, (err, result) => {
     if (err) {
@@ -78,7 +78,7 @@ router.get("/payments/:id", (req, res) => {
 router.post("/payments", upload.single('slip_images'), async (req, res) => {
   const { amount, user_id, method_id, payment_date, order_id, task_id, status_id } = req.body;
   let slipImagePath = null;
-
+  console.log(req.body)
   try {
     if (req.file) {
       const slipImage = req.file.path;
@@ -107,6 +107,7 @@ router.post("/payments", upload.single('slip_images'), async (req, res) => {
         INSERT INTO payments (amount, user_id, task_id, method_id, payment_date, image_url, status_id)
         VALUES (?, ?, ?, ?, ?, ?, ?)`;
       values.splice(2, 0, task_id); // Insert order_id into the correct position
+
     } else {
       return res.status(400).json({ error: "Either task_id or order_id must be provided." });
     }
@@ -260,6 +261,34 @@ router.put("/payments/:paymentId/slip_image", upload.single('slip_image'), async
     console.error("Error uploading to Cloudinary: " + error);
     res.status(500).json({ error: "Failed to upload image to Cloudinary" });
   }
+});
+
+router.put("/payments/:id/status", (req, res) => {
+  const paymentId = req.params.id;
+  const { status_id } = req.body;
+
+  if (!status_id) {
+    return res.status(400).json({ error: "status_id is required" });
+  }
+
+  const query = `
+    UPDATE payments
+    SET status_id = ?
+    WHERE payment_id = ?
+  `;
+
+  db.query(query, [status_id, paymentId], (err, result) => {
+    if (err) {
+      console.error("Error updating payment status: " + err);
+      return res.status(500).json({ error: "Failed to update payment status" });
+    }
+
+    if (result.affectedRows === 0) {
+      return res.status(404).json({ error: "Payment not found" });
+    }
+
+    res.status(200).json({ message: "Payment status updated successfully" });
+  });
 });
 
 module.exports = router;

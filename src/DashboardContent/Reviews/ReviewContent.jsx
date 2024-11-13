@@ -77,31 +77,31 @@ const ReviewContent = () => {
         </Link>
       </div>
       
-      <table className="w-full border-collapse border border-gray-300">
-        <thead>
+      <table className="table w-full border-collapse border border-gray-300">
+        <thead className="sticky-top bg-gray-200">
           <tr>
-            <th className="border border-gray-300 p-2">Review ID</th>
-            <th className="border border-gray-300 p-2">User</th>
-            <th className="border border-gray-300 p-2">Tech</th>
-            <th className="border border-gray-300 p-2">Comment</th>
-            <th className="border border-gray-300 p-2">Rating</th>
-            <th className="border border-gray-300 p-2">Date</th>
-            <th className="border border-gray-300 p-2">Actions</th>
+            <th className="border p-2 text-center">Review ID</th>
+            <th className="border p-2 text-center">User</th>
+            <th className="border p-2 text-center">Tech</th>
+            <th className="border p-2 text-center">Comment</th>
+            <th className="border p-2 text-center">Rating</th>
+            <th className="border p-2 text-center">Date</th>
+            <th className="border p-2 text-center">Actions</th>
           </tr>
         </thead>
         <tbody className="text-center">
           {reviews.length > 0 ? (
             reviews.map((review) => (
               <tr key={review.review_id}>
-                <td className="border border-gray-300 p-2">{review.review_id}</td>
-                <td className="border border-gray-300 p-2">{review.member_firstname} {review.member_lastname}</td>
-                <td className="border border-gray-300 p-2">{review.tech_firstname} {review.tech_lastname}</td>
-                <td className="border border-gray-300 p-2">{review.comment}</td>
-                <td className="border border-gray-300 p-2">{review.rating}</td>
-                <td className="border border-gray-300 p-2">
+                <td className="border p-2 text-center">{review.review_id}</td>
+                <td className="border p-2 text-center">{review.member_firstname} {review.member_lastname}</td>
+                <td className="border p-2 text-center">{review.tech_firstname} {review.tech_lastname}</td>
+                <td className="border p-2 text-center">{review.comment}</td>
+                <td className="border p-2 text-center">{review.rating}</td>
+                <td className="border p-2 text-center">
                   {new Date(review.created_at).toLocaleString()}
                 </td>
-                <td className="border border-gray-300 p-2">
+                <td className="border p-2 text-center">
                   <Link
                     to={`/dashboard/reviews/${review.review_id}`} // Link to the edit page
                     className="btn btn-success  text-white mr-2"

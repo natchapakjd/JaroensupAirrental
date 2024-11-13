@@ -3,23 +3,22 @@ import axios from 'axios';
 import Swal from 'sweetalert2';
 import Navbar from '../../components/Navbar';
 import Footer from '../../components/Footer';
+import { useLocation } from 'react-router-dom'; 
+import { jwtDecode } from 'jwt-decode';
 import Cookies from 'universal-cookie';
-import { useLocation } from 'react-router-dom'; // นำเข้า useLocation
-import { useAuth } from '../../context/AuthContext';
 
 const ChangePassword = () => {
   const [userId, setUserId] = useState('');
   const [newPassword, setNewPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
-  const cookies = new Cookies();
   const location = useLocation(); 
-  const { user }  = useAuth();
+  const cookies = new Cookies();
+  const token = cookies.get("authToken");
+  const decodeToken = jwtDecode(token);
+  const id = decodeToken.id;
 
   useEffect(() => {
-    const token = cookies.get("authToken");
-    if (token) {
-      setUserId(user.id);
-    }
+    setUserId(id);
   }, []);
 
   const handleChangePassword = async (e) => {
@@ -62,7 +61,7 @@ const ChangePassword = () => {
   return (
     <>
       {!isDashboard && <Navbar />}
-      <div className="flex items-center justify-center min-h-screen bg-white">
+      <div className="flex items-center justify-center min-h-screen bg-gray-100">
         <div className="bg-white p-8 rounded-lg shadow-md w-full max-w-md">
           <h2 className="text-2xl font-bold text-center mb-6">Change Password</h2>
           <form onSubmit={handleChangePassword} className="space-y-4">

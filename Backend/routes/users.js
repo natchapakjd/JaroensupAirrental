@@ -189,7 +189,7 @@ router.put("/user/:id",upload.single("profile_image"), async (req, res) => {
   }
 });
 
-router.delete("/user/:id",isAdmin,(req, res) => {
+router.delete("/user/:id",(req, res) => {
   const id = req.params.id;
   const query = "DELETE FROM users WHERE user_id = ?";
 
@@ -205,7 +205,7 @@ router.delete("/user/:id",isAdmin,(req, res) => {
   });
 });
 
-router.post("/user",isAdmin,upload.single("profile_image"), async (req, res) => {
+router.post("/user",upload.single("profile_image"), async (req, res) => {
   const {
     username,
     firstname,

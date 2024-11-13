@@ -20,6 +20,10 @@ const Product = () => {
     fetchData();
   }, []);
 
+  const filteredProducts = products.filter(
+    (product) =>
+      product.product_type_id === 1
+  );
   return (
     <>
       <Navbar />
@@ -35,7 +39,7 @@ const Product = () => {
               </p>
             </div>
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-              {products.map(product => (
+              {filteredProducts.map(product => (
                 <div
                   key={product.product_id}
                   className="bg-white shadow-lg rounded-lg overflow-hidden"

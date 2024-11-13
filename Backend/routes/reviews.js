@@ -77,7 +77,7 @@ router.post("/review", (req, res) => {
   });
 });
 
-router.put("/review/:id", isAdmin, (req, res) => {
+router.put("/review/:id", (req, res) => {
   const id = req.params.id;
   const { task_id, tech_id, user_id, rating, comment } = req.body;
   const query = "UPDATE reviews SET task_id = ?, tech_id = ?, user_id = ?, rating = ?, comment = ? WHERE review_id = ?";
@@ -94,7 +94,7 @@ router.put("/review/:id", isAdmin, (req, res) => {
   });
 });
 
-router.delete("/review/:id", isAdmin, (req, res) => {
+router.delete("/review/:id", (req, res) => {
   const id = req.params.id;
   const query = "DELETE FROM reviews WHERE review_id = ?";
 

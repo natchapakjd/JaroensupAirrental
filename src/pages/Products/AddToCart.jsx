@@ -54,8 +54,8 @@ const AddToCart = () => {
           <section className="container mx-auto p-6 text-center">
             <h1 className="text-4xl font-bold text-gray-800 mb-4">เพิ่มลงตะกร้า</h1>
             <p className="text-lg text-gray-600 mb-4">คุณต้องการเพิ่ม {product.name} ลงในตะกร้าหรือไม่?</p>
-            <p className="text-lg font-bold text-gray-900 mt-2">Price: ${product.price.toFixed(2)}</p>
-            <p className="text-lg font-bold text-gray-900 mt-2">Total: ${totalPrice}</p>
+            <p className="text-lg font-bold text-gray-900 mt-2">Price: {product.price.toFixed(2)}</p>
+            <p className="text-lg font-bold text-gray-900 mt-2">Total: {totalPrice}</p>
             <div className="mt-4">
               <label className="text-lg text-gray-600" htmlFor="quantity">จำนวน:</label>
               <input
