@@ -23,7 +23,7 @@ router.get("/task-paging", (req, res) => {
   const limit = parseInt(req.query.limit) || 10;
   const offset = (page - 1) * limit;
 
-  const query = "SELECT t.*,tt.type_name ,st.status_name FROM tasks t JOIN status st ON t.status_id = st.status_id JOIN tasktypes tt ON t.task_type_id = tt.task_type_id LIMIT ? OFFSET ?";
+  const query = "SELECT t.*,tt.type_name ,st.status_name,st.status_id FROM tasks t JOIN status st ON t.status_id = st.status_id JOIN tasktypes tt ON t.task_type_id = tt.task_type_id LIMIT ? OFFSET ?";
 
   db.query(query, [limit, offset], (err, result) => {
     if (err) {
@@ -57,7 +57,6 @@ router.get("/task-paging/:id", (req, res) => {
 
   query += " LIMIT ? OFFSET ?";
   queryParams.push(limit, offset);
-
   db.query(query, queryParams, (err, result) => {
     if (err) {
       console.error("Error fetching tasks: ", err);

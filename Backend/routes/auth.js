@@ -73,7 +73,7 @@ router.post("/register", async (req, res) => {
         // Insert the user into the database
         db.query(
           "INSERT INTO users SET ?",
-          { username: username,role : "client", password: hashedPassword, email: email,},
+          { username: username,role_id : "1", password: hashedPassword, email: email,},
           (error, results) => {
             if (error) {
               console.error("Database error:", error);

@@ -93,12 +93,12 @@ const BorrowProductTable = () => {
 
       if (response.status === 200) {
         Swal.fire({
-          title: "Equipment returned successfully",
+          title: "Equipment approved successfully",
           icon: "success",
         });
         fetchBorrowingData(); // Refresh data after returning equipment
       } else {
-        throw new Error("Failed to return equipment.");
+        throw new Error("Failed to approved equipment.");
       }
     } catch (error) {
       Swal.fire({

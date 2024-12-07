@@ -55,6 +55,7 @@ const UserHistory = () => {
     } catch (error) {
       console.error("Error fetching user history:", error);
     }
+    console.log(taskHistory)
   };
 
   useEffect(() => {
@@ -129,7 +130,7 @@ const UserHistory = () => {
                           >
                             <div className="flex pt-1 mt-1">
                               <MdOutlineStar className="text-yellow-400" />
-                              Rate and Review
+                              ให้คะแนนรีวิว
                             </div>
                           </button>
                         )}
