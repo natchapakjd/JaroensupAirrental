@@ -15,6 +15,7 @@ import Swal from "sweetalert2";
 import Cookies from "universal-cookie";
 import { jwtDecode } from "jwt-decode";
 import { useNavigate } from "react-router-dom";
+import Searchbox from "../../components/Searchbox";
 
 const icon = L.icon({
   iconUrl:
@@ -35,8 +36,8 @@ const RentAC = () => {
     appointment_date: "",
     latitude: "",
     longitude: "",
-    // rental_start_date: "", // เพิ่มฟิลด์สำหรับวันที่เริ่มเช่า
-    rental_end_date: "", // เพิ่มฟิลด์สำหรับวันที่สิ้นสุดเช่า
+    rental_start_date: "",
+    rental_end_date: "",
   });
   const [products, setProducts] = useState([]);
   const [taskTypes, setTaskTypes] = useState([]);
@@ -95,6 +96,16 @@ const RentAC = () => {
       taskType.type_name === "งานซ่อมบำรุงเครื่องปรับอากาศ"
   );
 
+  const handleLocationSelect = (lat, lon, displayName) => {
+    setSelectedLocation({ lat, lng: lon });
+    setFormData({
+      ...formData,
+      latitude: lat,
+      longitude: lon,
+      address: displayName,
+    });
+  };
+
   const fetchProfile = async () => {
     try {
       const response = await axios.get(
@@ -111,10 +122,10 @@ const RentAC = () => {
 
   const handleChange = (e) => {
     const { name, value } = e.target;
-    setFormData({
-      ...formData,
+    setFormData((prevData) => ({
+      ...prevData,
       [name]: value,
-    });
+    }));
   };
 
   const MapClick = () => {
@@ -132,8 +143,8 @@ const RentAC = () => {
   };
 
   const sendMessage = async () => {
-    if (!profile) return; 
-  
+    if (!profile) return;
+
     const messageResponse = await fetch(
       `${import.meta.env.VITE_SERVER_URL}/send-message`,
       {
@@ -147,20 +158,26 @@ const RentAC = () => {
         }),
       }
     );
-  
+
     if (!messageResponse.ok) throw new Error("Failed to send message");
   };
-  
+
   const handleSubmit = async (e) => {
     e.preventDefault();
+
     try {
+      // Extract date portion of `appointment_date` for `rental_start_date`
+      const rentalStartDate = formData.appointment_date.split("T")[0];
+
       const response = await axios.post(
         `${import.meta.env.VITE_SERVER_URL}/tasks`,
         {
           ...formData,
+          rental_start_date: rentalStartDate, // Add derived value
           user_id: userId,
         }
       );
+
       Swal.fire({
         title: "สำเร็จ!",
         text: "แบบฟอร์มถูกส่งเรียบร้อยแล้ว",
@@ -174,14 +191,10 @@ const RentAC = () => {
           task_type_id: taskTypeId || "",
           address: "",
           appointment_date: "",
-          latitude: "",
-          longitude: "",
-          rental_start_date: "", // รีเซ็ตฟิลด์วันที่เริ่มเช่า
-          rental_end_date: "", // รีเซ็ตฟิลด์วันที่สิ้นสุดเช่า
+          rental_end_date: "",
         });
-        sendMessage();
         setSelectedLocation(null);
-        navigate("/history")
+        navigate("/history");
       });
     } catch (error) {
       console.error("Error creating task:", error);
@@ -249,26 +262,15 @@ const RentAC = () => {
             <div className="mb-4">
               <label className="block text-gray-700">Rental Start Date</label>
               <input
-              
                 type="datetime-local"
                 name="appointment_date"
                 value={formData.appointment_date}
                 onChange={handleChange}
+                min={new Date().toISOString().slice(0, 16)} // Prevent past dates
                 required
                 className="input input-bordered w-full"
               />
             </div>
-            {/* <div className="mb-4">
-              <label className="block text-gray-700">Rental Start Date</label>
-              <input
-                type="date"
-                name="rental_start_date"
-                value={formData.rental_start_date}
-                onChange={handleChange}
-                required
-                className="input input-bordered w-full"
-              />
-            </div> */}
             <div className="mb-4">
               <label className="block text-gray-700">Rental End Date</label>
               <input
@@ -276,6 +278,7 @@ const RentAC = () => {
                 name="rental_end_date"
                 value={formData.rental_end_date}
                 onChange={handleChange}
+                min={new Date().toISOString().slice(0, 10)} // Prevent past dates
                 required
                 className="input input-bordered w-full"
               />
@@ -290,7 +293,6 @@ const RentAC = () => {
                 url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
                 attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
               />
-              <MapClick />
               {selectedLocation && (
                 <Marker position={selectedLocation} icon={icon}>
                   <Popup>
@@ -298,10 +300,15 @@ const RentAC = () => {
                   </Popup>
                 </Marker>
               )}
+              <MapClick /> {/* Include MapClick to handle click events */}
+              <div className="absolute top-0 left-12 z-[1000]">
+                <Searchbox onSelectLocation={handleLocationSelect} />
+              </div>
             </MapContainer>
+
             <button
               type="submit"
-              className="btn bg-blue hover:bg-blue-700 text-white my-5 w-full"
+              className="btn bg-blue hover:bg-blue text-white my-5 w-full"
             >
               Submit
             </button>

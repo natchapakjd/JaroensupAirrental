@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import { useNavigate, useParams } from 'react-router-dom';
+import Loading from '../../components/Loading';
 
 const EditAssignmentTask = () => {
   const { assignmentId } = useParams(); // Get the assignment ID from the URL params
@@ -54,7 +55,7 @@ const EditAssignmentTask = () => {
 
   // Render loading state or form
   if (!task || !technician) {
-    return <div>Loading...</div>;
+    return <Loading/>;
   }
 
   return (

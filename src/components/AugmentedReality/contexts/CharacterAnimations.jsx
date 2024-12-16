@@ -11,7 +11,8 @@ export const CharacterAnimationsProvider = (props) => {
                 "Druid": "druid",
                 "Young Korrigan": "young-korrigan",
                 "Korrigan Hat": "korrigan-hat",
-                "Bear" :"bear"
+                "Bear" :"bear",
+                "Air":"air"
             },
             onChange:(value)=>{
                 setCurrentModelName(value);

@@ -144,6 +144,7 @@ const ReportContent = () => {
             fillOpacity={1}
             fill="url(#colorAv)"
           />
+          
         </AreaChart>
       </div>
 {/* 

@@ -7,6 +7,7 @@ const Cube = () => {
   useFrame((state, delta) => {
     cubeRef.current.rotation.y += 0.05;
   });
+
   return (
     <>
       <OrbitControls />

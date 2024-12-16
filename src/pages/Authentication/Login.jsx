@@ -70,6 +70,7 @@ const Login = () => {
                 onChange={handleUsernameChange}
                 className="input input-bordered w-full bg-white"
                 placeholder="Username"
+                pattern="^[a-zA-Z0-9_-]{3,20}$"
               />
             </div>
             <div className="mb-4">

@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import liff from '@line/liff';
+import Loading from '../../components/Loading';
 
 const Noti = () => {
     const [profile, setProfile] = useState(null);
@@ -39,7 +40,7 @@ const Noti = () => {
                     <button onClick={logout}>Logout</button>
                 </>
             ) : (
-                <div>Loading...</div>
+                <Loading/>
             )}
         </>
     );

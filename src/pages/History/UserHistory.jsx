@@ -2,10 +2,12 @@ import React, { useEffect, useState } from "react";
 import axios from "axios";
 import Navbar from "../../components/Navbar";
 import Footer from "../../components/Footer";
-import { useNavigate } from "react-router-dom"; // Import useNavigate
+import { useNavigate } from "react-router-dom"; 
 import { MdOutlineStar } from "react-icons/md";
 import { jwtDecode } from "jwt-decode";
 import Cookies from "universal-cookie";
+import Swal from "sweetalert2"; // Ensure Swal is imported
+
 const UserHistory = () => {
   const [taskHistory, setTaskHistory] = useState([]);
   const [orderHistory, setOrderHistory] = useState([]);
@@ -13,8 +15,8 @@ const UserHistory = () => {
   const [totalOrders, setTotalOrders] = useState(0);
   const [taskPage, setTaskPage] = useState(1);
   const [orderPage, setOrderPage] = useState(1);
-  const [paymentHistory, setPaymentHistory] = useState({}); // Store payment info
-  const navigate = useNavigate(); // Initialize navigate
+  const [paymentHistory, setPaymentHistory] = useState({});
+  const navigate = useNavigate(); 
   const cookies = new Cookies();
   const token = cookies.get("authToken");
   const decodeToken = jwtDecode(token);
@@ -23,23 +25,16 @@ const UserHistory = () => {
   const fetchUserData = async (taskPage, orderPage) => {
     try {
       const taskResponse = await axios.get(
-        `${
-          import.meta.env.VITE_SERVER_URL
-        }/task-paging/${user_id}?page=${taskPage}&limit=100`
+        `${import.meta.env.VITE_SERVER_URL}/task-paging/${user_id}?page=${taskPage}&limit=100`
       );
-
-      // Filter tasks by task_type_id after fetching
       const filteredTasks = taskResponse.data.tasks.filter(
         (task) => task.task_type_id === 1
       );
-
       setTaskHistory(filteredTasks);
-      setTotalTasks(filteredTasks.length); // Set totalTasks based on filtered tasks
+      setTotalTasks(filteredTasks.length); 
 
       const orderResponse = await axios.get(
-        `${
-          import.meta.env.VITE_SERVER_URL
-        }/v1/orders/${user_id}?page=${orderPage}&limit=100`
+        `${import.meta.env.VITE_SERVER_URL}/v1/orders/${user_id}?page=${orderPage}&limit=100`
       );
       setOrderHistory(orderResponse.data.orders);
       setTotalOrders(orderResponse.data.totalCount);
@@ -55,7 +50,6 @@ const UserHistory = () => {
     } catch (error) {
       console.error("Error fetching user history:", error);
     }
-    console.log(taskHistory)
   };
 
   useEffect(() => {
@@ -71,21 +65,45 @@ const UserHistory = () => {
   };
 
   const handleTaskDetail = (taskId) => {
-    navigate(`/task/${taskId}`); // Navigate to task details page
+    navigate(`/task/${taskId}`);
   };
 
   const handleOrderDetail = (orderId) => {
-    navigate(`/order-history/${orderId}`); // Navigate to order details page
+    navigate(`/order-history/${orderId}`);
   };
 
   const handleReview = (taskId) => {
-    navigate(`/review/${taskId}`); // Navigate to the review page
+    navigate(`/review/${taskId}`);
   };
 
   const handlePaymentSlip = (orderId) => {
-    navigate(`/payment/${orderId}`); // Navigate to the payment slip upload/view page
+    navigate(`/payment/${orderId}`);
   };
 
+  const handleDeleteTask = async (taskId) => {
+    try {
+      const result = await axios.delete(`${import.meta.env.VITE_SERVER_URL}/v2/task/${taskId}`);
+      // After deleting, fetch user data again to refresh the task list
+      console.log(result);
+      fetchUserData(taskPage, orderPage);
+      
+      // Display success message with Swal
+      Swal.fire({
+        title: "Task deleted successfully.",
+        icon: "success",
+        confirmButtonText: "OK",
+      });
+    } catch (error) {
+      console.error("Error deleting task:", error);
+      
+      // Display error message with Swal
+      Swal.fire({
+        title: "Failed to delete task.",
+        icon: "error",
+        confirmButtonText: "OK",
+      });
+    }
+  };
   return (
     <>
       <Navbar />
@@ -105,49 +123,53 @@ const UserHistory = () => {
                 <th>Appointment Date</th>
                 <th>Created At</th>
                 <th>Details</th>
+                <th>Actions</th> {/* Add column for actions */}
               </tr>
             </thead>
             <tbody>
               {taskHistory.length > 0 ? (
-                taskHistory
-                  .filter((task) => task.task_type_id === 1)
-                  .map((task) => (
-                    <tr key={task.task_id}>
-                      <td>{task.task_id}</td>
-                      <td>{task.type_name}</td>
-                      <td>{task.description}</td>
-                      <td>{task.address}</td>
-                      <td>{task.status_name}</td>
-                      <td>
-                        {new Date(task.appointment_date).toLocaleString()}
-                      </td>
-                      <td>{new Date(task.created_at).toLocaleString()}</td>
-                      <td>
-                        {task.status_id === 2 && (
-                          <button
-                            onClick={() => handleReview(task.task_id)}
-                            className="ml-5 text-blue-600"
-                          >
-                            <div className="flex pt-1 mt-1">
-                              <MdOutlineStar className="text-yellow-400" />
-                              ให้คะแนนรีวิว
-                            </div>
-                          </button>
-                        )}
-                        {paymentHistory[task.task_id] && (
-                          <button
-                            onClick={() => handlePaymentSlip(task.task_id)}
-                            className="ml-5 text-blue-600"
-                          >
-                            <div className="flex pt-1 mt-1">แนบสลิป</div>
-                          </button>
-                        )}
-                      </td>
-                    </tr>
-                  ))
+                taskHistory.map((task) => (
+                  <tr key={task.task_id}>
+                    <td>{task.task_id}</td>
+                    <td>{task.type_name}</td>
+                    <td>{task.description}</td>
+                    <td>{task.address}</td>
+                    <td>{task.status_name}</td>
+                    <td>{new Date(task.appointment_date).toLocaleString()}</td>
+                    <td>{new Date(task.created_at).toLocaleString()}</td>
+                    <td>View details</td>
+                    <td>
+                      {task.status_id === 2 && (
+                        <button
+                          onClick={() => handleReview(task.task_id)}
+                          className="ml-5 text-blue-600"
+                        >
+                          <div className="flex pt-1 mt-1">
+                            <MdOutlineStar className="text-yellow-400" />
+                            ให้คะแนนรีวิว
+                          </div>
+                        </button>
+                      )}
+                      {paymentHistory[task.task_id] && (
+                        <button
+                          onClick={() => handlePaymentSlip(task.task_id)}
+                          className="ml-5 text-blue-600"
+                        >
+                          <div className="flex pt-1 mt-1">แนบสลิป</div>
+                        </button>
+                      )}
+                      <button
+                        onClick={() => handleDeleteTask(task.task_id)} // Add delete button
+                        className="ml-5 text-red-600"
+                      >
+                        ลบการสั่งงาน
+                      </button>
+                    </td>
+                  </tr>
+                ))
               ) : (
                 <tr>
-                  <td colSpan="8" className="text-center">
+                  <td colSpan="9" className="text-center">
                     No task history found.
                   </td>
                 </tr>
@@ -163,8 +185,7 @@ const UserHistory = () => {
             Previous
           </button>
           <span>
-            Page {taskPage} of {Math.ceil(totalTasks / 10) || 1}{" "}
-            {/* Prevent division by zero */}
+            Page {taskPage} of {Math.ceil(totalTasks / 10) || 1} 
           </span>
           <button
             onClick={() => handleTaskPageChange(1)}
@@ -196,7 +217,6 @@ const UserHistory = () => {
                       <button onClick={() => handleOrderDetail(order.id)}>
                         View details
                       </button>
-                      {}
                       {paymentHistory[order.task_id] && (
                         <button
                           onClick={() => handlePaymentSlip(order.task_id)}

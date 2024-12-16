@@ -16,6 +16,7 @@ const AddProduct = () => {
     warehouse_id: "",
     product_type_id: "",  // Add this line
     product_image: null,
+    model_file: null,  // Add state for .gltf file
   });
 
   const [brands, setBrands] = useState([]);
@@ -273,6 +274,20 @@ const AddProduct = () => {
             ))}
           </select>
         </div>
+
+        {/* .gltf File Upload */}
+        <div className="mb-4">
+          <label htmlFor="model_file" className="block text-gray-700 font-medium mb-2">Model (.gltf) File:</label>
+          <input
+            type="file"
+            id="model_file"
+            name="model_file"
+            onChange={handleChange}
+            accept=".gltf"
+            className="w-full p-2 rounded-lg"
+          />
+        </div>
+
         <div className="mb-4">
           <label htmlFor="product_image" className="block text-gray-700 font-medium mb-2">Product Image:</label>
           <input

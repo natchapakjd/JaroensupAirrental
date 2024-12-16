@@ -2,6 +2,7 @@ import React, { useEffect, useState } from "react";
 import { Link } from "react-router-dom"; // Import Link for navigation
 import axios from "axios";
 import Swal from "sweetalert2";
+import Loading from "../../components/Loading";
 
 const ReviewContent = () => {
   const [reviews, setReviews] = useState([]);
@@ -65,7 +66,7 @@ const ReviewContent = () => {
     }
   };
 
-  if (loading) return <div className="text-center">Loading...</div>;
+  if (loading) return <Loading/>;
   if (error) return <div className="text-red-500 text-center">{error}</div>;
 
   return (

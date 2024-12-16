@@ -7,9 +7,11 @@ const Cube = ({position}) => {
   useFrame((state, delta) => {
     cubeRef.current.rotation.y += delta;
   });
+
+  
   return (
     <>
-      <mesh ref={cubeRef} position={position}>
+      <mesh ref={cubeRef} position={position} >
         <boxGeometry args={[0.5,0.5,0.5]}/>
         <meshStandardMaterial color={"mediumpurple"} />
       </mesh>

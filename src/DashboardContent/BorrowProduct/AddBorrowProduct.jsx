@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import Cookies from 'universal-cookie';
-import {jwtDecode} from 'jwt-decode';
+import { jwtDecode } from 'jwt-decode';
 
 const AddBorrowProduct = () => {
   const [products, setProducts] = useState([]); // State to store products
@@ -12,6 +12,7 @@ const AddBorrowProduct = () => {
     product_id: '',
     borrow_date: '',
     return_date: '',
+    consent: false, // New state for consent checkbox
   });
   const [idCardImage, setIdCardImage] = useState(null); // State for image file
   const navigate = useNavigate();
@@ -51,6 +52,14 @@ const AddBorrowProduct = () => {
     });
   };
 
+  // Handle checkbox change
+  const handleCheckboxChange = (e) => {
+    setFormData({
+      ...formData,
+      consent: e.target.checked, // Update consent state
+    });
+  };
+
   // Handle file input change
   const handleFileChange = (e) => {
     setIdCardImage(e.target.files[0]);
@@ -60,8 +69,13 @@ const AddBorrowProduct = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
 
+    if (!formData.consent) {
+      alert('You must agree to the terms to proceed');
+      return;
+    }
+
     const formDataToSubmit = new FormData();
-    formDataToSubmit.append('tech_id', formData.tech_id); // Use tech_id from form data
+    formDataToSubmit.append('tech_id', formData.tech_id);
     formDataToSubmit.append('borrow_date', formData.borrow_date);
     formDataToSubmit.append('return_date', formData.return_date);
     formDataToSubmit.append('product_id', formData.product_id);
@@ -90,8 +104,10 @@ const AddBorrowProduct = () => {
     }
   };
 
+  const today = new Date().toISOString().slice(0, 16); // Get today's date and time in YYYY-MM-DDTHH:mm format
+
   return (
-    <div className="p-6 max-w-lg mx-auto bg-white rounded-xl shadow-md my-5">
+    <div className="p-6 max-w-lg mx-auto bg-white rounded-xl shadow-md my-5 font-inter">
       <h2 className="text-2xl font-bold mb-4">Add Borrow Product</h2>
       <form onSubmit={handleSubmit} encType="multipart/form-data">
         <div className="mb-4">
@@ -109,7 +125,7 @@ const AddBorrowProduct = () => {
             <option value="" disabled>Select a technician</option>
             {technicians.map((technician) => (
               <option key={technician.tech_id} value={technician.tech_id}>
-                  {technician.firstname} {technician.lastname}
+                {technician.firstname} {technician.lastname}
               </option>
             ))}
           </select>
@@ -145,6 +161,7 @@ const AddBorrowProduct = () => {
             value={formData.borrow_date}
             onChange={handleChange}
             required
+            min={today} // Prevent selecting past dates
             className="input input-bordered w-full"
           />
         </div>
@@ -158,6 +175,7 @@ const AddBorrowProduct = () => {
             id="return_date"
             value={formData.return_date}
             onChange={handleChange}
+            min={today}
             className="input input-bordered w-full"
           />
         </div>
@@ -174,6 +192,17 @@ const AddBorrowProduct = () => {
             className="input input-bordered w-full"
           />
         </div>
+        <div className="mb-4 flex items-center">
+          <input
+            type="checkbox"
+            id="consent"
+            name="consent"
+            checked={formData.consent}
+            onChange={handleCheckboxChange}
+            required
+          />
+          <label htmlFor="consent" className="ml-2 text-2sm font-inter">ฉันยินยอมให้เก็บข้อมูลของฉันลงในระบบ</label>
+            </div>
         <button type="submit" className="btn bg-blue text-white hover:bg-blue">
           Submit
         </button>

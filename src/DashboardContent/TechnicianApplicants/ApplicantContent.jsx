@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
 import Swal from 'sweetalert2';
+import Loading from '../../components/Loading';
 
 const ApplicantContent = () => {
   const [applicants, setApplicants] = useState([]);
@@ -96,7 +97,7 @@ const ApplicantContent = () => {
     navigate(`/dashboard/applicant/sending-email/${id}`); // Navigate to the SendApplicantEmail page
   };
 
-  if (loading) return <p>Loading...</p>;
+  if (loading) return <Loading/>;
   if (error) return <p>{error}</p>;
 
   return (

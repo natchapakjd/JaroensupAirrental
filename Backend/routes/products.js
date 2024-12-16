@@ -94,8 +94,10 @@ router.delete("/product/:id", (req, res) => {
     }
   });
 });
-
-router.post("/products", upload.single("product_image"), async (req, res) => {
+router.post("/products", upload.fields([
+  { name: 'product_image', maxCount: 1 },
+  { name: 'model_file', maxCount: 1 }
+]), async (req, res) => {
   const {
     name,
     description,
@@ -104,21 +106,22 @@ router.post("/products", upload.single("product_image"), async (req, res) => {
     brand_id,
     category_id,
     warehouse_id,
-    product_type_id, // Add this line
+    product_type_id,
   } = req.body;
 
-  const productImage = req.file ? req.file.path : null;
+  const productImage = req.files['product_image'] ? req.files['product_image'][0].path : null;
+  const modelFile = req.files['model_file'] ? req.files['model_file'][0].path : null;
 
   if (!productImage) {
     return res.status(400).json({ error: "No product image uploaded." });
   }
 
   try {
+    // Compress product image
     const compressedImagePath = path.join(
       __dirname,
-      `compressed-${req.file.filename}`
+      `compressed-${req.files['product_image'][0].filename}`
     );
-
     await sharp(productImage).resize(800).toFile(compressedImagePath);
 
     const result = await cloudinary.uploader.upload(compressedImagePath, {
@@ -126,11 +129,20 @@ router.post("/products", upload.single("product_image"), async (req, res) => {
     });
 
     const cloudinaryImageUrl = result.secure_url;
+    fs.unlinkSync(compressedImagePath);  // Delete the compressed image
 
-    fs.unlinkSync(compressedImagePath);
+    let modelUrl = null;
+    if (modelFile) {
+      const modelResult = await cloudinary.uploader.upload(modelFile, {
+        resource_type: 'auto', // Use 'auto' for automatic type detection
+        folder: "models/product-models",
+      });
+      modelUrl = modelResult.secure_url;  
+    }
 
+    // Insert product data into database
     db.query(
-      "INSERT INTO products (name, description, price, stock_quantity, brand_id, category_id, warehouse_id, product_type_id, image_url) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)", // Updated SQL statement
+      "INSERT INTO products (name, description, price, stock_quantity, brand_id, category_id, warehouse_id, product_type_id, image_url, model_url) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)", 
       [
         name,
         description,
@@ -139,8 +151,9 @@ router.post("/products", upload.single("product_image"), async (req, res) => {
         brand_id,
         category_id,
         warehouse_id,
-        product_type_id, // Include product_type_id here
+        product_type_id,
         cloudinaryImageUrl,
+        modelUrl, // Save the model URL if present
       ],
       (err, results) => {
         if (err) {
@@ -151,10 +164,13 @@ router.post("/products", upload.single("product_image"), async (req, res) => {
       }
     );
   } catch (err) {
-    console.error("Error uploading image to Cloudinary:", err);
-    res.status(500).json({ error: "Failed to upload product image." });
+    console.error("Error uploading files:", err);
+    res.status(500).json({ error: "Failed to upload files." });
   }
 });
+
+
+
 
 router.put("/product/:id", upload.single("product_image"), async (req, res) => {
   const id = req.params.id;

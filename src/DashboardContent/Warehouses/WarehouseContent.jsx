@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import Swal from 'sweetalert2';
 import { Link } from 'react-router-dom'; // Import Link for navigation
+import Loading from '../../components/Loading';
 
 const WarehouseContent = () => {
   const [warehouses, setWarehouses] = useState([]);
@@ -46,7 +47,7 @@ const WarehouseContent = () => {
     }
   };
 
-  if (loading) return <p>Loading...</p>;
+  if (loading) return <Loading/>;
   if (error) return <p>{error}</p>;
 
   return (

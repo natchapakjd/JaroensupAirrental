@@ -1,19 +1,19 @@
 import React, { useEffect, useRef, useMemo } from "react";
 import { useGLTF, useAnimations } from "@react-three/drei";
 import { useCharacterAnimations } from "../contexts/CharacterAnimations";
+import { useThree, useFrame } from "@react-three/fiber"; // Import useThree and useFrame
 
 export default function Druid(props) {
   const group = useRef();
+  const meshRef = useRef(); // Ref for the skinnedMesh
 
   const { nodes, materials, animations } = useMemo(
-    () => useGLTF(
-      "/models/druid.gltf"
-    ),
+    () => useGLTF("/models/druid.gltf"),
     []
   );
 
   const { actions, names } = useAnimations(animations, group);
-  const { setAnimations, animationIndex, Color} = useCharacterAnimations();
+  const { setAnimations, animationIndex, Color } = useCharacterAnimations();
 
   // Set animations once when component mounts
   useEffect(() => {
@@ -30,12 +30,14 @@ export default function Druid(props) {
       };
     }
   }, [animationIndex, actions, names]);
+ 
 
   return (
     <group ref={group} {...props} dispose={null}>
       <group scale={1.91}>
         <primitive object={nodes.root} />
-        <skinnedMesh
+        <skinnedMesh 
+          ref={meshRef} // Attach ref to the mesh
           geometry={nodes.druid.geometry}
           material={materials.color_main}
           skeleton={nodes.druid.skeleton}
@@ -46,4 +48,4 @@ export default function Druid(props) {
   );
 }
 
-useGLTF.preload('/models/druid.gltf')
+useGLTF.preload("/models/druid.gltf");

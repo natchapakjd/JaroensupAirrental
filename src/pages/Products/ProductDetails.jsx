@@ -3,6 +3,7 @@ import { useParams, useNavigate } from "react-router-dom";
 import Navbar from "../../components/Navbar";
 import Footer from "../../components/Footer";
 import axios from "axios";
+import Loading from "../../components/Loading";
 
 const ProductDetails = () => {
   const { id } = useParams();
@@ -33,7 +34,7 @@ const ProductDetails = () => {
     }
   };
 
-  if (!product) return <p>Loading...</p>;
+  if (!product) return <Loading/>;
 
   const handleAddToCart = () => {
     navigate('/add-to-cart', { state: { product } });

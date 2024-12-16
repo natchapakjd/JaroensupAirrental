@@ -81,16 +81,17 @@ router.get("/task-paging/:id", (req, res) => {
 });
 
 
-
 router.get("/task/:id", (req, res) => {
   const taskId = req.params.id;
 
   const query = `
     SELECT 
       tasks.*, 
-      users.*,
       tasktypes.*,
-      status.*
+      status.*,
+      rental.*,
+      users.firstname,
+      users.lastname
     FROM 
       tasks
     INNER JOIN 
@@ -99,6 +100,8 @@ router.get("/task/:id", (req, res) => {
       status ON tasks.status_id = status.status_id
     INNER JOIN 
       tasktypes ON tasks.task_type_id = tasktypes.task_type_id
+    INNER JOIN
+      rental ON tasks.task_id = rental.task_id
     WHERE 
       tasks.task_id = ?
   `;
@@ -116,6 +119,7 @@ router.get("/task/:id", (req, res) => {
     res.status(200).json(result[0]);
   });
 });
+
 
 
 router.get("/tasks", (req, res) => {
@@ -161,7 +165,6 @@ router.post("/tasks", (req, res) => {
     rental_start_date, 
     rental_end_date,   
   } = req.body;
-
   const query =
     "INSERT INTO tasks (user_id, description, task_type_id, quantity_used, address, appointment_date, latitude,longitude,isActive) VALUES (?, ?, ?, ?, ?, ?, ?,?,?)";
 
@@ -218,9 +221,8 @@ router.post("/tasks", (req, res) => {
 });
 
 
-router.put("/task/:id",(req, res) => {
+router.put("/task/:id", (req, res) => {
   const id = req.params.id;
-  console.log(req.body)
   const {
     user_id,
     description,
@@ -231,11 +233,12 @@ router.put("/task/:id",(req, res) => {
     latitude,
     longitude,
     status_id,
-    start_date,
-    finish_date,
+    rental_start_date,
+    rental_end_date,
   } = req.body;
-
-  const query = `
+  console.log(req.body)
+  // Update the task
+  const updateTaskQuery = `
     UPDATE tasks
     SET 
       user_id = ?,
@@ -246,13 +249,11 @@ router.put("/task/:id",(req, res) => {
       appointment_date = ?,
       latitude = ?,
       longitude = ?,
-      status_id = ?,
-      start_date = ?,
-      finish_date = ?
+      status_id = ?
     WHERE task_id = ?`;
 
   db.query(
-    query,
+    updateTaskQuery,
     [
       user_id,
       description,
@@ -263,35 +264,89 @@ router.put("/task/:id",(req, res) => {
       latitude,
       longitude,
       status_id,
-      start_date,
-      finish_date,
       id,
     ],
     (err, result) => {
       if (err) {
         console.error("Error updating task: " + err);
-        res.status(500).json({ error: "Failed to update task" });
-      } else if (result.affectedRows === 0) {
-        res.status(404).json({ error: "Task not found" });
-      } else {
-        res.json({
-          task_id: id,
-          user_id,
-          description,
-          task_type_id,
-          quantity_used,
-          address,
-          appointment_date,
-          latitude,
-          longitude,
-          status_id,
-          start_date,
-          finish_date,
-        });
+        return res.status(500).json({ error: "Failed to update task" });
       }
+
+      // Check if rental data exists for this task
+      const checkRentalQuery = "SELECT * FROM rental WHERE task_id = ?";
+      db.query(checkRentalQuery, [id], (err, rentalResult) => {
+        if (err) {
+          console.error("Error checking rental record: " + err);
+          return res.status(500).json({ error: "Failed to check rental record" });
+        }
+
+        if (rentalResult.length > 0) {
+          // Update existing rental record
+          const updateRentalQuery = `
+            UPDATE rental
+            SET rental_start_date = ?, rental_end_date = ?
+            WHERE task_id = ?`;
+
+          db.query(
+            updateRentalQuery,
+            [rental_start_date, rental_end_date, id],
+            (err) => {
+              if (err) {
+                console.error("Error updating rental record: " + err);
+                return res.status(500).json({ error: "Failed to update rental record" });
+              }
+
+              res.status(200).json({
+                task_id: id,
+                user_id,
+                description,
+                task_type_id,
+                quantity_used,
+                address,
+                appointment_date,
+                latitude,
+                longitude,
+                rental_start_date,
+                rental_end_date,
+              });
+            }
+          );
+        } else {
+          // Insert a new rental record
+          const insertRentalQuery = `
+            INSERT INTO rental (task_id, rental_start_date, rental_end_date)
+            VALUES (?, ?, ?)`;
+
+          db.query(
+            insertRentalQuery,
+            [id, rental_start_date, rental_end_date],
+            (err) => {
+              if (err) {
+                console.error("Error creating rental record: " + err);
+                return res.status(500).json({ error: "Failed to create rental record" });
+              }
+
+              res.status(200).json({
+                task_id: id,
+                user_id,
+                description,
+                task_type_id,
+                quantity_used,
+                address,
+                appointment_date,
+                latitude,
+                longitude,
+                rental_start_date,
+                rental_end_date,
+              });
+            }
+          );
+        }
+      });
     }
   );
 });
+
 
 router.delete("/task/:id",(req, res) => {
   const id = req.params.id;
@@ -308,6 +363,23 @@ router.delete("/task/:id",(req, res) => {
     }
   });
 });
+
+router.delete("/v2/task/:id", (req, res) => {
+  const id = req.params.id;
+  const query = "DELETE FROM tasks WHERE task_id = ?";
+
+  db.query(query, [id], (err, result) => {
+    if (err) {
+      console.error("Error deleting task: " + err);
+      res.status(500).json({ error: "Failed to delete task" });
+    } else if (result.affectedRows === 0) {
+      res.status(404).json({ error: "Task not found" });
+    } else {
+      res.status(204).send();
+    }
+  });
+});
+
 
 
 router.get("/tasks/assigned/:techId", (req, res) => {
@@ -369,5 +441,6 @@ router.put("/task-tech/:id", (req, res) => {
     }
   );
 });
+
 
 module.exports = router;

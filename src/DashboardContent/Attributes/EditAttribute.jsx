@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import Swal from 'sweetalert2';
 import { useNavigate, useParams } from 'react-router-dom';
+import Loading from '../../components/Loading';
 
 const EditAttribute = () => {
   const navigate = useNavigate();
@@ -51,7 +52,7 @@ const EditAttribute = () => {
     <div className="p-8 rounded-lg shadow-lg w-full mx-auto max-w-md mt-5">
       <h1 className="text-2xl font-semibold mb-6 ">Edit Attribute</h1>
       {isLoadingData ? (
-        <p>Loading...</p>
+        <Loading/>
       ) : (
         <form onSubmit={handleSubmit}>
           <div className="mb-4">
