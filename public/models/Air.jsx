@@ -28,4 +28,4 @@ export default function Air(props) {
   )
 }
 
-useGLTF.preload('/Air.gltf')
+useGLTF.preload('/models/Air.gltf')

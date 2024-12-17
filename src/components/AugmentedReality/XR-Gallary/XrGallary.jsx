@@ -9,7 +9,9 @@ import KorriganHat from "./KorriganHat";
 import { Fragment } from "react";
 import Bear from "./Bear";
 import Air from "../../../../public/models/Air";
+import Monkey from "../../../../public/models/Monkey";
 import useModelsStore from "../stores/modelStore";
+import Panda from "../../../../public/models/Panda";
 const XrGallary = () => {
   const reticleRef = useRef();
   const [models, setModels] = useState([]);
@@ -54,6 +56,9 @@ const XrGallary = () => {
               {currentModelName === "korrigan-hat" && <KorriganHat position={position}/>}
               {currentModelName === "bear" && <Bear position={position}/>}
               {currentModelName === "air" && <Air position={position}/>}
+              {currentModelName === "monkey" && <Monkey position={position}/>}
+              {currentModelName === "panda" && <Panda position={position}/>}
+
 
             </Fragment>
           );
@@ -72,6 +77,8 @@ const XrGallary = () => {
       {!isPresenting && currentModelName ==='korrigan-hat' && <KorriganHat />}
       {!isPresenting && currentModelName ==='bear' && <Bear />}
       {!isPresenting && currentModelName ==='air' && <Air />}
+      {!isPresenting && currentModelName ==='monkey' && <Monkey />}
+      {!isPresenting && currentModelName ==='panda' && <Panda />}
 
     </>
   );

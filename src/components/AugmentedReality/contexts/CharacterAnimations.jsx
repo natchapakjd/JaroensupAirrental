@@ -12,7 +12,11 @@ export const CharacterAnimationsProvider = (props) => {
                 "Young Korrigan": "young-korrigan",
                 "Korrigan Hat": "korrigan-hat",
                 "Bear" :"bear",
-                "Air":"air"
+                "Air":"air",
+                "Monkey":"monkey",
+                "Panda":"panda"
+
+
             },
             onChange:(value)=>{
                 setCurrentModelName(value);
