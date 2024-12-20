@@ -3,13 +3,17 @@ import axios from "axios";
 import { Link, useNavigate } from "react-router-dom";
 import Swal from "sweetalert2";
 import Cookies from "universal-cookie";
-import {jwtDecode} from "jwt-decode"; // Fix for jwtDecode import
+import { jwtDecode } from "jwt-decode"; // Fix for jwtDecode import
 
 const TaskContent = () => {
   const [tasks, setTasks] = useState([]);
   const [statuses, setStatuses] = useState([]);
   const [searchTerm, setSearchTerm] = useState("");
   const [filterStatus, setFilterStatus] = useState("all");
+  const [currentPage, setCurrentPage] = useState(1);
+  const [tasksPerPage, setTasksPerPage] = useState(10);
+  const [totalTasks, setTotalTasks] = useState(0);
+
   const cookies = new Cookies();
   const token = cookies.get("authToken");
   const decodedToken = jwtDecode(token);
@@ -22,21 +26,22 @@ const TaskContent = () => {
   useEffect(() => {
     fetchTasks();
     fetchStatuses();
-  }, []);
+  }, [currentPage, tasksPerPage]);
 
   const fetchTasks = async () => {
     try {
-      let tasksResponse;
-      if (role === 2) {
-        tasksResponse = await axios.get(`${apiUrl}/tasks/assigned/${techId}`);
-      } else {
-        tasksResponse = await axios.get(`${apiUrl}/tasks`);
-      }
+      const response = await axios.get(`${apiUrl}/tasks/paged`, {
+        params: {
+          page: currentPage,
+          limit: tasksPerPage,
+        },
+      });
 
-      const fetchedTasks = tasksResponse.data.tasks || tasksResponse.data;
-      setTasks(fetchedTasks.filter((task) => task.task_type_id === 1));
+      const { tasks, total } = response.data;
+      setTasks(tasks.filter((t) => t.task_type_id === 1));
+      setTotalTasks(total);
     } catch (error) {
-      console.error("Error fetching tasks:", error);
+      console.error("Error fetching paged tasks:", error);
     }
   };
 
@@ -63,7 +68,9 @@ const TaskContent = () => {
       });
 
       if (result.isConfirmed) {
-        const response = await axios.delete(`${apiUrl}/task/${taskId}`, { withCredentials: true });
+        const response = await axios.delete(`${apiUrl}/task/${taskId}`, {
+          withCredentials: true,
+        });
         if (response.status === 204) {
           Swal.fire("Deleted!", "Your task has been deleted.", "success");
           setTasks(tasks.filter((task) => task.task_id !== taskId));
@@ -83,12 +90,19 @@ const TaskContent = () => {
   };
 
   const filteredTasks = tasks.filter((task) => {
-    const matchesStatus = filterStatus === "all" || task.status_name === filterStatus;
+    const matchesStatus =
+      filterStatus === "all" || task.status_name === filterStatus;
     const matchesSearch =
       task.description.toLowerCase().includes(searchTerm.toLowerCase()) ||
       task.type_name.toLowerCase().includes(searchTerm.toLowerCase());
     return matchesStatus && matchesSearch;
   });
+
+  const totalPages = Math.ceil(totalTasks / tasksPerPage);
+
+  const handlePageChange = (newPage) => {
+    setCurrentPage(newPage);
+  };
 
   return (
     <div className="p-8 rounded-lg shadow-lg w-full mx-auto font-inter h-full">
@@ -98,10 +112,14 @@ const TaskContent = () => {
           {role === 3 && (
             <>
               <Link to="/dashboard/tasks/add">
-                <button className="btn bg-blue text-white hover:bg-blue">Add Task</button>
+                <button className="btn bg-blue text-white hover:bg-blue">
+                  Add Task
+                </button>
               </Link>
               <Link to="/dashboard/tasks/assign">
-                <button className="btn btn-success text-white">Assign Task</button>
+                <button className="btn btn-success text-white">
+                  Assign Task
+                </button>
               </Link>
             </>
           )}
@@ -153,7 +171,10 @@ const TaskContent = () => {
                   {new Date(task.appointment_date).toLocaleDateString()}
                 </td>
                 <td className="border p-2 text-center">
-                  {new Date(task.appointment_date).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                  {new Date(task.appointment_date).toLocaleTimeString([], {
+                    hour: "2-digit",
+                    minute: "2-digit",
+                  })}
                 </td>
                 <td className="border p-2 text-center">{task.status_name}</td>
                 <td className="border p-2 text-center">
@@ -161,7 +182,9 @@ const TaskContent = () => {
                     {role === 3 && (
                       <>
                         <Link to={`/dashboard/tasks/edit/${task.task_id}`}>
-                          <button className="btn btn-success text-white">Edit</button>
+                          <button className="btn btn-success text-white">
+                            Edit
+                          </button>
                         </Link>
                         <button
                           onClick={() => handleDelete(task.task_id)}
@@ -190,6 +213,32 @@ const TaskContent = () => {
           )}
         </tbody>
       </table>
+      <div className="flex justify-between mt-4">
+        <p
+          onClick={() => handlePageChange(currentPage - 1)}
+          className={`cursor-pointer ${
+            currentPage === 1 ? "text-gray-400" : "text-black"
+          }`}
+          style={{ pointerEvents: currentPage === 1 ? "none" : "auto" }}
+        >
+          Previous
+        </p>
+
+        <span>
+          Page {currentPage} of {totalPages}
+        </span>
+        <p
+          onClick={() => handlePageChange(currentPage + 1)}
+          className={`cursor-pointer ${
+            currentPage === totalPages ? "text-gray-400" : "text-black"
+          }`}
+          style={{
+            pointerEvents: currentPage === totalPages ? "none" : "auto",
+          }}
+        >
+          Next
+        </p>
+      </div>
     </div>
   );
 };

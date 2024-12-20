@@ -80,6 +80,54 @@ router.get("/task-paging/:id", (req, res) => {
   });
 });
 
+router.get("/tasks/paged", (req, res) => {
+  const { page = 1, limit = 10 } = req.query; // Default to page 1, 10 items per page
+  const offset = (page - 1) * limit;
+
+  const query = `
+    SELECT 
+      tasks.*, 
+      users.username,
+      tasktypes.type_name,
+      status.status_name
+    FROM 
+      tasks
+    INNER JOIN 
+      users ON tasks.user_id = users.user_id
+    INNER JOIN 
+      status ON tasks.status_id = status.status_id
+    INNER JOIN 
+      tasktypes ON tasks.task_type_id = tasktypes.task_type_id
+    WHERE 
+      tasks.isActive = 1
+    LIMIT ? OFFSET ?;
+  `;
+
+  const countQuery = `SELECT COUNT(*) AS total FROM tasks WHERE isActive = 1`;
+
+  db.query(countQuery, (err, countResult) => {
+    if (err) {
+      console.error("Error counting tasks: ", err);
+      return res.status(500).json({ error: "Failed to fetch tasks count" });
+    }
+
+    const total = countResult[0].total;
+
+    db.query(query, [parseInt(limit), parseInt(offset)], (err, result) => {
+      if (err) {
+        console.error("Error fetching paged tasks: ", err);
+        return res.status(500).json({ error: "Failed to fetch tasks" });
+      }
+
+      res.status(200).json({
+        total,
+        page: parseInt(page),
+        limit: parseInt(limit),
+        tasks: result,
+      });
+    });
+  });
+});
 
 
 router.get("/task/:id", (req, res) => {
