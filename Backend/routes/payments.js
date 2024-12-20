@@ -93,19 +93,18 @@ router.post("/payments", upload.single('slip_images'), async (req, res) => {
       amount,
       user_id,
       method_id,
-      payment_date,
       slipImagePath,
       status_id
     ];
     if (task_id == 'null') {
       query = `
-        INSERT INTO payments (amount, user_id, order_id, method_id, payment_date, image_url, status_id)
-        VALUES (?, ?, ?, ?, ?, ?, ?)`;
+        INSERT INTO payments (amount, user_id, order_id, method_id, image_url, status_id)
+        VALUES (?, ?, ?, ?, ?, ?)`;
       values.splice(2, 0, order_id); // Insert task_id into the correct position
     } else if (order_id == 'null') {
       query = `
-        INSERT INTO payments (amount, user_id, task_id, method_id, payment_date, image_url, status_id)
-        VALUES (?, ?, ?, ?, ?, ?, ?)`;
+        INSERT INTO payments (amount, user_id, task_id, method_id, image_url, status_id)
+        VALUES (?, ?, ?, ?, ?, ?)`;
       values.splice(2, 0, task_id); // Insert order_id into the correct position
 
     } else {

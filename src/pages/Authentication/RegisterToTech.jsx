@@ -17,6 +17,18 @@ const RegisterToTech = () => {
     criminal_record_image: null,
     additional_image: null,
   });
+  const isValidDateOfBirth = (dob) => {
+    const birthDate = new Date(dob);
+    const today = new Date();
+    const age = today.getFullYear() - birthDate.getFullYear();
+    const monthDiff = today.getMonth() - birthDate.getMonth();
+    return age > 18 || (age === 18 && monthDiff >= 0);
+  };
+
+  const isValidPhoneNumber = (phone) => {
+    const phoneRegex = /^[0-9]{10}$/; // Example for a 10-digit number
+    return phoneRegex.test(phone);
+  };
 
   const handleChange = (e) => {
     const { name, value, files } = e.target;
@@ -35,6 +47,24 @@ const RegisterToTech = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+
+    if (!isValidDateOfBirth(formData.date_of_birth)) {
+      Swal.fire({
+        title: "วันเกิดไม่ถูกต้อง",
+        text: "คุณต้องมีอายุอย่างน้อย 18 ปี",
+        icon: "error",
+      });
+      return;
+    }
+
+    if (!isValidPhoneNumber(formData.phone_number)) {
+      Swal.fire({
+        title: "หมายเลขโทรศัพท์ไม่ถูกต้อง",
+        text: "กรุณากรอกหมายเลขโทรศัพท์ให้ครบ 10 หลัก",
+        icon: "error",
+      });
+      return;
+    }
 
     const formDataToSend = new FormData();
     for (const key in formData) {
@@ -77,12 +107,19 @@ const RegisterToTech = () => {
       <Navbar />
       <div className="bg-gray-100 text-gray-800 font-prompt py-8">
         <header className="text-center mb-12">
-          <h1 className="text-4xl font-bold text-gray-800 mb-4">สมัครเป็นช่าง</h1>
-          <p className="text-lg text-gray-600">กรุณากรอกข้อมูลด้านล่างเพื่อลงทะเบียน</p>
+          <h1 className="text-4xl font-bold text-gray-800 mb-4">
+            สมัครเป็นช่าง
+          </h1>
+          <p className="text-lg text-gray-600">
+            กรุณากรอกข้อมูลด้านล่างเพื่อลงทะเบียน
+          </p>
         </header>
 
         <div className="container mx-auto px-4 mb-8">
-          <form onSubmit={handleSubmit} className="bg-white p-6 rounded-lg shadow-lg">
+          <form
+            onSubmit={handleSubmit}
+            className="bg-white p-6 rounded-lg shadow-lg"
+          >
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div className="mb-4">
                 <label className="block text-gray-700" htmlFor="first_name">
@@ -148,6 +185,8 @@ const RegisterToTech = () => {
                 name="email"
                 id="email"
                 className="border rounded w-full py-2 px-3"
+                pattern="^[^\s@]+@[^\s@]+\.[^\s@]+$"
+                title="Please enter a valid email address."
                 required
                 onChange={handleChange}
               />
@@ -238,6 +277,21 @@ const RegisterToTech = () => {
                 className="border rounded w-full py-2 px-3 mt-2"
                 onChange={handleChange}
               />
+            </div>
+            <div className="mb-4">
+              <label className="flex items-center">
+                <input
+                  type="checkbox"
+                  name="consent"
+                  id="consent"
+                  required
+                  onChange={(e) =>
+                    setFormData({ ...formData, consent: e.target.checked })
+                  }
+                  className="mr-2"
+                />
+                ฉันยินยอมให้เก็บข้อมูลของฉันลงในระบบ
+              </label>
             </div>
             <button
               type="submit"

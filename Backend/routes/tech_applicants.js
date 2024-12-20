@@ -78,7 +78,6 @@ router.post(
       position_applied,
       notes,
       interview_date,
-      interviewer,
       first_name,
       last_name,
       status_id,
@@ -108,7 +107,7 @@ router.post(
         }
       }
 
-      const query = `INSERT INTO technician_applicants (date_of_birth, address, email, phone_number, position_applied, notes, interview_date, interviewer, first_name, last_name, status_id, id_card_image_url, driver_license_image_url, criminal_record_image_url, additional_image_url) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?,?)`;
+      const query = `INSERT INTO technician_applicants (date_of_birth, address, email, phone_number, position_applied, notes, interview_date, first_name, last_name, status_id, id_card_image_url, driver_license_image_url, criminal_record_image_url, additional_image_url) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`;
 
       db.query(
         query,
@@ -120,7 +119,6 @@ router.post(
           position_applied,
           notes,
           interview_date,
-          interviewer,
           first_name,
           last_name,
           1,

@@ -67,6 +67,7 @@ const Register = () => {
                 className="input input-bordered w-full bg-white"
                 placeholder="Username"
                 value={username}
+                pattern="^[a-zA-Z0-9_-]{3,20}$"
                 onChange={handleUsernameChange}
               />
             </div>
@@ -82,6 +83,8 @@ const Register = () => {
                 id="email"
                 className="input input-bordered w-full bg-white"
                 placeholder="Email"
+                pattern="^[^\s@]+@[^\s@]+\.[^\s@]+$"
+                title="Please enter a valid email address."
                 value={email}
                 onChange={handleEmailChange}
               />

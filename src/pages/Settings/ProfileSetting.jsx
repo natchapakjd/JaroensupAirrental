@@ -6,6 +6,7 @@ import Footer from "../../components/Footer";
 import Swal from "sweetalert2";
 import axios from "axios";
 import { useLocation } from "react-router-dom";
+import Loading from "../../components/Loading";
 
 const ProfileSetting = () => {
   const [profile, setProfile] = useState(null);
@@ -95,6 +96,7 @@ const ProfileSetting = () => {
     }
   };
 
+  
   const isDashboard = location.pathname.startsWith('/dashboard');
 
   return (
@@ -146,6 +148,8 @@ const ProfileSetting = () => {
                   name="email"
                   value={formData.email}
                   onChange={handleChange}
+                  pattern="^[^\s@]+@[^\s@]+\.[^\s@]+$"
+                  title="Please enter a valid email address."
                   className="input input-bordered w-full mt-2"
                 />
               </div>
@@ -158,8 +162,12 @@ const ProfileSetting = () => {
                   value={formData.phone}
                   onChange={handleChange}
                   className="input input-bordered w-full mt-2"
+                  pattern="^[0-9]{10}$" 
+                  title="Phone number must be exactly 10 digits"
+                  required
                 />
               </div>
+
               <div>
                 <label htmlFor="age" className="label">Age</label>
                 <input
@@ -169,8 +177,12 @@ const ProfileSetting = () => {
                   value={formData.age}
                   onChange={handleChange}
                   className="input input-bordered w-full mt-2"
+                  min="18" 
+                  max="100" 
+                  required
                 />
               </div>
+
               <div>
                 <label htmlFor="address" className="label">Address</label>
                 <input
@@ -224,7 +236,7 @@ const ProfileSetting = () => {
             </form>
           </div>
         ) : (
-          <div className="text-center">Loading profile...</div>
+          <Loading/>
         )}
       </div>
       {!isDashboard && <Footer />}

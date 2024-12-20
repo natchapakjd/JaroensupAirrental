@@ -1,20 +1,23 @@
 import { OrbitControls } from "@react-three/drei";
 import { useFrame } from "@react-three/fiber";
 import { useRef } from "react";
+import Model from "../../../../public/models/Air";
 const XrCube = () => {
   const cubeRef = useRef();
 
   useFrame((state, delta) => {
     cubeRef.current.rotation.y += 0.05;
   });
+
   return (
     <>
       <OrbitControls />
       <ambientLight />
-      <mesh ref={cubeRef} position-z={-5}>
+      {/* <mesh ref={cubeRef} position-z={-5} >
         <boxGeometry args={[2,2,2]} />
         <meshStandardMaterial color={"mediumpurple"} />
-      </mesh>
+      </mesh> */}
+      <Model/>
     </>
   );
 };

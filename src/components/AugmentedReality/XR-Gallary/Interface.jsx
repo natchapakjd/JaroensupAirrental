@@ -1,9 +1,17 @@
 import React, { forwardRef } from "react";
 import { useCharacterAnimations } from "../contexts/CharacterAnimations";
 import "./Interface.css";
+import useModelsStore from "../stores/modelStore";
 
-const Interface = forwardRef(({ clearModels }, ref) => {
+const Interface = forwardRef(({ props }, ref) => {
   const { animations, animationIndex, setAnimationIndex } = useCharacterAnimations();
+  const { modelsStore, setModelsStore } = useModelsStore();
+  console.log(useModelsStore.getState().models); // ตรวจสอบว่า models ถูกเคลียร์แล้ว
+
+  const clearModels = () => {
+    useModelsStore.getState().setModelsStore([]);
+    console.log(useModelsStore.getState().models); // ตรวจสอบว่า models ถูกเคลียร์แล้ว
+  };
 
   return (
     <div id="overlay-content" ref={ref}>
@@ -22,10 +30,9 @@ const Interface = forwardRef(({ clearModels }, ref) => {
                 .join(" ")}
             </button>
           ))}
-          {/* <button className="button">Rotate Right</button>
           <button className="button" onClick={clearModels}>
             Clear
-          </button> */}
+          </button>
         </div>
       </div>
     </div>

@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { useParams } from 'react-router-dom';
 import axios from 'axios';
 import Swal from 'sweetalert2';
+import Loading from '../../components/Loading';
 
 const OrderDetails = () => {
   const { orderId } = useParams(); // Get the orderId from URL params
@@ -30,7 +31,7 @@ const OrderDetails = () => {
     }
   };
 
-  if (loading) return <div className="text-center">Loading...</div>;
+  if (loading) return <Loading/>;
   if (error) return <div className="text-red-500 text-center">{error}</div>;
 
   return (

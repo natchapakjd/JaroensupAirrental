@@ -50,17 +50,13 @@ router.get("/technician/:id", async (req, res) => {
 router.post('/technician', async (req, res) => {
   const {
     user_id,
-    specialization,
     nationality,
-    rating,
     isOutsource,
     work_experience,
     special_skills,
-    certificates,
     background_check_status,
     bank_account_number,
     start_date,
-    notes,
     status_id,
     id_card_image_url,
     driver_license_image_url,
@@ -72,38 +68,30 @@ router.post('/technician', async (req, res) => {
     const query = `
       INSERT INTO technicians (
         user_id,
-        specialization,
         nationality,
-        rating,
         isOutsource,
         work_experience,
         special_skills,
-        certificates,
         background_check_status,
         bank_account_number,
         start_date,
-        notes,
         status_id,
         id_card_image_url,
         driver_license_image_url,
         criminal_record_image_url,
         additional_image_url
-      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?,?)
     `;
 
     db.query(query, [
       user_id,
-      specialization,
       nationality,
-      rating,
       isOutsource ? 1 : 0,
       work_experience,
       special_skills,
-      certificates,
       background_check_status,
       bank_account_number,
       start_date,
-      notes,
       status_id,
       id_card_image_url,
       driver_license_image_url,

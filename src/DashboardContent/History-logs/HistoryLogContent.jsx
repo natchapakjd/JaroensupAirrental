@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import axios from 'axios';
 import Swal from 'sweetalert2';
+import Loading from '../../components/Loading';
 
 const HistoryLogContent = () => {
   const [adminLogs, setAdminLogs] = useState([]);
@@ -32,7 +33,7 @@ const HistoryLogContent = () => {
     fetchLogs();
   }, []);
 
-  if (loading) return <div className="text-center">Loading...</div>;
+  if (loading) return <Loading/>;
   if (error) return <div className="text-red-500 text-center">{error}</div>;
 
   return (

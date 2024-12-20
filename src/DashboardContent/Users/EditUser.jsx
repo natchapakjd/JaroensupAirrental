@@ -1,20 +1,22 @@
-import React, { useState, useEffect } from 'react';
-import axios from 'axios';
-import { useParams, useNavigate } from 'react-router-dom';
+import React, { useState, useEffect } from "react";
+import axios from "axios";
+import { useParams, useNavigate } from "react-router-dom";
+import Swal from "sweetalert2";
+import Loading from "../../components/Loading";
 
 const EditUser = () => {
   const { userId } = useParams(); // Retrieve userId from URL
   const navigate = useNavigate();
   const [user, setUser] = useState({
-    username: '',
-    firstname: '',
-    lastname: '',
-    email: '',
-    phone: '',
-    age: '',
-    address: '',
-    gender_id: '', // Use gender_id instead of gender
-    date_of_birth: '',
+    username: "",
+    firstname: "",
+    lastname: "",
+    email: "",
+    phone: "",
+    age: "",
+    address: "",
+    gender_id: "", // Use gender_id instead of gender
+    date_of_birth: "",
   });
   const [loading, setLoading] = useState(true);
   const [profileImage, setProfileImage] = useState(null);
@@ -25,11 +27,15 @@ const EditUser = () => {
     const fetchUserAndGenders = async () => {
       try {
         // Fetch user data
-        const userResponse = await axios.get(`${import.meta.env.VITE_SERVER_URL}/user/${userId}`);
+        const userResponse = await axios.get(
+          `${import.meta.env.VITE_SERVER_URL}/user/${userId}`
+        );
         setUser(userResponse.data);
 
         // Fetch gender options from API
-        const genderResponse = await axios.get(`${import.meta.env.VITE_SERVER_URL}/genders`);
+        const genderResponse = await axios.get(
+          `${import.meta.env.VITE_SERVER_URL}/genders`
+        );
         setGenders(genderResponse.data);
 
         setLoading(false);
@@ -41,12 +47,20 @@ const EditUser = () => {
     fetchUserAndGenders();
   }, [userId]);
 
+  const isValidDateOfBirth = (dob) => {
+    const birthDate = new Date(dob);
+    const today = new Date();
+    const age = today.getFullYear() - birthDate.getFullYear();
+    const monthDiff = today.getMonth() - birthDate.getMonth();
+    return age > 18 || (age === 18 && monthDiff >= 0);
+  };
+
   const handleChange = (e) => {
     const { name, value } = e.target;
     setUser((prevUser) => ({
       ...prevUser,
       [name]: value,
-    })); 
+    }));
   };
 
   const handleFileChange = (e) => {
@@ -57,17 +71,30 @@ const EditUser = () => {
     e.preventDefault();
     setSubmitLoading(true);
 
+    if (!isValidDateOfBirth(user.date_of_birth)) {
+      Swal.fire({
+        title: "วันเกิดไม่ถูกต้อง",
+        text: "คุณต้องมีอายุอย่างน้อย 18 ปี",
+        icon: "error",
+      });
+      return;
+    }
+
     try {
       const formData = new FormData();
-      Object.keys(user).forEach(key => formData.append(key, user[key]));
-      if (profileImage) formData.append('profile_image', profileImage);
+      Object.keys(user).forEach((key) => formData.append(key, user[key]));
+      if (profileImage) formData.append("profile_image", profileImage);
 
-      await axios.put(`${import.meta.env.VITE_SERVER_URL}/user/${userId}`, formData, {
-        headers: {
-          'Content-Type': 'multipart/form-data',
-        },
-        withCredentials : true
-      });
+      await axios.put(
+        `${import.meta.env.VITE_SERVER_URL}/user/${userId}`,
+        formData,
+        {
+          headers: {
+            "Content-Type": "multipart/form-data",
+          },
+          withCredentials: true,
+        }
+      );
 
       navigate(`/dashboard/user/${userId}`);
     } catch (error) {
@@ -78,7 +105,7 @@ const EditUser = () => {
   };
 
   if (loading) {
-    return <div>Loading...</div>;
+    return <Loading />;
   }
 
   return (
@@ -92,12 +119,13 @@ const EditUser = () => {
             type="text"
             name="username"
             value={user.username}
+            pattern="^[a-zA-Z0-9_-]{3,20}$"
             onChange={handleChange}
             className="mt-1 block w-full p-2 border border-gray-300 rounded bg-gray-100"
             readOnly
           />
         </div>
-       
+
         {/* First Name */}
         <div className="mb-4">
           <label className="block text-gray-700">First Name:</label>
@@ -169,12 +197,12 @@ const EditUser = () => {
           <label className="block text-gray-700">Gender:</label>
           <select
             name="gender_id"
-            value={user.gender_id}  // Bind gender_id to the value
-            onChange={handleChange}  // Handle change properly
+            value={user.gender_id} // Bind gender_id to the value
+            onChange={handleChange} // Handle change properly
             className="mt-1 block w-full p-2 border border-gray-300 rounded"
           >
             <option value="">Select Gender</option>
-            {genders.map(gender => (
+            {genders.map((gender) => (
               <option key={gender.gender_id} value={gender.gender_id}>
                 {gender.gender_name}
               </option>
@@ -193,8 +221,8 @@ const EditUser = () => {
             className="mt-1 block w-full p-2 border border-gray-300 rounded"
           />
         </div>
-         {/* Profile Image */}
-         <div className="mb-4">
+        {/* Profile Image */}
+        <div className="mb-4">
           <label className="block text-gray-700">Profile Picture:</label>
           <input
             type="file"
@@ -205,10 +233,9 @@ const EditUser = () => {
         </div>
         <button
           type="submit"
-          className={`bg-blue text-white hover:bg-blue py-2 px-4 rounded ${submitLoading ? 'opacity-50 cursor-not-allowed' : ''}`}
-          disabled={submitLoading}
+          className={`bg-blue text-white hover:bg-blue py-2 px-4 rounded }`}
         >
-          {submitLoading ? 'Saving...' : 'Save Changes'}
+          Save Changes
         </button>
       </form>
     </div>

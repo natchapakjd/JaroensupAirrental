@@ -2,6 +2,7 @@
 import React, { useEffect, useState } from 'react';
 import axios from 'axios';
 import { useParams, useNavigate } from 'react-router-dom';
+import Loading from '../../components/Loading';
 
 const ApplicantDetails = () => {
   const { id } = useParams();
@@ -25,7 +26,7 @@ const ApplicantDetails = () => {
     fetchApplicant();
   }, [id]);
 
-  if (loading) return <p className="text-center">กำลังโหลด...</p>;
+  if (loading) return <Loading/>;
   if (error) return <p className="text-red-500 text-center">{error}</p>;
   if (!applicant) return <p className="text-center">ไม่มีข้อมูลผู้สมัคร</p>;
 

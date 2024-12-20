@@ -8,6 +8,7 @@ import axios from "axios";
 import Swal from "sweetalert2";
 import Cookies from "universal-cookie";
 import { jwtDecode } from "jwt-decode";
+import Loading from "../../components/Loading";
 
 const LineProfile = () => {
   const cookies = new Cookies();
@@ -121,7 +122,7 @@ const LineProfile = () => {
             </div>
           </div>
         ) : (
-          <div className="text-center">Loading...</div>
+          <Loading/>
         )}
       </div>
       {!isDashboard && <Footer />}

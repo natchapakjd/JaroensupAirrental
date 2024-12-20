@@ -3,6 +3,7 @@ import axios from "axios";
 import { useParams, useNavigate } from "react-router-dom";
 import { MapContainer, TileLayer, Marker, useMapEvents } from "react-leaflet";
 import "leaflet/dist/leaflet.css";
+import Searchbox from "../../components/Searchbox";
 
 const MapClickHandler = ({ setLatitude, setLongitude }) => {
   useMapEvents({
@@ -33,7 +34,7 @@ const EditTask = () => {
   // const [products, setProducts] = useState([]);
   const [users, setUsers] = useState([]);
   const [statuses, setStatuses] = useState([]); // Add statuses state
-
+  let addressFromSearchBox  = ""
   const navigate = useNavigate();
   const apiUrl = import.meta.env.VITE_SERVER_URL; // Use the environment variable
 
@@ -67,6 +68,7 @@ const EditTask = () => {
         console.error("Error fetching users:", error);
       }
     };
+
 
     // Fetch statuses
     const fetchStatuses = async () => {
@@ -105,7 +107,14 @@ const EditTask = () => {
     fetchUsers();
     fetchStatuses(); // Fetch statuses
     fetchTask();
-  }, [taskId, apiUrl]);
+  }, [taskId,address]);
+
+
+  const handleLocationSelect = (lat, lon, displayName) => {
+    setAddress(displayName);
+    setLatitude(lat);
+    setLongitude(lon);
+  };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -122,8 +131,8 @@ const EditTask = () => {
         latitude,
         longitude,
         status_id: statusId, // Use statusId in the request
-        start_date: startDate,
-        finish_date: finishDate,
+        rental_start_date: startDate,
+        rental_end_date: finishDate,
       });
 
       if (response.status === 200) {
@@ -169,16 +178,7 @@ const EditTask = () => {
             required
           />
         </div>
-        <div>
-          <label className="block mb-2">Appointment Date</label>
-          <input
-            type="datetime-local"
-            value={appointmentDate}
-            onChange={(e) => setAppointmentDate(e.target.value)}
-            className="border p-2 w-full"
-            required
-          />
-        </div>
+
         <div>
           <label className="block mb-2">Status</label>
           <select
@@ -196,16 +196,23 @@ const EditTask = () => {
           </select>
         </div>
         <div>
-          <label className="block mb-2">Start Date</label>
+          <label className="block text-gray-700">Rental Start Date</label>
           <input
-            type="date"
-            value={startDate}
-            onChange={(e) => setStartDate(e.target.value)}
-            className="border p-2 w-full"
+            type="datetime-local"
+            name="appointment_date"
+            value={appointmentDate}
+            onChange={(e) => {
+              const fullDate = e.target.value;
+              setAppointmentDate(fullDate);
+              setStartDate(fullDate.split("T")[0]); // Extract date part only
+            }}
+            min={new Date().toISOString().slice(0, 16)} // Prevent past dates
+            required
+            className="input input-bordered w-full"
           />
         </div>
         <div>
-          <label className="block mb-2">Finish Date</label>
+          <label className="block mb-2">Rental End Date</label>
           <input
             type="date"
             value={finishDate}
@@ -256,24 +263,31 @@ const EditTask = () => {
             <option value="">Select User</option>
             {users.map((user) => (
               <option key={user.user_id} value={user.user_id}>
-                {user.username}
+                {user.firstname} - {user.lastname}
               </option>
             ))}
           </select>
         </div>
-        <div>
-          <label className="block mb-2">Map</label>
+        <div className="my-4">
           <MapContainer
-            center={[latitude || 51.505, longitude || -0.09]}
+            center={[13.7563, 100.5018]} // Default center (Bangkok)
             zoom={13}
-            className="h-64 w-full"
+            style={{ height: "400px", width: "100%" }}
           >
             <TileLayer
               url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
-              attribution="&copy; OpenStreetMap contributors"
+              attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
             />
-            {latitude && longitude && <Marker position={[latitude, longitude]} />}
-            <MapClickHandler setLatitude={setLatitude} setLongitude={setLongitude} />
+            <MapClickHandler
+              setLatitude={setLatitude}
+              setLongitude={setLongitude}
+            />
+            {latitude && longitude && (
+              <Marker position={[latitude, longitude]} />
+            )}
+            <div className="absolute top-0 left-12 z-[1000]">
+              <Searchbox onSelectLocation={handleLocationSelect} />
+            </div>
           </MapContainer>
         </div>
         <button type="submit" className="bg-blue text-white py-2 px-4 rounded">

@@ -7,7 +7,6 @@ import Swal from "sweetalert2";
 import { useAuth } from "../../context/AuthContext";
 import { MdOutlineStar } from "react-icons/md";
 
-
 const Review = () => {
   const { taskId } = useParams();
   const user = useAuth();
@@ -17,7 +16,8 @@ const Review = () => {
   const [tech_id, setTechId] = useState("");
   const [rating, setRating] = useState(0);
   const [comment, setComment] = useState("");
-  const [existingReview, setExistingReview] = useState(null); // State to store existing review
+  const [existingReview, setExistingReview] = useState(null);
+  const [loading, setLoading] = useState(true); // Loading state
 
   useEffect(() => {
     const fetchTaskDetails = async () => {
@@ -37,7 +37,7 @@ const Review = () => {
           `${import.meta.env.VITE_SERVER_URL}/review/${taskId}/${user_id}`
         );
         if (response.data) {
-          setExistingReview(response.data); // Set existing review if found
+          setExistingReview(response.data);
         }
       } catch (error) {
         console.error("Error fetching existing review:", error);
@@ -47,6 +47,12 @@ const Review = () => {
     fetchTaskDetails();
     fetchExistingReview();
   }, [taskId, user_id]);
+
+  useEffect(() => {
+    if (tech_id && existingReview !== null) {
+      setLoading(false); // Set loading to false once data is fetched
+    }
+  }, [tech_id, existingReview]);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -82,7 +88,19 @@ const Review = () => {
       });
     }
   };
-  
+
+  if (loading) {
+    return (
+      <>
+        <Navbar/>
+        <div className="flex justify-center items-center h-screen">
+        <div className="spinner-border animate-spin inline-block w-12 h-12 border-4 rounded-full border-t-4 border-blue-500"></div>
+      </div>
+      </>
+      
+    ); // Show loading spinner while waiting for data
+  }
+
   return (
     <div>
       <Navbar />
@@ -107,13 +125,10 @@ const Review = () => {
                 Technician ID:
               </label>
               <input
-                type="text"
+                type="hidden" // Use hidden input for tech_id
                 id="tech_id"
                 value={tech_id}
-                onChange={(e) => setTechId(e.target.value)}
-                required
-                className="input input-bordered w-full"
-                readOnly // Make it read-only since it’s auto-populated
+                readOnly
               />
             </div>
             <div className="mb-4">

@@ -2,7 +2,7 @@ import React, { useEffect, useState } from "react";
 import axios from "axios";
 import Swal from "sweetalert2";
 import { Link } from "react-router-dom";
-
+import Loading from "../../components/Loading";
 const PaymentContent = () => {
   const [payments, setPayments] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -96,7 +96,7 @@ const PaymentContent = () => {
     }
   };
 
-  if (loading) return <div className="text-center">Loading...</div>;
+  if (loading) return <Loading/>;
   if (error) return <div className="text-red-500 text-center">{error}</div>;
 
   const taskPayments = payments.filter((payment) => payment.task_id);
@@ -119,7 +119,7 @@ const PaymentContent = () => {
               <th className="border p-2 text-center">Task</th>
               <th className="border p-2 text-center">Amount</th>
               <th className="border p-2 text-center">Payment Method</th>
-              <th className="border p-2 text-center">Payment Date</th>
+              <th className="border p-2 text-center">Payment DateTime</th>
               <th className="border p-2 text-center">Slip Images</th>
               <th className="border p-2 text-center">Status</th>
               <th className="border p-2 text-center">Actions</th>
@@ -137,7 +137,7 @@ const PaymentContent = () => {
                   <td className="border p-2 text-center">{payment.amount}</td>
                   <td className="border p-2 text-center">{payment.method_name}</td>
                   <td className="border p-2 text-center">
-                    {new Date(payment.payment_date).toLocaleString()}
+                    {new Date(payment.created_at).toLocaleString()}
                   </td>
                   <td className="border p-2 text-center">
                     {payment.image_url ? (

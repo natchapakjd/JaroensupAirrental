@@ -2,6 +2,7 @@ import React, { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import Navbar from "../../components/Navbar";
 import axios from "axios";
+import Loading from "../../components/Loading";
 
 const Service = () => {
   const [taskTypes, setTaskTypes] = useState([]);
@@ -38,7 +39,7 @@ const Service = () => {
         <div className="container mx-auto p-6">
           <h1 className="text-4xl font-bold text-center mb-6">บริการของเรา</h1>
           {loading ? (
-            <p className="text-center">Loading task types...</p>
+            <Loading/>
           ) : (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
               {filteredTaskTypes.length > 0 ? (

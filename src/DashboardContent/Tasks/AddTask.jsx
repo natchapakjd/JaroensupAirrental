@@ -3,6 +3,7 @@ import axios from "axios";
 import { useNavigate } from "react-router-dom";
 import { MapContainer, TileLayer, Marker, useMapEvents } from "react-leaflet";
 import "leaflet/dist/leaflet.css";
+import Searchbox from "../../components/Searchbox";
 
 const MapClickHandler = ({ setLatitude, setLongitude }) => {
   useMapEvents({
@@ -19,15 +20,16 @@ const AddTask = () => {
   const [taskTypeId, setTaskTypeId] = useState("");
   const [description, setDescription] = useState("");
   const [appointmentDate, setAppointmentDate] = useState("");
+  const [rentalEndDate, setRentalEndDate] = useState(""); // New state
   const [address, setAddress] = useState("");
   const [quantityUsed, setQuantityUsed] = useState("");
-  // const [productId, setProductId] = useState("");
   const [userId, setUserId] = useState("");
   const [latitude, setLatitude] = useState("");
   const [longitude, setLongitude] = useState("");
   const [taskTypes, setTaskTypes] = useState([]);
   const [products, setProducts] = useState([]);
   const [users, setUsers] = useState([]);
+  const [rentalStartDate, setRentalStartDate] = useState("");
 
   const navigate = useNavigate();
   const apiUrl = import.meta.env.VITE_SERVER_URL; // Use the environment variable
@@ -63,7 +65,13 @@ const AddTask = () => {
     fetchTaskTypes();
     fetchProducts();
     fetchUsers();
-  }, [apiUrl]);
+  }, [address]);
+
+  const handleLocationSelect = (lat, lon, displayName) => {
+    setAddress(displayName);
+    setLatitude(lat);
+    setLongitude(lon);
+  };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -73,18 +81,18 @@ const AddTask = () => {
         task_type_id: taskTypeId,
         description,
         appointment_date: appointmentDate,
+        rental_start_date: rentalStartDate, // Include rental_start_date
+        rental_end_date: rentalEndDate,
         address,
         quantity_used: quantityUsed,
-        // product_id: productId,
         user_id: userId,
         latitude,
         longitude,
       });
 
       if (response.status === 201) {
-        // Log the addition of a new task
         await axios.post(`${apiUrl}/task-log`, {
-          task_id: response.data.task_id, // Assuming the response contains the new task ID
+          task_id: response.data.task_id,
           user_id: userId,
           action: "เพิ่มงาน",
         });
@@ -116,21 +124,6 @@ const AddTask = () => {
             ))}
           </select>
         </div>
-        {/* <div>
-          <label className="block mb-2">Product</label>
-          <select
-            value={productId}
-            onChange={(e) => setProductId(e.target.value)}
-            className="border p-2 w-full"
-          >
-            <option value="">Select Product</option>
-            {products.map((product) => (
-              <option key={product.product_id} value={product.product_id}>
-                {product.name}
-              </option>
-            ))}
-          </select>
-        </div> */}
         <div>
           <label className="block mb-2">User</label>
           <select
@@ -155,16 +148,37 @@ const AddTask = () => {
             required
           />
         </div>
+
         <div>
-          <label className="block mb-2">Appointment Date</label>
+          <label className="block text-gray-700">Rental Start Date</label>
           <input
             type="datetime-local"
+            name="appointment_date"
             value={appointmentDate}
-            onChange={(e) => setAppointmentDate(e.target.value)}
-            className="border p-2 w-full"
+            onChange={(e) => {
+              const fullDate = e.target.value;
+              setAppointmentDate(fullDate);
+              setRentalStartDate(fullDate.split("T")[0]); // Extract date part only
+            }}
+            min={new Date().toISOString().slice(0, 16)} // Prevent past dates
             required
+            className="input input-bordered w-full"
           />
         </div>
+
+        <div>
+          <label className="block text-gray-700">Rental End Date</label>
+          <input
+            type="date"
+            name="rental_end_date"
+            value={rentalEndDate}
+            onChange={(e) => setRentalEndDate(e.target.value)}
+            min={new Date().toISOString().slice(0, 16)} // Prevent past dates
+            required
+            className="input input-bordered w-full"
+          />
+        </div>
+
         <div>
           <label className="block mb-2">Address</label>
           <input
@@ -183,24 +197,16 @@ const AddTask = () => {
             className="border p-2 w-full"
           />
         </div>
-        <div>
-          <label className="block mb-2">Latitude</label>
-          <input
-            type="text"
-            value={latitude}
-            readOnly
-            className="border p-2 w-full"
-          />
-        </div>
-        <div>
-          <label className="block mb-2">Longitude</label>
-          <input
-            type="text"
-            value={longitude}
-            readOnly
-            className="border p-2 w-full"
-          />
-        </div>
+        <input
+          type="hidden"
+          value={latitude}
+          onChange={(e) => setLatitude(e.target.value)}
+        />
+        <input
+          type="hidden"
+          value={longitude}
+          onChange={(e) => setLongitude(e.target.value)}
+        />
         <div className="my-4">
           <MapContainer
             center={[13.7563, 100.5018]} // Default center (Bangkok)
@@ -211,13 +217,21 @@ const AddTask = () => {
               url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
               attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
             />
-            <MapClickHandler setLatitude={setLatitude} setLongitude={setLongitude} />
+            <MapClickHandler
+              setLatitude={setLatitude}
+              setLongitude={setLongitude}
+            />
             {latitude && longitude && (
               <Marker position={[latitude, longitude]} />
             )}
+            <div className="absolute top-0 left-12 z-[1000]">
+              <Searchbox onSelectLocation={handleLocationSelect} />
+            </div>
           </MapContainer>
         </div>
-        <button type="submit" className="btn bg-blue text-white hover:bg-blue">Add Task</button>
+        <button type="submit" className="btn bg-blue text-white hover:bg-blue">
+          Add Task
+        </button>
       </form>
     </div>
   );

@@ -78,48 +78,71 @@ const AddOrder = () => {
     setTotalOrderPrice(newItems.reduce((total, item) => total + (item.total_price || 0), 0));
   };
 
+  // const filterProductForSale =()=>{
+  //   products = products.filter((p)=>p.product_type_id = 3)
+  // }
+
   const handleSubmit = async (e) => {
     e.preventDefault();
-
-    const orderItems = items.map(item => ({
+  
+    const orderItems = items.map((item) => ({
       product_id: item.productId,
       name: item.name,
       quantity: item.quantity,
       price: item.price,
       total_price: item.total_price,
     }));
-    console.log()
+  
     try {
+      // Create the order
       const response = await axios.post(`${apiUrl}/v2/orders`, {
         user_id: userId,
         items: orderItems,
         total_price: totalOrderPrice,
       });
-
+  
       if (response.status === 201) {
-        // Replace alert with SweetAlert2
-        await Swal.fire({
-          icon: 'success',
-          title: 'Order created successfully!',
-          confirmButtonText: 'OK'
-        });
-
-        // Reset form state
-        setUserId('');
-        setItems([{ productId: '', name: '', quantity: 0, price: 0, total_price: 0 }]);
-        setTotalOrderPrice(0);
+        const orderResult = response.data; // Assume the order API response contains the order ID
+  
+        // Prepare payment details
+        const paymentDetails = {
+          amount: totalOrderPrice,
+          user_id: userId,
+          order_id: 'null',
+          method_id: 1, // Example: Replace with the actual payment method selected
+          status_id: 1, // Example: Replace with actual payment status
+          task_id: orderResult.taskId || null,
+        };
+  
+        // Submit payment details
+        const paymentResponse = await axios.post(`${apiUrl}/payments`, paymentDetails);
+  
+        if (paymentResponse.status === 201) {
+          await Swal.fire({
+            icon: 'success',
+            title: 'Order and payment created successfully!',
+            confirmButtonText: 'OK',
+          });
+  
+          // Reset form state
+          setUserId('');
+          setItems([{ productId: '', name: '', quantity: 0, price: 0, total_price: 0 }]);
+          setTotalOrderPrice(0);
+        } else {
+          throw new Error('Payment failed');
+        }
       }
     } catch (error) {
-      console.error('Error creating order:', error);
-      // Replace alert with SweetAlert2
+      console.error('Error:', error);
       await Swal.fire({
         icon: 'error',
-        title: 'Failed to create order',
+        title: 'Failed to create order or payment',
         text: 'Please check the console for details.',
-        confirmButtonText: 'OK'
+        confirmButtonText: 'OK',
       });
     }
   };
+  
 
   return (
     <div className="p-8 rounded-lg shadow-lg w-full mx-auto font-inter bg-base-100 h-full">
@@ -138,7 +161,7 @@ const AddOrder = () => {
             <option value="" disabled>Select a user</option>
             {users.map(user => (
               <option key={user.user_id} value={user.user_id}>
-                {user.firstname} {user.lastname}
+                {user.firstname} - {user.lastname}
               </option>
             ))}
           </select>
@@ -164,18 +187,19 @@ const AddOrder = () => {
                 ))}
               </select>
             </div>
-            <div className="flex-1">
-              <label className="label">
-                <span className="label-text">Product Name</span>
-              </label>
-              <input
-                type="text"
-                value={item.name}
-                readOnly
-                className="input input-bordered w-full"
-                required
-              />
-            </div>
+            <div className="flex-1" style={{ display: 'none' }}>
+  <label className="label">
+    <span className="label-text">Product Name</span>
+  </label>
+  <input
+    type="hidden"
+    value={item.name}
+    readOnly
+    className="input input-bordered w-full"
+    required
+  />
+</div>
+
             <div className="flex-1">
               <label className="label">
                 <span className="label-text">Quantity</span>

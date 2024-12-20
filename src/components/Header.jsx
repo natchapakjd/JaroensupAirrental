@@ -3,7 +3,7 @@ import { useNavigate } from "react-router-dom";
 import axios from "axios";
 import Cookies from "universal-cookie";
 import {jwtDecode} from "jwt-decode";
-
+import Loading from "./Loading";
 const Header = () => {
   const cookies = new Cookies();
   const navigate = useNavigate();
@@ -47,6 +47,7 @@ const Header = () => {
       setLoading(false); // Data loading is complete
     }
   };
+  if (loading) return <Loading/>;
 
   return (
     <div

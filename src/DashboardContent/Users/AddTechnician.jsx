@@ -85,7 +85,8 @@ const AddTechnician = () => {
   return (
     <div className="mx-auto p-6 bg-white rounded-lg shadow-md">
       <h2 className="text-2xl font-bold mb-4">Add Technician</h2>
-      <form onSubmit={handleSubmit} className="space-y-4">
+      <form onSubmit={handleSubmit} className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        {/* User Selection */}
         <div>
           <label htmlFor="user_id" className="block mb-1">Select User</label>
           <select
@@ -99,11 +100,13 @@ const AddTechnician = () => {
             <option value="">-- Select User --</option>
             {users.map((user) => (
               <option key={user.user_id} value={user.user_id}>
-                {user.username} - {user.email}
+                {user.firstname} {user.lastname} - {user.email}
               </option>
             ))}
           </select>
         </div>
+
+        {/* Specialization */}
         <div>
           <label htmlFor="specialization" className="block mb-1">Specialization</label>
           <input
@@ -116,6 +119,8 @@ const AddTechnician = () => {
             className="input input-bordered w-full"
           />
         </div>
+
+        {/* Nationality */}
         <div>
           <label htmlFor="nationality" className="block mb-1">Nationality</label>
           <input
@@ -128,43 +133,21 @@ const AddTechnician = () => {
             className="input input-bordered w-full"
           />
         </div>
+
         <div>
-          <label htmlFor="rating" className="block mb-1">Rating</label>
+          <label htmlFor="bank_account_number" className="block mb-1">Bank Account Number</label>
           <input
-            type="number"
-            name="rating"
-            id="rating"
-            value={formData.rating}
+            type="text"
+            name="bank_account_number"
+            id="bank_account_number"
+            value={formData.bank_account_number}
             onChange={handleChange}
-            step="0.01"
-            min="0"
-            max="5"
             className="input input-bordered w-full"
           />
         </div>
-        <div>
-          <label htmlFor="isOutsource" className="flex items-center">
-            <input
-              type="checkbox"
-              name="isOutsource"
-              id="isOutsource"
-              checked={formData.isOutsource}
-              onChange={handleChange}
-              className="checkbox"
-            />
-            Outsourced Technician
-          </label>
-        </div>
-        <div>
-          <label htmlFor="work_experience" className="block mb-1">Work Experience</label>
-          <textarea
-            name="work_experience"
-            id="work_experience"
-            value={formData.work_experience}
-            onChange={handleChange}
-            className="textarea textarea-bordered w-full"
-          />
-        </div>
+       
+
+        {/* Special Skills */}
         <div>
           <label htmlFor="special_skills" className="block mb-1">Special Skills</label>
           <textarea
@@ -175,16 +158,20 @@ const AddTechnician = () => {
             className="textarea textarea-bordered w-full"
           />
         </div>
+
+        {/* Background Check Status */}
+        
         <div>
-          <label htmlFor="certificates" className="block mb-1">Certificates</label>
+          <label htmlFor="work_experience" className="block mb-1">Work Experience</label>
           <textarea
-            name="certificates"
-            id="certificates"
-            value={formData.certificates}
+            name="work_experience"
+            id="work_experience"
+            value={formData.work_experience}
             onChange={handleChange}
             className="textarea textarea-bordered w-full"
           />
         </div>
+
         <div>
           <label htmlFor="background_check_status" className="block mb-1">Background Check Status</label>
           <select
@@ -199,17 +186,10 @@ const AddTechnician = () => {
             <option value="failed">Failed</option>
           </select>
         </div>
-        <div>
-          <label htmlFor="bank_account_number" className="block mb-1">Bank Account Number</label>
-          <input
-            type="text"
-            name="bank_account_number"
-            id="bank_account_number"
-            value={formData.bank_account_number}
-            onChange={handleChange}
-            className="input input-bordered w-full"
-          />
-        </div>
+        
+        
+
+        {/* Start Date */}
         <div>
           <label htmlFor="start_date" className="block mb-1">Start Date</label>
           <input
@@ -221,28 +201,9 @@ const AddTechnician = () => {
             className="input input-bordered w-full"
           />
         </div>
-        <div>
-          <label htmlFor="notes" className="block mb-1">Notes</label>
-          <textarea
-            name="notes"
-            id="notes"
-            value={formData.notes}
-            onChange={handleChange}
-            className="textarea textarea-bordered w-full"
-          />
-        </div>
-        <div>
-          <label htmlFor="status_id" className="block mb-1">Status ID</label>
-          <input
-            type="number"
-            name="status_id"
-            id="status_id"
-            value={formData.status_id}
-            onChange={handleChange}
-            className="input input-bordered w-full"
-            readOnly
-          />
-        </div>
+
+
+        {/* ID Card Image URL */}
         <div>
           <label htmlFor="id_card_image_url" className="block mb-1">ID Card Image URL</label>
           <input
@@ -250,6 +211,19 @@ const AddTechnician = () => {
             name="id_card_image_url"
             id="id_card_image_url"
             value={formData.id_card_image_url}
+            onChange={handleChange}
+            className="input input-bordered w-full"
+          />
+        </div>
+
+        {/* Criminal Record Image URL */}
+        <div>
+          <label htmlFor="criminal_record_image_url" className="block mb-1">Criminal Record Image URL</label>
+          <input
+            type="text"
+            name="criminal_record_image_url"
+            id="criminal_record_image_url"
+            value={formData.criminal_record_image_url}
             onChange={handleChange}
             className="input input-bordered w-full"
           />
@@ -266,17 +240,6 @@ const AddTechnician = () => {
           />
         </div>
         <div>
-          <label htmlFor="criminal_record_image_url" className="block mb-1">Criminal Record Image URL</label>
-          <input
-            type="text"
-            name="criminal_record_image_url"
-            id="criminal_record_image_url"
-            value={formData.criminal_record_image_url}
-            onChange={handleChange}
-            className="input input-bordered w-full"
-          />
-        </div>
-        <div>
           <label htmlFor="additional_image_url" className="block mb-1">Additional Image URL</label>
           <input
             type="text"
@@ -288,7 +251,23 @@ const AddTechnician = () => {
           />
         </div>
         <div>
-          <button type="submit" className="btn bg-blue hover:bg-blue text-white">Add Technician</button>
+          <label htmlFor="isOutsource" className="flex items-center">
+            <input
+              type="checkbox"
+              name="isOutsource"
+              id="isOutsource"
+              checked={formData.isOutsource}
+              onChange={handleChange}
+              className="checkbox"
+            />
+            Outsourced Technician
+          </label>
+        </div>
+        {/* Submit Button */}
+        <div className="col-span-2">
+          <button type="submit" className="btn bg-blue hover:bg-blue text-white w-full">
+            Add Technician
+          </button>
         </div>
       </form>
     </div>
