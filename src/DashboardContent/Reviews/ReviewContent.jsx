@@ -8,13 +8,21 @@ const ReviewContent = () => {
   const [reviews, setReviews] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [currentPage, setCurrentPage] = useState(1); // Track current page
+  const [totalPages, setTotalPages] = useState(1); // Track total number of pages
+  const [totalCount, setTotalCount] = useState(0); // Track total count of reviews
+  const pageSize = 10; // Set the page size
   const apiUrl = import.meta.env.VITE_SERVER_URL;
 
   useEffect(() => {
     const fetchReviews = async () => {
       try {
-        const response = await axios.get(`${apiUrl}/reviews`);
-        setReviews(response.data);
+        const response = await axios.get(`${apiUrl}/reviews-paging`, {
+          params: { page: currentPage, pageSize },
+        });
+        setReviews(response.data.data);
+        setTotalPages(response.data.totalPages);
+        setTotalCount(response.data.totalCount);
       } catch (err) {
         setError(err.message);
         Swal.fire({
@@ -28,7 +36,7 @@ const ReviewContent = () => {
     };
 
     fetchReviews();
-  }, []);
+  }, [currentPage]);
 
   const handleDelete = async (reviewId) => {
     const confirmDelete = await Swal.fire({
@@ -66,18 +74,22 @@ const ReviewContent = () => {
     }
   };
 
-  if (loading) return <Loading/>;
+  if (loading) return <Loading />;
   if (error) return <div className="text-red-500 text-center">{error}</div>;
 
+  const handlePageChange = (page) => {
+    setCurrentPage(page);
+  };
+
   return (
-    <div className="p-8 rounded-lg shadow-lg w-full mx-auto h-screen">
-       <div className="flex justify-between items-center mb-6">
+    <div className="p-8 rounded-lg shadow-lg w-full mx-auto h-screen ">
+      <div className="flex justify-between items-center mb-6">
         <h1 className="text-2xl font-semibold">Reviews</h1>
         <Link to="/dashboard/reviews/add" className="btn bg-blue text-white hover:bg-blue">
           Add Review
         </Link>
       </div>
-      
+
       <table className="table w-full border-collapse border border-gray-300">
         <thead className="sticky-top bg-gray-200">
           <tr>
@@ -95,8 +107,12 @@ const ReviewContent = () => {
             reviews.map((review) => (
               <tr key={review.review_id}>
                 <td className="border p-2 text-center">{review.review_id}</td>
-                <td className="border p-2 text-center">{review.member_firstname} {review.member_lastname}</td>
-                <td className="border p-2 text-center">{review.tech_firstname} {review.tech_lastname}</td>
+                <td className="border p-2 text-center">
+                  {review.member_firstname} {review.member_lastname}
+                </td>
+                <td className="border p-2 text-center">
+                  {review.tech_firstname} {review.tech_lastname}
+                </td>
                 <td className="border p-2 text-center">{review.comment}</td>
                 <td className="border p-2 text-center">{review.rating}</td>
                 <td className="border p-2 text-center">
@@ -105,7 +121,7 @@ const ReviewContent = () => {
                 <td className="border p-2 text-center">
                   <Link
                     to={`/dashboard/reviews/${review.review_id}`} // Link to the edit page
-                    className="btn btn-success  text-white mr-2"
+                    className="btn btn-success text-white mr-2"
                   >
                     Edit
                   </Link>
@@ -127,6 +143,26 @@ const ReviewContent = () => {
           )}
         </tbody>
       </table>
+
+      <div className="flex justify-between mt-4">
+        <p
+          onClick={() => handlePageChange(currentPage - 1)}
+          className={`cursor-pointer ${currentPage === totalPages ? "text-gray-400" : "text-black"}`}
+          style={{ pointerEvents: currentPage === 1 ? "none" : "auto" }}
+        >
+          Previous
+        </p>
+        <span>
+          Page {currentPage} of {totalPages}
+        </span>
+        <p
+          onClick={() => handlePageChange(currentPage + 1)}
+          className={`cursor-pointer ${currentPage === totalPages ? "text-gray-400" : "text-black"}`}
+              style={{ pointerEvents: currentPage === 1 ? "none" : "auto" }}
+        >
+          Next
+        </p>
+      </div>
     </div>
   );
 };

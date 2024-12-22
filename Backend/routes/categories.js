@@ -16,6 +16,48 @@ router.get("/categories", (req, res) => {
   });
 });
 
+router.get("/categories-paging", (req, res) => {
+  const page = parseInt(req.query.page) || 1; // หน้าที่ต้องการ (เริ่มต้นที่หน้า 1)
+  const limit = parseInt(req.query.limit) || 10; // จำนวนแถวที่แสดงในแต่ละหน้า (เริ่มต้นที่ 10)
+
+  // คำนวณ offset
+  const offset = (page - 1) * limit;
+
+  // คำสั่ง SQL สำหรับดึงข้อมูลในแต่ละหน้า
+  const query = `
+    SELECT * FROM categories
+    LIMIT ? OFFSET ?`;
+
+  // คิวรีข้อมูล
+  db.query(query, [limit, offset], (err, result) => {
+    if (err) {
+      console.error("Error fetching categories: " + err);
+      res.status(500).json({ error: "Failed to fetch categories" });
+    } else {
+      // คิวรีเพื่อหาจำนวนข้อมูลทั้งหมดในตาราง
+      const countQuery = "SELECT COUNT(*) AS total FROM categories";
+      db.query(countQuery, (err, countResult) => {
+        if (err) {
+          console.error("Error counting categories: " + err);
+          res.status(500).json({ error: "Failed to count categories" });
+        } else {
+          const total = countResult[0].total; // จำนวนข้อมูลทั้งหมด
+          const totalPages = Math.ceil(total / limit); // คำนวณจำนวนหน้าทั้งหมด
+
+          // ส่งข้อมูลและข้อมูลการ pagination
+          res.json({
+            data: result,
+            total,
+            totalPages,
+            currentPage: page,
+            perPage: limit
+          });
+        }
+      });
+    }
+  });
+});
+
 router.get("/category/:id", (req, res) => {
   const id = req.params.id;
   const query = "SELECT * FROM categories WHERE category_id = ?";

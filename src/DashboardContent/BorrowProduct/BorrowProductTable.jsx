@@ -6,6 +6,11 @@ import { jwtDecode } from "jwt-decode";
 import { Link } from "react-router-dom";
 const BorrowProductTable = () => {
   const [borrowingData, setBorrowingData] = useState([]);
+  const [currentPage, setCurrentPage] = useState(1);
+  const [totalPages, setTotalPages] = useState(1);
+  const [rowsPerPage] = useState(10); // Items per page
+
+
   const cookies = new Cookies();
   const token = cookies.get("authToken");
   const decodedToken = jwtDecode(token);
@@ -14,20 +19,28 @@ const BorrowProductTable = () => {
 
   useEffect(() => {
     fetchBorrowingData(techId);
-  }, [borrowingData]);
+  }, [currentPage]);
 
   const fetchBorrowingData = async (techId) => {
     try {
       if (role === 3) {
         const response = await axios.get(
-          `${import.meta.env.VITE_SERVER_URL}/equipment-borrowings`
+          `${import.meta.env.VITE_SERVER_URL}/equipment-borrowings-paging`,
+        { params: { page : currentPage, limit: rowsPerPage } }
         );
-        setBorrowingData(response.data);
+
+        const { data, total } = response.data;
+        setBorrowingData(data);
+        setTotalPages(Math.ceil(total / rowsPerPage));
       } else if (role === 2) {
         const response = await axios.get(
-          `${import.meta.env.VITE_SERVER_URL}/equipment-borrowing/${techId}`
+          `${import.meta.env.VITE_SERVER_URL}/equipment-borrowing-paging/${techId}`,
+          { params: { page: currentPage, limit: rowsPerPage } }
         );
-        setBorrowingData(response.data);
+      
+        const { data, total } = response.data;
+        setBorrowingData(data);
+        setTotalPages(Math.ceil(total / rowsPerPage));
       }
     } catch (error) {
       console.error("Error fetching borrowing data:", error);
@@ -39,6 +52,11 @@ const BorrowProductTable = () => {
     }
   };
 
+  const handlePageChange = (newPage) => {
+    if (newPage > 0 && newPage <= totalPages) {
+      setCurrentPage(newPage);
+    }
+  };
   const handleReturn = async (taskId) => {
     try {
       // Check the status of the task
@@ -231,6 +249,31 @@ const BorrowProductTable = () => {
           )}
         </tbody>
       </table>
+      <div className="flex justify-between mt-4">
+        <p
+          onClick={() => handlePageChange(currentPage - 1)}
+          className={`cursor-pointer ${
+            currentPage === 1 ? "text-gray-400" : "text-black"
+          }`}
+          style={{ pointerEvents: currentPage === 1 ? "none" : "auto" }}
+        >
+          Previous
+        </p>
+        <span>
+          Page {currentPage} of {totalPages}
+        </span>
+        <p
+          className={`cursor-pointer ${
+            currentPage === totalPages ? "text-gray-400" : "text-black"
+          }`}
+          style={{
+            pointerEvents: currentPage === totalPages ? "none" : "auto",
+          }}
+          onClick={() => handlePageChange(currentPage + 1)}
+        >
+          Next
+        </p>
+      </div>
     </div>
   );
 };

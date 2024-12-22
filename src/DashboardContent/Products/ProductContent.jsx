@@ -2,7 +2,7 @@ import React, { useState, useEffect } from "react";
 import axios from "axios";
 import { Link } from "react-router-dom";
 import Swal from "sweetalert2";
-import {jwtDecode} from "jwt-decode";
+import { jwtDecode } from "jwt-decode";
 import Cookies from "universal-cookie";
 
 const ProductContent = () => {
@@ -13,6 +13,9 @@ const ProductContent = () => {
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedCategory, setSelectedCategory] = useState("");
   const [selectedBrand, setSelectedBrand] = useState("");
+  const [currentPage, setCurrentPage] = useState(1);
+  const [totalPages, setTotalPages] = useState(1);
+  const [rowsPerPage] = useState(10); // Set the rows per page
 
   const cookies = new Cookies();
   const token = cookies.get("authToken");
@@ -23,7 +26,7 @@ const ProductContent = () => {
     fetchProducts();
     fetchCategories();
     fetchBrands();
-  }, []);
+  }, [currentPage]);
 
   useEffect(() => {
     filterProducts();
@@ -32,10 +35,14 @@ const ProductContent = () => {
   const fetchProducts = async () => {
     try {
       const response = await axios.get(
-        `${import.meta.env.VITE_SERVER_URL}/products`
+        `${import.meta.env.VITE_SERVER_URL}/products-paging`,
+        {
+          params: { page: currentPage, pageSize: rowsPerPage },
+        }
       );
-      setProducts(response.data);
-      setFilteredProducts(response.data);
+      setProducts(response.data.data);
+      setFilteredProducts(response.data.data);
+      setTotalPages(response.data.totalPages); // Set total pages from response
     } catch (error) {
       console.error("Error fetching products:", error);
       Swal.fire({
@@ -111,6 +118,12 @@ const ProductContent = () => {
         text: error.message,
         icon: "error",
       });
+    }
+  };
+
+  const handlePageChange = (newPage) => {
+    if (newPage > 0 && newPage <= totalPages) {
+      setCurrentPage(newPage);
     }
   };
 
@@ -228,6 +241,27 @@ const ProductContent = () => {
           )}
         </tbody>
       </table>
+
+      {/* Pagination */}
+      <div className="flex justify-between mt-4">
+      <p
+          onClick={() => handlePageChange(currentPage - 1)}
+          disabled={currentPage <= 1}
+          className={`cursor-pointer ${currentPage === totalPages ? "text-gray-400" : "text-black"}`}
+          >
+          Previous
+        </p>
+        <span className="flex items-center justify-center">
+          Page {currentPage} of {totalPages}
+        </span>
+        <p
+          onClick={() => handlePageChange(currentPage + 1)}
+          disabled={currentPage >= totalPages}
+          className={`cursor-pointer ${currentPage === totalPages ? "text-gray-400" : "text-black"}`}
+          >
+          Next
+        </p>
+      </div>
     </div>
   );
 };

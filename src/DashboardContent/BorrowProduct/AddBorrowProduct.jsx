@@ -19,7 +19,10 @@ const AddBorrowProduct = () => {
   const cookies = new Cookies();
   const token = cookies.get('authToken');
   const decodedToken = jwtDecode(token);
-  const user_id = decodedToken.id; // Get user_id from decoded token
+  let user_id = decodedToken.id; // Get user_id from decoded token
+  const role = decodedToken.role
+  const [techUserId,setTechUserId] = useState();
+  
 
   useEffect(() => {
     const fetchProducts = async () => {
@@ -73,13 +76,34 @@ const AddBorrowProduct = () => {
       alert('You must agree to the terms to proceed');
       return;
     }
-
+    if (role === 3) {
+      try {
+        if (!tech_id) {
+          console.error("Tech ID is missing");
+          return;
+        } 
+        const techId = formData.tech_id
+        const response = await axios.get(
+          `${import.meta.env.VITE_SERVER_URL}/technician/${techId}`
+        );
+    
+        console.log("Technician Data:", response.data[0]);
+        setTechUserId(response.data[0].user_id)
+      } catch (error) {
+        console.error("Error fetching technician data:", error);
+      }
+    }
+    
     const formDataToSubmit = new FormData();
     formDataToSubmit.append('tech_id', formData.tech_id);
     formDataToSubmit.append('borrow_date', formData.borrow_date);
     formDataToSubmit.append('return_date', formData.return_date);
     formDataToSubmit.append('product_id', formData.product_id);
-    formDataToSubmit.append('user_id', user_id);
+    if(role === 2){
+      formDataToSubmit.append('user_id', user_id);
+    }else{
+      formDataToSubmit.append('user_id', techUserId);
+    }
 
     if (idCardImage) {
       formDataToSubmit.append('id_card_image', idCardImage); // Add the image file

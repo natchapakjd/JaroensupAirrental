@@ -15,6 +15,48 @@ router.get("/brands", (req, res) => {
     }
   });
 });
+router.get("/brands-paging", (req, res) => {
+  const { page = 1, limit = 10 } = req.query; // Default to page 1 and 10 items per page
+  const offset = (page - 1) * limit;
+
+  const query = `
+    SELECT * 
+    FROM brands
+    LIMIT ? OFFSET ?
+  `;
+
+  const countQuery = "SELECT COUNT(*) AS total FROM brands";
+
+  // Fetch the paginated data
+  db.query(query, [parseInt(limit), parseInt(offset)], (err, dataResult) => {
+    if (err) {
+      console.error("Error fetching paginated brands data: " + err);
+      return res.status(500).json({ error: "Failed to fetch brands" });
+    }
+
+    // Fetch the total count for pagination info
+    db.query(countQuery, (err, countResult) => {
+      if (err) {
+        console.error("Error fetching total count: " + err);
+        return res.status(500).json({ error: "Failed to fetch total count" });
+      }
+
+      const totalCount = countResult[0].total;
+      const totalPages = Math.ceil(totalCount / limit);
+
+      res.json({
+        data: dataResult,
+        total: {
+          totalItems: totalCount,
+          totalPages: totalPages,
+          currentPage: page,
+          pageSize: limit,
+        },
+      });
+    });
+  });
+});
+
 
 router.get("/brand/:id", (req, res) => {
   const id = req.params.id;

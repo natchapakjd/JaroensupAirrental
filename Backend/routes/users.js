@@ -20,6 +20,63 @@ const storage = multer.diskStorage({
 
 const upload = multer({ storage: storage });
 
+router.get("/users-paging", (req, res) => {
+  const { page = 1, limit = 10 } = req.query; // Default to page 1 and limit 10 if not provided
+  const offset = (page - 1) * limit; // Calculate the offset
+
+  // Query to get the total count of users
+  const countQuery = "SELECT COUNT(*) as total FROM users";
+
+  // Query to fetch the paginated data
+  const dataQuery = `
+    SELECT u.*, r.role_name
+    FROM users u
+    JOIN roles r ON u.role_id = r.role_id
+    LIMIT ? OFFSET ?
+  `;
+
+  // Execute the count query
+  db.query(countQuery, (err, countResult) => {
+    if (err) {
+      console.error("Error fetching user count: " + err);
+      return res.status(500).send("Failed to fetch users");
+    }
+
+    const totalUsers = countResult[0].total;
+
+    // Execute the data query
+    db.query(dataQuery, [parseInt(limit), parseInt(offset)], (err, dataResult) => {
+      if (err) {
+        console.error("Error fetching users: " + err);
+        return res.status(500).send("Failed to fetch users");
+      }
+
+      const users = dataResult.map((row) => {
+        return {
+          user_id: row.user_id,
+          username: row.username,
+          firstname: row.firstname,
+          lastname: row.lastname,
+          email: row.email,
+          role: row.role,
+          created_at: row.created_at,
+          image_url: row.image_url,
+          role_id: row.role_id,
+          gender_id: row.gender_id,
+          role_name: row.role_name,
+        };
+      });
+
+      res.json({
+        total: totalUsers,
+        page: parseInt(page),
+        limit: parseInt(limit),
+        users,
+      });
+    });
+  });
+});
+
 router.get("/users", (req, res) => {
   const query = "SELECT u.*, r.role_name  FROM users u JOIN roles r ON u.role_id = r.role_id";
 

@@ -8,13 +8,21 @@ const ApplicantContent = () => {
   const [applicants, setApplicants] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [currentPage, setCurrentPage] = useState(1);
+  const [totalPages, setTotalPages] = useState(1);
+  const [totalCount, setTotalCount] = useState(0);
+  const [pageSize, setPageSize] = useState(10); // Default page size
   const navigate = useNavigate();
 
   useEffect(() => {
     const fetchApplicants = async () => {
       try {
-        const response = await axios.get(`${import.meta.env.VITE_SERVER_URL}/applicants`);
-        setApplicants(response.data);
+        const response = await axios.get(`${import.meta.env.VITE_SERVER_URL}/applicants-paging`, {
+          params: { page: currentPage, pageSize },
+        });
+        setApplicants(response.data.data);
+        setTotalPages(response.data.totalPages);
+        setTotalCount(response.data.totalCount);
       } catch (err) {
         setError('Cannot load applicants data');
       } finally {
@@ -23,7 +31,7 @@ const ApplicantContent = () => {
     };
 
     fetchApplicants();
-  }, [applicants]);
+  }, [currentPage, pageSize]); // Re-fetch when page or pageSize changes
 
   const handleDelete = async (id) => {
     const confirmation = await Swal.fire({
@@ -94,18 +102,24 @@ const ApplicantContent = () => {
   };
 
   const handleSendEmail = (id) => {
-    navigate(`/dashboard/applicant/sending-email/${id}`); // Navigate to the SendApplicantEmail page
+    navigate(`/dashboard/applicant/sending-email/${id}`);
   };
 
-  if (loading) return <Loading/>;
+  const handlePageChange = (newPage) => {
+    if (newPage > 0 && newPage <= totalPages) {
+      setCurrentPage(newPage);
+    }
+  };
+
+  if (loading) return <Loading />;
   if (error) return <p>{error}</p>;
 
   return (
-    <div className="table p-8 rounded-lg shadow-lg w-full mx-auto font-inter h-full">
+    <div className="table p-8 rounded-lg shadow-lg w-full mx-auto  h-full font-inter">
       <h2 className="text-xl font-semibold mt-8 mb-5">Applicants list</h2>
 
-      <table className="w-full border-collapse border border-gray-300">
-        <thead className='sticky-top bg-gray-200'>
+      <table className="w-full border-collapse border border-gray-300 font-inter">
+        <thead className="sticky-top bg-gray-200">
           <tr>
             <th className="border p-2 text-center">Applicant ID</th>
             <th className="border p-2 text-center">Firstname</th>
@@ -133,21 +147,20 @@ const ApplicantContent = () => {
                 <td className="border p-2 text-center">{new Date(applicant.application_date).toLocaleDateString('en-GB')}</td>
                 <td className="border p-2 text-center">{applicant.notes || 'No notes'}</td>
                 <td className="border p-2 text-center">
-                  {
-                    applicant.status_id === 1? ( <button className="btn btn-success text-white mr-2" onClick={() => handleAccept(applicant.applicant_id)}>
-                    Accept
-                  </button>) : null
-                  }
-                   {
-                    applicant.status_id === 7? (  <button className="btn btn-success  text-white mr-2" onClick={() => handleSendEmail(applicant.applicant_id)}>
-                    Send Email
-                  </button>) : null
-                  }
+                  {applicant.status_id === 1 && (
+                    <button className="btn btn-success text-white mr-2" onClick={() => handleAccept(applicant.applicant_id)}>
+                      Accept
+                    </button>
+                  )}
+                  {applicant.status_id === 7 && (
+                    <button className="btn btn-success text-white mr-2" onClick={() => handleSendEmail(applicant.applicant_id)}>
+                      Send Email
+                    </button>
+                  )}
                   <button className="btn bg-blue hover:bg-blue text-white" onClick={() => handleViewDetails(applicant.applicant_id)}>
                     View details
                   </button>
 
-                 
                   <button className="btn btn-error text-white ml-2" onClick={() => handleDelete(applicant.applicant_id)}>
                     Reject
                   </button>
@@ -161,6 +174,24 @@ const ApplicantContent = () => {
           )}
         </tbody>
       </table>
+
+      <div className="flex justify-between items-center mt-4">
+      <p
+          className={`cursor-pointer ${currentPage === 1 ? "text-gray-400" : "text-black"}`}
+          onClick={() => handlePageChange(currentPage - 1)}
+          disabled={currentPage === 1}
+        >
+          Prev
+        </p>
+        <span>{`Page ${currentPage} of ${totalPages}`}</span>
+        <p
+          onClick={() => handlePageChange(currentPage + 1)}
+          className={`cursor-pointer ${currentPage === 1 ? "text-gray-400" : "text-black"}`}
+          style={{ pointerEvents: currentPage === 1 ? "none" : "auto" }}
+        >
+          Next
+        </p>
+      </div>
     </div>
   );
 };

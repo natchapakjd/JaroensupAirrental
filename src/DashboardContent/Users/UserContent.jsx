@@ -10,19 +10,25 @@ const UserContent = () => {
   const [searchText, setSearchText] = useState("");
   const [roles, setRoles] = useState([]);
   const [selectedRole, setSelectedRole] = useState("");
+  const [currentPage, setCurrentPage] = useState(1);
+  const [totalPages, setTotalPages] = useState(1);
+
+  const pageLimit = 10;
 
   useEffect(() => {
-    fetchUsers();
+    fetchUsers(currentPage);
     fetchRoles();
-  }, []);
+  }, [currentPage]);
 
-  const fetchUsers = async () => {
+  const fetchUsers = async (page) => {
     try {
       const response = await axios.get(
-        `${import.meta.env.VITE_SERVER_URL}/users`
+        `${import.meta.env.VITE_SERVER_URL}/users-paging?page=${page}&limit=${pageLimit}`
       );
-      setUsers(response.data);
-      setFilteredUsers(response.data); // Initial display
+      const { users, total } = response.data;
+      setUsers(users);
+      setFilteredUsers(users);
+      setTotalPages(Math.ceil(total / pageLimit));
     } catch (error) {
       console.error("Error fetching users:", error);
     }
@@ -59,8 +65,7 @@ const UserContent = () => {
         );
         if (response.status === 200) {
           Swal.fire("Deleted!", "User has been deleted.", "success");
-          setUsers(users.filter((user) => user.user_id !== userId));
-          setFilteredUsers(filteredUsers.filter((user) => user.user_id !== userId));
+          fetchUsers(currentPage); // Refresh current page
         }
       } catch (error) {
         Swal.fire({
@@ -100,6 +105,12 @@ const UserContent = () => {
     }
 
     setFilteredUsers(filtered);
+  };
+
+  const handlePageChange = (newPage) => {
+    if (newPage >= 1 && newPage <= totalPages) {
+      setCurrentPage(newPage);
+    }
   };
 
   return (
@@ -146,7 +157,7 @@ const UserContent = () => {
         <table className="table w-full">
           <thead>
             <tr>
-              <th></th>
+              <th>Avatar</th>
               <th>Username</th>
               <th>Email</th>
               <th>Role</th>
@@ -159,25 +170,17 @@ const UserContent = () => {
               filteredUsers.map((user) => (
                 <tr key={user.user_id}>
                   <td>
-                    <div className="flex items-center gap-3">
-                      <div className="avatar">
-                        <div className="mask mask-squircle h-12 w-12">
-                          {user.image_url ? (
-                            <img
-                              src={user.image_url}
-                              alt={user.username}
-                              className="object-cover w-full h-full"
-                            />
-                          ) : (
-                            <p>No Image</p>
-                          )}
-                        </div>
-                      </div>
-                      <div>
-                        <div className="font-bold">{user.username}</div>
-                        <div className="text-sm opacity-50">
-                          {user.firstname} {user.lastname}
-                        </div>
+                    <div className="avatar">
+                      <div className="mask mask-squircle h-12 w-12">
+                        {user.image_url ? (
+                          <img
+                            src={user.image_url}
+                            alt={user.username}
+                            className="object-cover w-full h-full"
+                          />
+                        ) : (
+                          <p>No Image</p>
+                        )}
                       </div>
                     </div>
                   </td>
@@ -214,6 +217,27 @@ const UserContent = () => {
             )}
           </tbody>
         </table>
+      </div>
+
+      {/* Pagination */}
+      <div className="flex justify-between mt-4">
+        <p
+          onClick={() => handlePageChange(currentPage - 1)}
+          disabled={currentPage <= 1}
+          className={`cursor-pointer ${currentPage === totalPages ? "text-gray-400" : "text-black"}`}
+        >
+          Previous
+        </p>
+        <span className="flex items-center justify-center">
+          Page {currentPage} of {totalPages}
+        </span>
+        <p
+          onClick={() => handlePageChange(currentPage + 1)}
+          disabled={currentPage >= totalPages}
+          className={`cursor-pointer ${currentPage === totalPages ? "text-gray-400" : "text-black"}`}
+        >
+          Next
+        </p>
       </div>
     </div>
   );

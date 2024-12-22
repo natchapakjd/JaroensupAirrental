@@ -16,6 +16,43 @@ router.get("/warehouses", (req, res) => {
   });
 });
 
+router.get("/warehouses-paging", (req, res) => {
+  // รับค่าจาก query string หรือกำหนดค่าเริ่มต้น
+  const page = parseInt(req.query.page) || 1;
+  const limit = parseInt(req.query.limit) || 10;
+  const offset = (page - 1) * limit; // คำนวณ offset ตามหน้าที่ต้องการ
+
+  // คำสั่ง SQL เพื่อดึงข้อมูลที่มีการแบ่งหน้า
+  const query = `SELECT * FROM warehouses LIMIT ? OFFSET ?`;
+
+  db.query(query, [limit, offset], (err, result) => {
+    if (err) {
+      console.error("Error fetching warehouses: " + err);
+      res.status(500).json({ error: "Failed to fetch warehouses" });
+    } else {
+      // คำสั่ง SQL ที่คำนวณจำนวนแถวทั้งหมดในตาราง warehouses
+      const countQuery = "SELECT COUNT(*) AS total FROM warehouses";
+      
+      db.query(countQuery, (err, countResult) => {
+        if (err) {
+          console.error("Error fetching total count: " + err);
+          res.status(500).json({ error: "Failed to fetch total count" });
+        } else {
+          const total = countResult[0].total;
+          const totalPages = Math.ceil(total / limit); // คำนวณจำนวนหน้าทั้งหมด
+
+          res.json({
+            data: result,
+            totalPages: totalPages,
+            currentPage: page,
+          });
+        }
+      });
+    }
+  });
+});
+
+
 router.get("/warehouse/:id", (req, res) => {
   const id = req.params.id;
   const query = "SELECT * FROM warehouses WHERE warehouse_id = ?";

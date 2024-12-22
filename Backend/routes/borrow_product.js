@@ -19,6 +19,52 @@ const storage = multer.diskStorage({
 
 const upload = multer({ storage: storage });
 
+router.get("/equipment-borrowings-paging", (req, res) => {
+  const { page = 1, limit = 10 } = req.query; // Default to page 1 and 10 items per page
+  const offset = (page - 1) * limit;
+
+  const query = `
+    SELECT 
+      eb.*, 
+      t.user_id, 
+      t.description as task_desc,
+      t.status_id as status_id,
+      u.*,
+      st.status_name,
+      p.name as product_name
+    FROM 
+      equipment_borrowing eb 
+    JOIN 
+      tasks t ON eb.task_id = t.task_id
+    JOIN 
+      users u ON t.user_id = u.user_id
+    JOIN 
+      products p ON eb.product_id = p.product_id
+    JOIN status st ON t.status_id = st.status_id
+    LIMIT ? OFFSET ?`;
+
+  const countQuery = `SELECT COUNT(*) as total FROM equipment_borrowing`;
+
+  db.query(countQuery, (err, countResult) => {
+    if (err) {
+      console.error("Error fetching total count: " + err);
+      return res.status(500).json({ error: "Failed to fetch total count" });
+    }
+
+    const total = countResult[0].total;
+
+    db.query(query, [parseInt(limit), parseInt(offset)], (err, result) => {
+      if (err) {
+        console.error("Error fetching equipment borrowing: " + err);
+        res.status(500).json({ error: "Failed to fetch equipment borrowing" });
+      } else {
+        res.json({ data: result, total, page: parseInt(page), limit: parseInt(limit) });
+      }
+    });
+  });
+});
+
+
 router.get("/equipment-borrowings", (req, res) => {
   const query = `
     SELECT 
@@ -49,6 +95,75 @@ router.get("/equipment-borrowings", (req, res) => {
     }
   });
 });
+
+router.get("/equipment-borrowing-paging/:techId", (req, res) => {
+  const techId = req.params.techId;
+  
+  const { page = 1, limit = 10 } = req.query; // Default to page 1 and 10 items per page
+  const offset = (page - 1) * limit;
+
+  const query = `
+    SELECT 
+      eb.*, 
+      t.user_id, 
+      t.description AS task_desc,
+      t.status_id,
+      st.status_name,
+      u.firstname, 
+      u.lastname, 
+      p.name AS product_name
+    FROM 
+      equipment_borrowing eb
+    JOIN 
+      tasks t ON eb.task_id = t.task_id
+    JOIN 
+      users u ON t.user_id = u.user_id
+    JOIN 
+      products p ON eb.product_id = p.product_id
+    JOIN 
+      status st ON t.status_id = st.status_id
+    WHERE 
+      t.user_id = ?
+    LIMIT ? OFFSET ?
+  `;
+
+  const countQuery = `
+    SELECT COUNT(*) AS total
+    FROM 
+      equipment_borrowing eb
+    JOIN 
+      tasks t ON eb.task_id = t.task_id
+    WHERE 
+      t.user_id = ?
+  `;
+
+  // Fetch the total count for pagination
+  db.query(countQuery, [techId], (err, countResult) => {
+    if (err) {
+      console.error("Error fetching total count:", err);
+      return res.status(500).json({ error: "Failed to fetch total count" });
+    }
+
+    const total = countResult[0].total;
+    const totalPages = Math.ceil(total / limit);
+
+    // Fetch the paginated data
+    db.query(query, [techId, parseInt(limit), parseInt(offset)], (err, dataResult) => {
+      if (err) {
+        console.error("Error fetching equipment borrowing data:", err);
+        return res.status(500).json({ error: "Failed to fetch equipment borrowing data" });
+      }
+
+      res.json({
+        data: dataResult,
+        total,
+        page: parseInt(page),
+        limit: parseInt(limit),
+      });
+    });
+  });
+});
+
 
 router.get("/equipment-borrowing/:techId", (req, res) => {
   const techId = req.params.techId;
@@ -89,6 +204,8 @@ router.get("/equipment-borrowing/:techId", (req, res) => {
 router.post("/equipment-borrowing", upload.single("id_card_image"), async (req, res) => {
   const { tech_id, product_id, borrow_date, return_date, user_id } = req.body;
   let imageUrl = null;
+  console.log(user_id)
+  console.log(tech_id)
 
   try {
     // Upload ID card image if provided

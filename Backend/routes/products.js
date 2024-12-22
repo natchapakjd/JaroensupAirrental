@@ -37,6 +37,49 @@ router.get("/products", (req, res) => {
   });
 });
 
+router.get("/products-paging", (req, res) => {
+  const page = parseInt(req.query.page) || 1;
+  const pageSize = parseInt(req.query.pageSize) || 10;
+  const offset = (page - 1) * pageSize;
+
+  // Query to fetch the products with JOIN and pagination
+  const query = `
+    SELECT pd.*, ct.name as category_name, wh.location, b.name as brand_name 
+    FROM products pd
+    JOIN brands b ON pd.brand_id = b.brand_id
+    JOIN categories ct ON pd.category_id = ct.category_id
+    JOIN warehouses wh ON pd.warehouse_id = wh.warehouse_id
+    LIMIT ? OFFSET ?`;
+
+  // Query to get the total count of products
+  const countQuery = "SELECT COUNT(*) AS totalCount FROM products";
+
+  db.query(countQuery, (err, countResult) => {
+    if (err) {
+      console.error("Error fetching total count: " + err);
+      return res.status(500).json({ error: "Failed to fetch products count" });
+    }
+
+    const totalCount = countResult[0].totalCount;
+    const totalPages = Math.ceil(totalCount / pageSize);
+
+    // Now, fetch the products with pagination
+    db.query(query, [pageSize, offset], (err, result) => {
+      if (err) {
+        console.error("Error fetching products: " + err);
+        return res.status(500).json({ error: "Failed to fetch products" });
+      }
+
+      res.json({
+        data: result,
+        totalPages: totalPages,
+        currentPage: page,
+        totalCount: totalCount,
+      });
+    });
+  });
+});
+
 router.get("/products/count", (req, res) => {
   const query = "SELECT COUNT(*) AS count FROM products";
 

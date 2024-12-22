@@ -31,21 +31,31 @@ router.get("/technicians", (req, res) => {
 });
 
 
-router.get("/technician/:id", async (req, res) => {
+router.get("/technician/:id", (req, res) => {
   const id = req.params.id;
-  const query = "SELECT * FROM technicians WHERE tech_id = ?";
+  const query = `
+    SELECT 
+      technicians.*,
+      users.*
+    FROM 
+      technicians
+    INNER JOIN 
+      users 
+    ON 
+      technicians.user_id = users.user_id
+    WHERE tech_id  = ?
+  `;
 
-  try {
-    const [result] = await db.query(query, [id]);
-    if (result.length === 0) {
-      return res.status(404).json({ error: "Technician not found" });
+  db.query(query,[id], (err, result) => {
+    if (err) {
+      console.error("Error fetching technicians: " + err);
+      res.status(500).json({ error: "Failed to fetch technicians" });
+    } else {
+      res.json(result);
     }
-    res.json(result[0]); // Return the technician object instead of an array
-  } catch (err) {
-    console.error("Error fetching technician: " + err);
-    res.status(500).json({ error: "Failed to fetch technician" });
-  }
+  });
 });
+
 
 router.post('/technician', async (req, res) => {
   const {

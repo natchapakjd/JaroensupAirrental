@@ -16,6 +16,42 @@ router.get("/attributes", (req, res) => {
   });
 });
 
+router.get("/attributes-paging", (req, res) => {
+  const { page = 1, limit = 10 } = req.query; // Default to page 1 and limit 10 if not provided
+  const offset = (page - 1) * limit;
+
+  const countQuery = "SELECT COUNT(*) AS total FROM attributes";
+  const query = "SELECT * FROM attributes LIMIT ? OFFSET ?";
+
+  // Get total count for pagination
+  db.query(countQuery, (err, countResult) => {
+    if (err) {
+      console.error("Error fetching total attributes count: " + err);
+      return res.status(500).json({ error: "Failed to fetch attributes count" });
+    }
+
+    const totalCount = countResult[0].total;
+    const totalPages = Math.ceil(totalCount / limit);
+
+    // Fetch the paginated attributes
+    db.query(query, [parseInt(limit), offset], (err, result) => {
+      if (err) {
+        console.error("Error fetching attributes: " + err);
+        return res.status(500).json({ error: "Failed to fetch attributes" });
+      }
+
+      // Return paginated result along with total count and total pages
+      res.json({
+        data: result,
+        total: {
+          totalCount,
+          totalPages,
+          currentPage: parseInt(page),
+        },
+      });
+    });
+  });
+});
 router.get("/attribute/:id", (req, res) => {
   const id = req.params.id;
   const query = "SELECT * FROM attributes WHERE attribute_id = ?";

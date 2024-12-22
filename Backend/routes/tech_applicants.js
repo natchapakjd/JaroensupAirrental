@@ -47,6 +47,48 @@ router.get("/applicants", (req, res) => {
   });
 });
 
+router.get("/applicants-paging", (req, res) => {
+  const { page = 1, pageSize = 10 } = req.query; // Default to page 1 and page size 10 if not provided
+
+  // Calculate the offset for pagination
+  const offset = (page - 1) * pageSize;
+
+  const query = `
+    SELECT ta.*, st.status_name
+    FROM technician_applicants ta
+    JOIN status st ON ta.status_id = st.status_id
+    LIMIT ? OFFSET ?`;
+
+  const countQuery = "SELECT COUNT(*) AS totalCount FROM technician_applicants"; // Count the total number of applicants for pagination
+
+  // Execute the queries
+  db.query(query, [parseInt(pageSize), offset], (err, result) => {
+    if (err) {
+      console.error("Error fetching applicants: " + err);
+      return res.status(500).json({ error: "Failed to fetch applicants" });
+    }
+
+    // Fetch total count of applicants for pagination calculation
+    db.query(countQuery, (countErr, countResult) => {
+      if (countErr) {
+        console.error("Error fetching total applicants count: " + countErr);
+        return res.status(500).json({ error: "Failed to fetch total applicants count" });
+      }
+
+      const totalCount = countResult[0].totalCount;
+      const totalPages = Math.ceil(totalCount / pageSize); // Calculate total pages
+
+      res.json({
+        data: result, // Paginated data
+        totalCount,    // Total number of applicants
+        totalPages,    // Total number of pages
+        currentPage: page, // Current page
+      });
+    });
+  });
+});
+
+
 router.get("/applicants/:id", (req, res) => {
   const id = req.params.id;
   const query = "SELECT ta.*,st.status_name  FROM technician_applicants ta JOIN status st ON ta.status_id = st.status_id WHERE  applicant_id = ?";

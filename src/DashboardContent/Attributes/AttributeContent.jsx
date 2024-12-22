@@ -7,15 +7,26 @@ const AttributeContent = () => {
   const [attributes, setAttributes] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [currentPage, setCurrentPage] = useState(1);
+  const [totalPages, setTotalPages] = useState(1);
+  const [rowsPerPage] = useState(10); // You can set this to any number you want
 
+  // Fetch attributes whenever currentPage changes
   useEffect(() => {
     fetchAttributes();
-  }, []);
+  }, [currentPage]);  // Depend on currentPage to refetch on page change
 
   const fetchAttributes = async () => {
     try {
-      const response = await axios.get(`${import.meta.env.VITE_SERVER_URL}/attributes`);
-      const sortedAttributes = response.data.sort((a, b) => a.attribute_id - b.attribute_id);
+      const response = await axios.get(
+        `${import.meta.env.VITE_SERVER_URL}/attributes-paging`,
+        {
+          params: { page: currentPage, limit: rowsPerPage },
+        }
+      );
+      setTotalPages(response.data.total.totalPages);
+      const { data } = response.data;
+      const sortedAttributes = data.sort((a, b) => a.attribute_id - b.attribute_id);
       setAttributes(sortedAttributes);
     } catch (error) {
       setError('Failed to fetch attributes.');
@@ -41,7 +52,7 @@ const AttributeContent = () => {
         const response = await axios.delete(`${import.meta.env.VITE_SERVER_URL}/attribute/${attributeId}`);
         if (response.status === 200) {
           Swal.fire('Deleted!', 'Attribute has been deleted.', 'success');
-          fetchAttributes();
+          fetchAttributes();  // Refetch attributes after deletion
         } else {
           throw new Error('Failed to delete attribute.');
         }
@@ -75,9 +86,8 @@ const AttributeContent = () => {
             <tr key={attribute.attribute_id}>
               <td className="border p-2 text-center">{attribute.attribute_id}</td>
               <td className="border p-2 text-center">{attribute.name}</td>
-                 
               <td className="border p-2 text-center">
-                  <Link
+                <Link
                   to={`/dashboard/attributes/edit/${attribute.attribute_id}`}
                   className="btn btn-success text-white mr-2"
                 >
@@ -94,6 +104,27 @@ const AttributeContent = () => {
           ))}
         </tbody>
       </table>
+
+      {/* Pagination Controls */}
+      <div className="flex justify-between items-center mt-4">
+        <p
+          onClick={() => setCurrentPage((prev) => Math.max(prev - 1, 1))}
+          className={`cursor-pointer ${currentPage === 1 ? "text-gray-400" : "text-black"}`}
+          style={{ pointerEvents: currentPage === 1 ? "none" : "auto" }}
+        >
+          Previous
+        </p>
+        <span>
+          Page {currentPage} of {totalPages}
+        </span>
+        <p
+          onClick={() => setCurrentPage((prev) => Math.min(prev + 1, totalPages))}
+          className={`cursor-pointer ${currentPage === totalPages ? "text-gray-400" : "text-black"}`}
+          style={{ pointerEvents: currentPage === totalPages ? "none" : "auto" }}
+        >
+          Next
+        </p>
+      </div>
     </div>
   );
 };
