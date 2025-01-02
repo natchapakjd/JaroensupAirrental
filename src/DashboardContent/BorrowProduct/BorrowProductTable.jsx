@@ -2,14 +2,17 @@ import React, { useState, useEffect } from "react";
 import axios from "axios";
 import Swal from "sweetalert2";
 import Cookies from "universal-cookie";
-import { jwtDecode } from "jwt-decode";
+import {jwtDecode} from "jwt-decode";
 import { Link } from "react-router-dom";
+
 const BorrowProductTable = () => {
   const [borrowingData, setBorrowingData] = useState([]);
+  const [filteredData, setFilteredData] = useState([]);
+  const [searchQuery, setSearchQuery] = useState("");
+  const [statusFilter, setStatusFilter] = useState("");
   const [currentPage, setCurrentPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
   const [rowsPerPage] = useState(10); // Items per page
-
 
   const cookies = new Cookies();
   const token = cookies.get("authToken");
@@ -21,27 +24,27 @@ const BorrowProductTable = () => {
     fetchBorrowingData(techId);
   }, [currentPage]);
 
+  useEffect(() => {
+    applyFilters();
+  }, [borrowingData, searchQuery, statusFilter]);
+
   const fetchBorrowingData = async (techId) => {
     try {
+      let response;
       if (role === 3) {
-        const response = await axios.get(
+        response = await axios.get(
           `${import.meta.env.VITE_SERVER_URL}/equipment-borrowings-paging`,
-        { params: { page : currentPage, limit: rowsPerPage } }
+          { params: { page: currentPage, limit: rowsPerPage } }
         );
-
-        const { data, total } = response.data;
-        setBorrowingData(data);
-        setTotalPages(Math.ceil(total / rowsPerPage));
       } else if (role === 2) {
-        const response = await axios.get(
+        response = await axios.get(
           `${import.meta.env.VITE_SERVER_URL}/equipment-borrowing-paging/${techId}`,
           { params: { page: currentPage, limit: rowsPerPage } }
         );
-      
-        const { data, total } = response.data;
-        setBorrowingData(data);
-        setTotalPages(Math.ceil(total / rowsPerPage));
       }
+      const { data, total } = response.data;
+      setBorrowingData(data);
+      setTotalPages(Math.ceil(total / rowsPerPage));
     } catch (error) {
       console.error("Error fetching borrowing data:", error);
       Swal.fire({
@@ -52,119 +55,75 @@ const BorrowProductTable = () => {
     }
   };
 
+  const applyFilters = () => {
+    let filtered = borrowingData;
+
+    if (searchQuery) {
+      filtered = filtered.filter((item) =>
+        `${item.firstname} ${item.lastname}`
+          .toLowerCase()
+          .includes(searchQuery.toLowerCase()) ||
+        item.product_name.toLowerCase().includes(searchQuery.toLowerCase())
+      );
+    }
+
+    if (statusFilter) {
+      filtered = filtered.filter((item) => item.status_name === statusFilter);
+    }
+
+    setFilteredData(filtered);
+  };
+
+  const handleSearchChange = (event) => {
+    setSearchQuery(event.target.value);
+  };
+
+  const handleStatusFilterChange = (event) => {
+    setStatusFilter(event.target.value);
+  };
+
   const handlePageChange = (newPage) => {
     if (newPage > 0 && newPage <= totalPages) {
       setCurrentPage(newPage);
     }
   };
-  const handleReturn = async (taskId) => {
-    try {
-      // Check the status of the task
-      const statusResponse = await axios.get(
-        `${import.meta.env.VITE_SERVER_URL}/approve/${taskId}`
-      );
 
-      const statusId = statusResponse.data.status_id; // Assuming your API returns the status_id
-
-      // Check if the status_id is 4 (approved)
-      if (statusId !== 4) {
-        Swal.fire({
-          title: "Not Approved",
-          text: "The equipment return has not been approved yet.",
-          icon: "warning",
-        });
-        return;
-      }
-
-      // If approved, proceed to return the equipment
-      const response = await axios.put(
-        `${
-          import.meta.env.VITE_SERVER_URL
-        }/equipment-borrowing/return/${taskId}`
-      );
-
-      if (response.status === 200) {
-        Swal.fire({
-          title: "Equipment returned successfully",
-          icon: "success",
-        });
-        fetchBorrowingData(); // Refresh data after returning equipment
-      } else {
-        throw new Error("Failed to return equipment.");
-      }
-    } catch (error) {
-      Swal.fire({
-        title: "Error",
-        text: error.message,
-        icon: "error",
-      });
-    }
-  };
-
-  const handleApprove = async (taskId) => {
-    try {
-      const response = await axios.put(
-        `${
-          import.meta.env.VITE_SERVER_URL
-        }/equipment-borrowing/approve/${taskId}`
-      );
-
-      if (response.status === 200) {
-        Swal.fire({
-          title: "Equipment approved successfully",
-          icon: "success",
-        });
-        fetchBorrowingData(); // Refresh data after returning equipment
-      } else {
-        throw new Error("Failed to approved equipment.");
-      }
-    } catch (error) {
-      Swal.fire({
-        title: "Error",
-        text: error.message,
-        icon: "error",
-      });
-    }
-  };
-
-  const handleCancel = async (borrowing_id) => {
-    try {
-      const response = await axios.delete(
-        `${
-          import.meta.env.VITE_SERVER_URL
-        }/equipment-borrowing/${borrowing_id}`,
-        { withCredentials: true }
-      );
-
-      if (response.status === 200) {
-        Swal.fire({
-          title: "Task Canceled",
-          text: "The task has been marked as canceled.",
-          icon: "success",
-        });
-        fetchBorrowingData(techId); // Refresh data after canceling
-      } else {
-        throw new Error("Failed to cancel the task.");
-      }
-    } catch (error) {
-      Swal.fire({
-        title: "Error",
-        text: error.message,
-        icon: "error",
-      });
-    }
-  };
   return (
     <div className="p-8 rounded-lg shadow-lg w-full mx-auto font-inter h-full">
+
       <div className="flex justify-between items-center mb-4">
-        <h2 className="text-xl font-semibold mt-8">Borrowed Equipment List</h2>
-        {role === 3 ? (
+
+        
+      <h2 className="text-xl font-semibold ">Borrowed Equipment List</h2>
+
+        {role === 3 && (
           <Link to="/dashboard/borrows/add">
             <button className="btn bg-blue text-white hover:bg-blue">
               Create borrowing task
             </button>
           </Link>
-        ) : null}
+        )}
+      </div>
+
+      {/* Search and Filter Section */}
+      <div className="flex  gap-4 mb-6 justify-between">
+        <input
+          type="text"
+          placeholder="Search by name or product "
+          className="input input-bordered w-full"
+          value={searchQuery}
+          onChange={handleSearchChange}
+        />
+        <select
+          className="select select-bordered max-w-sm"
+          value={statusFilter}
+          onChange={handleStatusFilterChange}
+        >
+          <option value="">All Status</option>
+          <option value="Pending">Pending</option>
+          <option value="Approved">Approved</option>
+          <option value="Returned">Returned</option>
+        </select>
       </div>
 
       <table className="table w-full border-collapse border border-gray-300">
@@ -181,16 +140,14 @@ const BorrowProductTable = () => {
           </tr>
         </thead>
         <tbody className="text-center">
-          {borrowingData.length > 0 ? (
-            borrowingData.map((item) => (
+          {filteredData.length > 0 ? (
+            filteredData.map((item) => (
               <tr key={item.borrowing_id}>
+                <td className="border p-2 text-center">{item.borrowing_id}</td>
                 <td className="border p-2 text-center">
-                  {item.borrowing_id}
+                  {item.firstname} {item.lastname}
                 </td>
-                <td className="border p-2 text-center">{item.firstname} {item.lastname}</td>
-                <td className="border p-2 text-center">
-                  {item.product_name}
-                </td>
+                <td className="border p-2 text-center">{item.product_name}</td>
                 <td className="border p-2 text-center">
                   {new Date(item.borrow_date).toLocaleString()}
                 </td>
@@ -201,7 +158,9 @@ const BorrowProductTable = () => {
                 </td>
                 <td className="border p-2 text-center">{item.status_name}</td>
                 <td className="border p-2 text-center">{item.task_desc}</td>
-                <td className="border p-2 text-center">
+                
+
+            <td className="border p-2 text-center">
                   <div className="flex justify-center gap-2">
                     {role === 2 && item.status_id === 4? (
                       <button
@@ -242,20 +201,18 @@ const BorrowProductTable = () => {
             ))
           ) : (
             <tr>
-              <td colSpan="7" className="border border-gray-300 p-4">
+              <td colSpan="8" className="border p-4">
                 No borrowing data available
               </td>
             </tr>
           )}
         </tbody>
       </table>
+
       <div className="flex justify-between mt-4">
         <p
           onClick={() => handlePageChange(currentPage - 1)}
-          className={`cursor-pointer ${
-            currentPage === 1 ? "text-gray-400" : "text-black"
-          }`}
-          style={{ pointerEvents: currentPage === 1 ? "none" : "auto" }}
+          disabled={currentPage === 1}
         >
           Previous
         </p>
@@ -263,13 +220,8 @@ const BorrowProductTable = () => {
           Page {currentPage} of {totalPages}
         </span>
         <p
-          className={`cursor-pointer ${
-            currentPage === totalPages ? "text-gray-400" : "text-black"
-          }`}
-          style={{
-            pointerEvents: currentPage === totalPages ? "none" : "auto",
-          }}
           onClick={() => handlePageChange(currentPage + 1)}
+          disabled={currentPage === totalPages}
         >
           Next
         </p>
@@ -279,3 +231,6 @@ const BorrowProductTable = () => {
 };
 
 export default BorrowProductTable;
+
+
+

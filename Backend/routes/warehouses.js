@@ -17,7 +17,6 @@ router.get("/warehouses", (req, res) => {
 });
 
 router.get("/warehouses-paging", (req, res) => {
-  // รับค่าจาก query string หรือกำหนดค่าเริ่มต้น
   const page = parseInt(req.query.page) || 1;
   const limit = parseInt(req.query.limit) || 10;
   const offset = (page - 1) * limit; // คำนวณ offset ตามหน้าที่ต้องการ

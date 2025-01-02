@@ -6,11 +6,13 @@ import Loading from '../../components/Loading';
 
 const WarehouseContent = () => {
   const [warehouses, setWarehouses] = useState([]);
+  const [filteredWarehouses, setFilteredWarehouses] = useState([]); // State for filtered warehouses
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [currentPage, setCurrentPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
-  const [rowsPerPage] = useState(10); // You can set this to any number you want
+  const [rowsPerPage] = useState(10);
+  const [searchTerm, setSearchTerm] = useState(''); // State for search term
 
   useEffect(() => {
     const fetchWarehouses = async () => {
@@ -22,7 +24,8 @@ const WarehouseContent = () => {
           }
         );
         setWarehouses(response.data.data);
-        setTotalPages(response.data.totalPages); // Set totalPages from response
+        setTotalPages(response.data.totalPages);
+        setFilteredWarehouses(response.data.data); // Initialize filtered warehouses
       } catch (err) {
         setError('Failed to fetch warehouses.');
         console.error(err);
@@ -32,7 +35,7 @@ const WarehouseContent = () => {
     };
 
     fetchWarehouses();
-  }, [currentPage, rowsPerPage]); // Re-fetch when page changes
+  }, [currentPage, rowsPerPage]);
 
   const handleDelete = async (id) => {
     try {
@@ -49,11 +52,23 @@ const WarehouseContent = () => {
       if (result.isConfirmed) {
         await axios.delete(`${import.meta.env.VITE_SERVER_URL}/warehouse/${id}`);
         setWarehouses(warehouses.filter(warehouse => warehouse.warehouse_id !== id));
+        setFilteredWarehouses(filteredWarehouses.filter(warehouse => warehouse.warehouse_id !== id));
         Swal.fire('Deleted!', 'Your warehouse has been deleted.', 'success');
       }
     } catch (err) {
       Swal.fire('Error!', 'Failed to delete warehouse.', 'error');
     }
+  };
+
+  const handleSearch = (e) => {
+    const term = e.target.value.toLowerCase();
+    setSearchTerm(term);
+    setFilteredWarehouses(
+      warehouses.filter((warehouse) =>
+        warehouse.location.toLowerCase().includes(term) || 
+        warehouse.capacity.toString().includes(term) // Optional: Include capacity in search
+      )
+    );
   };
 
   if (loading) return <Loading />;
@@ -69,7 +84,19 @@ const WarehouseContent = () => {
           </button>
         </Link>
       </div>
-      {warehouses.length === 0 ? (
+
+      {/* Search Box */}
+      <div className="mb-4">
+        <input
+          type="text"
+          value={searchTerm}
+          onChange={handleSearch}
+          placeholder="Search by location or capacity..."
+          className="input input-bordered w-full"
+        />
+      </div>
+
+      {filteredWarehouses.length === 0 ? (
         <p>No warehouses available</p>
       ) : (
         <table className="table w-full border-collapse border border-gray-300 text-center font-inter">
@@ -82,7 +109,7 @@ const WarehouseContent = () => {
             </tr>
           </thead>
           <tbody>
-            {warehouses.map(warehouse => (
+            {filteredWarehouses.map(warehouse => (
               <tr key={warehouse.warehouse_id}>
                 <td className="border p-2 text-center">{warehouse.warehouse_id}</td>
                 <td className="border p-2 text-center">{warehouse.location}</td>
@@ -105,11 +132,13 @@ const WarehouseContent = () => {
           </tbody>
         </table>
       )}
-<div className="flex justify-between mt-4">
+
+      {/* Pagination Controls */}
+      <div className="flex justify-between mt-4">
         <p
-          onClick={() => handlePageChange(currentPage - 1)}
+          onClick={() => setCurrentPage(currentPage - 1)}
           disabled={currentPage <= 1}
-          className={`cursor-pointer ${currentPage === totalPages ? "text-gray-400" : "text-black"}`}
+          className={`cursor-pointer ${currentPage === 1 ? "text-gray-400" : "text-black"}`}
         >
           Previous
         </p>
@@ -117,7 +146,7 @@ const WarehouseContent = () => {
           Page {currentPage} of {totalPages}
         </span>
         <p
-          onClick={() => handlePageChange(currentPage + 1)}
+          onClick={() => setCurrentPage(currentPage + 1)}
           disabled={currentPage >= totalPages}
           className={`cursor-pointer ${currentPage === totalPages ? "text-gray-400" : "text-black"}`}
         >

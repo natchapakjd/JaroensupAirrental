@@ -141,9 +141,10 @@ const AddProduct = () => {
         throw new Error("Failed to add product.");
       }
     } catch (error) {
+      console.log(error)
       Swal.fire({
         title: "Error",
-        text: error.message,
+        text: error.response.data.error,
         icon: "error",
       });
     }
@@ -152,7 +153,7 @@ const AddProduct = () => {
   return (
     <div className="p-8 rounded-lg shadow-lg w-full mx-auto font-inter h-full">
       <h1 className="text-2xl font-semibold mb-6">Add New Product</h1>
-      <form onSubmit={handleSubmit}>
+      <form onSubmit={handleSubmit} className="text-sm font-medium">
         <div className="mb-4">
           <label htmlFor="name" className="block text-gray-700 font-medium mb-2">Name:</label>
           <input
@@ -273,19 +274,6 @@ const AddProduct = () => {
               </option>
             ))}
           </select>
-        </div>
-
-        {/* .gltf File Upload */}
-        <div className="mb-4">
-          <label htmlFor="model_file" className="block text-gray-700 font-medium mb-2">Model (.gltf) File:</label>
-          <input
-            type="file"
-            id="model_file"
-            name="model_file"
-            onChange={handleChange}
-            accept=".gltf"
-            className="w-full p-2 rounded-lg"
-          />
         </div>
 
         <div className="mb-4">

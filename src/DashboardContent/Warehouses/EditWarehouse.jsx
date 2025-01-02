@@ -56,7 +56,7 @@ const EditWarehouse = () => {
       {loading ? (
         <Loading/>
       ) : (
-        <form onSubmit={handleSubmit}>
+        <form onSubmit={handleSubmit} className='text-sm font-medium'>
           <div className="mb-4">
             <label htmlFor="location" className="block text-sm font-medium text-gray-700">Location</label>
             <input

@@ -6,12 +6,15 @@ import Loading from '../../components/Loading';
 
 const ApplicantContent = () => {
   const [applicants, setApplicants] = useState([]);
+  const [filteredApplicants, setFilteredApplicants] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [currentPage, setCurrentPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
   const [totalCount, setTotalCount] = useState(0);
   const [pageSize, setPageSize] = useState(10); // Default page size
+  const [searchQuery, setSearchQuery] = useState('');
+  const [filterStatus, setFilterStatus] = useState('');
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -32,6 +35,20 @@ const ApplicantContent = () => {
 
     fetchApplicants();
   }, [currentPage, pageSize]); // Re-fetch when page or pageSize changes
+
+  useEffect(() => {
+    // Filter applicants based on search query and status
+    const filtered = applicants.filter(applicant => {
+      const matchesSearch =
+        applicant.first_name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        applicant.last_name.toLowerCase().includes(searchQuery.toLowerCase());
+      const matchesStatus =
+        filterStatus === '' || applicant.status_id.toString() === filterStatus;
+      return matchesSearch && matchesStatus;
+    });
+    setFilteredApplicants(filtered);
+    setTotalPages(Math.ceil(filtered.length / pageSize)); // Update total pages based on filtered data
+  }, [searchQuery, filterStatus, applicants, pageSize]);
 
   const handleDelete = async (id) => {
     const confirmation = await Swal.fire({
@@ -115,8 +132,28 @@ const ApplicantContent = () => {
   if (error) return <p>{error}</p>;
 
   return (
-    <div className="table p-8 rounded-lg shadow-lg w-full mx-auto  h-full font-inter">
+    <div className="table p-8 rounded-lg shadow-lg w-full mx-auto h-full font-inter">
       <h2 className="text-xl font-semibold mt-8 mb-5">Applicants list</h2>
+
+      {/* Search and Filter */}
+      <div className="flex justify-between items-center mb-4 gap-4">
+        <input
+          type="text"
+          placeholder="Search by Firstname or Lastname"
+          value={searchQuery}
+          onChange={(e) => setSearchQuery(e.target.value)}
+          className="input input-bordered w-full"
+        />
+        <select
+          value={filterStatus}
+          onChange={(e) => setFilterStatus(e.target.value)}
+          className="input input-bordered w-full md:w-1/3"
+        >
+          <option value="">Filter by Status</option>
+          <option value="1">Pending</option>
+          <option value="7">Hiring</option>
+        </select>
+      </div>
 
       <table className="w-full border-collapse border border-gray-300 font-inter">
         <thead className="sticky-top bg-gray-200">
@@ -134,8 +171,8 @@ const ApplicantContent = () => {
           </tr>
         </thead>
         <tbody className="text-center">
-          {applicants.length > 0 ? (
-            applicants.map(applicant => (
+          {filteredApplicants.length > 0 ? (
+            filteredApplicants.slice((currentPage - 1) * pageSize, currentPage * pageSize).map(applicant => (
               <tr key={applicant.applicant_id}>
                 <td className="border p-2 text-center">{applicant.applicant_id}</td>
                 <td className="border p-2 text-center">{applicant.first_name}</td>
@@ -176,7 +213,7 @@ const ApplicantContent = () => {
       </table>
 
       <div className="flex justify-between items-center mt-4">
-      <p
+        <p
           className={`cursor-pointer ${currentPage === 1 ? "text-gray-400" : "text-black"}`}
           onClick={() => handlePageChange(currentPage - 1)}
           disabled={currentPage === 1}
@@ -186,8 +223,7 @@ const ApplicantContent = () => {
         <span>{`Page ${currentPage} of ${totalPages}`}</span>
         <p
           onClick={() => handlePageChange(currentPage + 1)}
-          className={`cursor-pointer ${currentPage === 1 ? "text-gray-400" : "text-black"}`}
-          style={{ pointerEvents: currentPage === 1 ? "none" : "auto" }}
+          className={`cursor-pointer ${currentPage === totalPages ? "text-gray-400" : "text-black"}`}
         >
           Next
         </p>

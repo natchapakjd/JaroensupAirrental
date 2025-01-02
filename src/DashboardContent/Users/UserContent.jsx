@@ -23,7 +23,9 @@ const UserContent = () => {
   const fetchUsers = async (page) => {
     try {
       const response = await axios.get(
-        `${import.meta.env.VITE_SERVER_URL}/users-paging?page=${page}&limit=${pageLimit}`
+        `${
+          import.meta.env.VITE_SERVER_URL
+        }/users-paging?page=${page}&limit=${pageLimit}`
       );
       const { users, total } = response.data;
       setUsers(users);
@@ -115,14 +117,28 @@ const UserContent = () => {
 
   return (
     <div className="font-inter mt-5 mx-16">
-      <h2 className="text-xl font-semibold my-5">User List</h2>
+      <div className="flex justify-between items-center mb-4">
+        <h2 className="text-xl font-semibold my-5">User List</h2>
+        <div className="flex justify-end gap-2 mb-4">
+          <Link to="/dashboard/user/add-tech">
+            <button className="btn bg-success hover:bg-success text-white">
+              Add Technician
+            </button>
+          </Link>
+          <Link to="/dashboard/user/add">
+            <button className="btn bg-blue hover:bg-blue text-white">
+              Add User
+            </button>
+          </Link>
+        </div>
+      </div>
 
       <div className="flex justify-between items-center mb-4">
-        <div className="flex gap-4 w-1/2">
+        <div className="flex gap-4 w-full">
           <input
             type="text"
             placeholder="Search User"
-            className="input input-bordered w-full max-w-xs"
+            className="input input-bordered w-full "
             value={searchText}
             onChange={handleSearch}
           />
@@ -138,18 +154,6 @@ const UserContent = () => {
               </option>
             ))}
           </select>
-        </div>
-        <div className="flex gap-2">
-          <Link to="/dashboard/user/add-tech">
-            <button className="btn bg-success hover:bg-success text-white">
-              Add Technician
-            </button>
-          </Link>
-          <Link to="/dashboard/user/add">
-            <button className="btn bg-blue hover:bg-blue text-white">
-              Add User
-            </button>
-          </Link>
         </div>
       </div>
 
@@ -191,7 +195,9 @@ const UserContent = () => {
                   <td>
                     <div className="flex gap-2">
                       <Link to={`/dashboard/user/${user.user_id}`}>
-                        <button className="btn btn-ghost btn-xs">Details</button>
+                        <button className="btn btn-ghost btn-xs">
+                          Details
+                        </button>
                       </Link>
                       <Link to={`/dashboard/user/edit/${user.user_id}`}>
                         <button className="btn btn-success text-white btn-xs">
@@ -224,7 +230,9 @@ const UserContent = () => {
         <p
           onClick={() => handlePageChange(currentPage - 1)}
           disabled={currentPage <= 1}
-          className={`cursor-pointer ${currentPage === totalPages ? "text-gray-400" : "text-black"}`}
+          className={`cursor-pointer ${
+            currentPage === totalPages ? "text-gray-400" : "text-black"
+          }`}
         >
           Previous
         </p>
@@ -234,7 +242,9 @@ const UserContent = () => {
         <p
           onClick={() => handlePageChange(currentPage + 1)}
           disabled={currentPage >= totalPages}
-          className={`cursor-pointer ${currentPage === totalPages ? "text-gray-400" : "text-black"}`}
+          className={`cursor-pointer ${
+            currentPage === totalPages ? "text-gray-400" : "text-black"
+          }`}
         >
           Next
         </p>

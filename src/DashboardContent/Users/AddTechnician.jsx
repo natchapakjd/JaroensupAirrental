@@ -85,7 +85,7 @@ const AddTechnician = () => {
   return (
     <div className="mx-auto p-6 bg-white rounded-lg shadow-md">
       <h2 className="text-2xl font-bold mb-4">Add Technician</h2>
-      <form onSubmit={handleSubmit} className="grid grid-cols-1 md:grid-cols-2 gap-4">
+      <form onSubmit={handleSubmit} className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm font-medium">
         {/* User Selection */}
         <div>
           <label htmlFor="user_id" className="block mb-1">Select User</label>
@@ -107,7 +107,7 @@ const AddTechnician = () => {
         </div>
 
         {/* Specialization */}
-        <div>
+        <div >
           <label htmlFor="specialization" className="block mb-1">Specialization</label>
           <input
             type="text"

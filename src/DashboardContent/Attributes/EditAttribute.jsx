@@ -54,7 +54,7 @@ const EditAttribute = () => {
       {isLoadingData ? (
         <Loading/>
       ) : (
-        <form onSubmit={handleSubmit}>
+        <form onSubmit={handleSubmit} className='text-sm font-medium'>
           <div className="mb-4">
             <label htmlFor="name" className="block text-sm font-medium text-gray-700">Name</label>
             <input

@@ -19,7 +19,7 @@ const AddBorrowProduct = () => {
   const cookies = new Cookies();
   const token = cookies.get('authToken');
   const decodedToken = jwtDecode(token);
-  let user_id = decodedToken.id; // Get user_id from decoded token
+  const user_id = decodedToken.id; // Get user_id from decoded token
   const role = decodedToken.role
   const [techUserId,setTechUserId] = useState();
   
@@ -71,44 +71,53 @@ const AddBorrowProduct = () => {
   // Handle form submission
   const handleSubmit = async (e) => {
     e.preventDefault();
-
+  
     if (!formData.consent) {
       alert('You must agree to the terms to proceed');
       return;
     }
-    if (role === 3) {
+  
+    // Ensure tech_id is present if role is 3 (technician)
+    if (role === 3 && !formData.tech_id) {
+      console.error("Tech ID is missing");
+      return;
+    }
+  
+    // If the role is 3, fetch technician data to get techUserId
+    if (role === 3 && formData.tech_id) {
       try {
-        if (!tech_id) {
-          console.error("Tech ID is missing");
-          return;
-        } 
-        const techId = formData.tech_id
         const response = await axios.get(
-          `${import.meta.env.VITE_SERVER_URL}/technician/${techId}`
+          `${import.meta.env.VITE_SERVER_URL}/technician/${formData.tech_id}`
         );
-    
-        console.log("Technician Data:", response.data[0]);
-        setTechUserId(response.data[0].user_id)
+        setTechUserId(response.data[0].user_id);  // Set techUserId after fetching technician
       } catch (error) {
         console.error("Error fetching technician data:", error);
+        return; // Don't proceed if there's an error fetching technician data
       }
     }
-    
+  
+    // Wait until techUserId is set before continuing
+    if (role === 3 && !techUserId) {
+      console.error("Tech User ID is not yet available.");
+      return;
+    }
+  
     const formDataToSubmit = new FormData();
     formDataToSubmit.append('tech_id', formData.tech_id);
     formDataToSubmit.append('borrow_date', formData.borrow_date);
     formDataToSubmit.append('return_date', formData.return_date);
     formDataToSubmit.append('product_id', formData.product_id);
-    if(role === 2){
-      formDataToSubmit.append('user_id', user_id);
-    }else{
-      formDataToSubmit.append('user_id', techUserId);
+  
+    if (role === 2) {
+      formDataToSubmit.append('user_id', user_id); // Add user_id for role 2
+    } else {
+      formDataToSubmit.append('user_id', techUserId); // Add techUserId for role 3
     }
-
+  
     if (idCardImage) {
       formDataToSubmit.append('id_card_image', idCardImage); // Add the image file
     }
-
+  
     try {
       const res = await axios.post(
         `${import.meta.env.VITE_SERVER_URL}/equipment-borrowing`,
@@ -119,7 +128,7 @@ const AddBorrowProduct = () => {
           },
         }
       );
-
+  
       if (res.status === 200) {
         navigate('/dashboard/borrows'); // Redirect on success
       }

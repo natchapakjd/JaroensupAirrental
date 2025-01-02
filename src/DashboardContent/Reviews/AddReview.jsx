@@ -78,7 +78,7 @@ const AddReview = () => {
   return (
     <div className="container mx-auto p-8">
       <h2 className="text-2xl font-bold mb-4">Add Review</h2>
-      <form onSubmit={handleSubmit} className="bg-white p-6 rounded-lg shadow-md">
+      <form onSubmit={handleSubmit} className="bg-white p-6 rounded-lg shadow-md text-sm font-medium">
         <div className="mb-4">
           <label className="block mb-2" htmlFor="task_id">Task ID:</label>
           <select

@@ -3,6 +3,80 @@ const router = express.Router();
 const db = require("../db");
 const isAdmin = require('../middlewares/isAdmin');
 
+router.get('/task-log-paging', (req, res) => {
+  const { page = 1, limit = 10 } = req.query; // Default to page 1 and limit 10 if not provided
+  const offset = (page - 1) * limit;
+
+  const countQuery = 'SELECT COUNT(*) as total FROM task_log';
+
+  const dataQuery = `
+    SELECT * 
+    FROM task_log 
+    LIMIT ? OFFSET ?
+  `;
+
+  db.query(countQuery, (err, countResult) => {
+    if (err) {
+      console.error('Error fetching task log count:', err);
+      return res.status(500).json({ error: 'Failed to fetch task log count' });
+    }
+
+    const totalLogs = countResult[0].total;
+
+    db.query(dataQuery, [parseInt(limit), parseInt(offset)], (err, dataResult) => {
+      if (err) {
+        console.error('Error fetching task logs:', err);
+        return res.status(500).json({ error: 'Failed to fetch task logs' });
+      }
+
+      res.json({
+        total: totalLogs,
+        page: parseInt(page),
+        limit: parseInt(limit),
+        taskLogs: dataResult,
+      });
+    });
+  });
+});
+
+router.get('/adminLogs-paging', (req, res) => {
+  const { page = 1, limit = 10 } = req.query; // Default to page 1 and limit 10 if not provided
+  const offset = (page - 1) * limit;
+
+  const countQuery = 'SELECT COUNT(*) as total FROM adminlogs';
+
+  const dataQuery = `
+    SELECT * 
+    FROM adminlogs 
+    LIMIT ? OFFSET ?
+  `;
+
+  // Execute the count query
+  db.query(countQuery, (err, countResult) => {
+    if (err) {
+      console.error('Error fetching admin log count:', err);
+      return res.status(500).json({ error: 'Failed to fetch admin log count' });
+    }
+
+    const totalLogs = countResult[0].total;
+
+    // Execute the data query
+    db.query(dataQuery, [parseInt(limit), parseInt(offset)], (err, dataResult) => {
+      if (err) {
+        console.error('Error fetching admin logs:', err);
+        return res.status(500).json({ error: 'Failed to fetch admin logs' });
+      }
+
+      res.json({
+        total: totalLogs,
+        page: parseInt(page),
+        limit: parseInt(limit),
+        adminLogs: dataResult,
+      });
+    });
+  });
+});
+
 router.get("/adminLogs", (req, res) => {
   const query = "SELECT * FROM adminlogs";
 

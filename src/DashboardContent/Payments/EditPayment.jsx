@@ -108,7 +108,7 @@ const EditPayment = () => {
   return (
     <div className="p-8 font-inter">
       <h2 className="text-2xl font-semibold mb-4">Edit Payment</h2>
-      <form onSubmit={handleSubmit}>
+      <form onSubmit={handleSubmit} className="text-sm font-medium">
         {taskId && (
           <div className="mb-4">
             <label className="block mb-2">Task ID</label>

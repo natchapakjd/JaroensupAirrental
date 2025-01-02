@@ -6,23 +6,26 @@ import Loading from "../../components/Loading";
 
 const CategoryContent = () => {
   const [categories, setCategories] = useState([]);
+  const [filteredCategories, setFilteredCategories] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [currentPage, setCurrentPage] = useState(1); // page state
   const [totalPages, setTotalPages] = useState(1); // total pages state
   const [rowsPerPage] = useState(10); // set the number of rows per page
+  const [searchTerm, setSearchTerm] = useState(""); // search term state
 
   useEffect(() => {
     const fetchCategories = async () => {
       try {
         const response = await axios.get(
-          `${import.meta.env.VITE_SERVER_URL}/categories-paging`, 
+          `${import.meta.env.VITE_SERVER_URL}/categories-paging`,
           {
-            params: { page: currentPage, limit: rowsPerPage } // pass pagination params
+            params: { page: currentPage, limit: rowsPerPage },
           }
         );
-        setCategories(response.data.data); // get categories data
-        setTotalPages(response.data.totalPages); // get total pages for pagination
+        setCategories(response.data.data);
+        setFilteredCategories(response.data.data); // initialize filteredCategories
+        setTotalPages(response.data.totalPages);
       } catch (err) {
         setError("Failed to fetch categories.");
         console.error(err);
@@ -32,7 +35,7 @@ const CategoryContent = () => {
     };
 
     fetchCategories();
-  }, [currentPage, rowsPerPage]); // fetch categories whenever currentPage changes
+  }, [currentPage, rowsPerPage]);
 
   const handleDelete = async (id) => {
     try {
@@ -51,11 +54,24 @@ const CategoryContent = () => {
         setCategories(
           categories.filter((category) => category.category_id !== id)
         );
+        setFilteredCategories(
+          filteredCategories.filter((category) => category.category_id !== id)
+        );
         Swal.fire("Deleted!", "Your category has been deleted.", "success");
       }
     } catch (err) {
       Swal.fire("Error!", "Failed to delete category.", "error");
     }
+  };
+
+  const handleSearch = (e) => {
+    const term = e.target.value.toLowerCase();
+    setSearchTerm(term);
+    setFilteredCategories(
+      categories.filter((category) =>
+        category.name.toLowerCase().includes(term)
+      )
+    );
   };
 
   const handlePageChange = (page) => {
@@ -68,7 +84,7 @@ const CategoryContent = () => {
   if (error) return <p>{error}</p>;
 
   return (
-    <div className="p-8 rounded-lg shadow-lg w-full mx-auto h-screen ">
+    <div className="p-8 rounded-lg shadow-lg w-full mx-auto h-screen">
       <div className="flex justify-between items-center mb-6">
         <h1 className="text-2xl font-semibold">Categories</h1>
         <Link to="/dashboard/categories/add">
@@ -77,7 +93,16 @@ const CategoryContent = () => {
           </button>
         </Link>
       </div>
-      {categories.length === 0 ? (
+      <div className="mb-4">
+        <input
+          type="text"
+          value={searchTerm}
+          onChange={handleSearch}
+          placeholder="Search by category name..."
+          className="input input-bordered w-full"
+        />
+      </div>
+      {filteredCategories.length === 0 ? (
         <p>No categories available</p>
       ) : (
         <>
@@ -91,7 +116,7 @@ const CategoryContent = () => {
               </tr>
             </thead>
             <tbody>
-              {categories.map((category) => (
+              {filteredCategories.map((category) => (
                 <tr key={category.category_id}>
                   <td className="border p-2 text-center">
                     {category.category_id}
@@ -122,24 +147,26 @@ const CategoryContent = () => {
 
           {/* Pagination Controls */}
           <div className="flex justify-between mt-4">
-        <p
-          onClick={() => handlePageChange(currentPage - 1)}
-          disabled={currentPage <= 1}
-          className={`cursor-pointer ${currentPage === totalPages ? "text-gray-400" : "text-black"}`}
-        >
-          Previous
-        </p>
-        <span className="flex items-center justify-center">
-          Page {currentPage} of {totalPages}
-        </span>
-        <p
-          onClick={() => handlePageChange(currentPage + 1)}
-          disabled={currentPage >= totalPages}
-          className={`cursor-pointer ${currentPage === totalPages ? "text-gray-400" : "text-black"}`}
-        >
-          Next
-        </p>
-      </div>
+            <p
+              onClick={() => handlePageChange(currentPage - 1)}
+              className={`cursor-pointer ${
+                currentPage === 1 ? "text-gray-400" : "text-black"
+              }`}
+            >
+              Previous
+            </p>
+            <span className="flex items-center justify-center">
+              Page {currentPage} of {totalPages}
+            </span>
+            <p
+              onClick={() => handlePageChange(currentPage + 1)}
+              className={`cursor-pointer ${
+                currentPage === totalPages ? "text-gray-400" : "text-black"
+              }`}
+            >
+              Next
+            </p>
+          </div>
         </>
       )}
     </div>

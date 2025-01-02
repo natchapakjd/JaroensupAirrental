@@ -137,80 +137,119 @@ router.delete("/product/:id", (req, res) => {
     }
   });
 });
-router.post("/products", upload.fields([
-  { name: 'product_image', maxCount: 1 },
-  { name: 'model_file', maxCount: 1 }
-]), async (req, res) => {
-  const {
-    name,
-    description,
-    price,
-    stock_quantity,
-    brand_id,
-    category_id,
-    warehouse_id,
-    product_type_id,
-  } = req.body;
 
-  const productImage = req.files['product_image'] ? req.files['product_image'][0].path : null;
-  const modelFile = req.files['model_file'] ? req.files['model_file'][0].path : null;
+router.post(
+  "/products",
+  upload.fields([
+    { name: "product_image", maxCount: 1 },
+    { name: "model_file", maxCount: 1 },
+  ]),
+  async (req, res) => {
+    const {
+      name,
+      description,
+      price,
+      stock_quantity,
+      brand_id,
+      category_id,
+      warehouse_id,
+      product_type_id,
+    } = req.body;
 
-  if (!productImage) {
-    return res.status(400).json({ error: "No product image uploaded." });
-  }
+    const productImage = req.files["product_image"]
+      ? req.files["product_image"][0].path
+      : null;
+    const modelFile = req.files["model_file"]
+      ? req.files["model_file"][0].path
+      : null;
 
-  try {
-    // Compress product image
-    const compressedImagePath = path.join(
-      __dirname,
-      `compressed-${req.files['product_image'][0].filename}`
-    );
-    await sharp(productImage).resize(800).toFile(compressedImagePath);
-
-    const result = await cloudinary.uploader.upload(compressedImagePath, {
-      folder: "image/product-image",
-    });
-
-    const cloudinaryImageUrl = result.secure_url;
-    fs.unlinkSync(compressedImagePath);  // Delete the compressed image
-
-    let modelUrl = null;
-    if (modelFile) {
-      const modelResult = await cloudinary.uploader.upload(modelFile, {
-        resource_type: 'auto', // Use 'auto' for automatic type detection
-        folder: "models/product-models",
-      });
-      modelUrl = modelResult.secure_url;  
+    if (!productImage) {
+      return res.status(400).json({ error: "No product image uploaded." });
     }
 
-    // Insert product data into database
-    db.query(
-      "INSERT INTO products (name, description, price, stock_quantity, brand_id, category_id, warehouse_id, product_type_id, image_url, model_url) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)", 
-      [
-        name,
-        description,
-        price,
-        stock_quantity,
-        brand_id,
-        category_id,
-        warehouse_id,
-        product_type_id,
-        cloudinaryImageUrl,
-        modelUrl, // Save the model URL if present
-      ],
-      (err, results) => {
-        if (err) {
-          console.error("Error inserting product:", err);
-          return res.status(500).json({ error: "Failed to add product." });
-        }
-        res.status(200).json({ message: "Product added successfully!" });
+    try {
+      // Step 1: Check current stock and warehouse capacity
+        const warehouseQuery = `
+        SELECT 
+          w.capacity, 
+          COALESCE(SUM(p.stock_quantity), 0) AS current_stock
+        FROM warehouses w
+        LEFT JOIN products p ON w.warehouse_id = p.warehouse_id
+        WHERE w.warehouse_id = ?
+        GROUP BY w.capacity
+      `;
+
+      const warehouseResult = await new Promise((resolve, reject) =>
+        db.query(warehouseQuery, [warehouse_id], (err, results) => {
+          if (err) reject(err);
+          else resolve(results[0]);
+        })
+      );
+
+      const { capacity, current_stock } = warehouseResult;
+
+      if (current_stock + parseInt(stock_quantity) > capacity) {
+        return res
+          .status(400)
+          .json({ error: "Stock exceeds warehouse capacity." });
       }
-    );
-  } catch (err) {
-    console.error("Error uploading files:", err);
-    res.status(500).json({ error: "Failed to upload files." });
+
+      // Step 2: Compress product image
+      const compressedImagePath = path.join(
+        __dirname,
+        `compressed-${req.files["product_image"][0].filename}`
+      );
+      await sharp(productImage).resize(800).toFile(compressedImagePath);
+
+      const result = await cloudinary.uploader.upload(compressedImagePath, {
+        folder: "image/product-image",
+      });
+
+      const cloudinaryImageUrl = result.secure_url;
+      fs.unlinkSync(compressedImagePath); // Delete the compressed image
+
+      let modelUrl = null;
+      if (modelFile) {
+        const modelResult = await cloudinary.uploader.upload(modelFile, {
+          resource_type: "auto", // Use 'auto' for automatic type detection
+          folder: "models/product-models",
+        });
+        modelUrl = modelResult.secure_url;
+      }
+
+      // Step 3: Insert product data into the database
+      db.query(
+        "INSERT INTO products (name, description, price, stock_quantity, brand_id, category_id, warehouse_id, product_type_id, image_url, model_url) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
+        [
+          name,
+          description,
+          price,
+          stock_quantity,
+          brand_id,
+          category_id,
+          warehouse_id,
+          product_type_id,
+          cloudinaryImageUrl,
+          modelUrl, // Save the model URL if present
+        ],
+        (err, results) => {
+          if (err) {
+            console.error("Error inserting product:", err);
+            return res
+              .status(500)
+              .json({ error: "Failed to add product." });
+          }
+          res
+            .status(200)
+            .json({ message: "Product added successfully!" });
+        }
+      );
+    } catch (err) {
+      console.error("Error processing request:", err);
+      res.status(500).json({ error: "Failed to process request." });
+    }
   }
-});
+);
 
 
 

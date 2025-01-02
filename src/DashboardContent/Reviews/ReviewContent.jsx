@@ -6,12 +6,14 @@ import Loading from "../../components/Loading";
 
 const ReviewContent = () => {
   const [reviews, setReviews] = useState([]);
+  const [filteredReviews, setFilteredReviews] = useState([]); // State for filtered reviews
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-  const [currentPage, setCurrentPage] = useState(1); // Track current page
-  const [totalPages, setTotalPages] = useState(1); // Track total number of pages
-  const [totalCount, setTotalCount] = useState(0); // Track total count of reviews
-  const pageSize = 10; // Set the page size
+  const [currentPage, setCurrentPage] = useState(1);
+  const [totalPages, setTotalPages] = useState(1);
+  const [totalCount, setTotalCount] = useState(0);
+  const [searchTerm, setSearchTerm] = useState(""); // State for search term
+  const pageSize = 10;
   const apiUrl = import.meta.env.VITE_SERVER_URL;
 
   useEffect(() => {
@@ -23,6 +25,7 @@ const ReviewContent = () => {
         setReviews(response.data.data);
         setTotalPages(response.data.totalPages);
         setTotalCount(response.data.totalCount);
+        setFilteredReviews(response.data.data); // Initialize filtered reviews
       } catch (err) {
         setError(err.message);
         Swal.fire({
@@ -57,6 +60,9 @@ const ReviewContent = () => {
         setReviews((prevReviews) =>
           prevReviews.filter((review) => review.review_id !== reviewId)
         );
+        setFilteredReviews((prevReviews) =>
+          prevReviews.filter((review) => review.review_id !== reviewId)
+        );
 
         await Swal.fire({
           icon: "success",
@@ -74,6 +80,24 @@ const ReviewContent = () => {
     }
   };
 
+  const handleSearch = (e) => {
+    const term = e.target.value.toLowerCase();
+    setSearchTerm(term);
+    setFilteredReviews(
+      reviews.filter(
+        (review) =>
+          review.comment.toLowerCase().includes(term) || // Search by comment
+          `${review.rating}`.includes(term) || // Search by rating
+          `${review.member_firstname} ${review.member_lastname}`
+            .toLowerCase()
+            .includes(term) || // Search by user name
+          `${review.tech_firstname} ${review.tech_lastname}`
+            .toLowerCase()
+            .includes(term) // Search by tech name
+      )
+    );
+  };
+
   if (loading) return <Loading />;
   if (error) return <div className="text-red-500 text-center">{error}</div>;
 
@@ -82,12 +106,23 @@ const ReviewContent = () => {
   };
 
   return (
-    <div className="p-8 rounded-lg shadow-lg w-full mx-auto h-screen ">
+    <div className="p-8 rounded-lg shadow-lg w-full mx-auto h-screen">
       <div className="flex justify-between items-center mb-6">
         <h1 className="text-2xl font-semibold">Reviews</h1>
         <Link to="/dashboard/reviews/add" className="btn bg-blue text-white hover:bg-blue">
           Add Review
         </Link>
+      </div>
+
+      {/* Search Box */}
+      <div className="mb-4">
+        <input
+          type="text"
+          value={searchTerm}
+          onChange={handleSearch}
+          placeholder="Search by comment, rating, user, or technician..."
+          className="input input-bordered w-full"
+        />
       </div>
 
       <table className="table w-full border-collapse border border-gray-300">
@@ -103,8 +138,8 @@ const ReviewContent = () => {
           </tr>
         </thead>
         <tbody className="text-center">
-          {reviews.length > 0 ? (
-            reviews.map((review) => (
+          {filteredReviews.length > 0 ? (
+            filteredReviews.map((review) => (
               <tr key={review.review_id}>
                 <td className="border p-2 text-center">{review.review_id}</td>
                 <td className="border p-2 text-center">
@@ -158,7 +193,7 @@ const ReviewContent = () => {
         <p
           onClick={() => handlePageChange(currentPage + 1)}
           className={`cursor-pointer ${currentPage === totalPages ? "text-gray-400" : "text-black"}`}
-              style={{ pointerEvents: currentPage === 1 ? "none" : "auto" }}
+          style={{ pointerEvents: currentPage === totalPages ? "none" : "auto" }}
         >
           Next
         </p>

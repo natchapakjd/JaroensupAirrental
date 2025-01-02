@@ -147,7 +147,7 @@ const AddOrder = () => {
   return (
     <div className="p-8 rounded-lg shadow-lg w-full mx-auto font-inter bg-base-100 h-full">
       <h2 className="text-2xl mb-4 font-bold">Add Order</h2>
-      <form onSubmit={handleSubmit} className="space-y-4">
+      <form onSubmit={handleSubmit} className="space-y-4 text-sm font-medium">
         <div>
           <label className="label">
             <span className="label-text">User</span>

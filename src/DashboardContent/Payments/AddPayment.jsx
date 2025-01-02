@@ -86,7 +86,7 @@ const AddPayment = () => {
   return (
     <div className="p-8 font-inter">
       <h2 className="text-2xl font-semibold mb-4">Add Payment</h2>
-      <form onSubmit={handleSubmit}>
+      <form onSubmit={handleSubmit} className='text-sm font-medium'>
         <div className="mb-4">
           <label className="block mb-2 ">Select Mode</label>
           <select value={selectionMode} onChange={(e) => setSelectionMode(e.target.value)} className="input w-full border-gray-300">

@@ -99,7 +99,7 @@ const EditProduct = () => {
     } catch (error) {
       Swal.fire({
         title: "Error",
-        text: error.message,
+        text: error.response.data.error,
         icon: "error",
       });
     }
@@ -108,7 +108,7 @@ const EditProduct = () => {
   return (
     <div className="bg-white p-8 rounded-lg shadow-lg w-full mx-auto h-full">
       <h1 className="text-2xl font-semibold mb-6">Edit Product</h1>
-      <form onSubmit={handleSubmit}>
+      <form onSubmit={handleSubmit} className="text-sm font-medium">
         <div className="mb-4">
           <label htmlFor="name" className="block text-gray-700 font-medium mb-2">
             Name:

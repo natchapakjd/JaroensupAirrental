@@ -34,7 +34,7 @@ const AddWarehouse = () => {
   return (
     <div className="p-8 rounded-lg shadow-lg w-full mx-auto h-screen max-w-md">
       <h1 className="text-2xl font-semibold mb-6">Add New Warehouse</h1>
-      <form onSubmit={handleSubmit}>
+      <form onSubmit={handleSubmit} className='text-sm font-medium'>
         <div className="mb-4">
           <label htmlFor="name" className="block text-sm font-medium text-gray-700">Name</label>
           <input
