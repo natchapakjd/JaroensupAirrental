@@ -341,7 +341,146 @@ router.get("/v2/orders/count", (req, res) => {
     }
   });
   
+  router.put("/v2/orders/:orderId", (req, res) => {
+    const { orderId } = req.params; // Extract orderId from the URL parameter
+    const { user_id, items, total_price } = req.body;
+    
+    console.log(req.body)
+    console.log(orderId)
+    if (!items || items.length === 0) {
+      return res.status(400).json({ message: "No items provided" });
+    }
+  
+    // Update the task (assuming it's related to this order)
+    const taskData = {
+      user_id: user_id,
+      description: "ซื้อขายอุปกรณ์",
+      task_type_id: 9,
+      isActive: 1,
+      updated_at: new Date(),
+      quantity_used: items.reduce((total, item) => total + item.quantity, 0),
+    };
 
-
+    db.query(
+      "UPDATE tasks SET user_id = ?, description = ?, task_type_id = ?, quantity_used = ?, isActive = ?, updatedAt = ? WHERE task_id = (SELECT task_id FROM orders WHERE id = ?)",
+      [
+        taskData.user_id,
+        taskData.description,
+        taskData.task_type_id,
+        taskData.quantity_used,
+        taskData.isActive,
+        taskData.updated_at,
+        orderId,
+      ],
+      (err) => {
+        if (err) return res.status(500).send(err);
+  
+        // Update the order
+        db.query(
+          "UPDATE orders SET user_id = ?, total_price = ? WHERE id = ?",
+          [user_id, total_price, orderId],
+          (err) => {
+            if (err) return res.status(500).send(err);
+  
+            // Delete existing order items and insert updated ones
+            db.query(
+              "DELETE FROM order_items WHERE order_id = ?",
+              [orderId],
+              (err) => {
+                if (err) return res.status(500).send(err);
+  
+                const orderItems = items.map((item) => [
+                  orderId,
+                  item.product_id,
+                  item.name,
+                  item.quantity,
+                  item.price,
+                  item.total_price,
+                ]);
+  
+                // Insert new order items
+                db.query(
+                  "INSERT INTO order_items (order_id, product_id, product_name, quantity, price, total_price) VALUES ?",
+                  [orderItems],
+                  (err) => {
+                    if (err) return res.status(500).send(err);
+  
+                    res.status(200).json({ message: "Order updated successfully", orderId });
+                  }
+                );
+              }
+            );
+          }
+        );
+      }
+    );
+  });
+  
+  router.get("/v3/orders/:id", (req, res) => {
+    const order_id = req.params.id;
+    const page = parseInt(req.query.page) || 1; // Default to page 1
+    const limit = parseInt(req.query.limit) || 10; // Default to 10 items per page
+    const offset = (page - 1) * limit;
+  
+    if (!order_id) {
+      return res.status(400).json({ message: "Order ID is required" });
+    }
+  
+    const query = `
+      SELECT o.id AS order_id, o.created_at, oi.product_id, oi.product_name, oi.quantity, oi.total_price,oi.price
+      FROM orders o
+      JOIN order_items oi ON o.id = oi.order_id
+      WHERE o.id = ?
+      LIMIT ? OFFSET ?
+    `;
+  
+    db.query(query, [order_id, limit, offset], (err, result) => {
+      if (err) return res.status(500).send(err);
+  
+      // Get the total count of items in order_items for the specified order
+      db.query(
+        `
+        SELECT COUNT(*) AS total_items 
+        FROM order_items oi
+        WHERE oi.order_id = ?
+        `,
+        [order_id],
+        (err, countResult) => {
+          if (err) return res.status(500).send(err);
+  
+          const totalItems = countResult[0].total_items || 0;
+  
+          const orders = result.reduce((acc, row) => {
+            const orderId = row.order_id;
+  
+            if (!acc[orderId]) {
+              acc[orderId] = {
+                order_id: orderId,
+                created_at: row.created_at,
+                items: [],
+              };
+            }
+  
+            acc[orderId].items.push({
+              product_id: row.product_id,
+              product_name: row.product_name,
+              quantity: row.quantity,
+              total_price: row.total_price,
+              price:row.price,
+            });
+  
+            return acc;
+          }, {});
+  
+          res.status(200).json({
+            orders: Object.values(orders),
+            totalItems,
+          });
+        }
+      );
+    });
+  });
+  
+  
 
 module.exports = router;

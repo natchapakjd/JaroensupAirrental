@@ -34,6 +34,7 @@ import XrHitCubeContainer from "./components/AugmentedReality/XR-Hit-Cube/XrHitC
 import XrHitModelContainer from "./components/AugmentedReality/XR-Hit-Model/XrHitModelContainer";
 import XrOverlayContainer from "./components/AugmentedReality/Xr-overlay/XrOverlayContainer";
 import XrGallaryContainer from "./components/AugmentedReality/XR-Gallary/XrGallaryContainer";
+import Areacal from "./DashboardContent/AugmentedReality/Areacal";
 const router = createBrowserRouter([
   {
     path: "/",
@@ -166,6 +167,10 @@ const router = createBrowserRouter([
   {
     path: "test-xr-gallary",
     element: <XrGallaryContainer />,
+  },
+  {
+    path: "test-calarea",
+    element: <Areacal />,
   },
 ]);
 

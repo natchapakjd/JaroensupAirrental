@@ -135,7 +135,7 @@ const EditPayment = () => {
             <select
               value={orderId}
               onChange={(e) => setOrderId(e.target.value)}
-              className="input w-full"
+              className="input w-full "
               required
             >
               <option value="">Select Order</option>
@@ -153,7 +153,7 @@ const EditPayment = () => {
             type="number"
             value={amount}
             onChange={(e) => setAmount(e.target.value)}
-            className="input w-full"
+            className="input w-full border-gray-300"
             required
           />
         </div>
@@ -162,7 +162,7 @@ const EditPayment = () => {
           <select
             value={userId}
             onChange={(e) => setUserId(e.target.value)}
-            className="input w-full"
+            className="input w-full border-gray-300"
             required
           >
             <option value="">Select User</option>
@@ -179,7 +179,7 @@ const EditPayment = () => {
           <select
             value={paymentMethod}
             onChange={(e) => setPaymentMethod(e.target.value)}
-            className="input w-full"
+            className="input w-full border-gray-300"
             required
           >
             <option value="">Select Payment Method</option>
@@ -196,7 +196,7 @@ const EditPayment = () => {
             type="datetime-local"
             value={paymentDate}
             onChange={(e) => setPaymentDate(e.target.value)}
-            className="input w-full"
+            className="input w-full border-gray-300"
             required
           />
         </div>
@@ -205,8 +205,7 @@ const EditPayment = () => {
           <input
             type="file"
             onChange={(e) => setSlipImages(e.target.files[0])}
-            className="input w-full"
-          />
+            className=" file-input file-input-bordered w-full h-10"          />
         </div>
 
         <div className="mb-4">
@@ -214,7 +213,7 @@ const EditPayment = () => {
           <select
             value={status}
             onChange={(e) => setStatus(e.target.value)}
-            className="input w-full"
+            className="input w-full border-gray-300"
             required
           >
             <option value="">Select Status</option>

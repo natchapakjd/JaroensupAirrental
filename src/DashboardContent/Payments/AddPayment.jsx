@@ -142,10 +142,7 @@ const AddPayment = () => {
           <label className="block mb-2">Payment Date</label>
           <input type="datetime-local" value={paymentDate} onChange={(e) => setPaymentDate(e.target.value)} className="input w-full border-gray-300" required />
         </div>
-        <div className="mb-4">
-          <label className="block mb-2">Slip Images</label>
-          <input type="file" onChange={(e) => setSlipImages(e.target.files[0])} className="input w-full border-gray-300" />
-        </div>
+
         <div className="mb-4">
           <label className="block mb-2">Status</label>
           <select value={status} onChange={(e) => setStatus(e.target.value)} className="input w-full border-gray-300">
@@ -154,6 +151,11 @@ const AddPayment = () => {
               <option key={statusOption.status_id} value={statusOption.status_id}>{statusOption.status_name}</option>
             ))}
           </select>
+          <div className="mb-4">
+          <label className="block mb-2">Slip Images</label>
+          <input type="file" onChange={(e) => setSlipImages(e.target.files[0])}             className=" file-input file-input-bordered w-full h-10"
+ />
+        </div>
         </div>
         <button type="submit" className="btn bg-blue text-white">Add Payment</button>
       </form>

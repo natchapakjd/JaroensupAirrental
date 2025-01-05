@@ -228,8 +228,7 @@ const EditUser = () => {
             type="file"
             name="profile_image"
             onChange={handleFileChange}
-            className="mt-1 block w-full p-2  rounded"
-          />
+            className=" file-input file-input-bordered w-full h-10"          />
         </div>
         <button
           type="submit"

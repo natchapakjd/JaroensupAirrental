@@ -335,7 +335,6 @@ router.put(
       position_applied,
       notes,
       interview_date,
-      interviewer,
       first_name,
       last_name,
       status_id,
@@ -366,7 +365,7 @@ router.put(
         }
       }
 
-      const query = `UPDATE technician_applicants SET date_of_birth = ?, address = ?, email = ?, phone_number = ?, position_applied = ?, notes = ?, interview_date = ?, interviewer = ?, first_name = ?, last_name = ?, status_id = ?, id_card_image_url = ?, driver_license_image_url = ?, criminal_record_image_url = ?, additional_image_url = ? WHERE applicant_id = ?`;
+      const query = `UPDATE technician_applicants SET date_of_birth = ?, address = ?, email = ?, phone_number = ?, position_applied = ?, notes = ?, interview_date = ?, first_name = ?, last_name = ?, status_id = ?, id_card_image_url = ?, driver_license_image_url = ?, criminal_record_image_url = ?, additional_image_url = ? WHERE applicant_id = ?`;
 
       db.query(
         query,
@@ -378,7 +377,6 @@ router.put(
           position_applied,
           notes,
           interview_date,
-          interviewer,
           first_name,
           last_name,
           status_id,

@@ -3,15 +3,18 @@ import { Link } from "react-router-dom";
 import Navbar from "../../components/Navbar";
 import Footer from "../../components/Footer";
 import axios from "axios";
+import Loading from "../../components/Loading";
 
 const Product = () => {
   const [products, setProducts] = useState([]); // Only need one state
+  const [loading, setLoading] = useState(true) // Only need one state
 
   useEffect(() => {
     const fetchData = async () => {
       try {
         const response = await axios.get(`${import.meta.env.VITE_SERVER_URL}/products`);
         setProducts(response.data); // Set products directly
+        setLoading(false)
       } catch (error) {
         console.error("Error fetching data:", error);
       }
@@ -19,7 +22,10 @@ const Product = () => {
 
     fetchData();
   }, []);
-
+  
+  if(loading){
+    return <Loading/>
+  }
   const filteredProducts = products.filter(
     (product) =>
       product.product_type_id === 1

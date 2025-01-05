@@ -1,10 +1,12 @@
-import React, { useState, useEffect } from 'react';
-import axios from 'axios';
-import Swal from 'sweetalert2'; // Import SweetAlert2
+import React, { useState, useEffect } from "react";
+import axios from "axios";
+import Swal from "sweetalert2";
 
 const AddOrder = () => {
-  const [userId, setUserId] = useState('');
-  const [items, setItems] = useState([{ productId: '', name: '', quantity: 0, price: 0, total_price: 0 }]);
+  const [userId, setUserId] = useState("");
+  const [items, setItems] = useState([
+    { productId: "", name: "", quantity: 0, price: 0, total_price: 0, stock_quantity: 0 },
+  ]);
   const [totalOrderPrice, setTotalOrderPrice] = useState(0);
   const [users, setUsers] = useState([]);
   const [products, setProducts] = useState([]);
@@ -12,34 +14,27 @@ const AddOrder = () => {
 
   // Fetch users and products on component mount
   useEffect(() => {
-    const fetchUsers = async () => {
+    const fetchData = async () => {
       try {
-        const response = await axios.get(`${apiUrl}/users`);
-        setUsers(response.data);
+        const [usersResponse, productsResponse] = await Promise.all([
+          axios.get(`${apiUrl}/users`),
+          axios.get(`${apiUrl}/products`),
+        ]);
+        setUsers(usersResponse.data);
+        setProducts(productsResponse.data.filter((p) => p.product_type_id === 1)); // Filter products
       } catch (error) {
-        console.error('Error fetching users:', error);
+        console.error("Error fetching data:", error);
       }
     };
-
-    const fetchProducts = async () => {
-      try {
-        const response = await axios.get(`${apiUrl}/products`);
-        setProducts(response.data);
-      } catch (error) {
-        console.error('Error fetching products:', error);
-      }
-    };
-
-    fetchProducts();
-    fetchUsers();
+    fetchData();
   }, [apiUrl]);
 
   const fetchProductDetails = async (productId) => {
     try {
       const response = await axios.get(`${apiUrl}/product/${productId}`);
-      return response.data[0]; 
+      return response.data[0];
     } catch (error) {
-      console.error('Error fetching product details:', error);
+      console.error("Error fetching product details:", error);
       return null;
     }
   };
@@ -48,101 +43,93 @@ const AddOrder = () => {
     const newItems = [...items];
     newItems[index][field] = value;
 
-    // Fetch product details when productId is changed
-    if (field === 'productId') {
-      const productDetails = await fetchProductDetails(value);
-      if (productDetails) {
-        newItems[index].name = productDetails.name;
-        newItems[index].price = productDetails.price;
+    if (field === "productId") {
+      if (value === "") {
+        newItems[index] = {
+          productId: "",
+          name: "",
+          price: 0,
+          quantity: 0,
+          total_price: 0,
+          stock_quantity: 0,
+        };
       } else {
-        newItems[index].name = '';
-        newItems[index].price = 0;
+        const productDetails = await fetchProductDetails(value);
+        if (productDetails) {
+          newItems[index] = {
+            ...newItems[index],
+            name: productDetails.name,
+            price: productDetails.price,
+            stock_quantity: productDetails.stock_quantity,
+            quantity: 0, // Reset quantity on product change
+            total_price: 0, // Reset total price
+          };
+        }
       }
     }
 
-    // Calculate total price for the item
-    newItems[index].total_price = newItems[index].quantity * newItems[index].price;
+    if (field === "quantity" && value > newItems[index].stock_quantity) {
+      Swal.fire({
+        icon: "error",
+        title: "Quantity exceeds stock",
+        text: `Available stock: ${newItems[index].stock_quantity}`,
+      });
+      newItems[index].quantity = newItems[index].stock_quantity;
+    } else if (field === "quantity") {
+      newItems[index].quantity = value;
+      newItems[index].total_price = value * newItems[index].price;
+    }
 
     setItems(newItems);
-    // Recalculate total order price
-    setTotalOrderPrice(newItems.reduce((total, item) => total + (item.total_price || 0), 0));
+    setTotalOrderPrice(newItems.reduce((total, item) => total + item.total_price, 0));
   };
 
   const handleAddItem = () => {
-    setItems([...items, { productId: '', name: '', quantity: 0, price: 0, total_price: 0 }]);
+    setItems([
+      ...items,
+      { productId: "", name: "", quantity: 0, price: 0, total_price: 0, stock_quantity: 0 },
+    ]);
   };
 
   const handleRemoveItem = (index) => {
     const newItems = items.filter((_, i) => i !== index);
     setItems(newItems);
-    setTotalOrderPrice(newItems.reduce((total, item) => total + (item.total_price || 0), 0));
+    setTotalOrderPrice(newItems.reduce((total, item) => total + item.total_price, 0));
   };
-
-  // const filterProductForSale =()=>{
-  //   products = products.filter((p)=>p.product_type_id = 3)
-  // }
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-  
-    const orderItems = items.map((item) => ({
-      product_id: item.productId,
-      name: item.name,
-      quantity: item.quantity,
-      price: item.price,
-      total_price: item.total_price,
-    }));
-  
     try {
-      // Create the order
       const response = await axios.post(`${apiUrl}/v2/orders`, {
         user_id: userId,
-        items: orderItems,
+        items: items.map(({ productId, quantity, price, total_price,name}) => ({
+          product_id: productId,
+          name,
+          quantity,
+          price,
+          total_price,
+        })),
         total_price: totalOrderPrice,
       });
-  
+
       if (response.status === 201) {
-        const orderResult = response.data; // Assume the order API response contains the order ID
-  
-        // Prepare payment details
-        const paymentDetails = {
-          amount: totalOrderPrice,
-          user_id: userId,
-          order_id: 'null',
-          method_id: 1, // Example: Replace with the actual payment method selected
-          status_id: 1, // Example: Replace with actual payment status
-          task_id: orderResult.taskId || null,
-        };
-  
-        // Submit payment details
-        const paymentResponse = await axios.post(`${apiUrl}/payments`, paymentDetails);
-  
-        if (paymentResponse.status === 201) {
-          await Swal.fire({
-            icon: 'success',
-            title: 'Order and payment created successfully!',
-            confirmButtonText: 'OK',
-          });
-  
-          // Reset form state
-          setUserId('');
-          setItems([{ productId: '', name: '', quantity: 0, price: 0, total_price: 0 }]);
-          setTotalOrderPrice(0);
-        } else {
-          throw new Error('Payment failed');
-        }
+        Swal.fire({
+          icon: "success",
+          title: "Order created successfully!",
+        });
+        setUserId("");
+        setItems([{ productId: "", name: "", quantity: 0, price: 0, total_price: 0 }]);
+        setTotalOrderPrice(0);
       }
     } catch (error) {
-      console.error('Error:', error);
-      await Swal.fire({
-        icon: 'error',
-        title: 'Failed to create order or payment',
-        text: 'Please check the console for details.',
-        confirmButtonText: 'OK',
+      console.error("Error submitting order:", error);
+      Swal.fire({
+        icon: "error",
+        title: "Failed to create order",
+        text: "Please try again later.",
       });
     }
   };
-  
 
   return (
     <div className="p-8 rounded-lg shadow-lg w-full mx-auto font-inter bg-base-100 h-full">
@@ -158,8 +145,10 @@ const AddOrder = () => {
             className="select select-bordered w-full"
             required
           >
-            <option value="" disabled>Select a user</option>
-            {users.map(user => (
+            <option value="" disabled>
+              Select a user
+            </option>
+            {users.map((user) => (
               <option key={user.user_id} value={user.user_id}>
                 {user.firstname} - {user.lastname}
               </option>
@@ -175,30 +164,20 @@ const AddOrder = () => {
               </label>
               <select
                 value={item.productId}
-                onChange={(e) => handleItemChange(index, 'productId', e.target.value)}
+                onChange={(e) => handleItemChange(index, "productId", e.target.value)}
                 className="select select-bordered w-full"
                 required
               >
-                <option value="" disabled>Select a product</option>
-                {products.map(product => (
+                <option value="" disabled>
+                  Select a product
+                </option>
+                {products.map((product) => (
                   <option key={product.product_id} value={product.product_id}>
-                    {product.product_id}. {product.name}
+                    {product.name} - Stock: {product.stock_quantity}
                   </option>
                 ))}
               </select>
             </div>
-            <div className="flex-1" style={{ display: 'none' }}>
-  <label className="label">
-    <span className="label-text">Product Name</span>
-  </label>
-  <input
-    type="hidden"
-    value={item.name}
-    readOnly
-    className="input input-bordered w-full"
-    required
-  />
-</div>
 
             <div className="flex-1">
               <label className="label">
@@ -207,11 +186,13 @@ const AddOrder = () => {
               <input
                 type="number"
                 value={item.quantity}
-                onChange={(e) => handleItemChange(index, 'quantity', Number(e.target.value))}
+                onChange={(e) => handleItemChange(index, "quantity", Number(e.target.value))}
                 className="input input-bordered w-full"
                 required
+                min="0"
               />
             </div>
+
             <div className="flex-1">
               <label className="label">
                 <span className="label-text">Price</span>
@@ -221,9 +202,9 @@ const AddOrder = () => {
                 value={item.price}
                 readOnly
                 className="input input-bordered w-full"
-                required
               />
             </div>
+
             <div className="flex-1">
               <label className="label">
                 <span className="label-text">Total Price</span>
@@ -235,13 +216,22 @@ const AddOrder = () => {
                 className="input input-bordered w-full"
               />
             </div>
-            <button type="button" onClick={() => handleRemoveItem(index)} className="btn btn-error text-white mt-9">
+
+            <button
+              type="button"
+              onClick={() => handleRemoveItem(index)}
+              className="btn btn-error text-white mt-8"
+            >
               Remove
             </button>
           </div>
         ))}
 
-        <button type="button" onClick={handleAddItem} className="btn bg-blue hover:bg-blue text-white">
+        <button
+          type="button"
+          onClick={handleAddItem}
+          className="btn bg-blue hover:bg-blue text-white"
+        >
           Add Item
         </button>
 

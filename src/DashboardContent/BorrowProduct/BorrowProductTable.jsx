@@ -87,7 +87,103 @@ const BorrowProductTable = () => {
       setCurrentPage(newPage);
     }
   };
+  const handleReturn = async (taskId) => {
+    try {
+      // Check the status of the task
+      const statusResponse = await axios.get(
+        `${import.meta.env.VITE_SERVER_URL}/approve/${taskId}`
+      );
 
+      const statusId = statusResponse.data.status_id; // Assuming your API returns the status_id
+
+      // Check if the status_id is 4 (approved)
+      if (statusId !== 4) {
+        Swal.fire({
+          title: "Not Approved",
+          text: "The equipment return has not been approved yet.",
+          icon: "warning",
+        });
+        return;
+      }
+
+      // If approved, proceed to return the equipment
+      const response = await axios.put(`
+        ${
+          import.meta.env.VITE_SERVER_URL
+        }/equipment-borrowing/return/${taskId}`
+      );
+
+      if (response.status === 200) {
+        Swal.fire({
+          title: "Equipment returned successfully",
+          icon: "success",
+        });
+        fetchBorrowingData(); // Refresh data after returning equipment
+      } else {
+        throw new Error("Failed to return equipment.");
+      }
+    } catch (error) {
+      Swal.fire({
+        title: "Error",
+        text: error.message,
+        icon: "error",
+      });
+    }
+  };
+
+  const handleApprove = async (taskId) => {
+    try {
+      const response = await axios.put(`
+        ${
+          import.meta.env.VITE_SERVER_URL
+        }/equipment-borrowing/approve/${taskId}`
+      );
+
+      if (response.status === 200) {
+        Swal.fire({
+          title: "Equipment approved successfully",
+          icon: "success",
+        });
+        fetchBorrowingData(); // Refresh data after returning equipment
+      } else {
+        throw new Error("Failed to approved equipment.");
+      }
+    } catch (error) {
+      Swal.fire({
+        title: "Error",
+        text: error.message,
+        icon: "error",
+      });
+    }
+  };
+
+  const handleCancel = async (borrowing_id) => {
+    try {
+      const response = await axios.delete(`
+        ${
+          import.meta.env.VITE_SERVER_URL
+        }/equipment-borrowing/${borrowing_id}`,
+        { withCredentials: true }
+      );
+
+      if (response.status === 200) {
+        Swal.fire({
+          title: "Task Canceled",
+          text: "The task has been marked as canceled.",
+          icon: "success",
+        });
+        fetchBorrowingData(techId); // Refresh data after canceling
+      } else {
+        throw new Error("Failed to cancel the task.");
+      }
+    } catch (error) {
+      Swal.fire({
+        title: "Error",
+        text: error.message,
+        icon: "error",
+      });
+    }
+  };
   return (
     <div className="p-8 rounded-lg shadow-lg w-full mx-auto font-inter h-full">
 

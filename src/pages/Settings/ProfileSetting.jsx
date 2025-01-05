@@ -227,8 +227,7 @@ const ProfileSetting = () => {
                   id="profile_image"
                   name="profile_image"
                   onChange={handleFileChange}
-                  className="input input-bordered w-full mt-2"
-                />
+                  className=" file-input file-input-bordered w-full h-10"                />
               </div>
               <button className="btn bg-blue mt-4 text-white hover:bg-blue-700" type="submit">
                 Save Changes

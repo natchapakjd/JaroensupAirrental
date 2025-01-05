@@ -53,6 +53,8 @@ import AddReview from '../DashboardContent/Reviews/AddReview'
 import EditAttribute from '../DashboardContent/Attributes/EditAttribute'
 import EditCategory from '../DashboardContent/Categories/EditCategory'
 import EditAssignmentTask from '../DashboardContent/Tasks/EditAssignmentTask'
+import AddApplicant from '../DashboardContent/TechnicianApplicants/AddApplicant'
+import EditApplicant from '../DashboardContent/TechnicianApplicants/EditApplicant'
 const DashboardRoute = () => {
   return (
       <div className='flex'>
@@ -71,6 +73,8 @@ const DashboardRoute = () => {
             <Route path="tasks/:taskId" element={<TaskDetails />} />
             <Route path="tasks-tech/edit/:taskId" element={<UpdateTaskTech />} />
             <Route path="applicants" element={<ApplicantContent />} />
+            <Route path="applicants/add" element={<AddApplicant />} />
+            <Route path="applicants/edit/:applicantId" element={<EditApplicant />} />
             <Route path="applicants/:id" element={<ApplicantDetails />} />
             <Route path="applicant/sending-email/:id" element={<SendApplicantEmail />} />
             <Route path="history-log" element={<HistoryLogContent />} />
@@ -86,7 +90,7 @@ const DashboardRoute = () => {
             <Route path="orders" element={<OrderContent />} />
             <Route path="orders/details/:orderId" element={<OrderDetails/>} />
             <Route path="orders/add" element={<AddOrder />} />
-            {/* <Route path="orders/edit/:orderId" element={<EditOrder />} /> */}
+            <Route path="orders/edit/:orderId" element={<EditOrder />} />
             <Route path="tasks/add" element={<AddTask />} />
             <Route path="tasks/edit/:taskId" element={<EditTask />} />
             <Route path="user" element={<UserContent />} />
@@ -111,6 +115,7 @@ const DashboardRoute = () => {
             <Route path="categories/edit/:categoryId" element={<EditCategory />} />
             <Route path="products/add" element={<AddProduct />} />
             <Route path="products/edit/:productId" element={<EditProduct />} /> 
+            
           </Routes>
         </div>
       </div>

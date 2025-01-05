@@ -102,13 +102,15 @@ const RegisterToTech = () => {
     }
   };
 
+  const isDashboard = location.pathname.startsWith('/dashboard');
+
   return (
     <>
-      <Navbar />
+      {!isDashboard && <Navbar/>}
       <div className="bg-gray-100 text-gray-800 font-prompt py-8">
         <header className="text-center mb-12">
           <h1 className="text-4xl font-bold text-gray-800 mb-4">
-            สมัครเป็นช่าง
+          {!isDashboard ? 'สมัครเป็นช่าง' : 'เพิ่มช่างภายนอก'}
           </h1>
           <p className="text-lg text-gray-600">
             กรุณากรอกข้อมูลด้านล่างเพื่อลงทะเบียน
@@ -241,8 +243,7 @@ const RegisterToTech = () => {
               <input
                 type="file"
                 name="id_card_image"
-                className="border rounded w-full py-2 px-3"
-                onChange={handleChange}
+                className=" file-input file-input-bordered w-full h-10"                onChange={handleChange}
               />
               <label
                 className="block text-gray-700"
@@ -253,8 +254,7 @@ const RegisterToTech = () => {
               <input
                 type="file"
                 name="driver_license_image"
-                className="border rounded w-full py-2 px-3 mt-2"
-                onChange={handleChange}
+                className=" file-input file-input-bordered w-full h-10"                onChange={handleChange}
               />
               <label
                 className="block text-gray-700"
@@ -265,8 +265,7 @@ const RegisterToTech = () => {
               <input
                 type="file"
                 name="criminal_record_image"
-                className="border rounded w-full py-2 px-3 mt-2"
-                onChange={handleChange}
+                className=" file-input file-input-bordered w-full h-10"                onChange={handleChange}
               />
               <label className="block text-gray-700" htmlFor="additional_image">
                 เอกสารเพิ่มเติม
@@ -274,8 +273,7 @@ const RegisterToTech = () => {
               <input
                 type="file"
                 name="additional_image"
-                className="border rounded w-full py-2 px-3 mt-2"
-                onChange={handleChange}
+                className=" file-input file-input-bordered w-full h-10"                onChange={handleChange}
               />
             </div>
             <div className="mb-4">
@@ -297,12 +295,13 @@ const RegisterToTech = () => {
               type="submit"
               className="bg-blue text-white rounded px-4 py-2 hover:bg-blue"
             >
-              ส่งใบสมัคร
-            </button>
+              {!isDashboard ? 'ส่งใบสมัคร' : 'เพิ่มข้อมูล'}
+          </button>
           </form>
         </div>
       </div>
-      <Footer />
+      {!isDashboard && <Footer/>}
+
     </>
   );
 };

@@ -3,7 +3,7 @@ import { useParams } from 'react-router-dom';
 import axios from 'axios';
 import Swal from 'sweetalert2';
 import Loading from '../../components/Loading';
-
+import { Link } from 'react-router-dom';
 const OrderDetails = () => {
   const { orderId } = useParams(); // Get the orderId from URL params
   const [order, setOrder] = useState(null);
@@ -31,12 +31,20 @@ const OrderDetails = () => {
     }
   };
 
-  if (loading) return <Loading/>;
+  if (loading) return <Loading />;
   if (error) return <div className="text-red-500 text-center">{error}</div>;
 
   return (
     <div className="p-8 rounded-lg shadow-lg w-full mx-auto font-inter h-full">
+      <div className="flex justify-between items-center mb-4">
       <h2 className="text-xl font-semibold mb-4">Order Details</h2>
+
+      <Link to={`/dashboard/orders/edit/${orderId}`}>
+        <button className="btn bg-blue text-white hover:bg-blue px-6 py-2 rounded-md">
+          Edit Order
+        </button>
+      </Link>
+      </div>
       {order ? (
         <div>
           <div className="mb-4">
@@ -65,6 +73,7 @@ const OrderDetails = () => {
               ))}
             </tbody>
           </table>
+  
         </div>
       ) : (
         <div>No order details available.</div>

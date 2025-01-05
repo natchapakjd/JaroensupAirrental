@@ -3,7 +3,7 @@ import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
 import Swal from 'sweetalert2';
 import Loading from '../../components/Loading';
-
+import { Link } from 'react-router-dom';
 const ApplicantContent = () => {
   const [applicants, setApplicants] = useState([]);
   const [filteredApplicants, setFilteredApplicants] = useState([]);
@@ -133,8 +133,15 @@ const ApplicantContent = () => {
 
   return (
     <div className="table p-8 rounded-lg shadow-lg w-full mx-auto h-full font-inter">
-      <h2 className="text-xl font-semibold mt-8 mb-5">Applicants list</h2>
-
+      
+  <div className="flex justify-between items-center mb-4">
+  <h2 className="text-xl font-semibold mt-8 mb-5">Applicants list</h2>
+  <Link to="/dashboard/applicants/add">
+                <button className="btn bg-blue text-white hover:bg-blue">
+                  Add Applicant
+                </button>
+              </Link>
+      </div>
       {/* Search and Filter */}
       <div className="flex justify-between items-center mb-4 gap-4">
         <input

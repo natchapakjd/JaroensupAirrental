@@ -272,8 +272,7 @@ const AddUser = () => {
             type="file"
             name="profile_image"
             onChange={handleFileChange}
-            className="mt-1 block w-full  rounded-lg px-3 py-2 shadow-sm  "
-          />
+            className=" file-input file-input-bordered w-full h-10"          />
         </div>
         <button
           type="submit"

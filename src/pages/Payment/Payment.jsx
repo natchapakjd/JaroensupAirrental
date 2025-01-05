@@ -148,8 +148,7 @@ const Payment = () => {
                   id="slip_image"
                   name="slip_image"
                   onChange={handleImageUpload}
-                  className="mt-1 block w-full text-sm text-gray-800 border-gray-300 rounded-md"
-                />
+                  className=" file-input file-input-bordered w-full h-10"                />
               </div>
 
               <button type="submit" className="btn bg-blue hover:bg-blue text-white">

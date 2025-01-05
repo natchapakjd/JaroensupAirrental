@@ -3,6 +3,7 @@ import React, { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import Swal from "sweetalert2";
 import { format } from "date-fns";
+import Loading from "../../components/Loading";
 
 const UserContent = () => {
   const [users, setUsers] = useState([]);
@@ -12,7 +13,7 @@ const UserContent = () => {
   const [selectedRole, setSelectedRole] = useState("");
   const [currentPage, setCurrentPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
-
+  const [loading,setLoading] =useState(true)
   const pageLimit = 10;
 
   useEffect(() => {
@@ -21,6 +22,7 @@ const UserContent = () => {
   }, [currentPage]);
 
   const fetchUsers = async (page) => {
+    setLoading(true)
     try {
       const response = await axios.get(
         `${
@@ -31,17 +33,20 @@ const UserContent = () => {
       setUsers(users);
       setFilteredUsers(users);
       setTotalPages(Math.ceil(total / pageLimit));
+      setLoading(false)
     } catch (error) {
       console.error("Error fetching users:", error);
     }
   };
 
   const fetchRoles = async () => {
+    setLoading(true)
     try {
       const response = await axios.get(
         `${import.meta.env.VITE_SERVER_URL}/roles`
       );
       setRoles(response.data);
+      setLoading(false)
     } catch (error) {
       console.error("Error fetching roles:", error);
     }
@@ -115,6 +120,9 @@ const UserContent = () => {
     }
   };
 
+  if(loading){
+    return <Loading/>
+  }
   return (
     <div className="font-inter mt-5 mx-16">
       <div className="flex justify-between items-center mb-4">

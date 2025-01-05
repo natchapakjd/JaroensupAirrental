@@ -284,8 +284,7 @@ const EditProduct = () => {
             id="product_image"
             name="product_image"
             onChange={handleChange}
-            className="w-full p-2 border border-gray-300 rounded-lg"
-          />
+            className=" file-input file-input-bordered w-full h-10"          />
         </div>
 
         <button

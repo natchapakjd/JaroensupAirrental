@@ -222,8 +222,7 @@ const AddBorrowProduct = () => {
             id="id_card_image"
             onChange={handleFileChange}
             accept="image/*"
-            className="input input-bordered w-full"
-          />
+            className=" file-input file-input-bordered w-full h-10"/>
         </div>
         <div className="mb-4 flex items-center">
           <input

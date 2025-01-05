@@ -32,15 +32,16 @@ const Service = () => {
       taskType.type_name === "งานซ่อมบำรุงเครื่องปรับอากาศ"
   );
 
+ 
+
   return (
     <>
       <Navbar />
       <div className="bg-gray-100 min-h-screen flex flex-col font-prompt">
         <div className="container mx-auto p-6">
           <h1 className="text-4xl font-bold text-center mb-6">บริการของเรา</h1>
-          {loading ? (
-            <Loading/>
-          ) : (
+          {/* ตรวจสอบว่ามี taskTypes หรือไม่ */}
+          {taskTypes && taskTypes.length > 0 ? (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
               {filteredTaskTypes.length > 0 ? (
                 filteredTaskTypes.map((taskType) => (
@@ -82,6 +83,8 @@ const Service = () => {
                 <p className="text-center">ไม่มีบริการให้เช่าหรือซื้อสินค้า</p>
               )}
             </div>
+          ) : (
+            <p className="text-center">ไม่มีบริการที่เกี่ยวข้อง</p>
           )}
         </div>
       </div>
