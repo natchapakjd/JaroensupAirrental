@@ -32,7 +32,6 @@ import CubeContainer from "./components/AugmentedReality/Cube/CubeContainer";
 import XrCubeContainer from "./components/AugmentedReality/XR/XrCubeContainer";
 import XrHitCubeContainer from "./components/AugmentedReality/XR-Hit-Cube/XrHitCubeContainer";
 import XrHitModelContainer from "./components/AugmentedReality/XR-Hit-Model/XrHitModelContainer";
-import XrOverlayContainer from "./components/AugmentedReality/Xr-overlay/XrOverlayContainer";
 import XrGallaryContainer from "./components/AugmentedReality/XR-Gallary/XrGallaryContainer";
 import Areacal from "./DashboardContent/AugmentedReality/Areacal";
 const router = createBrowserRouter([
@@ -160,10 +159,6 @@ const router = createBrowserRouter([
     path: "test-xr-hit-model",
     element: <XrHitModelContainer />,
   },
-  // {
-  //   path: "test-xr-overlay",
-  //   element: <XrOverlayContainer />,
-  // },
   {
     path: "test-xr-gallary",
     element: <XrGallaryContainer />,
