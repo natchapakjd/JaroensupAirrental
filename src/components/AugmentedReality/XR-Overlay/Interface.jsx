@@ -1,9 +1,9 @@
 import React, { forwardRef } from "react";
 import { useCharacterAnimations } from "../contexts/CharacterAnimations";
 import "./Interface.css";
-const Interface = forwardRef((props,ref)=>{
-    const { animations, animationIndex, setAnimationIndex } =
-    useCharacterAnimations();
+const Interface = forwardRef((props, ref) => {
+  const { animations, animationIndex, setAnimationIndex } = useCharacterAnimations();
+  
   return (
     <div id="overlay-content" ref={ref}>
       <div className="dom-container">
@@ -23,6 +23,5 @@ const Interface = forwardRef((props,ref)=>{
       </div>
     </div>
   );
-
-})
+});
 export default Interface;
