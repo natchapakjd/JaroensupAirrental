@@ -92,6 +92,9 @@ const Navbar = () => {
                 <li>
                   <Link to="/contact">ติดต่อเรา</Link>
                 </li>
+                <li>
+                  <Link to="/test-xr-gallary">AR Feature</Link>
+                </li>
               </ul>
             )}
           </div>
@@ -117,6 +120,9 @@ const Navbar = () => {
             <li>
               <Link to="/contact">ติดต่อเรา</Link>
             </li>
+            <li>
+                  <Link to="/test-xr-gallary">AR Feature</Link>
+                </li>
           </ul>
         </div>
         <div className="navbar-end ">

@@ -144,27 +144,27 @@ const router = createBrowserRouter([
     element: <Payment />,
   },
   {
-    path: "test-cube",
+    path: "/test-cube",
     element: <CubeContainer />,
   },
   {
-    path: "test-xr-cuber",
+    path: "/test-xr-cuber",
     element: <XrCubeContainer />,
   },
   {
-    path: "test-xr-hit-cube",
+    path: "/test-xr-hit-cube",
     element: <XrHitCubeContainer />,
   },
   {
-    path: "test-xr-hit-model",
+    path: "/test-xr-hit-model",
     element: <XrHitModelContainer />,
   },
   {
-    path: "test-xr-gallary",
+    path: "/test-xr-gallary",
     element: <XrGallaryContainer />,
   },
   {
-    path: "test-calarea",
+    path: "/test-calarea",
     element: <Areacal />,
   },
 ]);
