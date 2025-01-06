@@ -17,7 +17,7 @@ const XrGallary = () => {
   const [models, setModels] = useState([]);
   const { currentModelName ,count,setCount} = useCharacterAnimations();
   const { isPresenting } = useXR();
-  const { modelsStore, setModelsStore } = useModelsStore();
+  // const { modelsStore, setModelsStore } = useModelsStore();
 
   useThree(({ camera }) => {
     if (!isPresenting) {
@@ -39,16 +39,17 @@ const XrGallary = () => {
     let position = e.intersection.object.position.clone();
     let id = Date.now();
     setModels([...models, { position, id }]);
-    setModelsStore([...useModelsStore.getState().models, { position, id }]);
+    // setModelsStore([...useModelsStore.getState().models, { position, id }]);
   };
 
+  //useModelsStore.getState().models?.map(({ position, id }) => {
 
   return (
     <>
       <OrbitControls />
       <ambientLight />
       {isPresenting &&
-        useModelsStore.getState().models?.map(({ position, id }) => {
+        models.map(({ position, id }) => {
           return (
             <Fragment key ={id}>
               {currentModelName === "druid" && <Druid position={position}/>}
