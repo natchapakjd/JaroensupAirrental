@@ -160,10 +160,10 @@ const router = createBrowserRouter([
     path: "test-xr-hit-model",
     element: <XrHitModelContainer />,
   },
-  {
-    path: "test-xr-overlay",
-    element: <XrOverlayContainer />,
-  },
+  // {
+  //   path: "test-xr-overlay",
+  //   element: <XrOverlayContainer />,
+  // },
   {
     path: "test-xr-gallary",
     element: <XrGallaryContainer />,
