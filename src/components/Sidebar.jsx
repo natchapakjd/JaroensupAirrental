@@ -17,6 +17,7 @@ import {
   MdCalculate,
   MdHistory,
   MdOutlineSettings,
+  MdOutlineMenu
 } from "react-icons/md";
 import { jwtDecode } from "jwt-decode";
 import Cookies from "universal-cookie";
@@ -28,6 +29,7 @@ const Sidebar = () => {
   const token = cookies.get("authToken");
   const [role, setRole] = useState("");
   const location = useLocation();
+  const [isSidebarOpen, setIsSidebarOpen] = useState(true); 
 
   useEffect(() => {
     if (token) {
@@ -40,10 +42,24 @@ const Sidebar = () => {
     return location.pathname.startsWith(path);
   };
 
+  const toggleSidebar = () => {
+    setIsSidebarOpen(!isSidebarOpen); 
+  };
+
   return (
     <div>
-      <aside className="w-64 h-full sticky top-0  border font-inter min-h-screen">
-        <div className="relative">
+      <button
+        onClick={toggleSidebar}
+        className="fixed top-5 left-5 z-10 bg-blue text-white p-3 rounded-full md:hidden"
+      >
+        <MdOutlineMenu className="text-xl" />
+      </button>
+
+      <aside
+        className={`w-64 h-full sticky top-0 border font-inter min-h-screen transition-all duration-300 ${
+          isSidebarOpen ? "block" : "hidden"
+        }`}
+      >        <div className="relative">
           <p className="text-xl font-semibold mt-8 ml-10 mr-26 mb-9">
             Jaroensup
           </p>

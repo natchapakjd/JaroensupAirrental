@@ -55,6 +55,7 @@ import EditCategory from '../DashboardContent/Categories/EditCategory'
 import EditAssignmentTask from '../DashboardContent/Tasks/EditAssignmentTask'
 import AddApplicant from '../DashboardContent/TechnicianApplicants/AddApplicant'
 import EditApplicant from '../DashboardContent/TechnicianApplicants/EditApplicant'
+import EditTechProfile from '../DashboardContent/Users/EditTechProfile'
 const DashboardRoute = () => {
   return (
       <div className='flex'>
@@ -108,6 +109,7 @@ const DashboardRoute = () => {
             <Route path="user/add" element={<AddUser />} />
             <Route path="user/add-tech" element={<AddTechnician />} />
             <Route path="user/edit/:userId" element={<EditUser/>} />
+            <Route path="user/edit-tech/:techId" element={<EditTechProfile/>} />
             <Route path="user/:userId" element={<UserDetails/>} />
             <Route path="products" element={<ProductContent />} />
             <Route path="categories" element={<CategoryContent />} />

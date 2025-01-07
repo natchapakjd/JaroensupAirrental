@@ -105,10 +105,16 @@ router.get("/users", (req, res) => {
     res.json(users);
   });
 });
-
 router.get("/user/:id", (req, res) => {
   const id = req.params.id;
-  const query = "SELECT u.*, gd.gender_name, r.role_name FROM users u JOIN gender gd ON u.gender_id = gd.gender_id JOIN roles r ON u.role_id = r.role_id WHERE user_id = ?";
+
+  const query = `
+    SELECT u.*, gd.gender_name, r.role_name
+    FROM users u
+    JOIN gender gd ON u.gender_id = gd.gender_id
+    JOIN roles r ON u.role_id = r.role_id
+    WHERE u.user_id = ?;
+  `;
 
   db.query(query, [id], (err, result) => {
     if (err) {
@@ -121,32 +127,51 @@ router.get("/user/:id", (req, res) => {
     }
 
     const row = result[0];
-
     const user = {
       user_id: row.user_id,
-      role_id:row.role_id,
+      role_id: row.role_id,
       username: row.username,
       email: row.email,
-      role: row.role,
       created_at: row.created_at,
       image_url: row.image_url,
-      phone : row.phone,
-      role: row.role_id,
+      phone: row.phone,
       age: row.age,
       address: row.address,
       gender_id: row.gender_id,
       date_of_birth: row.date_of_birth,
-      created_at: row.created_at,
       firstname: row.firstname,
       lastname: row.lastname,
       linetoken: row.linetoken,
       gender_name: row.gender_name,
-      role_name: row.role_name
+      role_name: row.role_name,
     };
 
-    res.json(user);
+    // ตรวจสอบว่า role_id เท่ากับ 2 หรือไม่
+    if (user.role_id === 2) {
+      const technicianQuery = `
+        SELECT *
+        FROM technicians
+        WHERE user_id = ?;
+      `;
+
+      db.query(technicianQuery, [id], (err, technicianResult) => {
+        if (err) {
+          console.error("Error fetching technician details: " + err);
+          return res.status(500).json({ error: "Failed to fetch technician details" });
+        }
+
+        if (technicianResult.length > 0) {
+          user.technician_details = technicianResult[0];
+        }
+
+        res.json(user);
+      });
+    } else {
+      res.json(user);
+    }
   });
 });
+
 
 router.post("/change-password", (req, res) => {
   const newPassword = req.body.newPassword;

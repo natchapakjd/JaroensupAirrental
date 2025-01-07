@@ -3,7 +3,7 @@ import axios from "axios";
 import { useParams, useNavigate } from "react-router-dom";
 import Swal from "sweetalert2";
 import Loading from "../../components/Loading";
-
+import { Link } from "react-router-dom";
 const EditUser = () => {
   const { userId } = useParams(); // Retrieve userId from URL
   const navigate = useNavigate();
@@ -17,6 +17,7 @@ const EditUser = () => {
     address: "",
     gender_id: "", // Use gender_id instead of gender
     date_of_birth: "",
+    role_id: "",
   });
   const [loading, setLoading] = useState(true);
   const [profileImage, setProfileImage] = useState(null);
@@ -109,133 +110,157 @@ const EditUser = () => {
   }
 
   return (
-    <div className="mx-auto p-6 bg-white rounded-lg shadow-md font-inter">
-      <h1 className="text-2xl font-bold mb-4">Edit User</h1>
-      <form onSubmit={handleSubmit}>
-        {/* Username */}
-        <div className="mb-4">
-          <label className="block text-gray-700">Username:</label>
-          <input
-            type="text"
-            name="username"
-            value={user.username}
-            pattern="^[a-zA-Z0-9_-]{3,20}$"
-            onChange={handleChange}
-            className="mt-1 block w-full p-2 border border-gray-300 rounded bg-gray-100"
-            readOnly
-          />
+    <div className="mx-auto p-6 bg-white rounded-lg shadow-md font-inter h-screen">
+      <div className="flex justify-between items-center mb-4">
+        <h1 className="text-2xl font-bold mb-6">Edit User</h1>
+        {user.role_id === 2 ? (
+          <div className="flex justify-end gap-2 mb-4">
+            <Link to={`/dashboard/user/edit-tech/${userId}`}>
+              <button className="btn bg-success hover:bg-success text-white">
+                Edit Technician Profile
+              </button>
+            </Link>
+          </div>
+        ) : null}
+      </div>
+      <form onSubmit={handleSubmit} className="text-sm font-medium">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2 gap-6">
+          {/* Username */}
+          <div>
+            <label className="block text-gray-700">Username:</label>
+            <input
+              type="text"
+              name="username"
+              value={user.username}
+              pattern="^[a-zA-Z0-9_-]{3,20}$"
+              onChange={handleChange}
+              className="mt-1 block w-full p-2 border border-gray-300 rounded bg-gray-100"
+              readOnly
+            />
+          </div>
+
+          {/* First Name */}
+          <div>
+            <label className="block text-gray-700">First Name:</label>
+            <input
+              type="text"
+              name="firstname"
+              value={user.firstname}
+              onChange={handleChange}
+              className="mt-1 block w-full p-2 border border-gray-300 rounded"
+            />
+          </div>
+
+          {/* Last Name */}
+          <div>
+            <label className="block text-gray-700">Last Name:</label>
+            <input
+              type="text"
+              name="lastname"
+              value={user.lastname}
+              onChange={handleChange}
+              className="mt-1 block w-full p-2 border border-gray-300 rounded"
+            />
+          </div>
+
+          {/* Email */}
+          <div>
+            <label className="block text-gray-700">Email:</label>
+            <input
+              type="email"
+              name="email"
+              value={user.email}
+              onChange={handleChange}
+              className="mt-1 block w-full p-2 border border-gray-300 rounded"
+            />
+          </div>
+
+          {/* Phone */}
+          <div>
+            <label className="block text-gray-700">Phone:</label>
+            <input
+              type="text"
+              name="phone"
+              value={user.phone}
+              onChange={handleChange}
+              className="mt-1 block w-full p-2 border border-gray-300 rounded"
+            />
+          </div>
+
+          {/* Age */}
+          <div>
+            <label className="block text-gray-700">Age:</label>
+            <input
+              type="number"
+              name="age"
+              value={user.age}
+              onChange={handleChange}
+              className="mt-1 block w-full p-2 border border-gray-300 rounded"
+            />
+          </div>
+
+          {/* Address */}
+          <div className="col-span-2">
+            <label className="block text-gray-700">Address:</label>
+            <textarea
+              name="address"
+              value={user.address}
+              onChange={handleChange}
+              className="mt-1 block w-full p-2 border border-gray-300 rounded"
+            />
+          </div>
+
+          {/* Gender */}
+          <div>
+            <label className="block text-gray-700">Gender:</label>
+            <select
+              name="gender_id"
+              value={user.gender_id}
+              onChange={handleChange}
+              className="mt-1 block w-full p-2 border border-gray-300 rounded"
+            >
+              <option value="">Select Gender</option>
+              {genders.map((gender) => (
+                <option key={gender.gender_id} value={gender.gender_id}>
+                  {gender.gender_name}
+                </option>
+              ))}
+            </select>
+          </div>
+
+          {/* Date of Birth */}
+          <div>
+            <label className="block text-gray-700">Date of Birth:</label>
+            <input
+              type="date"
+              name="date_of_birth"
+              value={user.date_of_birth}
+              onChange={handleChange}
+              className="mt-1 block w-full p-2 border border-gray-300 rounded"
+            />
+          </div>
+
+          {/* Profile Image */}
+          <div>
+            <label className="block text-gray-700">Profile Picture:</label>
+            <input
+              type="file"
+              name="profile_image"
+              onChange={handleFileChange}
+              className="file-input file-input-bordered w-full h-10"
+            />
+          </div>
         </div>
 
-        {/* First Name */}
-        <div className="mb-4">
-          <label className="block text-gray-700">First Name:</label>
-          <input
-            type="text"
-            name="firstname"
-            value={user.firstname}
-            onChange={handleChange}
-            className="mt-1 block w-full p-2 border border-gray-300 rounded"
-          />
-        </div>
-        {/* Last Name */}
-        <div className="mb-4">
-          <label className="block text-gray-700">Last Name:</label>
-          <input
-            type="text"
-            name="lastname"
-            value={user.lastname}
-            onChange={handleChange}
-            className="mt-1 block w-full p-2 border border-gray-300 rounded"
-          />
-        </div>
-        {/* Email */}
-        <div className="mb-4">
-          <label className="block text-gray-700">Email:</label>
-          <input
-            type="email"
-            name="email"
-            value={user.email}
-            onChange={handleChange}
-            className="mt-1 block w-full p-2 border border-gray-300 rounded"
-          />
-        </div>
-        {/* Phone */}
-        <div className="mb-4">
-          <label className="block text-gray-700">Phone:</label>
-          <input
-            type="text"
-            name="phone"
-            value={user.phone}
-            onChange={handleChange}
-            className="mt-1 block w-full p-2 border border-gray-300 rounded"
-          />
-        </div>
-        {/* Age */}
-        <div className="mb-4">
-          <label className="block text-gray-700">Age:</label>
-          <input
-            type="number"
-            name="age"
-            value={user.age}
-            onChange={handleChange}
-            className="mt-1 block w-full p-2 border border-gray-300 rounded"
-          />
-        </div>
-        {/* Address */}
-        <div className="mb-4">
-          <label className="block text-gray-700">Address:</label>
-          <input
-            type="text"
-            name="address"
-            value={user.address}
-            onChange={handleChange}
-            className="mt-1 block w-full p-2 border border-gray-300 rounded"
-          />
-        </div>
-        {/* Gender */}
-        <div className="mb-4">
-          <label className="block text-gray-700">Gender:</label>
-          <select
-            name="gender_id"
-            value={user.gender_id} // Bind gender_id to the value
-            onChange={handleChange} // Handle change properly
-            className="mt-1 block w-full p-2 border border-gray-300 rounded"
+        {/* Submit Button */}
+        <div className="mt-6 flex justify-end">
+          <button
+            type="submit"
+            className={`bg-blue text-white hover:bg-blue py-2 px-4 rounded`}
           >
-            <option value="">Select Gender</option>
-            {genders.map((gender) => (
-              <option key={gender.gender_id} value={gender.gender_id}>
-                {gender.gender_name}
-              </option>
-            ))}
-          </select>
+            Save Changes
+          </button>
         </div>
-
-        {/* Date of Birth */}
-        <div className="mb-4">
-          <label className="block text-gray-700">Date of Birth:</label>
-          <input
-            type="date"
-            name="date_of_birth"
-            value={user.date_of_birth}
-            onChange={handleChange}
-            className="mt-1 block w-full p-2 border border-gray-300 rounded"
-          />
-        </div>
-        {/* Profile Image */}
-        <div className="mb-4">
-          <label className="block text-gray-700">Profile Picture:</label>
-          <input
-            type="file"
-            name="profile_image"
-            onChange={handleFileChange}
-            className=" file-input file-input-bordered w-full h-10"          />
-        </div>
-        <button
-          type="submit"
-          className={`bg-blue text-white hover:bg-blue py-2 px-4 rounded }`}
-        >
-          Save Changes
-        </button>
       </form>
     </div>
   );

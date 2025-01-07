@@ -43,7 +43,7 @@ router.get("/technician/:id", (req, res) => {
       users 
     ON 
       technicians.user_id = users.user_id
-    WHERE tech_id  = ?
+    WHERE technicians.user_id  = ?
   `;
 
   db.query(query,[id], (err, result) => {
@@ -119,5 +119,74 @@ router.post('/technician', async (req, res) => {
     res.status(500).json({ message: 'Error adding technician' });
   }
 });
+
+router.put('/technician/:id', async (req, res) => {
+  const {
+    nationality,
+    isOutsource,
+    work_experience,
+    special_skills,
+    background_check_status,
+    bank_account_number,
+    start_date,
+    status_id,
+    id_card_image_url,
+    driver_license_image_url,
+    criminal_record_image_url,
+    additional_image_url,
+  } = req.body;
+  const { id } = req.params;
+
+  try {
+    const query = `
+      UPDATE technicians
+      SET
+        nationality = ?,
+        isOutsource = ?,
+        work_experience = ?,
+        special_skills = ?,
+        background_check_status = ?,
+        bank_account_number = ?,
+        start_date = ?,
+        status_id = ?,
+        id_card_image_url = ?,
+        driver_license_image_url = ?,
+        criminal_record_image_url = ?,
+        additional_image_url = ?
+      WHERE user_id = ?
+    `;
+
+    db.query(query, [
+      nationality,
+      isOutsource ? 1 : 0,
+      work_experience,
+      special_skills,
+      background_check_status,
+      bank_account_number,
+      start_date,
+      status_id,
+      id_card_image_url,
+      driver_license_image_url,
+      criminal_record_image_url,
+      additional_image_url,
+      id,
+    ], (err, result) => {
+      if (err) {
+        console.error('Error updating technician:', err);
+        return res.status(500).json({ message: 'Error updating technician' });
+      }
+
+      if (result.affectedRows === 0) {
+        return res.status(404).json({ message: 'Technician not found' });
+      }
+
+      res.status(200).json({ message: 'Technician updated successfully' });
+    });
+  } catch (error) {
+    console.error('Error updating technician:', error);
+    res.status(500).json({ message: 'Error updating technician' });
+  }
+});
+
 
 module.exports = router;

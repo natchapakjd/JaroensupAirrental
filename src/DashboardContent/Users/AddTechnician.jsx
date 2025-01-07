@@ -83,7 +83,7 @@ const AddTechnician = () => {
   };
 
   return (
-    <div className="mx-auto p-6 bg-white rounded-lg shadow-md">
+    <div className="mx-auto p-6 bg-white rounded-lg shadow-md h-screen">
       <h2 className="text-2xl font-bold mb-4">Add Technician</h2>
       <form onSubmit={handleSubmit} className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm font-medium">
         {/* User Selection */}
@@ -264,8 +264,8 @@ const AddTechnician = () => {
           </label>
         </div>
         {/* Submit Button */}
-        <div className="col-span-2">
-          <button type="submit" className="btn bg-blue hover:bg-blue text-white w-full">
+        <div className="col-span-2 flex justify-end">
+          <button type="submit" className="btn bg-blue hover:bg-blue text-white ">
             Add Technician
           </button>
         </div>

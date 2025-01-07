@@ -189,7 +189,7 @@ const BorrowProductTable = () => {
 
       <div className="flex justify-between items-center mb-4">
 
-        
+
       <h2 className="text-xl font-semibold ">Borrowed Equipment List</h2>
 
         {role === 3 && (

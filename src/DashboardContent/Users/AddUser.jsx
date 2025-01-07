@@ -120,11 +120,11 @@ const AddUser = () => {
 
 
   return (
-    <div className="mx-auto p-6 bg-white rounded-lg shadow-md">
+    <div className="mx-auto p-6 bg-white rounded-lg shadow-md h-screen">
       <h1 className="text-2xl font-bold mb-4">Add New User</h1>
       <form onSubmit={handleSubmit} className="space-y-4">
-        {/* Username */}
-        <div>
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2 gap-6">
+      <div>
           <label className="block text-sm font-medium text-gray-700">Username:</label>
           <input
             type="text"
@@ -206,17 +206,7 @@ const AddUser = () => {
             className="mt-1 block w-full border border-gray-300 rounded-lg px-3 py-2 shadow-sm focus:outline-none focus:ring-1 focus:ring-blue-500"
           />
         </div>
-        {/* Address */}
-        <div>
-          <label className="block text-sm font-medium text-gray-700">Address:</label>
-          <input
-            type="text"
-            name="address"
-            value={formData.address}
-            onChange={handleChange}
-            className="mt-1 block w-full border border-gray-300 rounded-lg px-3 py-2 shadow-sm focus:outline-none focus:ring-1 focus:ring-blue-500"
-          />
-        </div>
+       
         {/* Gender */}
         <div>
           <label className="block text-sm font-medium text-gray-700">Gender:</label>
@@ -265,6 +255,18 @@ const AddUser = () => {
             ))}
           </select>
         </div>
+
+         {/* Address */}
+         <div className="col-span-2">
+         <label className="block text-sm font-medium text-gray-700">Address:</label>
+          <textarea
+            name="address"
+            value={formData.address}
+            onChange={handleChange}
+            className="mt-1 block w-full border border-gray-300 rounded-lg px-3 py-2 shadow-sm focus:outline-none focus:ring-1 focus:ring-blue-500"
+          />
+        </div>
+
         {/* Profile Image */}
         <div>
           <label className="block text-sm font-medium text-gray-700">Profile Image:</label>
@@ -274,6 +276,11 @@ const AddUser = () => {
             onChange={handleFileChange}
             className=" file-input file-input-bordered w-full h-10"          />
         </div>
+       
+      </div>
+        
+            
+        <div className="mt-6 flex justify-end">
         <button
           type="submit"
           className={`bg-blue text-white hover:bg-blue py-2 px-4 rounded ${loading ? 'opacity-50 cursor-not-allowed' : ''}`}
@@ -281,6 +288,8 @@ const AddUser = () => {
         >
           {loading ? 'Adding...' : 'Add User'}
         </button>
+      </div>
+       
       </form>
     </div>
   );
