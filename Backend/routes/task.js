@@ -31,7 +31,7 @@ router.get("/task-paging", (req, res) => {
       return res.status(500).json({ error: "Failed to fetch tasks" });
     }
 
-    db.query("SELECT COUNT(*) AS total FROM tasks", (err, countResult) => {
+    db.query("SELECT COUNT(*) AS total FROM tasks ", (err, countResult) => {
       if (err) {
         console.error("Error counting tasks: " + err);
         return res.status(500).json({ error: "Failed to count tasks" });
@@ -99,11 +99,11 @@ router.get("/tasks/paged", (req, res) => {
     INNER JOIN 
       tasktypes ON tasks.task_type_id = tasktypes.task_type_id
     WHERE 
-      tasks.isActive = 1
+      tasks.isActive = 1 and tasks.task_type_id  = 1
     LIMIT ? OFFSET ?;
   `;
 
-  const countQuery = `SELECT COUNT(*) AS total FROM tasks WHERE isActive = 1`;
+  const countQuery = `SELECT COUNT(*) AS total FROM tasks WHERE task_type_id = 1 and isActive = 1`;
 
   db.query(countQuery, (err, countResult) => {
     if (err) {
@@ -488,6 +488,210 @@ router.put("/task-tech/:id", (req, res) => {
       }
     }
   );
+});
+
+router.post('/rental', (req, res) => {
+  const { task_id, rentals } = req.body;
+
+  // ตรวจสอบข้อมูลที่ได้รับ
+  if (!task_id || !rentals || rentals.length === 0) {
+    return res.status(400).json({ message: 'Invalid data' });
+  }
+
+  // ดึงข้อมูล rental_start_date และ rental_end_date เดิมจากฐานข้อมูล
+  const queryGetDates = 'SELECT rental_start_date, rental_end_date FROM rental WHERE task_id = ? LIMIT 1';
+
+  db.query(queryGetDates, [task_id], (err, result) => {
+    if (err) {
+      console.error('Error fetching existing rental dates: ', err);
+      return res.status(500).json({ message: 'Failed to fetch existing rental dates' });
+    }
+
+    if (result.length === 0) {
+      return res.status(404).json({ message: 'Task ID not found' });
+    }
+
+    const existingRentalDates = result[0];
+
+    // สร้างคำสั่ง SQL สำหรับเพิ่มข้อมูลการเช่าโดยใช้วันที่เดิม
+    const rentalValues = rentals.map((rental) => [
+      task_id,
+      rental.product_id,
+      existingRentalDates.rental_start_date || new Date().toISOString().split('T')[0], // ใช้วันที่เดิมหรือวันที่ปัจจุบัน
+      existingRentalDates.rental_end_date || new Date().toISOString().split('T')[0], // ใช้วันที่เดิมหรือวันที่ปัจจุบัน
+      rental.quantity,
+    ]);
+
+    const queryInsert = 'INSERT INTO rental (task_id, product_id, rental_start_date, rental_end_date, quantity) VALUES ?';
+
+    db.query(queryInsert, [rentalValues], (err, result) => {
+      if (err) {
+        console.error('Error inserting rental data: ', err);
+        return res.status(500).json({ message: 'Failed to add rental data' });
+      }
+
+      // ลดจำนวน stock_quantity ใน products และ capacity ใน warehouses ตามจำนวนที่เช่า
+      rentals.forEach((rental) => {
+        const updateProductQuery = `
+          UPDATE products
+          SET stock_quantity = stock_quantity - ?
+          WHERE product_id = ?
+        `;
+
+        db.query(updateProductQuery, [rental.quantity, rental.product_id], (err) => {
+          if (err) {
+            console.error('Error updating product stock_quantity:', err);
+            return res.status(500).json({ message: 'Failed to update product stock_quantity' });
+          }
+
+          // ลด capacity ใน warehouses ที่เก็บสินค้า
+          const getWarehouseQuery = `
+            SELECT warehouse_id FROM products WHERE product_id = ?
+          `;
+
+          db.query(getWarehouseQuery, [rental.product_id], (err, warehouseResult) => {
+            if (err) {
+              console.error('Error retrieving warehouse ID:', err);
+              return res.status(500).json({ message: 'Failed to retrieve warehouse ID' });
+            }
+
+            if (warehouseResult.length > 0) {
+              const warehouseId = warehouseResult[0].warehouse_id;
+
+              const updateWarehouseCapacityQuery = `
+                UPDATE warehouses
+                SET capacity = capacity - ?
+                WHERE warehouse_id = ?
+              `;
+
+              db.query(updateWarehouseCapacityQuery, [rental.quantity, warehouseId], (err) => {
+                if (err) {
+                  console.error('Error updating warehouse capacity:', err);
+                  return res.status(500).json({ message: 'Failed to update warehouse capacity' });
+                }
+              });
+            }
+          });
+        });
+      });
+
+      return res.status(200).json({ message: 'Rental data added successfully and quantities updated' });
+    });
+  });
+});
+
+// rental/return endpoint สำหรับคืนทรัพยากร
+router.put('/rental/return/:taskId', async (req, res) => {
+  const taskId = req.params.taskId;
+  try {
+    // 1. ค้นหาสินค้าที่ใช้ใน task นี้จากตาราง rental
+    const taskItemsQuery = `
+      SELECT product_id, quantity 
+      FROM rental 
+      WHERE task_id = ?
+    `;
+    db.query(taskItemsQuery, [taskId], (err, taskItemsResult) => {
+      if (err) {
+        console.error("Error executing query:", err);
+        return res.status(500).json({ message: 'Failed to retrieve task items' });
+      }
+
+      // ตรวจสอบว่า taskItemsResult มีข้อมูลหรือไม่
+      if (taskItemsResult.length === 0) {
+        return res.status(400).json({ message: 'No items found for this task' });
+      }
+
+      // 2. อัพเดตสถานะของ task ให้เป็น 2
+      const updateStatusQuery = `
+        UPDATE tasks 
+        SET status_id = 2 
+        WHERE task_id = ?
+      `;
+      db.query(updateStatusQuery, [taskId], (err, updateStatusResult) => {
+        if (err) {
+          console.error("Error updating task status:", err);
+          return res.status(500).json({ message: 'Failed to update task status' });
+        }
+
+        // 3. คืนสินค้ากลับใน products และ warehouses ตามที่ระบุใน task_items
+        taskItemsResult.forEach((taskItem) => {
+          const { product_id, quantity } = taskItem;
+
+          // 3.1 เพิ่ม stock_quantity ใน products
+          const updateProductQuery = `
+            UPDATE products 
+            SET stock_quantity = stock_quantity + ? 
+            WHERE product_id = ?
+          `;
+          db.query(updateProductQuery, [quantity, product_id]);
+
+          // 3.2 เพิ่ม capacity ใน warehouses
+          const getWarehouseQuery = `
+            SELECT warehouse_id FROM products WHERE product_id = ?
+          `;
+          db.query(getWarehouseQuery, [product_id], (err, warehouseResult) => {
+            if (err) {
+              console.error("Error retrieving warehouse:", err);
+              return;
+            }
+            if (warehouseResult.length > 0) {
+              const warehouseId = warehouseResult[0].warehouse_id;
+
+              const updateWarehouseQuery = `
+                UPDATE warehouses
+                SET capacity = capacity + ? 
+                WHERE warehouse_id = ?
+              `;
+              db.query(updateWarehouseQuery, [quantity, warehouseId]);
+            }
+          });
+          
+          // 3.3 อัพเดต quantity ใน rental เป็น 0
+          const updateRentalQuery = `
+            UPDATE rental
+            SET quantity = 0
+            WHERE task_id = ? AND product_id = ?
+          `;
+          db.query(updateRentalQuery, [taskId, product_id]);
+        });
+
+        res.status(200).json({ message: 'Return processed and quantities updated' });
+      });
+    });
+  } catch (error) {
+    console.error("Error processing return:", error);
+    res.status(500).json({ message: 'Failed to process return' });
+  }
+});
+
+
+// Add an API endpoint to check the quantity of items in the rental table
+router.get('/rental/quantity/:taskId', async (req, res) => {
+  const taskId = req.params.taskId;
+  try {
+    // Query to sum up the quantities for the given taskId in the rental table
+    const checkQuantityQuery = `
+      SELECT SUM(quantity) AS total_quantity
+      FROM rental
+      WHERE task_id = ?
+    `;
+    db.query(checkQuantityQuery, [taskId], (err, result) => {
+      if (err) {
+        console.error("Error executing query:", err);
+        return res.status(500).json({ message: 'Failed to retrieve rental quantities' });
+      }
+
+      if (result.length > 0) {
+        const totalQuantity = result[0].total_quantity || 0;
+        res.status(200).json({ totalQuantity });
+      } else {
+        res.status(400).json({ message: 'No items found for this task' });
+      }
+    });
+  } catch (error) {
+    console.error("Error fetching rental quantities:", error);
+    res.status(500).json({ message: 'Failed to process request' });
+  }
 });
 
 

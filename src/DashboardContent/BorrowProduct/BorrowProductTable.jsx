@@ -216,9 +216,9 @@ const BorrowProductTable = () => {
           onChange={handleStatusFilterChange}
         >
           <option value="">All Status</option>
-          <option value="Pending">Pending</option>
-          <option value="Approved">Approved</option>
-          <option value="Returned">Returned</option>
+          <option value="pending">Pending</option>
+          <option value="approve">Approved</option>
+          <option value="completed">Completed</option>
         </select>
       </div>
 

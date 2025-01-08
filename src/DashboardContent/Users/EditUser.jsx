@@ -195,6 +195,7 @@ const EditUser = () => {
               name="age"
               value={user.age}
               onChange={handleChange}
+              max={new Date().toISOString().split("T")[0]} 
               className="mt-1 block w-full p-2 border border-gray-300 rounded"
             />
           </div>

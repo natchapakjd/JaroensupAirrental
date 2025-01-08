@@ -204,8 +204,6 @@ router.get("/equipment-borrowing/:techId", (req, res) => {
 router.post("/equipment-borrowing", upload.single("id_card_image"), async (req, res) => {
   const { tech_id, product_id, borrow_date, return_date, user_id } = req.body;
   let imageUrl = null;
-  console.log(user_id)
-  console.log(tech_id)
 
   try {
     // Upload ID card image if provided
@@ -262,6 +260,7 @@ router.post("/equipment-borrowing", upload.single("id_card_image"), async (req, 
 });
 
 
+// ฟังก์ชันสำหรับอัพเดตการอนุมัติการยืมอุปกรณ์ (Approve)
 router.put("/equipment-borrowing/approve/:taskId", async (req, res) => {
   const taskId = req.params.taskId;
 
@@ -290,7 +289,7 @@ router.put("/equipment-borrowing/approve/:taskId", async (req, res) => {
       const approveQuery = `
         UPDATE equipment_borrowing eb
         JOIN tasks t ON eb.task_id = t.task_id
-        SET  t.status_id = 4
+        SET t.status_id = 4
         WHERE t.task_id = ?
       `;
 
@@ -322,9 +321,44 @@ router.put("/equipment-borrowing/approve/:taskId", async (req, res) => {
               .json({ error: "Error decreasing product quantity" });
           }
 
-          res
-            .status(200)
-            .json({ message: "Return approved and quantity updated" });
+          // อัพเดต capacity ของ warehouse ตาม product
+          const getWarehouseQuery = `
+            SELECT warehouse_id FROM products WHERE product_id = ?
+          `;
+          
+          db.query(getWarehouseQuery, [productId], (err, warehouseResult) => {
+            if (err) {
+              console.error("Error retrieving warehouse ID:", err);
+              return res.status(500).json({ error: "Error retrieving warehouse ID" });
+            }
+
+            if (warehouseResult.length > 0) {
+              const warehouseId = warehouseResult[0].warehouse_id;
+
+              const updateWarehouseCapacityQuery = `
+                UPDATE warehouses
+                SET capacity = capacity - 1
+                WHERE warehouse_id = ?
+              `;
+
+              db.query(updateWarehouseCapacityQuery, [warehouseId], (err) => {
+                if (err) {
+                  console.error("Error updating warehouse capacity:", err);
+                  return res
+                    .status(500)
+                    .json({ error: "Error updating warehouse capacity" });
+                }
+
+                res
+                  .status(200)
+                  .json({ message: "Return approved, product quantity and warehouse capacity updated" });
+              });
+            } else {
+              res
+                .status(404)
+                .json({ error: "Product does not belong to any warehouse" });
+            }
+          });
         });
       });
     });
@@ -334,6 +368,7 @@ router.put("/equipment-borrowing/approve/:taskId", async (req, res) => {
   }
 });
 
+// ฟังก์ชันสำหรับอัพเดตการคืนอุปกรณ์ (Return)
 router.put("/equipment-borrowing/return/:taskId", async (req, res) => {
   const taskId = req.params.taskId;
 
@@ -362,7 +397,7 @@ router.put("/equipment-borrowing/return/:taskId", async (req, res) => {
       const approveQuery = `
         UPDATE equipment_borrowing eb
         JOIN tasks t ON eb.task_id = t.task_id
-        SET  t.status_id = 2
+        SET t.status_id = 2
         WHERE t.task_id = ?
       `;
 
@@ -380,23 +415,58 @@ router.put("/equipment-borrowing/return/:taskId", async (req, res) => {
             .json({ error: "Borrowing record or task not found" });
         }
 
-        const decreaseQuantityQuery = `
+        const increaseQuantityQuery = `
           UPDATE products
           SET stock_quantity = stock_quantity + 1
           WHERE product_id = ?
         `;
 
-        db.query(decreaseQuantityQuery, [productId], (err) => {
+        db.query(increaseQuantityQuery, [productId], (err) => {
           if (err) {
-            console.error("Error decreasing product quantity:", err);
+            console.error("Error increasing product quantity:", err);
             return res
               .status(500)
-              .json({ error: "Error decreasing product quantity" });
+              .json({ error: "Error increasing product quantity" });
           }
 
-          res
-            .status(200)
-            .json({ message: "Return approved and quantity updated" });
+          // อัพเดต capacity ของ warehouse ตาม product
+          const getWarehouseQuery = `
+            SELECT warehouse_id FROM products WHERE product_id = ?
+          `;
+          
+          db.query(getWarehouseQuery, [productId], (err, warehouseResult) => {
+            if (err) {
+              console.error("Error retrieving warehouse ID:", err);
+              return res.status(500).json({ error: "Error retrieving warehouse ID" });
+            }
+
+            if (warehouseResult.length > 0) {
+              const warehouseId = warehouseResult[0].warehouse_id;
+
+              const updateWarehouseCapacityQuery = `
+                UPDATE warehouses
+                SET capacity = capacity + 1
+                WHERE warehouse_id = ?
+              `;
+
+              db.query(updateWarehouseCapacityQuery, [warehouseId], (err) => {
+                if (err) {
+                  console.error("Error updating warehouse capacity:", err);
+                  return res
+                    .status(500)
+                    .json({ error: "Error updating warehouse capacity" });
+                }
+
+                res
+                  .status(200)
+                  .json({ message: "Return approved, product quantity and warehouse capacity updated" });
+              });
+            } else {
+              res
+                .status(404)
+                .json({ error: "Product does not belong to any warehouse" });
+            }
+          });
         });
       });
     });
@@ -405,6 +475,7 @@ router.put("/equipment-borrowing/return/:taskId", async (req, res) => {
     res.status(500).json({ error: "Server error" });
   }
 });
+
 
 router.get("/approve/:taskId", (req, res) => {
   const taskId = req.params.taskId;

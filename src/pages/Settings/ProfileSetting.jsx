@@ -218,6 +218,12 @@ const ProfileSetting = () => {
                   value={formData.date_of_birth}
                   onChange={handleChange}
                   className="input input-bordered w-full mt-2"
+                  max={new Date().toISOString().split("T")[0]}
+                  min={new Date(
+                    new Date().setFullYear(new Date().getFullYear() - 18) // คำนวณวันที่อย่างน้อย 18 ปีที่แล้ว
+                  )
+                    .toISOString()
+                    .split("T")[0]} // ตั้ง min เป็น 18 ปีที่แล้ว
                 />
               </div>
               <div>

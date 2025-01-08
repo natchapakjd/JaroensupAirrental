@@ -233,7 +233,13 @@ const AddUser = () => {
             type="date"
             name="date_of_birth"
             value={formData.date_of_birth}
+            min={new Date(
+              new Date().setFullYear(new Date().getFullYear() - 18) // คำนวณวันที่อย่างน้อย 18 ปีที่แล้ว
+            )
+              .toISOString()
+              .split("T")[0]} // ตั้ง min เป็น 18 ปีที่แล้ว
             onChange={handleChange}
+            max={new Date().toISOString().split("T")[0]}
             className="mt-1 block w-full border border-gray-300 rounded-lg px-3 py-2 shadow-sm focus:outline-none focus:ring-1 focus:ring-blue-500"
           />
         </div>

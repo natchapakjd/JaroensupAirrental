@@ -56,6 +56,8 @@ import EditAssignmentTask from '../DashboardContent/Tasks/EditAssignmentTask'
 import AddApplicant from '../DashboardContent/TechnicianApplicants/AddApplicant'
 import EditApplicant from '../DashboardContent/TechnicianApplicants/EditApplicant'
 import EditTechProfile from '../DashboardContent/Users/EditTechProfile'
+import ApproveTask from '../DashboardContent/Tasks/ApproveTask'
+
 const DashboardRoute = () => {
   return (
       <div className='flex'>
@@ -94,6 +96,7 @@ const DashboardRoute = () => {
             <Route path="orders/edit/:orderId" element={<EditOrder />} />
             <Route path="tasks/add" element={<AddTask />} />
             <Route path="tasks/edit/:taskId" element={<EditTask />} />
+            <Route path="tasks/approve/:taskId" element={<ApproveTask />} />
             <Route path="user" element={<UserContent />} />
             <Route path="augmented-reality" element={<ThreeScene />} />
             <Route path="analytics" element={<ReportContent />} />

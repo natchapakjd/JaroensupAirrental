@@ -13,7 +13,7 @@ const TaskContent = () => {
   const [currentPage, setCurrentPage] = useState(1);
   const [tasksPerPage, setTasksPerPage] = useState(10);
   const [totalTasks, setTotalTasks] = useState(0);
-
+  const [quantities, setQuantities] = useState({}); // Store quantities
   const cookies = new Cookies();
   const token = cookies.get("authToken");
   const decodedToken = jwtDecode(token);
@@ -26,7 +26,13 @@ const TaskContent = () => {
   useEffect(() => {
     fetchTasks();
     fetchStatuses();
-  }, [currentPage, tasksPerPage]);
+  }, [currentPage, tasksPerPage, tasks]);
+
+  useEffect(() => {
+    tasks.forEach((task) => {
+      fetchQuantities(task.task_id);
+    });
+  }, [tasks]);
 
   const fetchTasks = async () => {
     try {
@@ -42,6 +48,20 @@ const TaskContent = () => {
       setTotalTasks(total);
     } catch (error) {
       console.error("Error fetching paged tasks:", error);
+    }
+  };
+
+  const fetchQuantities = async (taskId) => {
+    try {
+      const response = await axios.get(`${apiUrl}/rental/quantity/${taskId}`);
+      if (response.status === 200) {
+        setQuantities((prevQuantities) => ({
+          ...prevQuantities,
+          [taskId]: response.data.totalQuantity,
+        }));
+      }
+    } catch (error) {
+      console.error("Error fetching rental quantities:", error);
     }
   };
 
@@ -87,6 +107,41 @@ const TaskContent = () => {
 
   const handleViewDetails = (taskId) => {
     navigate(`/dashboard/tasks/${taskId}`);
+  };
+
+  const handleReturn = async (taskId) => {
+    try {
+      const result = await Swal.fire({
+        title: "Are you sure?",
+        text: "You are about to return the products and update the quantities.",
+        icon: "warning",
+        showCancelButton: true,
+        confirmButtonColor: "#3085d6",
+        cancelButtonColor: "#d33",
+        confirmButtonText: "Yes, return it!",
+        cancelButtonText: "Cancel",
+      });
+
+      if (result.isConfirmed) {
+        const response = await axios.put(`${apiUrl}/rental/return/${taskId}`);
+
+        if (response.status === 200) {
+          Swal.fire(
+            "Returned!",
+            "Your task has been updated and products returned.",
+            "success"
+          );
+          setTasks(tasks.filter((task) => task.task_id !== taskId));
+
+        }
+      }
+    } catch (error) {
+      Swal.fire({
+        title: "Error",
+        text: error.message,
+        icon: "error",
+      });
+    }
   };
 
   const filteredTasks = tasks.filter((task) => {
@@ -181,6 +236,19 @@ const TaskContent = () => {
                   <div className="flex justify-center gap-2">
                     {role === 3 && (
                       <>
+                        <Link to={`/dashboard/tasks/approve/${task.task_id}`}>
+                          <button className="btn btn-success text-white">
+                            Approve
+                          </button>
+                        </Link>
+                        {quantities[task.task_id] > 0 && (
+                          <button
+                            className="btn btn-success text-white"
+                            onClick={() => handleReturn(task.task_id)}
+                          >
+                            Return
+                          </button>
+                        )}
                         <Link to={`/dashboard/tasks/edit/${task.task_id}`}>
                           <button className="btn btn-success text-white">
                             Edit
