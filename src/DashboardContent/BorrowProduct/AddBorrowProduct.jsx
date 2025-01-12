@@ -188,7 +188,7 @@ const AddBorrowProduct = () => {
             Borrow Date
           </label>
           <input
-            type="datetime-local"
+            type="date"
             name="borrow_date"
             id="borrow_date"
             value={formData.borrow_date}
@@ -203,7 +203,7 @@ const AddBorrowProduct = () => {
             Return Date
           </label>
           <input
-            type="datetime-local"
+            type="date"
             name="return_date"
             id="return_date"
             value={formData.return_date}

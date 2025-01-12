@@ -1,11 +1,14 @@
-import React, { useState } from "react";
+import React, { useState ,useEffect} from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import axios from "axios";
 import Cookies from "universal-cookie";
-import {jwtDecode} from "jwt-decode";
-
+import { jwtDecode } from "jwt-decode";
+import Loading from "../../components/Loading";
 const BorrowProductContent = () => {
   const { productId } = useParams();
+  const [technician,setTechinician] = useState("");
+  const [loading,setLoading] = useState(true)
+
   const navigate = useNavigate();
   const cookies = new Cookies();
   const token = cookies.get("authToken");
@@ -17,25 +20,58 @@ const BorrowProductContent = () => {
     tech_id: tech_id,
     borrow_date: "",
     return_date: "",
+    consent: false, // New state for consent checkbox
   });
-  const [idCardImage, setIdCardImage] = useState(null); // State for image file
+  const [idCardImage, setIdCardImage] = useState(null);
 
   // Handle text input changes
+
+
+  useEffect(()=>{
+    fetchTechnicianById();
+    
+  },[])
+
   const handleChange = (e) => {
     setFormData({
       ...formData,
       [e.target.name]: e.target.value,
     });
   };
+  const fetchTechnicianById = async () => {
+    try {
+      const techResult = await axios.get(`${import.meta.env.VITE_SERVER_URL}/user/${user_id}`);
+      setTechinician(techResult.data); // Assign the actual data to the state
+      console.log(techResult.data); // Log the data
+      setLoading(false)
+    } catch (err) {
+      console.error("Error fetching technician details:", err);
+    }
+  };
+  if(loading){
+    return <Loading/>
+  }
+  // Handle checkbox change
+  const handleCheckboxChange = (e) => {
+    setFormData({
+      ...formData,
+      consent: e.target.checked,
+    });
+  };
 
   // Handle file input change
   const handleFileChange = (e) => {
-    setIdCardImage(e.target.files[0]); // Capture the selected file
+    setIdCardImage(e.target.files[0]);
   };
 
   // Handle form submission
   const handleSubmit = async (e) => {
     e.preventDefault();
+
+    if (!formData.consent) {
+      alert("You must agree to the terms to proceed.");
+      return;
+    }
 
     const formDataToSubmit = new FormData();
     formDataToSubmit.append("tech_id", formData.tech_id);
@@ -45,7 +81,7 @@ const BorrowProductContent = () => {
     formDataToSubmit.append("user_id", user_id);
 
     if (idCardImage) {
-      formDataToSubmit.append("id_card_image", idCardImage); // Add the image file
+      formDataToSubmit.append("id_card_image", idCardImage);
     }
 
     try {
@@ -60,12 +96,14 @@ const BorrowProductContent = () => {
       );
 
       if (res.status === 200) {
-        navigate("/dashboard/borrows"); // Redirect or show success message
+        navigate("/dashboard/borrows");
       }
     } catch (error) {
       console.error("Error borrowing product:", error);
     }
   };
+
+  const today = new Date().toISOString().slice(0, 10); // Get today's date in YYYY-MM-DD format
 
   return (
     <div className="p-6 max-w-lg mx-auto bg-white rounded-xl shadow-md my-5">
@@ -73,8 +111,18 @@ const BorrowProductContent = () => {
       <form onSubmit={handleSubmit} encType="multipart/form-data">
         <div className="mb-4">
           <label htmlFor="tech_id" className="block text-sm font-medium">
-            Technician ID
+            Technician Name
           </label>
+          <input
+            type="text"
+            name="tech_name"
+            id="tech_name"
+            value={formData.tech_id  +'.' + ''+  technician.firstname +' '+  technician.lastname}
+            onChange={handleChange}
+            required
+            disabled
+            className="input input-bordered w-full "
+          />
           <input
             type="number"
             name="tech_id"
@@ -83,7 +131,7 @@ const BorrowProductContent = () => {
             onChange={handleChange}
             required
             disabled
-            className="input input-bordered w-full"
+            className="input input-bordered w-full hidden"
           />
         </div>
         <div className="mb-4">
@@ -91,12 +139,13 @@ const BorrowProductContent = () => {
             Borrow Date
           </label>
           <input
-            type="datetime-local"
+            type="date" // Changed to 'date'
             name="borrow_date"
             id="borrow_date"
             value={formData.borrow_date}
             onChange={handleChange}
             required
+            min={today} // Prevent past dates
             className="input input-bordered w-full"
           />
         </div>
@@ -105,11 +154,12 @@ const BorrowProductContent = () => {
             Return Date
           </label>
           <input
-            type="datetime-local"
+            type="date" // Changed to 'date'
             name="return_date"
             id="return_date"
             value={formData.return_date}
             onChange={handleChange}
+            min={formData.borrow_date || today} // Ensure return_date is after borrow_date
             className="input input-bordered w-full"
           />
         </div>
@@ -123,8 +173,21 @@ const BorrowProductContent = () => {
             id="id_card_image"
             onChange={handleFileChange}
             accept="image/*"
-            className="input input-bordered w-full"
+            className=" file-input file-input-bordered w-full h-10"         
+             />
+        </div>
+        <div className="mb-4 flex items-center">
+          <input
+            type="checkbox"
+            id="consent"
+            name="consent"
+            checked={formData.consent}
+            onChange={handleCheckboxChange}
+            required
           />
+          <label htmlFor="consent" className="ml-2 text-sm">
+            ฉันยินยอมให้เก็บข้อมูลของฉันลงในระบบ
+          </label>
         </div>
         <button type="submit" className="btn bg-blue text-white hover:bg-blue">
           Submit

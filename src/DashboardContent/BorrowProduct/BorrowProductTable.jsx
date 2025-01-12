@@ -2,7 +2,7 @@ import React, { useState, useEffect } from "react";
 import axios from "axios";
 import Swal from "sweetalert2";
 import Cookies from "universal-cookie";
-import {jwtDecode} from "jwt-decode";
+import { jwtDecode } from "jwt-decode";
 import { Link } from "react-router-dom";
 
 const BorrowProductTable = () => {
@@ -43,7 +43,22 @@ const BorrowProductTable = () => {
         );
       }
       const { data, total } = response.data;
-      setBorrowingData(data);
+
+      // Check for overdue equipment
+      const today = new Date();
+      const updatedData = data.map((item) => {
+        if (
+          item.status_id === 2 &&
+          item.return_date &&
+          new Date(item.return_date) < today
+        ) {
+          sendOverdueNotification(item.technician_id, item.borrowing_id);
+          return { ...item, isOverdue: true }; // Add warning flag
+        }
+        return { ...item, isOverdue: false };
+      });
+
+      setBorrowingData(updatedData);
       setTotalPages(Math.ceil(total / rowsPerPage));
     } catch (error) {
       console.error("Error fetching borrowing data:", error);
@@ -55,15 +70,29 @@ const BorrowProductTable = () => {
     }
   };
 
+  const sendOverdueNotification = async (technicianId, borrowingId) => {
+    try {
+      const message = `The equipment for borrowing ID ${borrowingId} is overdue. Please return it immediately.`;
+      const body = {
+        userId: technicianId,
+        message,
+      };
+      await axios.post(`${import.meta.env.VITE_SERVER_URL}/send-message`, body);
+    } catch (error) {
+      console.error("Error sending LINE notification:", error);
+    }
+  };
+
   const applyFilters = () => {
     let filtered = borrowingData;
 
     if (searchQuery) {
-      filtered = filtered.filter((item) =>
-        `${item.firstname} ${item.lastname}`
-          .toLowerCase()
-          .includes(searchQuery.toLowerCase()) ||
-        item.product_name.toLowerCase().includes(searchQuery.toLowerCase())
+      filtered = filtered.filter(
+        (item) =>
+          `${item.firstname} ${item.lastname}`
+            .toLowerCase()
+            .includes(searchQuery.toLowerCase()) ||
+          item.product_name.toLowerCase().includes(searchQuery.toLowerCase())
       );
     }
 
@@ -110,8 +139,7 @@ const BorrowProductTable = () => {
       const response = await axios.put(`
         ${
           import.meta.env.VITE_SERVER_URL
-        }/equipment-borrowing/return/${taskId}`
-      );
+        }/equipment-borrowing/return/${taskId}`);
 
       if (response.status === 200) {
         Swal.fire({
@@ -136,8 +164,7 @@ const BorrowProductTable = () => {
       const response = await axios.put(`
         ${
           import.meta.env.VITE_SERVER_URL
-        }/equipment-borrowing/approve/${taskId}`
-      );
+        }/equipment-borrowing/approve/${taskId}`);
 
       if (response.status === 200) {
         Swal.fire({
@@ -159,10 +186,9 @@ const BorrowProductTable = () => {
 
   const handleCancel = async (borrowing_id) => {
     try {
-      const response = await axios.delete(`
-        ${
-          import.meta.env.VITE_SERVER_URL
-        }/equipment-borrowing/${borrowing_id}`,
+      const response = await axios.delete(
+        `
+        ${import.meta.env.VITE_SERVER_URL}/equipment-borrowing/${borrowing_id}`,
         { withCredentials: true }
       );
 
@@ -186,11 +212,8 @@ const BorrowProductTable = () => {
   };
   return (
     <div className="p-8 rounded-lg shadow-lg w-full mx-auto font-inter h-full">
-
       <div className="flex justify-between items-center mb-4">
-
-
-      <h2 className="text-xl font-semibold ">Borrowed Equipment List</h2>
+        <h2 className="text-xl font-semibold ">Borrowed Equipment List</h2>
 
         {role === 3 && (
           <Link to="/dashboard/borrows/add">
@@ -233,6 +256,8 @@ const BorrowProductTable = () => {
             <th className="border p-2 text-center">Status</th>
             <th className="border p-2 text-center">Task Type</th>
             <th className="border p-2 text-center">Actions</th>
+            <th className="border p-2 text-center">Warnings</th>
+
           </tr>
         </thead>
         <tbody className="text-center">
@@ -245,20 +270,20 @@ const BorrowProductTable = () => {
                 </td>
                 <td className="border p-2 text-center">{item.product_name}</td>
                 <td className="border p-2 text-center">
-                  {new Date(item.borrow_date).toLocaleString()}
+                  {new Date(item.borrow_date).toLocaleDateString()}
                 </td>
                 <td className="border p-2 text-center">
                   {item.return_date
-                    ? new Date(item.return_date).toLocaleString()
+                    ? new Date(item.return_date).toLocaleDateString()
                     : "Not Returned"}
                 </td>
+
                 <td className="border p-2 text-center">{item.status_name}</td>
                 <td className="border p-2 text-center">{item.task_desc}</td>
-                
 
-            <td className="border p-2 text-center">
+                <td className="border p-2 text-center">
                   <div className="flex justify-center gap-2">
-                    {role === 2 && item.status_id === 4? (
+                    {role === 2 && item.status_id === 4 ? (
                       <button
                         onClick={() => handleReturn(item.task_id)}
                         className="btn btn-error text-white"
@@ -266,7 +291,7 @@ const BorrowProductTable = () => {
                         Return
                       </button>
                     ) : null}
-                    {role === 3 && item.status_id !== 2? (
+                    {role === 3 && item.status_id !== 2 ? (
                       <button
                         onClick={() => handleReturn(item.task_id)}
                         className="btn bg-blue text-white hover:bg-blue"
@@ -275,7 +300,9 @@ const BorrowProductTable = () => {
                       </button>
                     ) : null}
 
-                    {role === 3 && item.status_id !== 4 && item.status_id !== 2?(
+                    {role === 3 &&
+                    item.status_id !== 4 &&
+                    item.status_id !== 2 ? (
                       <button
                         onClick={() => handleApprove(item.task_id)}
                         className="btn btn-success text-white"
@@ -292,6 +319,13 @@ const BorrowProductTable = () => {
                       </button>
                     ) : null}
                   </div>
+                </td>
+                <td className="border p-2 text-center">
+                  {item.isOverdue ? (
+                    <span className="text-red-500 font-bold">⚠️</span>
+                  ) : (
+                    "No Warning"
+                  )}
                 </td>
               </tr>
             ))
@@ -327,6 +361,3 @@ const BorrowProductTable = () => {
 };
 
 export default BorrowProductTable;
-
-
-
