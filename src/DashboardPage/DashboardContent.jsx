@@ -10,6 +10,7 @@ const DashboardContent = () => {
   const [totalOrders, setTotalOrders] = useState(0);
   const [totalRevenue, setTotalRevenue] = useState(0);
   const [loading, setLoading] = useState(true);
+  const [recentActivity, setRecentActivity] = useState([]);
 
   const cookies = new Cookies();
   const [user, setUser] = useState(null);
@@ -31,8 +32,21 @@ const DashboardContent = () => {
       } catch (error) {
         console.error('Error fetching dashboard data:', error);
       }
+
+
     };
 
+    const fetchRecentActivity = async () => {
+      try {
+        const activityResponse = await axios.get(`${import.meta.env.VITE_SERVER_URL}/task-log-by-user/${id}`);
+        setRecentActivity(activityResponse.data || []);
+        console.log(activityResponse)
+      } catch (error) {
+        console.error('Error fetching recent activity:', error);
+      }
+    };
+
+    fetchRecentActivity();
     fetchUserByID(id);
     fetchDashboardData();
   },[]);
@@ -63,7 +77,6 @@ const DashboardContent = () => {
         <p className="text-gray-500 mt-2">Here's a quick overview of your dashboard.</p>
       </div>
 
-      {role === 3 && (
         <div>
           {/* Stats Overview Section */}
           <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6 mb-6">
@@ -124,25 +137,22 @@ const DashboardContent = () => {
           </div>
 
           {/* Recent Activity Section */}
-          <div className="bg-white p-6 rounded-lg shadow-lg">
-            <h2 className="text-2xl font-semibold text-gray-800 mb-4">Recent Activity</h2>
-            <ul className="space-y-4">
-              <li className="border-b border-gray-200 py-3 hover:bg-gray-50">
-                <p className="font-semibold text-gray-700">New Order #12345</p>
-                <p className="text-gray-500">Placed on September 15, 2024</p>
+           <div className="bg-white p-6 rounded-lg shadow-lg">
+        <h2 className="text-2xl font-semibold text-gray-800 mb-4">Recent Activity</h2>
+        <ul className="space-y-4">
+          {recentActivity.length > 0 ? (
+            recentActivity.map((activity, index) => (
+              <li key={index} className="border-b border-gray-200 py-3 hover:bg-gray-50">
+                <p className="font-semibold text-gray-700">{activity.title}</p>
+                <p className="text-gray-500">Placed on {activity.date}</p>
               </li>
-              <li className="border-b border-gray-200 py-3 hover:bg-gray-50">
-                <p className="font-semibold text-gray-700">Product XYZ Updated</p>
-                <p className="text-gray-500">Updated on September 14, 2024</p>
-              </li>
-              <li className="border-b border-gray-200 py-3 hover:bg-gray-50">
-                <p className="font-semibold text-gray-700">New Product Added</p>
-                <p className="text-gray-500">Added on September 13, 2024</p>
-              </li>
-            </ul>
-          </div>
+            ))
+          ) : (
+            <li className="text-gray-500">No recent activity</li>
+          )}
+        </ul>
+      </div>
         </div>
-      )}
     </div>
   );
 };

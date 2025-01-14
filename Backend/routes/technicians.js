@@ -56,6 +56,31 @@ router.get("/technician/:id", (req, res) => {
   });
 });
 
+router.get("/v2/technician/:id", (req, res) => {
+  const id = req.params.id;
+  const query = `
+    SELECT 
+      technicians.*,
+      users.*
+    FROM 
+      technicians
+    INNER JOIN 
+      users 
+    ON 
+      technicians.user_id = users.user_id
+    WHERE technicians.tech_id  = ?
+  `;
+
+  db.query(query,[id], (err, result) => {
+    if (err) {
+      console.error("Error fetching technicians: " + err);
+      res.status(500).json({ error: "Failed to fetch technicians" });
+    } else {
+      res.json(result);
+    }
+  });
+});
+
 
 router.post('/technician', async (req, res) => {
   const {

@@ -94,7 +94,7 @@ const AddTask = () => {
         await axios.post(`${apiUrl}/task-log`, {
           task_id: response.data.task_id,
           user_id: userId,
-          action: "เพิ่มงาน",
+          action: "สั่งงานเช่า",
         });
 
         navigate("/dashboard/tasks");
@@ -167,17 +167,18 @@ const AddTask = () => {
         </div>
 
         <div>
-          <label className="block text-gray-700">Rental End Date</label>
-          <input
-            type="date"
-            name="rental_end_date"
-            value={rentalEndDate}
-            onChange={(e) => setRentalEndDate(e.target.value)}
-            min={new Date().toISOString().slice(0, 16)} // Prevent past dates
-            required
-            className="input input-bordered w-full"
-          />
-        </div>
+  <label className="block text-gray-700">Rental End Date</label>
+  <input
+    type="date"
+    name="rental_end_date"
+    value={rentalEndDate}
+    onChange={(e) => setRentalEndDate(e.target.value)}
+    min={new Date().toISOString().split('T')[0]} // Ensure correct format for "date"
+    required
+    className="input input-bordered w-full"
+  />
+</div>
+
 
         <div>
           <label className="block mb-2">Address</label>

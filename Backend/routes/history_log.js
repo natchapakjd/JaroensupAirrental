@@ -178,4 +178,20 @@ router.delete('/task-log/:id', (req, res) => {
   });
 });
 
+router.get('/task-log-by-user/:user_id', (req, res) => {
+  const userId = req.params.user_id;
+  const query = 'SELECT * FROM task_log WHERE user_id = ?';
+  
+  db.query(query, [userId], (err, results) => {
+    if (err) {
+      console.error('Error fetching task logs by user:', err);
+      return res.status(500).json({ error: 'Failed to fetch task logs by user' });
+    }
+    if (results.length === 0) {
+      return res.status(404).json({ error: 'No task logs found for this user' });
+    }
+    res.json(results);
+  });
+});
+
 module.exports = router;

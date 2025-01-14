@@ -19,6 +19,7 @@ const BorrowProductTable = () => {
   const decodedToken = jwtDecode(token);
   const techId = decodedToken.id;
   const role = decodedToken.role;
+  
 
   useEffect(() => {
     fetchBorrowingData(techId);
@@ -31,6 +32,8 @@ const BorrowProductTable = () => {
   const fetchBorrowingData = async (techId) => {
     try {
       let response;
+      let userData;
+      let techData;
       if (role === 3) {
         response = await axios.get(
           `${import.meta.env.VITE_SERVER_URL}/equipment-borrowings-paging`,
@@ -41,10 +44,10 @@ const BorrowProductTable = () => {
           `${import.meta.env.VITE_SERVER_URL}/equipment-borrowing-paging/${techId}`,
           { params: { page: currentPage, limit: rowsPerPage } }
         );
+        
       }
+      
       const { data, total } = response.data;
-
-      // Check for overdue equipment
       const today = new Date();
       const updatedData = data.map((item) => {
         if (
@@ -52,7 +55,7 @@ const BorrowProductTable = () => {
           item.return_date &&
           new Date(item.return_date) < today
         ) {
-          sendOverdueNotification(item.technician_id, item.borrowing_id);
+          sendOverdueNotification(item.linetoken, item.borrowing_id);
           return { ...item, isOverdue: true }; // Add warning flag
         }
         return { ...item, isOverdue: false };
@@ -72,16 +75,29 @@ const BorrowProductTable = () => {
 
   const sendOverdueNotification = async (technicianId, borrowingId) => {
     try {
-      const message = `The equipment for borrowing ID ${borrowingId} is overdue. Please return it immediately.`;
+      const today = new Date().toISOString().split("T")[0]; // รูปแบบวันที่ YYYY-MM-DD
+      const notificationKey = `notification_${technicianId}_${borrowingId}`;
+      const lastSentDate = localStorage.getItem(notificationKey);
+  
+      if (lastSentDate === today) {
+        console.log("Notification already sent today.");
+        return; 
+      }
+  
+      const message = `อุปกรณ์สำหรับการยืม รหัสการยืม ${borrowingId} เกินวันกำหนดคืนแล้ว กรุณานำสินค้ามาคืนโดยทันที`;
       const body = {
         userId: technicianId,
         message,
       };
+  
       await axios.post(`${import.meta.env.VITE_SERVER_URL}/send-message`, body);
+      localStorage.setItem(notificationKey, today);
+      console.log("Notification sent successfully.");
     } catch (error) {
       console.error("Error sending LINE notification:", error);
     }
   };
+  
 
   const applyFilters = () => {
     let filtered = borrowingData;

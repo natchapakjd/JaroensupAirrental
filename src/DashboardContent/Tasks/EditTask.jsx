@@ -218,6 +218,8 @@ const EditTask = () => {
             value={finishDate}
             onChange={(e) => setFinishDate(e.target.value)}
             className="border p-2 w-full"
+            min={new Date().toISOString().split('T')[0]} // Ensure correct format for "date"
+
           />
         </div>
         <div>

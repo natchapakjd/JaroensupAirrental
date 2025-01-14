@@ -694,5 +694,32 @@ router.get('/rental/quantity/:taskId', async (req, res) => {
   }
 });
 
+router.get("/tasks/count/:user_id", (req, res) => {
+  const { user_id } = req.params;
+
+  const query = `
+    SELECT user_id, COUNT(*) AS total_tasks
+    FROM tasks
+    WHERE user_id = ?
+    GROUP BY user_id
+  `;
+
+  db.query(query, [user_id], (error, results) => {
+    if (error) {
+      console.error("Error fetching task count:", error);
+      return res.status(500).json({ message: "Internal Server Error" });
+    }
+
+    if (results.length === 0) {
+      return res.status(404).json({ message: "No tasks found for this user." });
+    }
+
+    res.json({
+      user_id: results[0].user_id,
+      total_tasks: results[0].total_tasks,
+    });
+  });
+});
+
 
 module.exports = router;

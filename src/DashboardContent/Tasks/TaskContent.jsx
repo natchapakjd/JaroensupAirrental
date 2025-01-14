@@ -132,7 +132,6 @@ const TaskContent = () => {
             "success"
           );
           setTasks(tasks.filter((task) => task.task_id !== taskId));
-
         }
       }
     } catch (error) {
@@ -236,11 +235,14 @@ const TaskContent = () => {
                   <div className="flex justify-center gap-2">
                     {role === 3 && (
                       <>
-                        <Link to={`/dashboard/tasks/approve/${task.task_id}`}>
-                          <button className="btn btn-success text-white">
-                            Approve
-                          </button>
-                        </Link>
+                        {task.status_id !== 2 && (
+                          <Link to={`/dashboard/tasks/approve/${task.task_id}`}>
+                            <button className="btn btn-success text-white">
+                              Approve
+                            </button>
+                          </Link>
+                        )}
+
                         {quantities[task.task_id] > 0 && (
                           <button
                             className="btn btn-success text-white"

@@ -29,7 +29,9 @@ router.get("/equipment-borrowings-paging", (req, res) => {
       t.user_id, 
       t.description as task_desc,
       t.status_id as status_id,
-      u.*,
+      u.linetoken,
+      u.firstname,
+      u.lastname,
       st.status_name,
       p.name as product_name
     FROM 
@@ -510,5 +512,32 @@ router.delete("/equipment-borrowing/:id", isAdmin, (req, res) => {
     }
   });
 });
+
+router.get("/borrowings/count/:tech_id", async (req, res) => {
+  const { tech_id } = req.params;
+
+  try {
+    const [rows] = await db.query(
+      `SELECT tech_id, COUNT(*) AS total_borrowings
+       FROM equipment_borrowing
+       WHERE tech_id = ?
+       GROUP BY tech_id`,
+      [tech_id]
+    );
+
+    if (rows.length === 0) {
+      return res.status(404).json({ message: "No borrowings found for this technician." });
+    }
+
+    res.json({
+      tech_id: rows[0].tech_id,
+      total_borrowings: rows[0].total_borrowings,
+    });
+  } catch (error) {
+    console.error("Error fetching borrowings count:", error);
+    res.status(500).json({ message: "Internal Server Error" });
+  }
+});
+
 
 module.exports = router;

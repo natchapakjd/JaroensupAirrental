@@ -3,12 +3,17 @@ import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import Cookies from 'universal-cookie';
 import { jwtDecode } from 'jwt-decode';
+import Loading from '../../components/Loading';
 
 const AddBorrowProduct = () => {
   const [products, setProducts] = useState([]); // State to store products
   const [technicians, setTechnicians] = useState([]); // State to store technicians
+  const [today, setToday] = useState("");
+  const [loading,setLoading] = useState(true)
+
   const [formData, setFormData] = useState({
     tech_id: '',
+    user_id: '',
     product_id: '',
     borrow_date: '',
     return_date: '',
@@ -24,11 +29,14 @@ const AddBorrowProduct = () => {
   const [techUserId,setTechUserId] = useState();
   
 
+
+
   useEffect(() => {
     const fetchProducts = async () => {
       try {
         const response = await axios.get(`${import.meta.env.VITE_SERVER_URL}/products`);
         setProducts(response.data);
+        setLoading(false)
       } catch (error) {
         console.error('Error fetching products:', error);
       }
@@ -43,6 +51,8 @@ const AddBorrowProduct = () => {
       }
     };
 
+    const currentDate = new Date().toISOString().split("T")[0];
+    setToday(currentDate);
     fetchProducts();
     fetchTechnicians();
   }, []);
@@ -82,14 +92,16 @@ const AddBorrowProduct = () => {
       console.error("Tech ID is missing");
       return;
     }
-  
     // If the role is 3, fetch technician data to get techUserId
+    let id = formData.tech_id;
+    let techId;
+
     if (role === 3 && formData.tech_id) {
       try {
         const response = await axios.get(
-          `${import.meta.env.VITE_SERVER_URL}/technician/${formData.tech_id}`
+          `${import.meta.env.VITE_SERVER_URL}/v2/technician/${id}`
         );
-        setTechUserId(response.data[0].user_id);  // Set techUserId after fetching technician
+        techId  =  response.data[0].user_id;  
       } catch (error) {
         console.error("Error fetching technician data:", error);
         return; // Don't proceed if there's an error fetching technician data
@@ -97,7 +109,7 @@ const AddBorrowProduct = () => {
     }
   
     // Wait until techUserId is set before continuing
-    if (role === 3 && !techUserId) {
+    if (role === 3 && !techId) {
       console.error("Tech User ID is not yet available.");
       return;
     }
@@ -110,14 +122,15 @@ const AddBorrowProduct = () => {
   
     if (role === 2) {
       formDataToSubmit.append('user_id', user_id); // Add user_id for role 2
-    } else {
-      formDataToSubmit.append('user_id', techUserId); // Add techUserId for role 3
+    } else if(role ===3){
+      formDataToSubmit.append('user_id', techId); //
+      //  Add techUserId for role 3
     }
-  
     if (idCardImage) {
       formDataToSubmit.append('id_card_image', idCardImage); // Add the image file
     }
   
+    console.log(formData)
     try {
       const res = await axios.post(
         `${import.meta.env.VITE_SERVER_URL}/equipment-borrowing`,
@@ -130,14 +143,30 @@ const AddBorrowProduct = () => {
       );
   
       if (res.status === 200) {
-        navigate('/dashboard/borrows'); // Redirect on success
+        // Add to task-log after a successful submission
+        const taskLogResponse = await axios.post(
+          `${import.meta.env.VITE_SERVER_URL}/task-log`,
+          {
+            task_id: res.data.task_id, // Assuming task_id is returned from borrowing product API
+            user_id: user_id,
+            action: "ยืมอุปกรณ์", // Action description in Thai
+          }
+        );
+  
+        // Navigate after both the borrowing action and task-log have been recorded
+        if (taskLogResponse.status === 201) {
+          navigate('/dashboard/borrows'); // Redirect on success
+        }
       }
     } catch (error) {
       console.error('Error borrowing product:', error);
     }
   };
+  
+  if(loading){
+    return <Loading/>
+  }
 
-  const today = new Date().toISOString().slice(0, 16); // Get today's date and time in YYYY-MM-DDTHH:mm format
 
   return (
     <div className="p-6 max-w-lg mx-auto bg-white rounded-xl shadow-md my-5 font-inter">
