@@ -121,9 +121,7 @@ const Review = () => {
         ) : (
           <form onSubmit={handleSubmit}>
             <div className="mb-4">
-              <label className="block mb-2" htmlFor="tech_id">
-                Technician ID:
-              </label>
+
               <input
                 type="hidden" // Use hidden input for tech_id
                 id="tech_id"

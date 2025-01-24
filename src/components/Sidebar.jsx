@@ -277,7 +277,7 @@ const Sidebar = () => {
                   >
                     <a
                       className="text-base pl-10 flex gap-1"
-                      href="/dashboard/augmented-reality"
+                      href="/dashboard/test-area-cal"
                     >
                       <MdCalculate className="mt-1" /> Area Calculation
                     </a>

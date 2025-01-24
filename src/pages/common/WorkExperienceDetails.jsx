@@ -21,7 +21,7 @@ const WorkExperienceDetails = () => {
   return (
     <>
       <Navbar />
-      <div className="bg-gray-100 min-h-screen py-8">
+      <div className="bg-gray-100 min-h-screen py-8 font-prompt">
         <div className="container mx-auto px-6">
           <div className="bg-white shadow-lg rounded-lg overflow-hidden">
             {/* ตรวจสอบจำนวนรูปใน images */}

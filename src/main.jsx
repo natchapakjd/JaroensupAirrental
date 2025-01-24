@@ -35,6 +35,7 @@ import XrHitModelContainer from "./components/AugmentedReality/XR-Hit-Model/XrHi
 import XrGallaryContainer from "./components/AugmentedReality/XR-Gallary/XrGallaryContainer";
 import Areacal from "./DashboardContent/AugmentedReality/Areacal";
 import WorkExperienceDetails from "./pages/common/WorkExperienceDetails";
+import TaskDetails from "./pages/History/TaskDetails";
 const router = createBrowserRouter([
   {
     path: "/",
@@ -165,12 +166,12 @@ const router = createBrowserRouter([
     element: <XrGallaryContainer />,
   },
   {
-    path: "/test-calarea",
-    element: <Areacal />,
-  },
-  {
     path: "/experience/:expId",
     element: <WorkExperienceDetails/>,
+  },
+  {
+    path: "/task/:taskId",
+    element: <TaskDetails/>,
   }
 ]);
 

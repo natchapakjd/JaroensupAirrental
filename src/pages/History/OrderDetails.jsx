@@ -45,7 +45,7 @@ const OrderDetails = () => {
           <div>
             <div className="mb-4">
               <h3 className="font-bold">Order ID: {order.order_id}</h3>
-              <p>User ID: {order.user_id}</p>
+              {/* <p>User ID: {order.user_id}</p> */}
               <p>Order Date: {new Date(order.created_at).toLocaleString()}</p>
             </div>
             <h4 className="font-semibold mb-2">Items:</h4>

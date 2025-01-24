@@ -61,10 +61,10 @@ const WorkExperience = () => {
   return (
     <>
       <Navbar />
-      <div className="bg-gray-100 min-h-screen py-8">
+      <div className="bg-gray-100 min-h-screen py-8 font-prompt">
         <div className="container mx-auto px-6">
           <header className="text-center mb-12">
-            <h1 className="text-4xl font-bold text-gray-800 mb-4 font-prompt">
+            <h1 className="text-4xl font-bold text-gray-800 mb-4 ">
               ผลงานเก่าของเรา
             </h1>
             <p className="text-lg text-gray-600">
