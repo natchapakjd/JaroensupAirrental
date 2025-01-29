@@ -8,13 +8,17 @@ export const CharacterAnimationsProvider = (props) => {
         Color:"#ffffff",
         Model:{
             options:{
-                "Druid": "druid",
-                "Young Korrigan": "young-korrigan",
-                "Korrigan Hat": "korrigan-hat",
-                "Bear" :"bear",
-                "Air":"air",
-                "Monkey":"monkey",
-                "Panda":"panda"
+                // "Druid": "druid",
+                // "Young Korrigan": "young-korrigan",
+                // "Korrigan Hat": "korrigan-hat",
+                // "Bear" :"bear",
+                // "Air":"air",
+                // "Monkey":"monkey",
+                // "Panda":"panda",
+                "Air5Ton":"air5ton",
+                "Air10Ton":"air10ton",
+                "Air20Ton":"air20ton",
+
 
 
             },

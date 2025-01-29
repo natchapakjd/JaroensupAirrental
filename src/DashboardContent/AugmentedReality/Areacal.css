@@ -15,7 +15,7 @@ label {
     display: block; /* ให้ label ไปอยู่คนละบรรทัด */
 }
 
-input, select {
+.input-air, .select-air {
     margin-top: 10px; /* เพิ่มระยะห่างระหว่าง label กับ input/select */
     padding: 8px;
     width: 100%;

@@ -16,31 +16,34 @@ const Areacal = () => {
   const [acUsageResult, setAcUsageResult] = useState("");
   const [acSelections, setAcSelections] = useState([]);
   const [hasQuickPlacedAC, setHasQuickPlacedAC] = useState(false);
-  const [isEraserMode,setIsEraserMode] = useState(false)
+  const [isEraserMode, setIsEraserMode] = useState(false);
 
   let acCount = 1; // ตัวแปรที่เก็บจำนวนแอร์ที่เพิ่มเข้ามาแล้ว
-  let isDragging = false
-  let originalBox = null
-  let isMouseDown = false
+  let originalBox = null;
+  let isDragging = false; // สถานะการลาก
+  let isDraggingMode = false;
 
-  useEffect(()=>{
-   
-    const dragModeToggle = document.getElementById('dragModeToggle');
-    
+  useEffect(() => {
+    const toolboxItems = document.querySelectorAll(".toolbox .box"); // ดึง box ทั้งหมดใน toolbox
 
-
-    // เปิด/ปิดโหมดลากค้าง
-    dragModeToggle.addEventListener('change', (event) => {
-        if (event.target.checked) {
-            console.log("เปิดโหมดลากค้างและคัดลอก");
-            enableDragCopyMode();
+    toolboxItems.forEach((item) => {
+      item.addEventListener("mousedown", () => {
+        if (item.classList.contains("selected")) {
+          // ถ้า box นี้ถูกเลือกอยู่แล้ว ให้ลบคลาส 'selected'
+          item.classList.remove("selected");
+          console.log(`ยกเลิกการเลือก ${item.textContent} ใน toolbox`);
         } else {
-            console.log("ปิดโหมดลากค้างและคัดลอก");
-            disableDragCopyMode();
+          // ลบคลาส 'selected' จากทุก box ก่อน
+          toolboxItems.forEach((box) => box.classList.remove("selected"));
+
+          // เพิ่มคลาส 'selected' ให้กับ box ที่ถูกกด
+          item.classList.add("selected");
+          console.log(`เลือก ${item.textContent} ใน toolbox`);
         }
+      });
+    });
   });
 
-  },[])
   useEffect(() => {
     // Monitor input changes for air-input class
     document.querySelectorAll(".air-input").forEach((input) => {
@@ -58,23 +61,6 @@ const Areacal = () => {
     const fivetonBox = document.getElementById("fivetonBox");
     const tentonBox = document.getElementById("tentonBox");
     const twentytonBox = document.getElementById("twentytonBox");
-    const toolboxItems = document.querySelectorAll('.toolbox .box'); // ดึง box ทั้งหมดใน toolbox
-    toolboxItems.forEach((item) => {
-        item.addEventListener('mousedown', () => {
-            if (item.classList.contains('selected')) {
-                // ถ้า box นี้ถูกเลือกอยู่แล้ว ให้ลบคลาส 'selected'
-                item.classList.remove('selected');
-                console.log(`ยกเลิกการเลือก ${item.textContent} ใน toolbox`);
-            } else {
-                // ลบคลาส 'selected' จากทุก box ก่อน
-                toolboxItems.forEach((box) => box.classList.remove('selected'));
-
-                // เพิ่มคลาส 'selected' ให้กับ box ที่ถูกกด
-                item.classList.add('selected');
-                console.log(`เลือก ${item.textContent} ใน toolbox`);
-            }
-        });
-    });
 
     const setupDragEvent = (box, boxId) => {
       if (box) {
@@ -83,7 +69,7 @@ const Areacal = () => {
         });
       }
     };
-   
+
     setupDragEvent(acBox, "newBox");
     setupDragEvent(obsBox, "newObstacle");
     setupDragEvent(obs2Box, "newObstacle2");
@@ -111,48 +97,63 @@ const Areacal = () => {
       removeDragEvent(tentonBox);
       removeDragEvent(twentytonBox);
     };
-  },[]);
+  }, []);
 
   useEffect(() => {
     calculateBTUWithMinAC();
   }, [width, length, roomType, airInventory]);
 
-  
-  function handleEraserButton(){
-    setIsEraserMode(!isEraserMode)
-    if (isEraserMode) {
-        eraserButton.classList.add('active');
-        document.body.style.cursor = 'crosshair'; // เปลี่ยน cursor เป็นรูปยางลบ
-        console.log('เปิดโหมดยางลบ');
+
+  function handleDraggingMode(event) {
+    if (event.target.checked) {
+      isDraggingMode = true
+      enableDragCopyMode();
+      console.log("เปิดโหมดลากค้างและคัดลอก");
     } else {
-        eraserButton.classList.remove('active');
-        document.body.style.cursor = 'default'; // เปลี่ยน cursor กลับเป็นปกติ
-        console.log('ปิดโหมดยางลบ');
+      isDraggingMode = false
+      disableDragCopyMode();
+      console.log("ปิดโหมดลากค้างและคัดลอก");
     }
   }
 
-  function handleEraserGrid(){
+  
+  function handleEraserButton() {
+    setIsEraserMode(!isEraserMode);
     if (!isEraserMode) {
-      const targetBox = event.target.closest('.box');
+      eraserButton.classList.add("active");
+      document.body.style.cursor = "crosshair"; // เปลี่ยน cursor เป็นรูปยางลบ
+      console.log("เปิดโหมดยางลบ");
+    } else {
+      eraserButton.classList.remove("active");
+      document.body.style.cursor = "default"; // เปลี่ยน cursor กลับเป็นปกติ
+      console.log("ปิดโหมดยางลบ");
+    }
+  }
+
+  function handleEraserGrid() {
+    if (isEraserMode) {
+      const targetBox = event.target.closest(".box");
+      
       if (targetBox) {
-          const parentCell = targetBox.parentElement;
+        console.log(targetBox)
+        const parentCell = targetBox.parentElement;
+        // console.log(parentCell)
+        // ลบ boxElement
+        targetBox.remove();
 
-          // ลบ boxElement
-          targetBox.remove();
-          console.log('ลบ box:', targetBox.id);
+        console.log("ลบ box:", targetBox.id);
 
-          // เรียกใช้ฟังก์ชันลบ cooling effect
-          removeCoolingEffect(targetBox);
+        // เรียกใช้ฟังก์ชันลบ cooling effect
+        removeCoolingEffect(targetBox);
 
-          // อัปเดตจำนวนแอร์ในกริด
-          calculateBTU();
+        // อัปเดตจำนวนแอร์ในกริด
+        calculateBTU();
 
-          // ล็อกการลบสำเร็จ
-          console.log(`ลบ ${targetBox.id} ออกจาก cell:`, parentCell);
+        // ล็อกการลบสำเร็จ
+        console.log(`ลบ ${targetBox.id} ออกจาก cell:`, parentCell);
       }
+    }
   }
-  }
-
 
   function calculateBTUWithMinAC() {
     const width = parseInt(document.getElementById("width").value, 10);
@@ -249,8 +250,9 @@ const Areacal = () => {
 
       const acSelect = document.createElement("select");
       acSelect.classList.add("ac-type");
+      acSelect.classList.add("select-air");
+
       acSelect.innerHTML = `
-          <option value="12000">1 ตัน (12,000 BTU)</option>
           <option value="60000">5 ตัน (60,000 BTU)</option>
           <option value="120000">10 ตัน (120,000 BTU)</option>
           <option value="240000">20 ตัน (240,000 BTU)</option>
@@ -259,6 +261,7 @@ const Areacal = () => {
 
       const quantityInput = document.createElement("input");
       quantityInput.type = "number";
+      quantityInput.classList.add("input-air");
       quantityInput.classList.add("ac-quantity");
       quantityInput.min = 1;
       quantityInput.value = count; // ตั้งค่าจำนวนแอร์ที่ต้องใช้
@@ -269,19 +272,18 @@ const Areacal = () => {
     });
   }
 
-
   function enableDragCopyMode() {
     const toolboxItems = document.querySelectorAll(".toolbox .box");
-    toolboxItems.forEach((item) => {
-      item.addEventListener("mousedown", startDragCopy); // เริ่มลากค้าง
+      toolboxItems.forEach((item) => {
+        item.addEventListener("mousedown", startDragCopy); // เริ่มลากค้าง
     });
   }
   // ปิดโหมดลากค้าง
   function disableDragCopyMode() {
-    const toolboxItems = document.querySelectorAll(".toolbox .box");
-    toolboxItems.forEach((item) => {
-      item.removeEventListener("mousedown", startDragCopy); // ยกเลิกการลากค้าง
-    });
+      const toolboxItems = document.querySelectorAll(".toolbox .box");
+      toolboxItems.forEach((item) => {
+        item.removeEventListener("mousedown", startDragCopy); // ยกเลิกการลากค้าง
+      });
   }
   // ฟังก์ชันเริ่มลากค้าง
   function startDragCopy(event) {
@@ -298,13 +300,11 @@ const Areacal = () => {
 }
   // ฟังก์ชันคัดลอก box element
   function dragCopy(event) {
-    console.log(isDragging)
-    console.log(originalBox)
-    console.log(isMouseDown)
-    if (!isDragging || !originalBox || !isMouseDown) return; // ตรวจสอบสถานะการคลิกค้าง
+    if (!isDragging || !originalBox ||!isDraggingMode) return; // ตรวจสอบสถานะการคลิกค้าง
+    console.log("drag copy")
     const cell = event.target;
-    if (!cell.classList.contains("cell")) return; // หยุดถ้าไม่ใช่ cell
-    if (cell.querySelector(".box")) return; // หยุดถ้า cell มี box อยู่แล้ว
+    if (!cell.classList.contains('cell')) return; // หยุดถ้าไม่ใช่ cell
+    if (cell.querySelector('.box')) return; // หยุดถ้า cell มี box อยู่แล้ว
 
     // คัดลอกกล่องต้นฉบับ
     const newBox = createBoxCopy(originalBox);
@@ -317,19 +317,16 @@ const Areacal = () => {
     console.log("เพิ่ม box ลงใน cell:", cell);
 
     // แพร่ผล (เช่น Cooling Effect) ถ้าจำเป็น
-    if (
-      newBox.classList.contains("ac") ||
-      newBox.classList.contains("oneton") ||
-      newBox.classList.contains("fiveton") ||
-      newBox.classList.contains("tenton") ||
-      newBox.classList.contains("twentyton")
-    ) {
-      spreadCoolingEffect(cell, newBox); // ฟังก์ชันแพร่ความเย็น
+    if (newBox.classList.contains('ac') || newBox.classList.contains('oneton') ||
+        newBox.classList.contains('fiveton') || newBox.classList.contains('tenton') ||
+        newBox.classList.contains('twentyton')) {
+        spreadCoolingEffect(cell, newBox); // ฟังก์ชันแพร่ความเย็น
     }
-  }
+}
 
-  // ฟังก์ชันหยุดลากค้าง
-  function stopDragCopy() {
+
+// ฟังก์ชันหยุดลากค้าง
+function stopDragCopy() {
     if (!isDragging) return;
 
     isDragging = false; // ยกเลิกสถานะลากค้าง
@@ -391,8 +388,8 @@ const Areacal = () => {
     // สร้าง dropdown สำหรับเลือกประเภทแอร์
     const acSelect = document.createElement("select");
     acSelect.classList.add("ac-type");
+
     acSelect.innerHTML = `
-      <option value="12000">1 ตัน (12,000 BTU)</option>
       <option value="60000">5 ตัน (60,000 BTU)</option>
       <option value="120000">10 ตัน (120,000 BTU)</option>
       <option value="240000">20 ตัน (240,000 BTU)</option>
@@ -493,7 +490,6 @@ const Areacal = () => {
       return;
     }
 
-    
     const grid = document.getElementById("grid");
     grid.innerHTML = ""; // ล้าง Grid เดิม
 
@@ -672,24 +668,23 @@ const Areacal = () => {
   }
 
   function createDeleteButton(boxElement) {
-    const deleteButton = document.createElement("button");
-    deleteButton.textContent = "ลบ";
-    deleteButton.className = "delete-button";
-    deleteButton.style.position = "absolute";
-    deleteButton.style.top = "2px";
-    deleteButton.style.right = "2px";
+    const deleteButton = document.createElement("delete");
+    // deleteButton.textContent = "ลบ";
+    // deleteButton.className = "delete-button";
+    // deleteButton.style.position = "absolute";
+    // deleteButton.style.top = "2px";
+    // deleteButton.style.right = "2px";
 
-    deleteButton.addEventListener("click", () => {
-      const parentCell = boxElement.parentElement;
-
-      if (boxElement.classList.contains("ac")) {
-        removeCoolingEffect(boxElement); // ลบความเย็น
-      }
-      if (boxElement.classList.contains("obstacle2")) {
-        removeObstacle(parentCell, boxElement); // Remove obs2 effect
-      }
-      boxElement.remove();
-    });
+    // deleteButton.addEventListener("click", () => {
+    //   const parentCell = boxElement.parentElement;
+    //   if (boxElement.classList.contains("ac")){
+    //     removeCoolingEffect(parentCell); // ลบความเย็น
+    //   }
+    //   if (boxElement.classList.contains("obstacle2")) {
+    //     removeObstacle(parentCell, boxElement); // Remove obs2 effect
+    //   }
+    //   boxElement.remove();
+    // });
 
     return deleteButton;
   }
@@ -819,9 +814,8 @@ const Areacal = () => {
   }
 
   // ฟังก์ชันลบ cooling effect
-  function removeCoolingEffect(boxElement) {
+  async function removeCoolingEffect(boxElement) {
     const gridCells = document.querySelectorAll(".cell");
-
     gridCells.forEach((cell) => {
       if (cell.coolingSources) {
         cell.coolingSources.delete(boxElement.id);
@@ -830,7 +824,7 @@ const Areacal = () => {
         }
       }
     });
-    updateACUsageInGrid(); // เรียกใช้เมื่อมีการลบแอร์
+    await updateACUsageInGrid(); // เรียกใช้เมื่อมีการลบแอร์
   }
 
   function createACBox(acType) {
@@ -918,7 +912,7 @@ const Areacal = () => {
         icon: "warning",
         confirmButtonText: "ตกลง",
       });
-      
+
       return;
     }
 
@@ -968,7 +962,7 @@ const Areacal = () => {
     Swal.fire({
       title: "เสร็จสิ้น",
       text: "การวางแอร์อย่างรวดเร็วเสร็จสิ้น",
-      icon: "warning",
+      icon: "success",
       confirmButtonText: "ตกลง",
     });
     setHasQuickPlacedAC(true); // ตั้งค่าสถานะเมื่อวางแอร์เสร็จ
@@ -1264,6 +1258,7 @@ const Areacal = () => {
           min="1"
           placeholder="Enter width"
           value={width}
+          className="input-air"
           onChange={(e) => setWidth(e.target.value)}
         />
 
@@ -1274,6 +1269,7 @@ const Areacal = () => {
           min="1"
           placeholder="Enter length"
           value={length}
+          className="input-air"
           onChange={(e) => setLength(e.target.value)}
         />
 
@@ -1282,6 +1278,7 @@ const Areacal = () => {
           id="room-type"
           value={roomType}
           onChange={(e) => setRoomType(e.target.value)}
+          className="select-air"
         >
           <option value="750">1. ห้องนอนปกติ - ไม่โดนแดดโดยตรง</option>
           <option value="800">2. ห้องนอนปกติ - โดนแดดมาก</option>
@@ -1299,8 +1296,8 @@ const Areacal = () => {
         <div id="ac-container">
           <label htmlFor="ac-type">เลือกชนิดแอร์:</label>
           <div className="ac-selection">
-            <select className="ac-type">
-              <option value="12000">1 ตัน (12,000 BTU)</option>
+            <select className="ac-type select-air">
+              {/* <option value="12000">1 ตัน (12,000 BTU)</option> */}
               <option value="60000">5 ตัน (60,000 BTU)</option>
               <option value="120000">10 ตัน (120,000 BTU)</option>
               <option value="240000">20 ตัน (240,000 BTU)</option>
@@ -1336,21 +1333,24 @@ const Areacal = () => {
         <div id="btu-result">{btuResult}</div>
         <div id="ac-count-result">{acCountResult}</div>
         <div id="ac-usage-result">{acUsageResult}</div>
-        <div id="grid" className="x" onClick={handleEraserGrid} >
-        </div>
+        <div
+          id="grid"
+          className="x"
+          onClick={handleEraserGrid}
+        ></div>
         <div className="toolbox">
-          <div id="acBox" className="box ac" draggable="true">
+          {/* <div id="acBox" className="box ac" draggable="true">
             AC
-          </div>
+          </div> */}
           <div id="obsBox" className="box obstacle" draggable="true">
             OBS
           </div>
           <div id="obs2Box" className="box obstacle2" draggable="true">
             OBS2
           </div>
-          <div id="onetonBox" className="box oneton" draggable="true">
+          {/* <div id="onetonBox" className="box oneton" draggable="true">
             1 Ton
-          </div>
+          </div> */}
           <div id="fivetonBox" className="box fiveton" draggable="true">
             5 Ton
           </div>
@@ -1361,10 +1361,19 @@ const Areacal = () => {
             20 Ton
           </div>
           <div className="drag-mode-container">
-            <input type="checkbox" id="dragModeToggle"/>
+            <input
+              type="checkbox"
+              id="dragModeToggle"
+              onChange={handleDraggingMode}
+              className="input-air"
+            />
             <label htmlFor="dragModeToggle">เปิดใช้งานการคลิกค้าง</label>
           </div>
-          <div className="eraser-button" id="eraserButton" onClick={handleEraserButton}>
+          <div
+            className="eraser-button"
+            id="eraserButton"
+            onClick={handleEraserButton}
+          >
             Eraser
           </div>
         </div>

@@ -99,7 +99,7 @@ const DashboardRoute = () => {
             <Route path="tasks/edit/:taskId" element={<EditTask />} />
             <Route path="tasks/approve/:taskId" element={<ApproveTask />} />
             <Route path="user" element={<UserContent />} />
-            <Route path="augmented-reality" element={<ThreeScene />} />
+            {/* <Route path="augmented-reality" element={<ThreeScene />} /> */}
             <Route path="analytics" element={<ReportContent />} />
             <Route path="brands" element={<BrandContent />} />
             <Route path="brands/add" element={<AddBrand />} />
@@ -121,7 +121,7 @@ const DashboardRoute = () => {
             <Route path="categories/edit/:categoryId" element={<EditCategory />} />
             <Route path="products/add" element={<AddProduct />} />
             <Route path="products/edit/:productId" element={<EditProduct />} /> 
-            <Route path="test-area-cal" element={<Areacal />} /> 
+            <Route path="area-cal" element={<Areacal />} /> 
 
           </Routes>
         </div>
