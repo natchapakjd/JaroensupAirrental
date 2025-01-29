@@ -7,6 +7,7 @@ import { MdOutlineStar } from "react-icons/md";
 import { jwtDecode } from "jwt-decode";
 import Cookies from "universal-cookie";
 import Swal from "sweetalert2"; // Ensure Swal is imported
+import Loading from "../../components/Loading";
 
 const UserHistory = () => {
   const [taskHistory, setTaskHistory] = useState([]);
@@ -16,6 +17,7 @@ const UserHistory = () => {
   const [taskPage, setTaskPage] = useState(1);
   const [orderPage, setOrderPage] = useState(1);
   const [paymentHistory, setPaymentHistory] = useState({});
+  const [loading,setLoading] = useState(true);
   const navigate = useNavigate(); 
   const cookies = new Cookies();
   const token = cookies.get("authToken");
@@ -47,6 +49,7 @@ const UserHistory = () => {
         return acc;
       }, {});
       setPaymentHistory(payments);
+      setLoading(false);
     } catch (error) {
       console.error("Error fetching user history:", error);
     }
@@ -71,7 +74,7 @@ const UserHistory = () => {
   const handleOrderDetail = (orderId) => {
     navigate(`/order-history/${orderId}`);
   };
-
+ 
   const handleReview = (taskId) => {
     navigate(`/review/${taskId}`);
   };
@@ -80,22 +83,71 @@ const UserHistory = () => {
     navigate(`/payment/${orderId}`);
   };
 
-  const handleDeleteTask = async (taskId) => {
+  const handleCompleteTask = async (taskId) => {
     try {
-      const result = await axios.delete(`${import.meta.env.VITE_SERVER_URL}/v2/task/${taskId}`);
-      // After deleting, fetch user data again to refresh the task list
-      console.log(result);
-      fetchUserData(taskPage, orderPage);
-      
-      // Display success message with Swal
+      // Show confirmation dialog before proceeding
+      const confirmation = await Swal.fire({
+        title: "Are you sure?",
+        text: "This task will be marked as completed.",
+        icon: "info",
+        showCancelButton: true,
+        confirmButtonText: "Yes, mark as completed!",
+        cancelButtonText: "Cancel",
+      });
+  
+      if (confirmation.isConfirmed) {
+        const result = await axios.put(
+          `${import.meta.env.VITE_SERVER_URL}/task/update-status/${taskId}`
+        );
+        // After updating the task, fetch user data again to refresh the task list
+        console.log(result);
+        fetchUserData(taskPage, orderPage);
+  
+        // Display success message with Swal
+        Swal.fire({
+          title: "Task marked as completed.",
+          icon: "success",
+          confirmButtonText: "OK",
+        });
+      }
+    } catch (error) {
+      console.error("Error completing task:", error);
+  
+      // Display error message with Swal
       Swal.fire({
-        title: "Task deleted successfully.",
-        icon: "success",
+        title: "Failed to mark task as completed.",
+        icon: "error",
         confirmButtonText: "OK",
       });
+    }
+  };
+  const handleDeleteTask = async (taskId) => {
+    try {
+      // Show confirmation dialog before proceeding
+      const confirmation = await Swal.fire({
+        title: "Are you sure?",
+        text: "This task will be deleted permanently.",
+        icon: "warning",
+        showCancelButton: true,
+        confirmButtonText: "Yes, delete it!",
+        cancelButtonText: "Cancel",
+      });
+  
+      if (confirmation.isConfirmed) {
+        const result = await axios.delete(`${import.meta.env.VITE_SERVER_URL}/v2/task/${taskId}`);
+        // After deleting, fetch user data again to refresh the task list
+        fetchUserData(taskPage, orderPage);
+  
+        // Display success message with Swal
+        Swal.fire({
+          title: "Task deleted successfully.",
+          icon: "success",
+          confirmButtonText: "OK",
+        });
+      }
     } catch (error) {
       console.error("Error deleting task:", error);
-      
+  
       // Display error message with Swal
       Swal.fire({
         title: "Failed to delete task.",
@@ -104,6 +156,10 @@ const UserHistory = () => {
       });
     }
   };
+  
+  if(loading){
+    return <Loading/>
+  }
   return (
     <>
       <Navbar />
@@ -137,7 +193,9 @@ const UserHistory = () => {
                     <td>{task.status_name}</td>
                     <td>{new Date(task.appointment_date).toLocaleString()}</td>
                     <td>{new Date(task.created_at).toLocaleString()}</td>
-                    <td>View details</td>
+                    <td> <button onClick={() => handleTaskDetail(task.task_id)} className="text-blue-500 hover:underline">
+          View details
+        </button></td>
                     <td>
                       {task.status_id === 2 && (
                         <button
@@ -158,12 +216,24 @@ const UserHistory = () => {
                           <div className="flex pt-1 mt-1">แนบสลิป</div>
                         </button>
                       )}
+                                            {task.status_id !== 2 && ( // If task is in progress
+
                       <button
                         onClick={() => handleDeleteTask(task.task_id)} // Add delete button
                         className="ml-5 text-red-600"
                       >
-                        ลบการสั่งงาน
+                        ยกเลิกงาน
                       </button>
+                                            )}
+                      {task.status_id === 1 && ( // If task is in progress
+                      <button
+                        onClick={() => handleCompleteTask(task.task_id)} // Mark task as completed
+                        className="ml-5 text-green-600"
+                      >
+                        งานเสร็จสิ้น
+                      </button>
+
+                    )}
                     </td>
                   </tr>
                 ))
@@ -204,6 +274,7 @@ const UserHistory = () => {
                 <th>Total Price</th>
                 <th>Order Date</th>
                 <th>Details</th>
+                <th>Action</th>
               </tr>
             </thead>
             <tbody>
@@ -214,10 +285,13 @@ const UserHistory = () => {
                     <td>{order.total_price.toFixed(2)}</td>
                     <td>{new Date(order.created_at).toLocaleString()}</td>
                     <td>
-                      <button onClick={() => handleOrderDetail(order.id)}>
+                      <button onClick={() => handleOrderDetail(order.id)} className="hover:underline">
                         View details
                       </button>
-                      {paymentHistory[order.task_id] && (
+                     
+                    </td>
+                    <td>
+                    {paymentHistory[order.task_id] && (
                         <button
                           onClick={() => handlePaymentSlip(order.task_id)}
                           className="ml-5 text-blue-600"

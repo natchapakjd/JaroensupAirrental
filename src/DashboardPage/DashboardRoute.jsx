@@ -57,6 +57,7 @@ import AddApplicant from '../DashboardContent/TechnicianApplicants/AddApplicant'
 import EditApplicant from '../DashboardContent/TechnicianApplicants/EditApplicant'
 import EditTechProfile from '../DashboardContent/Users/EditTechProfile'
 import ApproveTask from '../DashboardContent/Tasks/ApproveTask'
+import Areacal from '../DashboardContent/AugmentedReality/Areacal'
 
 const DashboardRoute = () => {
   return (
@@ -98,7 +99,7 @@ const DashboardRoute = () => {
             <Route path="tasks/edit/:taskId" element={<EditTask />} />
             <Route path="tasks/approve/:taskId" element={<ApproveTask />} />
             <Route path="user" element={<UserContent />} />
-            <Route path="augmented-reality" element={<ThreeScene />} />
+            {/* <Route path="augmented-reality" element={<ThreeScene />} /> */}
             <Route path="analytics" element={<ReportContent />} />
             <Route path="brands" element={<BrandContent />} />
             <Route path="brands/add" element={<AddBrand />} />
@@ -120,7 +121,8 @@ const DashboardRoute = () => {
             <Route path="categories/edit/:categoryId" element={<EditCategory />} />
             <Route path="products/add" element={<AddProduct />} />
             <Route path="products/edit/:productId" element={<EditProduct />} /> 
-            
+            <Route path="area-cal" element={<Areacal />} /> 
+
           </Routes>
         </div>
       </div>

@@ -270,14 +270,14 @@ const Sidebar = () => {
                   </li>
                   <li
                     className={`mb-5 hover:rounded-lg hover:py-3 hover:px-4 transition-all duration-300 hover:mx-5 ${
-                      isActive("/dashboard/augmented-reality")
+                      isActive("/dashboard/area-cal")
                         ? "bg-blue text-white mx-5 px-4 py-3 rounded-lg"
                         : null
                     }`}
                   >
                     <a
                       className="text-base pl-10 flex gap-1"
-                      href="/dashboard/augmented-reality"
+                      href="/dashboard/area-cal"
                     >
                       <MdCalculate className="mt-1" /> Area Calculation
                     </a>

@@ -721,5 +721,32 @@ router.get("/tasks/count/:user_id", (req, res) => {
   });
 });
 
+router.put("/task/update-status/:id", (req, res) => {
+  const taskId = req.params.id;
+  const newStatusId = 2; // Set the new status_id to 2
+
+  const query = `
+    UPDATE tasks
+    SET status_id = ?
+    WHERE task_id = ?
+  `;
+
+  db.query(query, [newStatusId, taskId], (err, result) => {
+    if (err) {
+      console.error("Error updating status: ", err);
+      return res.status(500).json({ error: "Failed to update task status" });
+    }
+
+    if (result.affectedRows === 0) {
+      return res.status(404).json({ error: "Task not found" });
+    }
+
+    res.status(200).json({
+      message: "Task status updated successfully",
+      task_id: taskId,
+      status_id: newStatusId,
+    });
+  });
+});
 
 module.exports = router;

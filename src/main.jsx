@@ -28,13 +28,9 @@ import RegisterToTech from "./pages/Authentication/RegisterToTech";
 import DashboardRoute from "./DashboardPage/DashboardRoute";
 import { AuthProvider } from "./context/AuthContext";
 import Payment from "./pages/Payment/Payment";
-import CubeContainer from "./components/AugmentedReality/Cube/CubeContainer";
-import XrCubeContainer from "./components/AugmentedReality/XR/XrCubeContainer";
-import XrHitCubeContainer from "./components/AugmentedReality/XR-Hit-Cube/XrHitCubeContainer";
-import XrHitModelContainer from "./components/AugmentedReality/XR-Hit-Model/XrHitModelContainer";
 import XrGallaryContainer from "./components/AugmentedReality/XR-Gallary/XrGallaryContainer";
-import Areacal from "./DashboardContent/AugmentedReality/Areacal";
 import WorkExperienceDetails from "./pages/common/WorkExperienceDetails";
+import TaskDetails from "./pages/History/TaskDetails";
 const router = createBrowserRouter([
   {
     path: "/",
@@ -145,32 +141,16 @@ const router = createBrowserRouter([
     element: <Payment />,
   },
   {
-    path: "/test-cube",
-    element: <CubeContainer />,
-  },
-  {
-    path: "/test-xr-cuber",
-    element: <XrCubeContainer />,
-  },
-  {
-    path: "/test-xr-hit-cube",
-    element: <XrHitCubeContainer />,
-  },
-  {
-    path: "/test-xr-hit-model",
-    element: <XrHitModelContainer />,
-  },
-  {
     path: "/test-xr-gallary",
     element: <XrGallaryContainer />,
   },
   {
-    path: "/test-calarea",
-    element: <Areacal />,
-  },
-  {
     path: "/experience/:expId",
     element: <WorkExperienceDetails/>,
+  },
+  {
+    path: "/task/:taskId",
+    element: <TaskDetails/>,
   }
 ]);
 

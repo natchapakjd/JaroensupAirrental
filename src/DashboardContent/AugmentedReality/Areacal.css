@@ -1,0 +1,447 @@
+สไตล์หลักของ Body
+
+
+/* การตกแต่งช่อง input */
+.input-container {
+    margin-bottom: 20px;
+    display: block; /* เปลี่ยนให้จัดเรียงแบบบรรทัดใหม่ */
+}
+
+/* ป้าย label และช่อง input */
+label {
+    margin-right: 10px;
+    font-size: 16px;
+    color: #333;
+    display: block; /* ให้ label ไปอยู่คนละบรรทัด */
+}
+
+.input-air, .select-air {
+    margin-top: 10px; /* เพิ่มระยะห่างระหว่าง label กับ input/select */
+    padding: 8px;
+    width: 100%;
+    font-size: 14px;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+}
+
+
+button {
+    padding: 8px 15px;
+    font-size: 14px;
+    cursor: pointer;
+    background-color: #007bff;
+    color: white;
+    border: none;
+    border-radius: 5px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    transition: background-color 0.3s ease;
+}
+
+button:hover {
+    background-color: #0056b3;
+}
+
+.x {
+    display: grid;
+    gap: 3px;
+    margin-top: 20px;
+    border-radius: 8px;
+    background-color: #fff;
+    box-shadow: 0 8px 15px rgba(0, 0, 0, 0.1);
+    overflow: hidden; /* เผื่อกรณีกริดใหญ่เกิน */
+}
+
+.x .cell {
+    background-color: #f1f1f1;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    transition: background-color 0.3s ease;
+    cursor: pointer;
+}
+
+
+.grid .cell:hover {
+    background-color: #e0e0e0;
+}
+
+/* การตกแต่ง Box AC */
+.toolbox {
+    margin-top: 20px;
+    display: flex;
+    justify-content: center;
+    gap: 10px;
+}
+
+.box.ac {
+    width: 40px; /* ขนาด Box AC ให้ตรงกับขนาดเซลล์ในกริด */
+    height: 40px; /* ขนาด Box AC ให้ตรงกับขนาดเซลล์ในกริด */
+    background-color: #28a745;
+    color: white;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 8px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.2);
+    cursor: grab;
+    transition: transform 0.3s ease, background-color 0.3s ease, box-shadow 0.3s ease;
+}
+
+/* Hover และ Active state ของ Box AC */
+.box.ac:hover {
+    background-color: #66bb6a;
+    transform: scale(1.1);
+    box-shadow: 0 8px 12px rgba(0, 0, 0, 0.3);
+}
+
+.box.ac:active {
+    background-color: #388e3c;
+    transform: scale(0.95);
+}
+
+/* สีความเย็นที่จะออกจาก Box AC */
+.cooling-effect {
+    background-color: rgba(173, 216, 230, 0.6) !important; /* put !important to make 1st priority, ฟ้าอ่อน */
+    transition: background-color 0.5s ease;
+    border-radius: 5px;
+}
+
+
+/* เพิ่ม style ของความเย็น */
+[class*="cooling-"] {
+    background-color: rgba(173, 216, 230, 0.6); /* ฟ้าอ่อน */
+    transition: background-color 0.5s ease;
+}
+
+.remove-btn {
+    background-color: red;
+    color: white;
+    border: none;
+    padding: 5px;
+    cursor: pointer;
+    font-size: 12px;
+    position: absolute;
+    top: 5px;
+    right: 5px;
+}
+
+.remove-btn:hover {
+    background-color: darkred;
+}
+
+.delete-button {
+    background-color: red;
+    color: white;
+    border: none;
+    border-radius: 50%;
+    cursor: pointer;
+    padding: 0;
+    text-align: center;
+}
+
+.box.obstacle {
+    width: 40px; /* ขนาดเท่ากับ AC */
+    height: 40px;
+    background-color: #6c757d; /* สีเทา */
+    color: white;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 8px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.2);
+    cursor: grab;
+    transition: transform 0.3s ease, background-color 0.3s ease, box-shadow 0.3s ease;
+}
+
+/* Hover และ Active state */
+.box.obstacle:hover {
+    background-color: #868e96;
+    transform: scale(1.1);
+    box-shadow: 0 8px 12px rgba(0, 0, 0, 0.3);
+}
+
+.box.obstacle:active {
+    background-color: #495057;
+    transform: scale(0.95);
+}
+
+.box.obstacle {
+    width: 40px; /* ขนาดเท่ากับ AC */
+    height: 40px;
+    background-color: #6c757d; /* สีเทา */
+    color: white;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 8px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.2);
+    cursor: grab;
+    transition: transform 0.3s ease, background-color 0.3s ease, box-shadow 0.3s ease;
+}
+
+/* Hover และ Active state */
+.box.obstacle:hover {
+    background-color: #868e96;
+    transform: scale(1.1);
+    box-shadow: 0 8px 12px rgba(0, 0, 0, 0.3);
+}
+
+.box.obstacle:active {
+    background-color: #495057;
+    transform: scale(0.95);
+}
+
+.box.obstacle2 {
+    width: 40px;
+    height: 40px;
+    background-color: #ff5722; /* สีแดงส้ม */
+    color: white;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 8px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.2);
+    cursor: grab;
+    transition: transform 0.3s ease, background-color 0.3s ease, box-shadow 0.3s ease;
+}
+
+.box.obstacle2:hover {
+    background-color: #ff7043;
+    transform: scale(1.1);
+    box-shadow: 0 8px 12px rgba(0, 0, 0, 0.3);
+}
+
+.box.obstacle2:active {
+    background-color: #e64a19;
+    transform: scale(0.95);
+}
+
+
+/* สไตล์สำหรับกล่อง 1Ton */
+.box.oneton {
+    width: 40px; /* ขนาดเท่ากับ AC */
+    height: 40px;
+    background-color: #ff9800; /* สีส้ม */
+    color: white;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 8px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.2);
+    cursor: grab;
+    transition: transform 0.3s ease, background-color 0.3s ease, box-shadow 0.3s ease;
+}
+
+/* Hover และ Active state */
+.box.oneton:hover {
+    background-color: #ffa726;
+    transform: scale(1.1);
+    box-shadow: 0 8px 12px rgba(0, 0, 0, 0.3);
+}
+
+.box.oneton:active {
+    background-color: #fb8c00;
+    transform: scale(0.95);
+}
+
+/* สไตล์สำหรับกล่อง 5Ton */
+.box.fiveton {
+    width: 40px;
+    height: 40px;
+    background-color: #ff9800;
+    color: white;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 8px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.2);
+    cursor: grab;
+    transition: transform 0.3s ease, background-color 0.3s ease, box-shadow 0.3s ease;
+}
+
+.box.fiveton:hover {
+    background-color: #ffa726;
+    transform: scale(1.1);
+    box-shadow: 0 8px 12px rgba(0, 0, 0, 0.3);
+}
+
+.box.fiveton:active {
+    background-color: #fb8c00;
+    transform: scale(0.95);
+}
+
+/* สไตล์สำหรับกล่อง 10Ton */
+.box.tenton {
+    width: 40px;
+    height: 40px;
+    background-color: #ff9800;
+    color: white;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 8px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.2);
+    cursor: grab;
+    transition: transform 0.3s ease, background-color 0.3s ease, box-shadow 0.3s ease;
+}
+
+.box.tenton:hover {
+    background-color: #ffa726;
+    transform: scale(1.1);
+    box-shadow: 0 8px 12px rgba(0, 0, 0, 0.3);
+}
+
+.box.tenton:active {
+    background-color: #fb8c00;
+    transform: scale(0.95);
+}
+
+/* สไตล์สำหรับกล่อง 20Ton */
+.box.twentyton {
+    width: 40px;
+    height: 40px;
+    background-color: #ff9800;
+    color: white;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 8px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.2);
+    cursor: grab;
+    transition: transform 0.3s ease, background-color 0.3s ease, box-shadow 0.3s ease;
+}
+
+.box.twentyton:hover {
+    background-color: #ffa726;
+    transform: scale(1.1);
+    box-shadow: 0 8px 12px rgba(0, 0, 0, 0.3);
+}
+
+.box.twentyton:active {
+    background-color: #fb8c00;
+    transform: scale(0.95);
+}
+
+/*css column จำนวนแอร์หลังประเภท*/
+.ac-selection {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.quantity-container {
+    display: flex;
+    flex-direction: column;
+}
+
+.add-ac-container {
+    display: flex;
+    flex-direction: row; /* เปลี่ยนเป็นแถวเพื่อให้ปุ่มลบและช่องใส่จำนวนอยู่ในแนวนอน */
+    align-items: center; /* จัดตำแหน่งแนวตั้ง */
+    gap: 10px; /* กำหนดระยะห่างระหว่างช่องใส่จำนวนและปุ่มลบ */
+}
+
+.quantity-container label {
+    font-size: 14px; /* ขนาดตัวอักษร */
+    margin-bottom: 5px; /* ระยะห่างระหว่าง label และ input */
+}
+
+.quantity-container input {
+    width: 50px; /* กำหนดความกว้างของ input */
+}
+
+#add-ac {
+    padding: 4px 10px;
+    font-size: 14px;
+    height: 38px;
+    width: 160px;
+}
+
+.delete-ac {
+    padding: 4px 10px;
+    font-size: 14px;
+    height: 38px;
+    width: 80px; /* ขนาดปุ่มลบ */
+    background-color: #dc3545;
+    color: white;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    transition: background-color 0.3s ease;
+}
+
+.delete-ac:hover {
+    background-color: #c82333;
+}
+
+/*css กล่อง 3 ช่อง*/
+/* จัดตำแหน่งกล่องจำนวนแอร์ให้ไปอยู่มุมขวาบน */
+.air-container {
+    top: 10px; /* ระยะห่างจากขอบบน */
+    right: 10px; /* ระยะห่างจากขอบขวา */
+    border: 2px solid #007bff;
+    border-radius: 8px;
+    padding: 15px;
+    width: 300px;
+    background-color: #f9f9f9;
+    box-shadow: 0 8px 15px rgba(0, 0, 0, 0.1);
+    text-align: left;
+}
+
+
+.air-container h3 {
+    text-align: center;
+    margin-bottom: 10px;
+    color: #007bff;
+}
+
+.air-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 10px;
+}
+
+.air-input {
+    width: 60px;
+    text-align: center;
+    padding: 5px;
+    font-size: 14px;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+}
+
+/*ขอบดำหลังกดปุ่ม*/
+.toolbox .box.selected {
+    border: 2px solid black; /* ขอบดำ */
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.5); /* เงาขอบ */
+    transform: scale(1.1); /* ขยายเล็กน้อยเพื่อแสดงการเลือก */
+}
+
+/*ปุ่มลบ*/
+.eraser-button {
+    width: 100px;
+    height: 40px;
+    background-color: #f44336; /* สีแดง */
+    color: white;
+    text-align: center;
+    line-height: 40px;
+    border-radius: 5px;
+    cursor: pointer;
+    margin: 10px;
+    user-select: none;
+}
+
+.eraser-button.active {
+    background-color: #d32f2f; /* สีแดงเข้มเมื่อเปิดใช้งาน */
+}
+
+
+
+
+
+
+
+
+
