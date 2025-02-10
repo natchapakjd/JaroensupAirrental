@@ -51,7 +51,7 @@ const BorrowProductTable = () => {
       const today = new Date();
       const updatedData = data.map((item) => {
         if (
-          item.status_id === 2 &&
+          item.status_id === 4 &&
           item.return_date &&
           new Date(item.return_date) < today
         ) {
@@ -327,6 +327,14 @@ const BorrowProductTable = () => {
                       </button>
                     ) : null}
                     {role === 3 ? (
+                      <Link to={`/dashboard/borrows/edit/${item.borrowing_id}`}>
+                        <button className="btn bg-success text-white hover:bg-success">
+                          Edit
+                        </button>
+                      </Link>
+                    ) : null}
+                    
+                    {role === 3 ? (
                       <button
                         onClick={() => handleCancel(item.task_id)}
                         className="btn btn-error text-white"
@@ -334,6 +342,7 @@ const BorrowProductTable = () => {
                         Cancel
                       </button>
                     ) : null}
+                    
                   </div>
                 </td>
                 <td className="border p-2 text-center">

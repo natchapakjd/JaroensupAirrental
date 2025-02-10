@@ -10,25 +10,31 @@ const PaymentContent = () => {
   const [error, setError] = useState(null);
   const [searchTerm, setSearchTerm] = useState(""); // For search input
   const [statusFilter, setStatusFilter] = useState(""); // For dropdown filter
+  const [currentPage, setCurrentPage] = useState(1);
+  const [totalPages, setTotalPages] = useState(1);
   const apiUrl = import.meta.env.VITE_SERVER_URL;
-
   useEffect(() => {
     fetchPayments();
-  }, []);
+  }, [currentPage]);
 
   const fetchPayments = async () => {
     try {
-      const response = await axios.get(`${apiUrl}/payments`);
-      setPayments(response.data);
+      const response = await axios.get(`${apiUrl}/payments-paging`, {
+        params: { page: currentPage, limit: 10 },
+      });
+      setPayments(response.data.data);
+      setTotalPages(response.data.total.totalPages);
     } catch (err) {
       setError(err.message);
-      Swal.fire({
-        title: "Error",
-        text: "Failed to load payments.",
-        icon: "error",
-      });
+      Swal.fire({ title: "Error", text: "Failed to load payments.", icon: "error" });
     } finally {
       setLoading(false);
+    }
+  };
+
+  const handlePageChange = (newPage) => {
+    if (newPage >= 1 && newPage <= totalPages) {
+      setCurrentPage(newPage);
     }
   };
 
@@ -230,6 +236,22 @@ const PaymentContent = () => {
           )}
         </tbody>
       </table>
+
+      <div className="flex justify-between mt-4">
+        <p
+          onClick={() => handlePageChange(currentPage - 1)}
+          className={`cursor-pointer ${currentPage === 1 ? "text-gray-400" : "text-black"}`}
+        >
+          Previous
+        </p>
+        <span className="flex items-center justify-center">Page {currentPage} of {totalPages}</span>
+        <p
+          onClick={() => handlePageChange(currentPage + 1)}
+          className={`cursor-pointer ${currentPage === totalPages ? "text-gray-400" : "text-black"}`}
+        >
+          Next
+        </p>
+      </div>
     </div>
   );
 };

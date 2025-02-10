@@ -540,4 +540,73 @@ router.get("/borrowings/count/:tech_id", async (req, res) => {
 });
 
 
+router.put("/equipment-borrowing/:borrowingId", async (req, res) => {
+  const { borrowingId } = req.params;
+  const { tech_id, product_id, borrow_date, return_date, user_id } = req.body;
+
+  const query = `
+    UPDATE equipment_borrowing
+    SET tech_id = ?, product_id = ?, borrow_date = ?, return_date = ?
+    WHERE borrowing_id = ?
+  `;
+
+  db.query(
+    query,
+    [tech_id, product_id, borrow_date, return_date, borrowingId],
+    (err, result) => {
+      if (err) {
+        console.error("Error updating borrowing record:", err);
+        return res.status(500).json({ error: "Failed to update borrowing record" });
+      }
+
+      if (result.affectedRows === 0) {
+        return res.status(404).json({ error: "Borrowing record not found" });
+      }
+
+      res.json({ message: "Borrowing record updated successfully" });
+    }
+  );
+});
+
+router.get("/equipment-borrowing/id/:borrowingId", (req, res) => {
+  const { borrowingId } = req.params;
+
+  const query = `
+    SELECT 
+      eb.*, 
+      t.user_id, 
+      t.description AS task_desc,
+      t.status_id,
+      st.status_name,
+      u.firstname, 
+      u.lastname, 
+      p.name AS product_name
+    FROM 
+      equipment_borrowing eb
+    JOIN 
+      tasks t ON eb.task_id = t.task_id
+    JOIN 
+      users u ON t.user_id = u.user_id
+    JOIN 
+      products p ON eb.product_id = p.product_id
+    JOIN 
+      status st ON t.status_id = st.status_id
+    WHERE 
+      eb.borrowing_id = ?
+  `;
+
+  db.query(query, [borrowingId], (err, result) => {
+    if (err) {
+      console.error("Error fetching borrowing record:", err);
+      return res.status(500).json({ error: "Failed to fetch borrowing record" });
+    }
+
+    if (result.length === 0) {
+      return res.status(404).json({ error: "Borrowing record not found" });
+    }
+
+    res.json(result[0]); // Return the first record
+  });
+});
+
 module.exports = router;

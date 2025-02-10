@@ -18,7 +18,11 @@ export const CharacterAnimationsProvider = (props) => {
                 "Air5Ton":"air5ton",
                 "Air10Ton":"air10ton",
                 "Air20Ton":"air20ton",
-
+                // "Test":"Test",
+                // "Test1":"Test1",
+                "Air5TonCC":"air5tonCC",
+                "Air10TonCC":"air10tonCC",
+                "Air20TonCC":"air20tonCC",
 
 
             },

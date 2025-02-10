@@ -18,9 +18,11 @@ const XrGallaryContainer = () => {
       setOverlayContent(node);
     }
   });
+
   return (
     <>
-        <CharacterAnimationsProvider>
+      <CharacterAnimationsProvider>
+        {overlayContent && (
           <ARButton
             className="ar-button"
             sessionInit={{
@@ -29,15 +31,17 @@ const XrGallaryContainer = () => {
               domOverlay: { root: overlayContent },
             }}
           />
-          <div className="h-screen bg-black">
-            <Canvas>
-              <XR>
-                <XrGallary />
-              </XR>
-            </Canvas>
-            <Interface ref={interfaceRef} />
-          </div>
-        </CharacterAnimationsProvider>
+        )}
+
+      <div className="h-screen bg-black">
+          <Canvas>
+            <XR>
+              <XrGallary />
+            </XR>
+          </Canvas>
+          <Interface ref={interfaceRef} />
+        </div>
+      </CharacterAnimationsProvider>
     </>
   );
 };

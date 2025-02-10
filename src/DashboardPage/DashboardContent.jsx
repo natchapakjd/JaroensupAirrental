@@ -38,14 +38,16 @@ const DashboardContent = () => {
 
     const fetchRecentActivity = async () => {
       try {
-        const activityResponse = await axios.get(`${import.meta.env.VITE_SERVER_URL}/task-log-by-user/${id}`);
-        setRecentActivity(activityResponse.data || []);
-        console.log(activityResponse)
+        const activityResponse = await axios.get(
+          `${import.meta.env.VITE_SERVER_URL}/tasks/top3`
+        );
+        setRecentActivity(activityResponse.data.tasks || []);
+        console.log("Recent Activity Data:", activityResponse.data.tasks);
       } catch (error) {
-        console.error('Error fetching recent activity:', error);
+        console.error("Error fetching recent activity:", error);
       }
     };
-
+    
     fetchRecentActivity();
     fetchUserByID(id);
     fetchDashboardData();
@@ -139,18 +141,59 @@ const DashboardContent = () => {
           {/* Recent Activity Section */}
            <div className="bg-white p-6 rounded-lg shadow-lg">
         <h2 className="text-2xl font-semibold text-gray-800 mb-4">Recent Activity</h2>
-        <ul className="space-y-4">
-          {recentActivity.length > 0 ? (
-            recentActivity.map((activity, index) => (
-              <li key={index} className="border-b border-gray-200 py-3 hover:bg-gray-50">
-                <p className="font-semibold text-gray-700">{activity.title}</p>
-                <p className="text-gray-500">Placed on {activity.date}</p>
-              </li>
-            ))
-          ) : (
-            <li className="text-gray-500">No recent activity</li>
-          )}
-        </ul>
+        <ul className="divide-y divide-gray-200">
+    {recentActivity.length > 0 ? (
+      recentActivity.map((activity, index) => (
+        <li
+          key={index}
+          className="py-4 flex items-center gap-4 hover:bg-gray-50 rounded-lg p-3 transition"
+        >
+          <div className="bg-blue-500 text-white p-3 rounded-full">
+            <svg
+              className="w-6 h-6"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+              xmlns="http://www.w3.org/2000/svg"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth="2"
+                d="M5 13l4 4L19 7"
+              />
+            </svg>
+          </div>
+
+          <div>
+            <p className="font-semibold text-gray-700 text-lg">
+              {activity.description}
+            </p>
+            <p className="text-sm text-gray-500">
+              Task Type:{activity.task_type_id}
+              <span className="text-blue-600 font-medium">
+                {activity.type_name}
+              </span>{" "}
+              | Status:{activity.status_id}
+              <span
+                className={`font-medium ${
+                  activity.status_id === 1
+                    ? "text-yellow-500"
+                    : activity.status_id === 2
+                    ? "text-green-500"
+                    : "text-red-500"
+                }`}
+              >
+                {activity.status_name}
+              </span>
+            </p>
+          </div>
+        </li>
+      ))
+    ) : (
+      <li className="text-gray-500 text-center py-4">No recent activity</li>
+    )}
+  </ul>
       </div>
         </div>
     </div>

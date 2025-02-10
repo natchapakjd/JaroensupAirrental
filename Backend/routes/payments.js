@@ -32,6 +32,53 @@ router.get("/payments", (req, res) => {
   });
 });
 
+router.get("/payments-paging", (req, res) => {
+  const { page = 1, limit = 10 } = req.query; // ค่าเริ่มต้นเป็นหน้า 1 และ 10 รายการต่อหน้า
+  const offset = (page - 1) * limit;
+
+  const query = `
+    SELECT pm.*, t.description as task_desc, u.firstname, u.lastname, 
+           pmt.method_name, st.status_name 
+    FROM payments pm 
+    JOIN users u ON pm.user_id = u.user_id 
+    JOIN tasks t ON pm.task_id = t.task_id 
+    JOIN payment_methods pmt ON pm.method_id = pmt.method_id 
+    JOIN status st ON pm.status_id = st.status_id 
+    LIMIT ? OFFSET ?
+  `;
+
+  const countQuery = "SELECT COUNT(*) AS total FROM payments";
+
+  // ดึงข้อมูลตามหน้าและจำนวนที่กำหนด
+  db.query(query, [parseInt(limit), parseInt(offset)], (err, dataResult) => {
+    if (err) {
+      console.error("Error fetching paginated payments data: " + err);
+      return res.status(500).json({ error: "Failed to fetch payments" });
+    }
+
+    // ดึงจำนวนทั้งหมดของข้อมูล
+    db.query(countQuery, (err, countResult) => {
+      if (err) {
+        console.error("Error fetching total count: " + err);
+        return res.status(500).json({ error: "Failed to fetch total count" });
+      }
+
+      const totalCount = countResult[0].total;
+      const totalPages = Math.ceil(totalCount / limit);
+
+      res.json({
+        data: dataResult,
+        total: {
+          totalItems: totalCount,
+          totalPages: totalPages,
+          currentPage: page,
+          pageSize: limit,
+        },
+      });
+    });
+  });
+});
+
 router.get("/payments/:id", (req, res) => {
   const id = req.params.id;
   const query = "SELECT * FROM payments WHERE user_id = ?";
