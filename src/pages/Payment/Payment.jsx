@@ -4,6 +4,7 @@ import { useParams } from 'react-router-dom';
 import Navbar from '../../components/Navbar';
 import Footer from '../../components/Footer';
 import Swal from 'sweetalert2';  // Import SweetAlert2
+import QRCode from "../../assets/images/IMG_0896.png";
 
 const Payment = () => {
   // Extract paymentId from the URL
@@ -83,8 +84,18 @@ const Payment = () => {
     <>
       <Navbar />
       <div className="container mx-auto mt-10 font-prompt">
-        <h2 className="text-2xl font-bold mb-4">Admin Payment Management</h2>
+        <h2 className="text-2xl font-bold mb-4 text-center md:text-left">Admin Payment Management</h2>
 
+        <div className="mb-8 text-center">
+          <h3 className="text-xl font-semibold mb-4">QR Code for Payment</h3>
+          <div className="flex justify-center">
+            <img 
+              src={QRCode}
+              alt="Payment QR Code" 
+              className="w-60 h-60"
+            />
+          </div>
+        </div>
         {/* Display orders fetched from the server */}
         <div className="mb-8">
           <h3 className="text-xl font-semibold mb-2">Orders</h3>

@@ -58,6 +58,10 @@ import EditApplicant from '../DashboardContent/TechnicianApplicants/EditApplican
 import EditTechProfile from '../DashboardContent/Users/EditTechProfile'
 import ApproveTask from '../DashboardContent/Tasks/ApproveTask'
 import Areacal from '../DashboardContent/AugmentedReality/Areacal'
+import AreacalContent from '../DashboardContent/AugmentedReality/AreacalContent'
+import AddAreacal from '../DashboardContent/AugmentedReality/AddAreacal'
+import EditAreacal from '../DashboardContent/AugmentedReality/EditAreacal'
+import EditBorrowProduct from '../DashboardContent/BorrowProduct/EditBorrowProduct'
 
 const DashboardRoute = () => {
   return (
@@ -122,6 +126,10 @@ const DashboardRoute = () => {
             <Route path="products/add" element={<AddProduct />} />
             <Route path="products/edit/:productId" element={<EditProduct />} /> 
             <Route path="area-cal" element={<Areacal />} /> 
+            <Route path="area-cal/content" element={<AreacalContent />} /> 
+            <Route path="area-cal/add" element={<AddAreacal />} /> 
+            <Route path="area-cal/edit/:areaId" element={<EditAreacal />} /> 
+            <Route path="borrows/edit/:borrowingId" element={<EditBorrowProduct />} /> 
 
           </Routes>
         </div>

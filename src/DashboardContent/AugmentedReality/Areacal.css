@@ -26,7 +26,7 @@ label {
 }
 
 
-button {
+.b-air {
     padding: 8px 15px;
     font-size: 14px;
     cursor: pointer;
@@ -38,7 +38,7 @@ button {
     transition: background-color 0.3s ease;
 }
 
-button:hover {
+.b-air:hover {
     background-color: #0056b3;
 }
 
@@ -47,7 +47,7 @@ button:hover {
     gap: 3px;
     margin-top: 20px;
     border-radius: 8px;
-    background-color: #fff;
+    background-color: #f9fafc !important;
     box-shadow: 0 8px 15px rgba(0, 0, 0, 0.1);
     overflow: hidden; /* เผื่อกรณีกริดใหญ่เกิน */
 }
@@ -61,7 +61,7 @@ button:hover {
 }
 
 
-.grid .cell:hover {
+.x .cell:hover {
     background-color: #e0e0e0;
 }
 

@@ -749,4 +749,54 @@ router.put("/task/update-status/:id", (req, res) => {
   });
 });
 
+router.get("/tasks/top3", (req, res) => {
+  const query = `
+    SELECT t.*, COUNT(ta.assignment_id) AS assignment_count
+    FROM tasks t
+    JOIN taskassignments ta ON t.task_id = ta.task_id
+    GROUP BY t.task_id
+    ORDER BY assignment_count DESC
+    LIMIT 3;
+  `;
+
+  db.query(query, (err, result) => {
+    if (err) {
+      console.error("Error fetching top 3 tasks:", err);
+      return res.status(500).json({ error: "Failed to fetch top 3 tasks" });
+    }
+
+    res.status(200).json({
+      message: "Top 3 tasks based on assignments",
+      tasks: result,
+    });
+  });
+});
+
+router.get("/tasks/top3/:user_id", (req, res) => {
+  const { user_id } = req.params;
+
+  const query = `
+    SELECT t.*, COUNT(ta.assignment_id) AS assignment_count
+    FROM tasks t
+    JOIN taskassignments ta ON t.task_id = ta.task_id
+    WHERE t.user_id = ?
+    GROUP BY t.task_id
+    ORDER BY assignment_count DESC
+    LIMIT 3;
+  `;
+
+  db.query(query, [user_id], (err, result) => {
+    if (err) {
+      console.error(`Error fetching top 3 tasks for user ${user_id}:`, err);
+      return res.status(500).json({ error: "Failed to fetch top 3 tasks for the user" });
+    }
+
+    res.status(200).json({
+      message: `Top 3 tasks for user ${user_id}`,
+      tasks: result,
+    });
+  });
+});
+
+
 module.exports = router;

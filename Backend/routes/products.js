@@ -361,4 +361,31 @@ router.get("/product-type", (req, res) => {
   });
 });
 
+
+router.get("/products/ac-count", (req, res) => {
+  const query = `
+    SELECT 
+      SUM(CASE WHEN pd.name = "แอร์ 60000BTU" THEN pd.stock_quantity ELSE 0 END) AS air_60000_btu,
+      SUM(CASE WHEN pd.name = "แอร์ 120000BTU" THEN pd.stock_quantity ELSE 0 END) AS air_120000_btu,
+      SUM(CASE WHEN pd.name = "แอร์ 20ตัน" THEN pd.stock_quantity ELSE 0 END) AS air_240000_btu
+    FROM products pd
+  `;
+
+  db.query(query, (err, result) => {
+    if (err) {
+      console.error("Error counting AC products: " + err);
+      return res.status(500).json({ error: "Failed to fetch AC counts" });
+    }
+
+    const counts = result[0] || { air_60000_btu: 0, air_120000_btu: 0, air_240000_btu: 0 };
+
+    res.status(200).json({
+      air_60000_btu: counts.air_60000_btu || 0,
+      air_120000_btu: counts.air_120000_btu || 0,
+      air_240000_btu: counts.air_240000_btu || 0,
+    });
+  });
+});
+
+
 module.exports = router;

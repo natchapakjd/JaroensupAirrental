@@ -2,6 +2,9 @@ import React, { useState } from "react";
 import { useEffect } from "react";
 import "./Areacal.css";
 import Swal from "sweetalert2";
+import { useNavigate } from "react-router-dom";
+import { Link } from "react-router-dom";
+import axios from "axios";
 const Areacal = () => {
   const [width, setWidth] = useState(0);
   const [length, setLength] = useState(0);
@@ -17,11 +20,35 @@ const Areacal = () => {
   const [acSelections, setAcSelections] = useState([]);
   const [hasQuickPlacedAC, setHasQuickPlacedAC] = useState(false);
   const [isEraserMode, setIsEraserMode] = useState(false);
+  const [assignments, setAssignments] = useState([]); // รายการ Assignment
+  const [selectedAssignment, setSelectedAssignment] = useState(null); // Assignment ที่เลือก
+  const [locationName, setLocationName] = useState("");
+  const [AirConditionerNeeded, setAirConditionerNeeded] = useState(0);
+  const [acPlacements, setAcPlacements] = useState([]);
+
+  const navigate = useNavigate();
 
   let acCount = 1; // ตัวแปรที่เก็บจำนวนแอร์ที่เพิ่มเข้ามาแล้ว
   let originalBox = null;
   let isDragging = false; // สถานะการลาก
   let isDraggingMode = false;
+  let assignmentId = null;
+
+  useEffect(() => {
+    // ดึงรายการ Assignments (สามารถเปลี่ยนเป็น API จริงได้)
+    const fetchAssignments = async () => {
+      try {
+        const response = await axios.get(
+          `${import.meta.env.VITE_SERVER_URL}/appointments`
+        );
+        setAssignments(response.data);
+      } catch (error) {
+        console.error("Error fetching assignments:", error);
+      }
+    };
+
+    fetchAssignments();
+  }, []);
 
   useEffect(() => {
     const toolboxItems = document.querySelectorAll(".toolbox .box"); // ดึง box ทั้งหมดใน toolbox
@@ -100,23 +127,132 @@ const Areacal = () => {
   }, []);
 
   useEffect(() => {
+    if (width > 0 && length > 0) {
+      console.log("🔄 Width หรือ Length เปลี่ยนแปลง, กำลังสร้าง Grid ใหม่...");
+      createGrid();
+    }
+  }, [width, length]); // ✅ สร้าง Grid ทันทีเมื่อ width หรือ length เปลี่ยน
+
+  useEffect(() => {
     calculateBTUWithMinAC();
   }, [width, length, roomType, airInventory]);
 
+  const fetchACInventory = async () => {
+    try {
+      const response = await axios.get(
+        `${import.meta.env.VITE_SERVER_URL}/products/ac-count`
+      );
+      const { air_60000_btu, air_120000_btu, air_240000_btu } = response.data;
+
+      setAirInventory({
+        air5ton: air_60000_btu || 0,
+        air10ton: air_120000_btu || 0,
+        air20ton: air_240000_btu || 0,
+      });
+
+      Swal.fire("สำเร็จ!", "โหลดข้อมูลแอร์สำเร็จ", "success");
+    } catch (error) {
+      console.error("Error fetching AC inventory:", error);
+      Swal.fire("ข้อผิดพลาด!", "ไม่สามารถโหลดข้อมูลแอร์ได้", "error");
+    }
+  };
+
+  const handleSelectAssignment = async () => {
+    const { value: formValues } = await Swal.fire({
+      title: "กรุณาเลือกการนัดหมายที่ต้องการบันทึกข้อมูล",
+      html: `
+        <select id="assignment-select" class="input-air">
+          ${assignments
+            .map(
+              (assignment) =>
+                `<option value="${assignment.assignment_id}">
+                  ${assignment.assignment_id} - ${assignment.description}
+                </option>`
+            )
+            .join("")}
+        </select>
+        <br/>
+        <input type="text" id="location-name" class="input-air" placeholder="ใส่ชื่อสถานที่ (Location Name)" />
+      `,
+      showCancelButton: true,
+      confirmButtonText: "ตกลง",
+      preConfirm: () => {
+        const selectedId = document.getElementById("assignment-select").value;
+        const locationName = document
+          .getElementById("location-name")
+          .value.trim();
+
+        if (!locationName) {
+          Swal.showValidationMessage("กรุณากรอกชื่อสถานที่!");
+          return false;
+        }
+
+        const selected = assignments.find(
+          (a) => a.assignment_id.toString() === selectedId
+        );
+
+        return { ...selected, locationName };
+      },
+    });
+
+    if (formValues) {
+      setSelectedAssignment(formValues.assignment_id);
+      setLocationName(formValues.locationName);
+      // ส่งค่าไปบันทึก โดยใช้ค่า assignment_id ที่ถูกต้อง
+      handleSaveData(formValues.assignment_id, formValues.locationName);
+    }
+  };
+
+  const handleSaveData = async (id, location) => {
+    if (!id) {
+      Swal.fire(
+        "ข้อผิดพลาด!",
+        "กรุณาเลือก Assignment ก่อนบันทึกข้อมูล",
+        "error"
+      );
+      return;
+    }
+
+    // Get AC usage values
+    const acUsage = updateACUsageInGrid();
+
+    const data = {
+      assignment_id: id,
+      location_name: location,
+      width: parseFloat(width),
+      height: parseFloat(length),
+      air_conditioners_needed: parseInt(AirConditionerNeeded) || 0,
+      area_type: roomType,
+      air_5ton_used: acUsage.air_5ton_used,
+      air_10ton_used: acUsage.air_10ton_used,
+      air_20ton_used: acUsage.air_20ton_used,
+      grid_pattern: acPlacements, // ส่งข้อมูลตำแหน่ง AC
+    };
+
+    try {
+      const response = await axios.post(
+        `${import.meta.env.VITE_SERVER_URL}/area_cal`,
+        data
+      );
+      Swal.fire("สำเร็จ!", "บันทึกข้อมูลเรียบร้อย", "success");
+    } catch (error) {
+      console.error("Error saving data:", error);
+      Swal.fire("ข้อผิดพลาด!", "ไม่สามารถบันทึกข้อมูลได้", "error");
+    }
+  };
 
   function handleDraggingMode(event) {
     if (event.target.checked) {
-      isDraggingMode = true
+      isDraggingMode = true;
       enableDragCopyMode();
       console.log("เปิดโหมดลากค้างและคัดลอก");
     } else {
-      isDraggingMode = false
+      isDraggingMode = false;
       disableDragCopyMode();
       console.log("ปิดโหมดลากค้างและคัดลอก");
     }
   }
 
-  
   function handleEraserButton() {
     setIsEraserMode(!isEraserMode);
     if (!isEraserMode) {
@@ -133,9 +269,9 @@ const Areacal = () => {
   function handleEraserGrid() {
     if (isEraserMode) {
       const targetBox = event.target.closest(".box");
-      
+
       if (targetBox) {
-        console.log(targetBox)
+        console.log(targetBox);
         const parentCell = targetBox.parentElement;
         // console.log(parentCell)
         // ลบ boxElement
@@ -165,6 +301,9 @@ const Areacal = () => {
         "กรุณากรอกข้อมูลให้ครบถ้วน";
       return;
     }
+
+    setWidth(width);
+    setLength(length);
 
     const roomArea = width * length;
     const requiredBTU = roomArea * roomType;
@@ -207,12 +346,10 @@ const Areacal = () => {
     const btuDifferenceMessage =
       remainingBTU > 0 ? `ยังขาด BTU อีก: ${remainingBTU}` : `BTU เพียงพอแล้ว`;
 
-    document.getElementById(
-      "btu-result"
-    ).textContent = `BTU ที่ต้องการ: ${requiredBTU}`;
-    document.getElementById(
-      "ac-count-result"
-    ).textContent = `BTU รวมจากแอร์: ${totalBTU}, ${btuDifferenceMessage}`;
+    document.getElementById("btu-result").textContent =
+      `BTU ที่ต้องการ: ${requiredBTU}`;
+    document.getElementById("ac-count-result").textContent =
+      `BTU รวมจากแอร์: ${totalBTU}, ${btuDifferenceMessage}`;
 
     const usageResult = document.getElementById("ac-usage-result");
     usageResult.innerHTML = "";
@@ -220,7 +357,6 @@ const Areacal = () => {
       const sizeInTons = size / 12000; // แปลง BTU เป็นตัน
       usageResult.innerHTML += `<div>แอร์ขนาด ${sizeInTons} ตัน: ${count} ตัว</div>`;
     });
-
     // เพิ่มปุ่ม "ต้องการใช้ค่านี้"
     addApplyButton(result);
   }
@@ -233,6 +369,7 @@ const Areacal = () => {
     const applyButton = document.createElement("button");
     applyButton.id = "applyButton";
     applyButton.textContent = "ต้องการใช้ค่านี้";
+    applyButton.classList.add("b-air");
     applyButton.addEventListener("click", () => applyResultToDropdown(result));
 
     buttonContainer.appendChild(applyButton);
@@ -274,37 +411,37 @@ const Areacal = () => {
 
   function enableDragCopyMode() {
     const toolboxItems = document.querySelectorAll(".toolbox .box");
-      toolboxItems.forEach((item) => {
-        item.addEventListener("mousedown", startDragCopy); // เริ่มลากค้าง
+    toolboxItems.forEach((item) => {
+      item.addEventListener("mousedown", startDragCopy); // เริ่มลากค้าง
     });
   }
   // ปิดโหมดลากค้าง
   function disableDragCopyMode() {
-      const toolboxItems = document.querySelectorAll(".toolbox .box");
-      toolboxItems.forEach((item) => {
-        item.removeEventListener("mousedown", startDragCopy); // ยกเลิกการลากค้าง
-      });
+    const toolboxItems = document.querySelectorAll(".toolbox .box");
+    toolboxItems.forEach((item) => {
+      item.removeEventListener("mousedown", startDragCopy); // ยกเลิกการลากค้าง
+    });
   }
   // ฟังก์ชันเริ่มลากค้าง
   function startDragCopy(event) {
     event.preventDefault(); // ป้องกัน Default behavior
     originalBox = event.target; // เก็บกล่องต้นฉบับที่ถูกลากค้าง
-    if (!originalBox.classList.contains('box')) return;
+    if (!originalBox.classList.contains("box")) return;
 
     isDragging = true; // เริ่มสถานะลากค้าง
 
     // ตรวจจับการลากเมาส์ผ่าน grid
-    const grid = document.getElementById('grid');
-    grid.addEventListener('mousemove', dragCopy); // คัดลอกเมื่อเมาส์ลากผ่าน
-    grid.addEventListener('mouseup', stopDragCopy); // หยุดเมื่อปล่อยเมาส์
-}
+    const grid = document.getElementById("grid");
+    grid.addEventListener("mousemove", dragCopy); // คัดลอกเมื่อเมาส์ลากผ่าน
+    grid.addEventListener("mouseup", stopDragCopy); // หยุดเมื่อปล่อยเมาส์
+  }
   // ฟังก์ชันคัดลอก box element
   function dragCopy(event) {
-    if (!isDragging || !originalBox ||!isDraggingMode) return; // ตรวจสอบสถานะการคลิกค้าง
-    console.log("drag copy")
+    if (!isDragging || !originalBox || !isDraggingMode) return; // ตรวจสอบสถานะการคลิกค้าง
+    console.log("drag copy");
     const cell = event.target;
-    if (!cell.classList.contains('cell')) return; // หยุดถ้าไม่ใช่ cell
-    if (cell.querySelector('.box')) return; // หยุดถ้า cell มี box อยู่แล้ว
+    if (!cell.classList.contains("cell")) return; // หยุดถ้าไม่ใช่ cell
+    if (cell.querySelector(".box")) return; // หยุดถ้า cell มี box อยู่แล้ว
 
     // คัดลอกกล่องต้นฉบับ
     const newBox = createBoxCopy(originalBox);
@@ -317,25 +454,28 @@ const Areacal = () => {
     console.log("เพิ่ม box ลงใน cell:", cell);
 
     // แพร่ผล (เช่น Cooling Effect) ถ้าจำเป็น
-    if (newBox.classList.contains('ac') || newBox.classList.contains('oneton') ||
-        newBox.classList.contains('fiveton') || newBox.classList.contains('tenton') ||
-        newBox.classList.contains('twentyton')) {
-        spreadCoolingEffect(cell, newBox); // ฟังก์ชันแพร่ความเย็น
+    if (
+      newBox.classList.contains("ac") ||
+      newBox.classList.contains("oneton") ||
+      newBox.classList.contains("fiveton") ||
+      newBox.classList.contains("tenton") ||
+      newBox.classList.contains("twentyton")
+    ) {
+      spreadCoolingEffect(cell, newBox); // ฟังก์ชันแพร่ความเย็น
     }
-}
+  }
 
-
-// ฟังก์ชันหยุดลากค้าง
-function stopDragCopy() {
+  // ฟังก์ชันหยุดลากค้าง
+  function stopDragCopy() {
     if (!isDragging) return;
 
     isDragging = false; // ยกเลิกสถานะลากค้าง
     originalBox = null; // รีเซ็ตกล่องต้นฉบับ
 
-    const grid = document.getElementById('grid');
-    grid.removeEventListener('mousemove', dragCopy); // ยกเลิก Event Listener
-    grid.removeEventListener('mouseup', stopDragCopy); // ยกเลิก Event Listener
-}
+    const grid = document.getElementById("grid");
+    grid.removeEventListener("mousemove", dragCopy); // ยกเลิก Event Listener
+    grid.removeEventListener("mouseup", stopDragCopy); // ยกเลิก Event Listener
+  }
 
   // ฟังก์ชันสร้างสำเนาของกล่อง
   function createBoxCopy(originalBox) {
@@ -388,6 +528,7 @@ function stopDragCopy() {
     // สร้าง dropdown สำหรับเลือกประเภทแอร์
     const acSelect = document.createElement("select");
     acSelect.classList.add("ac-type");
+    acSelect.classList.add("select-air");
 
     acSelect.innerHTML = `
       <option value="60000">5 ตัน (60,000 BTU)</option>
@@ -401,6 +542,8 @@ function stopDragCopy() {
     const quantityInput = document.createElement("input");
     quantityInput.type = "number";
     quantityInput.classList.add("ac-quantity");
+    quantityInput.classList.add("input-air");
+
     quantityInput.min = 1;
     quantityInput.value = 1;
     quantityInput.placeholder = "จำนวน";
@@ -416,6 +559,7 @@ function stopDragCopy() {
     deleteButton.addEventListener("click", function () {
       acDiv.remove();
       acCount--; // ลดจำนวนแอร์ที่เพิ่มไป
+      setAirConditionerNeeded(acCount);
       calculateBTU(); // อัปเดต BTU หลังลบแอร์
     });
 
@@ -428,6 +572,7 @@ function stopDragCopy() {
     document.getElementById("ac-container").appendChild(acDiv);
 
     acCount++; // เพิ่มจำนวนแอร์ที่เพิ่มไป
+    setAirConditionerNeeded(acCount);
     calculateBTU(); // คำนวณ BTU ใหม่ทุกครั้งที่เพิ่มแอร์
   };
 
@@ -470,16 +615,14 @@ function stopDragCopy() {
         : `BTU เพียงพอแล้ว`;
 
     // แสดงผลลัพธ์
-    document.getElementById(
-      "btu-result"
-    ).textContent = `BTU ที่ต้องการ: ${requiredBTU}`;
+    document.getElementById("btu-result").textContent =
+      `BTU ที่ต้องการ: ${requiredBTU}`;
     setBtuResult(requiredBTU);
-    document.getElementById(
-      "ac-count-result"
-    ).textContent = `BTU รวมจากแอร์: ${totalACBTU}, ${btuDifferenceMessage}`;
+    document.getElementById("ac-count-result").textContent =
+      `BTU รวมจากแอร์: ${totalACBTU}, ${btuDifferenceMessage}`;
   }
 
-  const createGrid = () => {
+  const createGrid = async () => {
     if (isNaN(width) || isNaN(length) || width < 1 || length < 1) {
       Swal.fire({
         title: "จำกัดความกว้างความยาว",
@@ -504,22 +647,41 @@ function stopDragCopy() {
     for (let i = 0; i < width * length; i++) {
       const cell = document.createElement("div");
       cell.classList.add("cell");
+
+      const row = Math.floor(i / width); // หาค่าแถว (index เริ่มที่ 0)
+      const col = i % width; // หาค่าคอลัมน์ (index เริ่มที่ 0)
+
+      cell.setAttribute("data-index", i); // เก็บ index เริ่มจาก 0
+      cell.setAttribute("data-row", row); // เก็บค่าหมายเลขแถว
+      cell.setAttribute("data-col", col); // เก็บค่าหมายเลขคอลัมน์
+
       cell.style.width = `${cellSize}px`;
       cell.style.height = `${cellSize}px`;
+
       cell.addEventListener("dragover", (e) => e.preventDefault());
       cell.addEventListener("drop", handleDrop);
+
       grid.appendChild(cell);
     }
 
+    await new Promise((resolve) => setTimeout(resolve, 50));
     setHasQuickPlacedAC(false); // รีเซ็ตสถานะเมื่อสร้าง Grid ใหม่
   };
 
   function handleDrop(e) {
     e.preventDefault();
     const boxType = e.dataTransfer.getData("boxId");
+    console.log(boxType)
     let boxElement;
 
     const cell = e.target;
+    const index = parseInt(cell.getAttribute("data-index"), 10);
+    const row = parseInt(cell.getAttribute("data-row"), 10);
+    const col = parseInt(cell.getAttribute("data-col"), 10);
+
+    console.log("index", index);
+    console.log("row", row);
+    console.log("col", col);
 
     // Ensure the target is a valid cell
     if (!cell.classList.contains("cell")) {
@@ -649,6 +811,25 @@ function stopDragCopy() {
         spreadCoolingEffect(cell, boxElement);
       }
     }
+    const rotation =
+      parseInt(boxElement.getAttribute("data-rotation"), 10) || 0;
+
+    // อัปเดต State เพื่อเก็บข้อมูลของ AC
+    setAcPlacements((prev) => {
+      const updatedPlacements = [
+        ...prev,
+        {
+          id: boxElement.id,
+          index,
+          row,
+          col,
+          type: boxType,
+          rotation,
+        },
+      ];
+      console.log("Updated AC Placements inside setState:", updatedPlacements);
+      return updatedPlacements;
+    });
     updateACUsageInGrid(); // Update AC usage after placing
   }
 
@@ -740,7 +921,6 @@ function stopDragCopy() {
 
     // ลิสต์เซลล์ที่ได้รับผลจากความเย็น
     const coolingCells = [];
-
     // ดึง obs2 ทั้งหมด
     const obstacles = document.querySelectorAll(".obstacle2");
 
@@ -880,29 +1060,43 @@ function stopDragCopy() {
     return acBox;
   }
 
-  function updateACUsageInGrid() {
+  const updateACUsageInGrid = () => {
     const gridCells = document.querySelectorAll(".cell");
-    const acUsage = {};
+    let acUsage = {
+      air_5ton_used: 0,
+      air_10ton_used: 0,
+      air_20ton_used: 0,
+    };
 
     gridCells.forEach((cell) => {
       const acBox = cell.querySelector(".box");
       if (acBox) {
-        const acType = acBox.className
-          .split(" ")
-          .find((cls) => cls.endsWith("ton"));
-        if (acType) {
-          acUsage[acType] = (acUsage[acType] || 0) + 1;
+        if (acBox.classList.contains("fiveton")) {
+          acUsage.air_5ton_used += 1;
+        } else if (acBox.classList.contains("tenton")) {
+          acUsage.air_10ton_used += 1;
+        } else if (acBox.classList.contains("twentyton")) {
+          acUsage.air_20ton_used += 1;
         }
       }
     });
 
+    // Update state with AC usage
+    setAirConditionerNeeded(
+      acUsage.air_5ton_used + acUsage.air_10ton_used + acUsage.air_20ton_used
+    );
+
+    // Update AC usage results in the UI
     const usageResult = document.getElementById("ac-usage-result");
-    usageResult.innerHTML = ""; // ล้างข้อมูลเดิมก่อน
-    for (const [acType, count] of Object.entries(acUsage)) {
-      const acLabel = getACLabelFromClassName(acType);
-      usageResult.innerHTML += `<div>แอร์ขนาด ${acLabel}: ${count} ตัว</div>`;
-    }
-  }
+    usageResult.innerHTML = `
+      <div>แอร์ขนาด 5 ตัน: ${acUsage.air_5ton_used} ตัว</div>
+      <div>แอร์ขนาด 10 ตัน: ${acUsage.air_10ton_used} ตัว</div>
+      <div>แอร์ขนาด 20 ตัน: ${acUsage.air_20ton_used} ตัว</div>
+    `;
+
+    // Store AC usage separately for saving
+    return acUsage;
+  };
 
   function handleQuickPlaceAc() {
     if (hasQuickPlacedAC) {
@@ -912,7 +1106,6 @@ function stopDragCopy() {
         icon: "warning",
         confirmButtonText: "ตกลง",
       });
-
       return;
     }
 
@@ -932,6 +1125,7 @@ function stopDragCopy() {
 
     const acSelections = document.querySelectorAll(".ac-selection");
     const uncoveredCells = new Map();
+    let newPlacements = []; // สร้างอาร์เรย์เก็บข้อมูล AC ที่ถูกวาง
 
     gridCells.forEach((cell, index) => {
       uncoveredCells.set(index, cell);
@@ -954,24 +1148,54 @@ function stopDragCopy() {
           gridHeight,
           acType
         );
+
         if (!placed) {
           placeACInFallbackPosition(uncoveredCells, acType);
         }
+
+        // ✅ ค้นหาเซลล์ที่เพิ่งวาง AC ลงไป และบันทึกตำแหน่ง
+        const placedCell = Array.from(gridCells).find((cell) =>
+          cell.querySelector(".box")
+        );
+        if (placedCell) {
+          console.log(placedCell)
+          const boxElement = placedCell.querySelector(".box");
+          const index = parseInt(placedCell.getAttribute("data-index"), 10);
+          const row = parseInt(placedCell.getAttribute("data-row"), 10);
+          const col = parseInt(placedCell.getAttribute("data-col"), 10);
+          const rotation =
+            parseInt(boxElement.getAttribute("data-rotation"), 10) || 0;
+        
+
+          newPlacements.push({
+            id: boxElement.id,
+            index,
+            row,
+            col,
+            type: acType,
+            rotation,
+          });
+        }
+        console.log("newPlacement",newPlacements)
       }
     });
+
+    // ✅ อัปเดต State ของ acPlacements เพื่อให้บันทึกค่าลงไป
+    setAcPlacements((prev) => [...prev, ...newPlacements]);
+    console.log("Updated AC Placements in Quick Place:", newPlacements);
+
     Swal.fire({
       title: "เสร็จสิ้น",
       text: "การวางแอร์อย่างรวดเร็วเสร็จสิ้น",
       icon: "success",
       confirmButtonText: "ตกลง",
     });
-    setHasQuickPlacedAC(true); // ตั้งค่าสถานะเมื่อวางแอร์เสร็จ
 
-    updateACUsageInGrid(); // เรียกใช้เมื่อมีการลบแอร์
+    setHasQuickPlacedAC(true); // ตั้งค่าสถานะเมื่อวางแอร์เสร็จ
+    updateACUsageInGrid(); // อัปเดตจำนวนแอร์ที่ถูกใช้
   }
 
   function rotateAC(boxElement) {
-    // ตรวจสอบว่า boxElement มี attribute data-rotation หรือไม่
     if (!boxElement.hasAttribute("data-rotation")) {
       boxElement.setAttribute("data-rotation", "0"); // กำหนดค่าเริ่มต้น
     }
@@ -986,13 +1210,149 @@ function stopDragCopy() {
 
     const parentCell = boxElement.parentElement;
 
-    // ฟังก์ชันที่มีอยู่เดิม: ลบผลความเย็นเก่าและแพร่ผลใหม่
+    // ลบและแพร่ผลความเย็นใหม่
     removeCoolingEffect(boxElement);
     spreadCoolingEffect(parentCell, boxElement);
 
-    // ฟังก์ชันที่มีอยู่เดิม: อัปเดตตำแหน่งปุ่มลบให้ตรงกับ box
+    // อัปเดตตำแหน่งปุ่มลบให้ตรงกับ box
     updateRemoveButtonPosition(boxElement);
+
+    // ✅ อัปเดตค่า rotation ใน acPlacements
+    setAcPlacements((prev) =>
+      prev.map((ac) =>
+        ac.id === boxElement.id ? { ...ac, rotation: newRotation } : ac
+      )
+    );
+
+    console.log(`หมุน ${boxElement.id} ไปที่ ${newRotation}°`);
   }
+
+  const selectAssignmentAndLoadGrid = async () => {
+    try {
+        // ✅ 1. ดึงรายการ Assignment จาก API
+        const response = await axios.get(
+            `${import.meta.env.VITE_SERVER_URL}/area_cals`
+        );
+        const assignments = response.data;
+
+        if (!assignments || assignments.length === 0) {
+            Swal.fire("ไม่พบข้อมูล!", "ไม่มีการนัดหมายที่บันทึกไว้", "info");
+            return;
+        }
+
+        // ✅ 2. สร้าง Dropdown ให้ผู้ใช้เลือก Assignment
+        const { value: selectedId } = await Swal.fire({
+            title: "เลือกสถานที่และโหลดข้อมูลที่บันทึกไว้",
+            input: "select",
+            inputOptions: Object.fromEntries(
+                assignments.map((a) => [
+                    a.calculation_id,
+                    `ID: ${a.calculation_id} - ${a.location_name || "ไม่ระบุชื่อสถานที่"}`,
+                ])
+            ),
+            inputPlaceholder: "เลือกสถานที่...",
+            showCancelButton: true,
+            confirmButtonText: "ตกลง",
+            cancelButtonText: "ยกเลิก",
+            inputValidator: (value) => {
+                if (!value) return "กรุณาเลือกสถานที่!";
+            },
+        });
+
+        if (!selectedId) return; // ถ้าผู้ใช้กดยกเลิก ไม่ต้องทำอะไรต่อ
+
+        // ✅ 3. โหลดข้อมูล Grid ตาม Assignment ที่เลือก
+        await loadGridPattern(selectedId);
+    } catch (error) {
+        console.error("Error fetching assignments:", error);
+        Swal.fire("ข้อผิดพลาด!", "ไม่สามารถโหลดรายการสถานที่ได้", "error");
+    }
+};
+
+
+  const loadGridPattern = async (assignmentId) => {
+    try {
+      // ✅ 1. ดึงข้อมูลจาก API
+      const response = await axios.get(
+        `${import.meta.env.VITE_SERVER_URL}/area_cal/${assignmentId}`
+      );
+
+      let { width, height, grid_pattern } = response.data[0];
+
+      console.log("Raw gridPattern:", grid_pattern);
+
+      // ✅ 2. ตรวจสอบและแปลงเป็น Array (จาก JSON String)
+      if (typeof grid_pattern === "string") {
+        grid_pattern = JSON.parse(grid_pattern);
+      }
+
+      console.log("Parsed gridPattern:", grid_pattern);
+
+      if (!Array.isArray(grid_pattern) || grid_pattern.length === 0) {
+        Swal.fire("ไม่พบข้อมูล!", "ไม่มีการบันทึกแอร์ในกริดนี้", "info");
+        return;
+      }
+
+      // ✅ 3. ตั้งค่าความกว้างและความยาวของ Grid อัตโนมัติ
+      document.getElementById("width").value = width;
+      document.getElementById("length").value = height;
+      setWidth(width);
+      setLength(height);
+
+      // ✅ 4. สร้าง Grid ใหม่ และ `await` ให้ Grid สร้างเสร็จก่อน
+      await createGrid();
+
+      // ✅ 5. รอให้ DOM อัปเดต (ให้ Grid Cells ถูกต้องก่อน)
+      await new Promise((resolve) => setTimeout(resolve, 50));
+
+      // ✅ 6. ค้นหาเซลล์ใน Grid ใหม่
+      const gridCells = document.querySelectorAll(".cell");
+      const gridWidth = parseInt(width, 10);
+
+      // ✅ 7. วนลูปวางแอร์ใน Grid
+      grid_pattern.forEach((acData) => {
+        const { id, row, col, type, rotation } = acData;
+        const cellIndex = row * gridWidth + col;
+        const targetCell = gridCells[cellIndex];
+
+        if (!targetCell) return;
+
+        // ✅ 8. สร้างแอร์ใหม่
+        const boxElement = document.createElement("div");
+        boxElement.className = `box ${getACClassName(type)}`;
+        boxElement.textContent = getACLabel(type);
+        boxElement.setAttribute("data-rotation", rotation);
+        boxElement.setAttribute("draggable", "true");
+        boxElement.id = id;
+
+        // ✅ 9. ปรับขนาดให้ตรงกับเซลล์
+        adjustBoxSize(boxElement, targetCell);
+        boxElement.style.transform = `rotate(${rotation}deg)`;
+
+        // ✅ 10. เพิ่ม Event ให้แอร์
+        boxElement.addEventListener("click", () => rotateAC(boxElement));
+        boxElement.addEventListener("dragstart", (e) => {
+          e.dataTransfer.setData("boxId", boxElement.id);
+        });
+
+        // ✅ 11. เพิ่มปุ่มลบ
+        const deleteButton = createDeleteButton(boxElement);
+        adjustDeleteButtonSize(deleteButton, boxElement);
+        boxElement.appendChild(deleteButton);
+
+        // ✅ 12. ใส่แอร์ลงใน Grid
+        targetCell.appendChild(boxElement);
+
+        // ✅ 13. แพร่ผลความเย็น
+        spreadCoolingEffect(targetCell, boxElement);
+      });
+
+      Swal.fire("โหลดสำเร็จ!", "โหลดการวางแอร์เรียบร้อย", "success");
+    } catch (error) {
+      console.error("Error loading grid pattern:", error);
+      Swal.fire("ข้อผิดพลาด!", "โหลดข้อมูลล้มเหลว", "error");
+    }
+  };
 
   function placeACInOptimalPosition(
     uncoveredCells,
@@ -1143,36 +1503,39 @@ function stopDragCopy() {
         return "ไม่ระบุ";
     }
   }
+  const AC_TYPE_MAP = {
+    12000: { className: "oneton", label: "1Ton" },
+    60000: { className: "fiveton", label: "5Ton" },
+    120000: { className: "tenton", label: "10Ton" },
+    240000: { className: "twentyton", label: "20Ton" },
+    ac: { className: "ac", label: "AC" },
+    newBox: { className: "ac", label: "AC" },
+    obstacle: { className: "obstacle", label: "OBS" },
+    newObstacle: { className: "obstacle", label: "OBS" },
+    obstacle2: { className: "obstacle2", label: "OBS2" },
+    newObstacle2: { className: "obstacle2", label: "OBS2" },
+    oneton: { className: "oneton", label: "1Ton" },
+    newOnetonBox: { className: "oneton", label: "1Ton" },
+    fiveton: { className: "fiveton", label: "5Ton" },
+    newFivetonBox: { className: "fiveton", label: "5Ton" },
+    tenton: { className: "tenton", label: "10Ton" },
+    newTentonBox: { className: "tenton", label: "10Ton" },
+    twentyton: { className: "twentyton", label: "20Ton" },
+    newTwentytonBox: { className: "twentyton", label: "20Ton" },
+  };
 
-  function getACClassName(acType) {
-    switch (acType) {
-      case "12000":
-        return "oneton";
-      case "60000":
-        return "fiveton";
-      case "120000":
-        return "tenton";
-      case "240000":
-        return "twentyton";
-      default:
-        return "ac";
-    }
+  /**
+   * ฟังก์ชันคืนค่า className ของแอร์
+   */
+  function getACClassName(type) {
+    return AC_TYPE_MAP[type]?.className || "ac";
   }
 
-  // ฟังก์ชันรับชื่อของแอร์
-  function getACLabel(acType) {
-    switch (acType) {
-      case "12000":
-        return "1Ton";
-      case "60000":
-        return "5Ton";
-      case "120000":
-        return "10Ton";
-      case "240000":
-        return "20Ton";
-      default:
-        return "AC";
-    }
+  /**
+   * ฟังก์ชันคืนค่า label ของแอร์
+   */
+  function getACLabel(type) {
+    return AC_TYPE_MAP[type]?.label || "AC";
   }
 
   // ฟังก์ชันคำนวณระยะห่างของแอร์
@@ -1191,9 +1554,52 @@ function stopDragCopy() {
     }
   }
 
+  const handleSelectAssignmentGrid = async () => {
+    const { value: selectedId } = await Swal.fire({
+      title: "เลือกการนัดหมายที่ต้องการ",
+      input: "select",
+      inputOptions: assignments.reduce((acc, assignment) => {
+        acc[assignment.assignment_id] =
+          `${assignment.assignment_id} - ${assignment.description}`;
+        return acc;
+      }, {}),
+      inputPlaceholder: "เลือก Assignment",
+      showCancelButton: true,
+      confirmButtonText: "ตกลง",
+    });
+
+    if (selectedId) {
+      setSelectedAssignment(selectedId);
+      setAssignmentId(selectedId);
+      Swal.fire("สำเร็จ!", `เลือก Assignment ID: ${selectedId}`, "success");
+    }
+  };
   return (
     <>
       <div className="mx-5 my-5 font-inter">
+        <div className="flex  items-center mb-4 justify-between">
+          <h2 className="text-2xl font-bold mb-4">Area Calculations</h2>
+
+          <div className="flex justify-between">
+            <button
+              onClick={selectAssignmentAndLoadGrid}
+              className="btn bg-error text-white hover:bg-error"
+            >
+              เลือกสถานที่และโหลดข้อมูลที่บันทึกไว้
+            </button>
+            <button
+              className="btn bg-success text-white hover:bg-success"
+              onClick={fetchACInventory}
+            >
+              ดึงข้อมูลจำนวนแอร์ที่มีอยู่
+            </button>
+            <Link to="/dashboard/area-cal/content">
+              <button className="btn bg-blue text-white hover:bg-blue">
+                ดูรายการพื้นที่ทั้งหมด
+              </button>
+            </Link>
+          </div>
+        </div>
         <div
           id="air-container"
           className="p-6 bg-base-100 shadow-md rounded-lg w-full  mx-auto"
@@ -1305,12 +1711,12 @@ function stopDragCopy() {
             <div className="quantity-container">
               <input
                 type="number"
-                className="ac-quantity"
+                className="ac-quantity input-air"
                 min="1"
                 placeholder="จำนวน"
               />
             </div>
-            <button id="add-ac" onClick={handleAddAC}>
+            <button id="add-ac" onClick={handleAddAC} className="b-air">
               เพิ่มแอร์
             </button>
           </div>
@@ -1320,24 +1726,27 @@ function stopDragCopy() {
           คำนวณจำนวนแอร์ที่ต้องใช้
         </button> */}
         <br />
-        <button id="createGrid" className="my-2 mr-2" onClick={createGrid}>
+        <button
+          id="createGrid"
+          className="my-2 mr-2 b-air"
+          onClick={createGrid}
+        >
           Create Grid
         </button>
-        <button id="quickPlaceAC" onClick={handleQuickPlaceAc}>
+        <button
+          id="quickPlaceAC"
+          onClick={handleQuickPlaceAc}
+          className="b-air"
+        >
           วางแอร์อย่างรวดเร็ว
         </button>
 
-        <br />
         <br />
 
         <div id="btu-result">{btuResult}</div>
         <div id="ac-count-result">{acCountResult}</div>
         <div id="ac-usage-result">{acUsageResult}</div>
-        <div
-          id="grid"
-          className="x"
-          onClick={handleEraserGrid}
-        ></div>
+        <div id="grid" className="x" onClick={handleEraserGrid}></div>
         <div className="toolbox">
           {/* <div id="acBox" className="box ac" draggable="true">
             AC
@@ -1360,6 +1769,7 @@ function stopDragCopy() {
           <div id="twentytonBox" className="box twentyton" draggable="true">
             20 Ton
           </div>
+
           <div className="drag-mode-container">
             <input
               type="checkbox"
@@ -1376,6 +1786,11 @@ function stopDragCopy() {
           >
             Eraser
           </div>
+        </div>
+        <div className="flex justify-end gap-5">
+          <button onClick={handleSelectAssignment} className="b-air">
+            บันทึก
+          </button>
         </div>
       </div>
     </>
