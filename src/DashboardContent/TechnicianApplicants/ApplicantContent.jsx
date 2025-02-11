@@ -269,20 +269,18 @@ const ApplicantContent = () => {
 
       <div className="flex justify-between items-center mt-4">
         <p
-          className={`cursor-pointer ${
-            currentPage === 1 ? "text-gray-400" : "text-black"
-          }`}
+                     className={`cursor-pointer ${currentPage === totalPages ? "text-gray-400" : "text-black"}`}
+
           onClick={() => handlePageChange(currentPage - 1)}
           disabled={currentPage === 1}
         >
-          Prev
+          Previous
         </p>
         <span>{`Page ${currentPage} of ${totalPages}`}</span>
         <p
           onClick={() => handlePageChange(currentPage + 1)}
-          className={`cursor-pointer ${
-            currentPage === totalPages ? "text-gray-400" : "text-black"
-          }`}
+          className={`cursor-pointer ${currentPage === totalPages ? "text-gray-400" : "text-black"}`}
+
         >
           Next
         </p>

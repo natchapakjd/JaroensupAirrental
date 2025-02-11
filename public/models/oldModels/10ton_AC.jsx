@@ -6,9 +6,9 @@ Command: npx gltfjsx@6.5.3 10ton_AC.gltf
 import React from 'react'
 import { useGLTF } from '@react-three/drei'
 import { useEffect } from 'react'
-import { useCharacterAnimations } from '../../src/components/AugmentedReality/contexts/CharacterAnimations'
+import { useCharacterAnimations } from '../../../src/components/AugmentedReality/contexts/CharacterAnimations'
 export default function Air10Ton(props) {
-  const { nodes, materials } = useGLTF('/models/10ton_AC.gltf')
+  const { nodes, materials } = useGLTF('/models/oldModels/10ton_AC.gltf')
   const {setAnimations} = useCharacterAnimations();
             useEffect(() => {
               setAnimations([]);
@@ -32,4 +32,4 @@ export default function Air10Ton(props) {
   )
 }
 
-useGLTF.preload('/models/10ton_AC.gltf')
+useGLTF.preload('/models/oldModels/10ton_AC.gltf')

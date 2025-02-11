@@ -16,13 +16,44 @@
     position: absolute;
     bottom: 8vh;
     width: 100%;
+    height: 80%;
+}   
+
+.menu-button {
+    position: absolute; /* ทำให้สามารถกำหนดตำแหน่งแบบอิสระ */
+    top: 0rem;
+    right: 1rem; /* เลื่อนปุ่มไปชิดขวา */
+    padding: 0.8rem 1rem;
+    border-radius: 0.3rem;
+    border: none;
+    background-color: rgba(255,127,80,0.9);
+    color: white;
+    font-size: 1rem;
+    cursor: pointer;
+    pointer-events: auto;
+    z-index: 1000;
+}
+
+/* Popup Menu */
+.popup-menu {
+    position: absolute;
+    top: 4rem;
+    right: 1rem; /* เปลี่ยนจาก left เป็น right เพื่อให้เมนูชิดขวา */
+    width: 800px;
+    height: 800px;
+    background-color: rgba(0, 0, 0, 0.8);
+    padding: 1rem;
+    border-radius: 0.5rem;
+    box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.3);
+    pointer-events: auto;
+    z-index: 999;
 }
 
 .button-container{
     display:flex;
     justify-content: center;
     align-items: center;
-    width: 90%;
+    width: 100%;
     gap: 1rem;
     margin: 0 auto;
     padding: 1rem;
@@ -43,4 +74,96 @@
 }
 .ar-button{
     background-color: rgb(255,127,80) !important;
+}
+
+/* Dropdown */
+.dropdown-label {
+    color: white;
+    font-size: 1rem;
+    margin-bottom: 0.5rem;
+    display: block;
+}
+
+.dropdown {
+    width: 100%;
+    padding: 0.5rem;
+    border-radius: 0.3rem;
+    border: none;
+    font-size: 1rem;
+    background-color: white;
+    color: black;
+    cursor: pointer;
+    margin-bottom: 1rem;
+}
+
+
+.model-count-container {
+    color: white;
+    font-size: 1rem;
+    margin-top: 1rem;
+    padding: 0.5rem;
+    border-radius: 0.3rem;
+    background-color: rgba(255, 255, 255, 0.1);
+    text-align: left;
+}
+.model-count-container h3 {
+    font-size: 1.2rem;
+    margin-bottom: 0.5rem;
+}
+
+
+.input-container {
+    margin-bottom: 1rem;
+    text-align: left;
+}
+
+.input-label {
+    color: white;
+    font-size: 1rem;
+    display: block;
+    margin-bottom: 0.5rem;
+}
+
+.input-field {
+    width: 100%;
+    padding: 0.5rem;
+    border-radius: 0.3rem;
+    border: none;
+    font-size: 1rem;
+    background-color: white;
+    color: black;
+    cursor: pointer;
+}
+
+/* 📌 Dropdown */
+.dropdown-container {
+    margin-bottom: 1rem;
+}
+
+.save-button {
+    background-color: green;
+    color: white;
+    font-weight: bold;
+    margin-top: 1rem;
+}
+
+.save-button:hover {
+    background-color: darkgreen;
+}
+
+/* 📌 Container สำหรับ Input และ Dropdown */
+.grid-container {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr); /* 2 คอลัมน์ */
+    gap: 1rem; /* ระยะห่างระหว่างช่อง */
+}
+
+/* 📌 ปรับขนาดให้เต็มคอลัมน์ */
+.full-width {
+    grid-column: span 2;
+}
+.button-container-right {
+    display: flex;
+    justify-content: flex-end; /* ✅ ชิดขวา */
+    margin-top: 1rem;
 }

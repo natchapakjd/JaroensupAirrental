@@ -6,11 +6,13 @@ Command: npx gltfjsx@6.5.3 10ton_AC_CC.gltf
 import React, { useEffect } from 'react';
 import { useGLTF } from '@react-three/drei';
 import { useCharacterAnimations } from '../../src/components/AugmentedReality/contexts/CharacterAnimations';
+import useModelsStore from '../../src/components/AugmentedReality/stores/modelStore';
 
 export default function Air10tonCC(props) {
   const { nodes, materials } = useGLTF('models/10ton_AC_CC.gltf');
-
+  const { isAnimating, showGeometry } = useModelsStore(); // ดึง state จาก Zustand
   const { setAnimations } = useCharacterAnimations();
+
   useEffect(() => {
     setAnimations([]);
   }, [setAnimations]);
@@ -18,12 +20,11 @@ export default function Air10tonCC(props) {
   return (
     <group {...props} dispose={null} scale={0.1}>
       {/* Apply transparency to this mesh */}
-      <mesh 
-        geometry={nodes.Cube.geometry} 
-        material={materials['Material.005']} 
-        material-transparent={true} 
-        material-opacity={0.5} // Adjust opacity (0 = fully transparent, 1 = fully opaque)
-      />
+       {showGeometry && (
+        <mesh         material={materials['Material.005']} 
+        material-transparent={true} material-opacity={0.5} />
+      )}
+      
       <group position={[0.108, 10.457, -0.166]}>
         <mesh geometry={nodes.Cube002_1.geometry} material={materials['Material.004']} />
         <mesh geometry={nodes.Cube002_2.geometry} material={materials['Material.007']} />
@@ -36,6 +37,12 @@ export default function Air10tonCC(props) {
       <mesh geometry={nodes.Cube013.geometry} material={nodes.Cube013.material} position={[2.48, 4.826, 1.689]} />
       <mesh geometry={nodes.Cube014.geometry} material={nodes.Cube014.material} position={[3.937, 4.826, 1.689]} />
       <mesh geometry={nodes.Cube015.geometry} material={materials['Material.001']} position={[3.139, 4.744, 1.556]} scale={[1.483, 1, 1]} />
+
+       {/* 🔥 แสดง Animation เมื่อ `isAnimating = true` */}
+       {isAnimating && (
+        <mesh geometry={nodes.Cube.geometry}         material={materials['Material.005']} 
+ />
+      )}
     </group>
   );
 }

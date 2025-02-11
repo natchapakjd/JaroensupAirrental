@@ -21,8 +21,6 @@ const TaskContent = () => {
   const techId = decodedToken.technicianId;
 
   const navigate = useNavigate();
-  const apiUrl = import.meta.env.VITE_SERVER_URL;
-
   useEffect(() => {
     fetchTasks();
     fetchStatuses();

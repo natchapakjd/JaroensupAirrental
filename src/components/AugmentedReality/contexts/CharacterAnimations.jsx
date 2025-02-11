@@ -5,38 +5,26 @@ const CharacterAnimationContext = createContext({});
 
 export const CharacterAnimationsProvider = (props) => {
     const {Color,Model} = useControls({
-        Color:"#ffffff",
-        Model:{
-            options:{
-                // "Druid": "druid",
-                // "Young Korrigan": "young-korrigan",
-                // "Korrigan Hat": "korrigan-hat",
-                // "Bear" :"bear",
-                // "Air":"air",
-                // "Monkey":"monkey",
-                // "Panda":"panda",
-                "Air5Ton":"air5ton",
-                "Air10Ton":"air10ton",
-                "Air20Ton":"air20ton",
-                // "Test":"Test",
-                // "Test1":"Test1",
-                "Air5TonCC":"air5tonCC",
-                "Air10TonCC":"air10tonCC",
-                "Air20TonCC":"air20tonCC",
+        // Color:"#ffffff",
+        // Model:{
+        //     options:{
+        //         "Air5TonCC":"air5tonCC",
+        //         "Air10TonCC":"air10tonCC",
+        //         "Air20TonCC":"air20tonCC",
 
 
-            },
-            onChange:(value)=>{
-                setCurrentModelName(value);
-                setAnimationIndex(0);
-                setCount(0);
-            }
-        }
+        //     },
+        //     onChange:(value)=>{
+        //         setCurrentModelName(value);
+        //         setAnimationIndex(0);
+        //         setCount(0);
+        //     }
+        // }
     })
   const [count,setCount] = useState(0);
   const [animations, setAnimations] = useState([]);
   const [animationIndex, setAnimationIndex] = useState(0);
-  const [currentModelName, setCurrentModelName] = useState(Model)
+  const [currentModelName, setCurrentModelName] = useState("air5tonCC")
   return (
     <CharacterAnimationContext.Provider
       value={{

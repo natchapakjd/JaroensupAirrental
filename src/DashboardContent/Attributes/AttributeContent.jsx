@@ -139,7 +139,6 @@ const AttributeContent = () => {
             <p
               onClick={() => setCurrentPage((prev) => Math.max(prev - 1, 1))}
               className={`cursor-pointer ${currentPage === 1 ? "text-gray-400" : "text-black"}`}
-              style={{ pointerEvents: currentPage === 1 ? "none" : "auto" }}
             >
               Previous
             </p>
@@ -149,7 +148,6 @@ const AttributeContent = () => {
             <p
               onClick={() => setCurrentPage((prev) => Math.min(prev + 1, totalPages))}
               className={`cursor-pointer ${currentPage === totalPages ? "text-gray-400" : "text-black"}`}
-              style={{ pointerEvents: currentPage === totalPages ? "none" : "auto" }}
             >
               Next
             </p>
