@@ -147,15 +147,19 @@ const AreacalContent = () => {
           <p
             onClick={() => handlePageChange(currentPage - 1)}
             disabled={currentPage === 1}
+            className={`cursor-pointer ${currentPage === totalPages ? "text-gray-400" : "text-black"}`}
+
           >
             Previous
           </p>
-          <span>
-            Page {currentPage} of {totalPages}
+          <span className="flex items-center justify-center">
+          Page {currentPage} of {totalPages}
           </span>
           <p
             onClick={() => handlePageChange(currentPage + 1)}
             disabled={currentPage === totalPages}
+            className={`cursor-pointer ${currentPage === totalPages ? "text-gray-400" : "text-black"}`}
+
           >
             Next
           </p>

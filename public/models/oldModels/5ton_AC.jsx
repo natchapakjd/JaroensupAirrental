@@ -6,10 +6,10 @@ Command: npx gltfjsx@6.5.3 5ton_AC.gltf
 import React from 'react'
 import { useGLTF } from '@react-three/drei'
 import { useEffect } from 'react'
-import { useCharacterAnimations } from '../../src/components/AugmentedReality/contexts/CharacterAnimations'
+import { useCharacterAnimations } from '../../../src/components/AugmentedReality/contexts/CharacterAnimations'
 
 export default function Model(props) {
-  const { nodes, materials } = useGLTF('models/5ton_AC.gltf')
+  const { nodes, materials } = useGLTF('models/oldModels/5ton_AC.gltf')
 
    const {setAnimations} = useCharacterAnimations();
               useEffect(() => {
@@ -29,4 +29,4 @@ export default function Model(props) {
   )
 }
 
-useGLTF.preload('models/5ton_AC.gltf')
+useGLTF.preload('models/oldModels/5ton_AC.gltf')

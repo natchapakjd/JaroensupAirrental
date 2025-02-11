@@ -183,7 +183,6 @@ const ReviewContent = () => {
         <p
           onClick={() => handlePageChange(currentPage - 1)}
           className={`cursor-pointer ${currentPage === totalPages ? "text-gray-400" : "text-black"}`}
-          style={{ pointerEvents: currentPage === 1 ? "none" : "auto" }}
         >
           Previous
         </p>
@@ -193,7 +192,6 @@ const ReviewContent = () => {
         <p
           onClick={() => handlePageChange(currentPage + 1)}
           className={`cursor-pointer ${currentPage === totalPages ? "text-gray-400" : "text-black"}`}
-          style={{ pointerEvents: currentPage === totalPages ? "none" : "auto" }}
         >
           Next
         </p>

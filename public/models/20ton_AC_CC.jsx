@@ -7,20 +7,26 @@ import React from 'react'
 import { useGLTF } from '@react-three/drei'
 import { useEffect } from 'react'
 import { useCharacterAnimations } from '../../src/components/AugmentedReality/contexts/CharacterAnimations'
+import useModelsStore from '../../src/components/AugmentedReality/stores/modelStore'
 
 export default function Air20tonCC(props) {
   const { nodes, materials } = useGLTF('models/20ton_AC_CC.gltf')
+  const { isAnimating, showGeometry } = useModelsStore(); // ดึง state จาก Zustand
+  const {setAnimations} = useCharacterAnimations();
 
-       const {setAnimations} = useCharacterAnimations();
-                  useEffect(() => {
-                    setAnimations([]);
-                  }, [setAnimations]);
+  useEffect(() => {
+    setAnimations([]);
+  }, [setAnimations]);               
+
   return (
     <group {...props} dispose={null} scale={0.1}>
-      <mesh geometry={nodes.Cube001.geometry} 
-            material={materials['Material.002']}  
-            material-transparent={true} 
-            material-opacity={0.5} />
+
+       {/* 🔥 ควบคุมการแสดงผล Geometry */}
+       {showGeometry && (
+        <mesh             material={materials['Material.002']}  
+        material-transparent={true} material-opacity={0.5} />
+      )}
+      
       <group position={[0, 11.826, -0.16]}>
         <mesh geometry={nodes.Cube003_1.geometry} material={materials['Material.006']} />
         <mesh geometry={nodes.Cube003_2.geometry} material={materials['Material.008']} />
@@ -36,6 +42,9 @@ export default function Air20tonCC(props) {
       <mesh geometry={nodes['pngtree-texture-of-an-air-conditioner-s-radiator-grille-ima003'].geometry} material={materials['pngtree-texture-of-an-air-conditioner-s-radiator-grille-image_1']} position={[-3.542, 10.757, 3.556]} rotation={[Math.PI / 2, 0, 0]} scale={[3.177, 4.12, 2.738]} />
       <mesh geometry={nodes['pngtree-texture-of-an-air-conditioner-s-radiator-grille-ima004'].geometry} material={materials['pngtree-texture-of-an-air-conditioner-s-radiator-grille-image_1']} position={[3.71, 10.757, 3.553]} rotation={[Math.PI / 2, 0, 0]} scale={[3.177, 4.12, 2.738]} />
       <mesh geometry={nodes['pngtree-texture-of-an-air-conditioner-s-radiator-grille-image_1'].geometry} material={materials['pngtree-texture-of-an-air-conditioner-s-radiator-grille-image_1']} position={[-3.542, 4.883, 3.556]} rotation={[Math.PI / 2, 0, 0]} scale={[3.177, 4.12, 2.738]} />
+      {isAnimating && (
+        <mesh  geometry={nodes.Cube001.geometry} material={materials['Material.002']} />
+      )}
     </group>
   )
 }

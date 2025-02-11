@@ -16,6 +16,12 @@ const useModelsStore = create((set) => ({
     };
   }),
 
+  isAnimating: false,
+  toggleAnimation: () => set((state) => ({ isAnimating: !state.isAnimating })),
+
+  showGeometry: true,
+  toggleGeometry: () => set((state) => ({ showGeometry: !state.showGeometry })),
+  
   removeModelById: (id) => set((state) => ({
     models: state.models.filter((model) => model.id !== id),
     selectedModel: state.selectedModel === id ? null : state.selectedModel,

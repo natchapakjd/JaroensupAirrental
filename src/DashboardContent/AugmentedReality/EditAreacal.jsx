@@ -72,7 +72,7 @@ const EditAreacal = () => {
   }
 
   return (
-    <div className="mx-auto p-6 bg-white shadow rounded-lg font-inter ">
+    <div className="mx-auto p-6 bg-white shadow rounded-lg font-inter">
       <h2 className="text-2xl font-bold mb-4">Edit Area Calculation</h2>
       <form onSubmit={handleSubmit} className="space-y-4">
         <label className="block">
