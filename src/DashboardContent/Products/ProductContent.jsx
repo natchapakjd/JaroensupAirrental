@@ -126,7 +126,16 @@ const ProductContent = () => {
       setCurrentPage(newPage);
     }
   };
-
+  const openImagePopup = (imageUrl) => {
+    Swal.fire({
+      imageUrl: imageUrl,
+      imageAlt: "Product Image",
+      showCloseButton: true,
+      showConfirmButton: false,
+      background: "#fff",
+      width: "auto",
+    });
+  };
   return (
     <div className="p-8 rounded-lg shadow-lg w-full mx-auto font-inter h-full">
       <div className="flex flex-col sm:flex-row justify-between items-center mb-6 gap-4">
@@ -202,9 +211,14 @@ const ProductContent = () => {
                 <td className="border p-2 text-center">{product.brand_name}</td>
                 <td className="border p-2 text-center">{product.category_name}</td>
                 <td className="border p-2 text-center">{product.location}</td>
-                <td className="border p-2 text-center">
+                <td>
                   {product.image_url ? (
-                    <img src={product.image_url} alt={product.name} className="w-32 h-32 object-cover mx-auto" />
+                    <img
+                      src={product.image_url}
+                      alt={product.name}
+                      className="w-16 h-16 object-cover cursor-pointer mx-auto"
+                      onClick={() => openImagePopup(product.image_url)}
+                    />
                   ) : (
                     "No image"
                   )}

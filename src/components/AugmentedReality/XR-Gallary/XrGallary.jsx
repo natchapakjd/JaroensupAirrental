@@ -3,10 +3,7 @@ import { useRef, useState } from "react";
 import { useThree } from "@react-three/fiber";
 import { Interactive, useHitTest, useXR } from "@react-three/xr";
 import { useCharacterAnimations } from "../contexts/CharacterAnimations";
-import { Fragment } from "react";
-import Air5Ton from "../../../../public/models/oldModels/5ton_AC";
-import Air10Ton from "../../../../public/models/oldModels/10ton_AC";
-import Air20Ton from "../../../../public/models/oldModels/20ton_AC";
+
 import useModelsStore from "../stores/modelStore";
 import Air5tonCC from "../../../../public/models/5ton_AC_CC";
 import Air10tonCC from "../../../../public/models/10ton_AC_CC";
@@ -89,13 +86,15 @@ const XrGallary = () => {
         </Interactive>
       )}
 
-      {!isPresenting && currentModelName === "air5ton" && <Air5Ton />}
-      {!isPresenting && currentModelName === "air10ton" && <Air10Ton />}
-      {!isPresenting && currentModelName === "air20ton" && <Air20Ton />}
-      {!isPresenting && currentModelName === "air5tonCC" && <Air5tonCC />}
-      {!isPresenting && currentModelName === "air10tonCC" && <Air10tonCC />}
-      {!isPresenting && currentModelName === "air20tonCC" && <Air20tonCC />}
-    
+      {!isPresenting && currentModelName === "air5tonCC" && (
+        <Air5tonCC scale={0.1} />
+      )}
+      {!isPresenting && currentModelName === "air10tonCC" && (
+        <Air10tonCC scale={0.1} />
+      )}
+      {!isPresenting && currentModelName === "air20tonCC" && (
+        <Air20tonCC scale={0.1} />
+      )}
     </>
   );
 };

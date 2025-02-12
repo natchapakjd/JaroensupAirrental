@@ -2,7 +2,7 @@ import React, { forwardRef, useState, useEffect } from "react";
 import { useCharacterAnimations } from "../contexts/CharacterAnimations";
 import "./Interface.css";
 import useModelsStore from "../stores/modelStore";
-import axios from "axios";
+import axios from "axios"
 
 const Interface = forwardRef(({ props }, ref) => {
   const {
@@ -27,7 +27,8 @@ const Interface = forwardRef(({ props }, ref) => {
   const [locationName, setLocationName] = useState("");
   const [appointments, setAppointments] = useState([]);
   const [selectedAppointment, setSelectedAppointment] = useState("");
-  const [roomType, setRoomType] = useState("750"); // ค่าพื้นฐานของ area_type
+  const [roomType, setRoomType] = useState(1); // ค่าพื้นฐานของ area_type
+  const [roomTypes, setRoomTypes] = useState([]); // 📌 เก็บค่าห้องจาก API
   const [width, setWidth] = useState(""); // Optional Width
   const [height, setHeight] = useState(""); // Optional Height
 
@@ -43,6 +44,20 @@ const Interface = forwardRef(({ props }, ref) => {
       })
       .catch((error) => {
         console.error("Error fetching appointments:", error);
+      });
+  }, []);
+
+  useEffect(() => {
+    axios
+      .get(`${import.meta.env.VITE_SERVER_URL}/area-types`)
+      .then((response) => {
+        setRoomTypes(response.data);
+        if (response.data.length > 0) {
+          setRoomType(response.data[0].id); // ตั้งค่าห้องเริ่มต้น
+        }
+      })
+      .catch((error) => {
+        console.error("Error fetching room types:", error);
       });
   }, []);
 
@@ -63,13 +78,13 @@ const Interface = forwardRef(({ props }, ref) => {
       width: width || 10, // ใช้ค่า default ถ้าไม่กรอก
       height: height || 10, // ใช้ค่า default ถ้าไม่กรอก
       air_conditioners_needed: totalModels,
-      area_type: roomType, // ✅ ใช้ค่าจาก roomType
+      room_type_id: roomType, // ✅ ใช้ค่าจาก roomType
       air_5ton_used: modelCounts["air5tonCC"] || 0,
       air_10ton_used: modelCounts["air10tonCC"] || 0,
       air_20ton_used: modelCounts["air20tonCC"] || 0,
       grid_pattern: models,
     };
-
+    console.log(roomType)
     axios
       .post(`${import.meta.env.VITE_SERVER_URL}/area_cal`, payload)
       .then((response) => {
@@ -80,7 +95,7 @@ const Interface = forwardRef(({ props }, ref) => {
         alert("Failed to save data");
       });
   };
-
+  
   const clearModels = () => {
     setModels([]); // ล้างโมเดลทั้งหมด
   };
@@ -99,15 +114,15 @@ const Interface = forwardRef(({ props }, ref) => {
           <div className="popup-menu">
             {/* 🔥 ส่วนเลือกโมเดล */}
             <div className="dropdown-ar-container">
-              <label className="dropdown-ar label">Select Model:</label>
+              <label className="dropdown-ar-label">Select Model:</label>
               <select
                 className="dropdown-ar"
                 value={currentModelName}
                 onChange={(e) => setCurrentModelName(e.target.value)}
               >
-                <option value="air5tonCC">Air 5 Ton CC</option>
-                <option value="air10tonCC">Air 10 Ton CC</option>
-                <option value="air20tonCC">Air 20 Ton CC</option>
+                <option value="air5tonCC">Air 5 Ton</option>
+                <option value="air10tonCC">Air 10 Ton</option>
+                <option value="air20tonCC">Air 20 Ton</option>
               </select>
             </div>
 
@@ -208,15 +223,11 @@ const Interface = forwardRef(({ props }, ref) => {
                   value={roomType}
                   onChange={(e) => setRoomType(e.target.value)}
                 >
-                  <option value="750">1. ห้องนอนปกติ - ไม่โดนแดดโดยตรง</option>
-                  <option value="800">2. ห้องนอนปกติ - โดนแดดมาก</option>
-                  <option value="850">3. ห้องทำงาน - ไม่โดนแดดโดยตรง</option>
-                  <option value="900">4. ห้องทำงาน - โดนแดดมาก</option>
-                  <option value="950">5. ร้านอาหาร/ร้านค้า - ไม่โดนแดด</option>
-                  <option value="1000">6. ร้านอาหาร/ร้านค้า - โดนแดดมาก</option>
-                  <option value="1100">7. ห้องประชุม</option>
-                  <option value="1200">8. ห้องประชุมขนาดใหญ่เพดานสูง</option>
-                  <option value="1300">9. สนามเปิด/พื้นที่เปิด</option>
+                  {roomTypes.map((type) => (
+                    <option key={type.id} value={type.id}>
+                      {type.room_name}
+                    </option>
+                  ))}
                 </select>
               </div>
 
@@ -247,6 +258,7 @@ const Interface = forwardRef(({ props }, ref) => {
            
             </div>
             <div className="button-container-right">
+            
               <button className="button save-button" onClick={saveCalculation}>
                 Save Calculation
               </button>

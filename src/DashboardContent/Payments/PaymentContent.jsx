@@ -125,6 +125,17 @@ const PaymentContent = () => {
     return matchesSearch && matchesStatus;
   });
 
+  const openSlipImagePopup = (imageUrl) => {
+    Swal.fire({
+      imageUrl: imageUrl,
+      imageAlt: "Product Image",
+      showCloseButton: true,
+      showConfirmButton: false,
+      background: "#fff",
+      width: "auto",
+    });
+  };
+  
   return (
     <div className="p-8 rounded-lg shadow-lg w-full mx-auto font-inter h-full">
             <div className="flex justify-between items-center mb-4">
@@ -191,16 +202,18 @@ const PaymentContent = () => {
                   {new Date(payment.created_at).toLocaleString()}
                 </td>
                 <td className="border p-2 text-center">
-                  {payment.image_url ? (
-                    <img
-                      src={`${payment.image_url}`}
-                      alt="Slip"
-                      className="w-16 h-16 object-cover mx-auto"
-                    />
-                  ) : (
-                    <p>No Image</p>
-                  )}
-                </td>
+  {payment.image_url ? (
+    <img
+      src={`${payment.image_url}`}
+      alt="Slip"
+      className="w-16 h-16 object-cover mx-auto cursor-pointer"
+      onClick={() => openSlipImagePopup(payment.image_url)}
+    />
+  ) : (
+    <p>No Image</p>
+  )}
+</td>
+
                 <td className="border p-2 text-center">
                   {payment.status_name}
                 </td>

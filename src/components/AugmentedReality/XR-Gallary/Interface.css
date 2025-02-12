@@ -234,24 +234,13 @@
     }
 }
 
-@media screen and (max-width: 480px) {
-    .popup-menu {
-        width: 100vw;
-        height: auto;
-        max-height: 90vh;
-        padding: 0.5rem;
-    }
+.capture-button {
+    background-color: royalblue;
+    color: white;
+    font-weight: bold;
+    margin-right: 1rem; /* ✅ เพิ่มระยะห่างจากปุ่ม Save */
+}
 
-    .menu-button {
-        font-size: 0.9rem;
-    }
-
-    .button {
-        font-size: 0.9rem;
-    }
-
-    .dropdown-ar, .input-field {
-        font-size: 0.9rem;
-        padding: 0.4rem;
-    }
+.capture-button:hover {
+    background-color: navy;
 }
