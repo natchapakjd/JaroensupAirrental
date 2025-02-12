@@ -8,7 +8,7 @@ import axios from "axios";
 const Areacal = () => {
   const [width, setWidth] = useState(0);
   const [length, setLength] = useState(0);
-  const [roomType, setRoomType] = useState("750");
+  const [roomType, setRoomType] = useState(1);
   const [airInventory, setAirInventory] = useState({
     air5ton: 0,
     air10ton: 0,
@@ -26,6 +26,7 @@ const Areacal = () => {
   const [AirConditionerNeeded, setAirConditionerNeeded] = useState(0);
   const [acPlacements, setAcPlacements] = useState([]);
   const [isReadyToDrag, setIsReadyToDrag] = useState(false);
+  const [roomTypes, setRoomTypes] = useState([]);
 
 
   const navigate = useNavigate();
@@ -52,7 +53,27 @@ const Areacal = () => {
     fetchAssignments();
   }, []);
 
- 
+  useEffect(() => {
+    // 📌 ดึงข้อมูลประเภทห้องจาก API
+    const fetchRoomTypes = async () => {
+      try {
+        const response = await axios.get(
+          `${import.meta.env.VITE_SERVER_URL}/area-types`
+        );
+        
+        // ✅ อัปเดต state ให้มี btu_required ด้วย
+        setRoomTypes(response.data.map(room => ({
+          id: room.id,
+          name: room.room_name,
+          btuRequired: room.btu_required
+        })));
+      } catch (error) {
+        console.error("Error fetching room types:", error);
+      }
+    };
+
+    fetchRoomTypes();
+}, []);
 
   useEffect(() => {
     const toolboxItems = document.querySelectorAll(".toolbox .box"); // ดึง box ทั้งหมดใน toolbox
@@ -151,6 +172,17 @@ const Areacal = () => {
     calculateBTUWithMinAC();
   }, [width, length, roomType, airInventory]);
 
+  const handleRoomTypeChange = (e) => {
+    const selectedRoomId = e.target.value;
+    setRoomType(selectedRoomId);
+
+    // ✅ ค้นหาค่าจาก roomTypes
+    const selectedRoom = roomTypes.find(room => room.id === parseInt(selectedRoomId, 10));
+    if (selectedRoom) {
+        setBtuResult(selectedRoom.btuRequired);
+    }
+};
+
   const fetchACInventory = async () => {
     try {
       const response = await axios.get(
@@ -235,7 +267,7 @@ const Areacal = () => {
       width: parseFloat(width),
       height: parseFloat(length),
       air_conditioners_needed: parseInt(AirConditionerNeeded) || 0,
-      area_type: roomType,
+      room_type_id: roomType,
       air_5ton_used: acUsage.air_5ton_used,
       air_10ton_used: acUsage.air_10ton_used,
       air_20ton_used: acUsage.air_20ton_used,
@@ -306,7 +338,8 @@ const Areacal = () => {
   function calculateBTUWithMinAC() {
     const width = parseInt(document.getElementById("width").value, 10);
     const length = parseInt(document.getElementById("length").value, 10);
-    const roomType = parseInt(document.getElementById("room-type").value, 10);
+    const selectedRoom = roomTypes.find(room => room.id === parseInt(roomType, 10));
+    const btuRequiredPerSqM = selectedRoom ? selectedRoom.btuRequired : 750; // ใช้ค่า default ถ้าไม่พบ
 
     if (!width || !length) {
       document.getElementById("btu-result").textContent =
@@ -318,7 +351,7 @@ const Areacal = () => {
     setLength(length);
 
     const roomArea = width * length;
-    const requiredBTU = roomArea * roomType;
+    const requiredBTU = roomArea * btuRequiredPerSqM;
 
     const airOptions = [
       {
@@ -566,6 +599,7 @@ function disableDragCopyMode() {
             console.log("กำลังหมุน:", boxElement.id);
             rotateAC(boxElement); // ✅ Call rotate function only if it's not an obstacle
         });
+
     } else {
         // ✅ Ensure obstacles have rotation set to 0
         boxElement.setAttribute("data-rotation", "0");
@@ -665,10 +699,12 @@ function disableDragCopyMode() {
         "กรุณากรอกข้อมูลให้ครบถ้วน";
       return;
     }
+    const selectedRoom = roomTypes.find(room => room.id === parseInt(roomType, 10));
+    const btuRequiredPerSqM = selectedRoom ? selectedRoom.btuRequired : 750; // ใช้ค่า default ถ้าไม่พบ
 
     // คำนวณพื้นที่และ BTU ที่ต้องการ
-    const roomArea = width * length;
-    const requiredBTU = roomArea * roomType;
+    const roomArea = width * length;f
+    const requiredBTU = roomArea * btuRequiredPerSqM;
 
     // ดึงค่าจากกล่องจำนวนแอร์ที่มีอยู่
     const air5tonCount =
@@ -741,7 +777,6 @@ function disableDragCopyMode() {
 
     await new Promise((resolve) => setTimeout(resolve, 50));
     setAcPlacements([])
-    console.log("acPlacement",acPlacements)
     setHasQuickPlacedAC(false); // รีเซ็ตสถานะเมื่อสร้าง Grid ใหม่
   };
   function handleDrop(e) {
@@ -811,35 +846,38 @@ function disableDragCopyMode() {
     boxElement.setAttribute("draggable", "true");
 
     setAcPlacements((prev) => {
-        // ✅ ลบค่า `id` ที่มีอยู่แล้วออกไปก่อน
-        const filteredPlacements = prev.filter((ac) => ac.id !== boxId);
-
-        return [
-            ...filteredPlacements,
-            {
-                id: newId,
-                index,
-                row,
-                col,
-                type: boxType,
-                rotation: 0,
-            },
-        ];
-    });
-
+      const filteredPlacements = prev.filter((ac) => ac.id !== boxId);
+  
+      // ✅ ถ้าเป็นกล่องที่มีอยู่แล้ว ให้ใช้ rotation เดิม
+      const existingAC = prev.find((ac) => ac.id === boxId);
+      const rotationValue = existingAC ? existingAC.rotation : 0; // ถ้ามีค่าก่อนหน้าให้ใช้, ถ้าไม่มีให้เป็น 0
+  
+      return [
+          ...filteredPlacements,
+          {
+              id: newId,
+              index,
+              row,
+              col,
+              type: boxType,
+              rotation: rotationValue, // ✅ ใช้ค่าหมุนเดิมถ้ามี
+          },
+      ];
+  });
+  
     // ✅ ปรับขนาด และเพิ่มลงใน Grid
     adjustBoxSize(boxElement, cell);
     cell.appendChild(boxElement);
+    spreadCoolingEffect(cell, boxElement);
 
-    if (boxType !== "obstacle" && boxType !== "obstacle2") {
-        spreadCoolingEffect(cell, boxElement);
+    if (boxType !== "obstacle" && boxType !== "obstacle2" && !isExistingBox) {
         boxElement.addEventListener("click", () => rotateAC(boxElement));
     }
 
     boxElement.addEventListener("dragstart", (event) => {
         event.dataTransfer.setData("boxId", newId);
     });
-
+    console.log(acPlacements)
     updateACUsageInGrid(); // ✅ อัปเดตการใช้แอร์
 }
 
@@ -1082,8 +1120,12 @@ function getACLabel(type) {
         const boxId = e.dataTransfer.getData("boxId");
         const draggedBox = document.getElementById(boxId);
         const targetCell = e.target;
+        console.log("Box ID:", boxId);
+        console.log("Dragged Box:", draggedBox);
+        console.log("Target Cell:", targetCell);
 
         if (targetCell.classList.contains("cell")) {
+          console.log(targetCell.classList.contains("cell"))
           targetCell.appendChild(draggedBox);
           spreadCoolingEffect(
             targetCell,
@@ -1226,39 +1268,40 @@ function getACLabel(type) {
   }
   
   
+    function rotateAC(boxElement) {
+      if (!boxElement.hasAttribute("data-rotation")) {
+        boxElement.setAttribute("data-rotation", "0"); // กำหนดค่าเริ่มต้น
+      }
 
-  function rotateAC(boxElement) {
-    if (!boxElement.hasAttribute("data-rotation")) {
-      boxElement.setAttribute("data-rotation", "0"); // กำหนดค่าเริ่มต้น
+      const currentRotation = parseInt(
+        boxElement.getAttribute("data-rotation"),
+        10
+      );
+      const newRotation = (currentRotation + 90) % 360;
+      boxElement.setAttribute("data-rotation", newRotation);
+      boxElement.style.transform = `rotate(${newRotation}deg)`;
+
+      const parentCell = boxElement.parentElement;
+
+      // ลบและแพร่ผลความเย็นใหม่
+      removeCoolingEffect(boxElement);
+      spreadCoolingEffect(parentCell, boxElement);
+
+      // อัปเดตตำแหน่งปุ่มลบให้ตรงกับ box
+      updateRemoveButtonPosition(boxElement);
+
+      // ✅ อัปเดตค่า rotation ใน acPlacements
+      setAcPlacements((prev) =>
+        prev.map((ac) =>
+          ac.id === boxElement.id ? { ...ac, rotation: newRotation } : ac
+        )
+      );
+
+      console.log(`หมุน ${boxElement.id} ไปที่ ${newRotation}°`);
     }
 
-    const currentRotation = parseInt(
-      boxElement.getAttribute("data-rotation"),
-      10
-    );
-    const newRotation = (currentRotation + 90) % 360;
-    boxElement.setAttribute("data-rotation", newRotation);
-    boxElement.style.transform = `rotate(${newRotation}deg)`;
-
-    const parentCell = boxElement.parentElement;
-
-    // ลบและแพร่ผลความเย็นใหม่
-    removeCoolingEffect(boxElement);
-    spreadCoolingEffect(parentCell, boxElement);
-
-    // อัปเดตตำแหน่งปุ่มลบให้ตรงกับ box
-    updateRemoveButtonPosition(boxElement);
-
-    // ✅ อัปเดตค่า rotation ใน acPlacements
-    setAcPlacements((prev) =>
-      prev.map((ac) =>
-        ac.id === boxElement.id ? { ...ac, rotation: newRotation } : ac
-      )
-    );
-
-    console.log(`หมุน ${boxElement.id} ไปที่ ${newRotation}°`);
-  }
-
+    
+  
   const selectAssignmentAndLoadGrid = async () => {
     try {
         // ✅ 1. ดึงรายการ Assignment จาก API
@@ -1538,6 +1581,7 @@ function placeACInOptimalPosition(uncoveredCells, gridWidth, gridHeight, acType)
     const cellIndex = parseInt(cell.getAttribute("data-index"), 10);
     const row = Math.floor(cellIndex / gridWidth);
     const col = cellIndex % gridWidth;
+    console.log("roomEdge")
 
     if (row === 0) {
       acBox.setAttribute("data-rotation", "90"); // หันไปทางขวา
@@ -1740,23 +1784,24 @@ function placeACInOptimalPosition(uncoveredCells, gridWidth, gridHeight, acType)
           onChange={(e) => setLength(e.target.value)}
         />
 
-        <label htmlFor="room-type">ประเภทห้อง: </label>
-        <select
-          id="room-type"
-          value={roomType}
-          onChange={(e) => setRoomType(e.target.value)}
-          className="select-air"
-        >
-          <option value="750">1. ห้องนอนปกติ - ไม่โดนแดดโดยตรง</option>
-          <option value="800">2. ห้องนอนปกติ - โดนแดดมาก</option>
-          <option value="850">3.ห้องทำงาน - ไม่โดนแดดโดยตรง</option>
-          <option value="900">4.ห้องทำงาน - โดนแดดมาก</option>
-          <option value="950">5.ร้านอาหาร/ร้านค้า - ไม่โดนแดด</option>
-          <option value="1000">6.ร้านอาหาร/ร้านค้า - โดนแดดมาก</option>
-          <option value="1100">7.ห้องประชุม</option>
-          <option value="1200">8.ห้องประชุมขนาดใหญ่เพดานสูง</option>
-          <option value="1300">9.สนามเปิด/พื้นที่เปิด</option>
-        </select>
+      <label htmlFor="room-type">ประเภทห้อง: </label>
+      <select
+        id="room-type"
+        value={roomType}
+        onChange={handleRoomTypeChange}
+        className="select-air"
+      >
+        {roomTypes.length > 0 ? (
+          roomTypes.map((room) => (
+            <option key={room.id} value={room.id}>
+              {room.id}. {room.name} (Factor: {room.btuRequired})
+            </option>
+          ))
+        ) : (
+          <option>กำลังโหลด...</option>
+        )}
+      </select>
+
         <br />
         <br />
 
@@ -1792,7 +1837,7 @@ function placeACInOptimalPosition(uncoveredCells, gridWidth, gridHeight, acType)
           className="my-2 mr-2 b-air"
           onClick={createGrid}
         >
-          Create Grid
+          Clear Grid
         </button>
         <button
           id="quickPlaceAC"

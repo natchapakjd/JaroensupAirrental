@@ -4,7 +4,6 @@ import Swal from "sweetalert2";
 import Cookies from "universal-cookie";
 import { jwtDecode } from "jwt-decode";
 import { Link } from "react-router-dom";
-
 const BorrowProductTable = () => {
   const [borrowingData, setBorrowingData] = useState([]);
   const [filteredData, setFilteredData] = useState([]);
@@ -201,31 +200,56 @@ const BorrowProductTable = () => {
   };
 
   const handleCancel = async (borrowing_id) => {
-    try {
-      const response = await axios.delete(
-        `
-        ${import.meta.env.VITE_SERVER_URL}/equipment-borrowing/${borrowing_id}`,
-        { withCredentials: true }
-      );
-
-      if (response.status === 200) {
+    const result = await Swal.fire({
+      title: "Are you sure?",
+      text: "This action cannot be undone.",
+      icon: "warning",
+      showCancelButton: true,
+      confirmButtonColor: "#d33",
+      cancelButtonColor: "#3085d6",
+      confirmButtonText: "Yes, delete it!",
+      cancelButtonText: "Cancel",
+    });
+  
+    if (result.isConfirmed) {
+      try {
+        const response = await axios.delete(
+          `${import.meta.env.VITE_SERVER_URL}/equipment-borrowing/${borrowing_id}`,
+          { withCredentials: true }
+        );
+  
+        if (response.status === 200) {
+          Swal.fire({
+            title: "Deleted!",
+            text: "The borrowing task has been deleted.",
+            icon: "success",
+          });
+          fetchBorrowingData(techId); // Refresh data after deletion
+        } else {
+          throw new Error("Failed to cancel the task.");
+        }
+      } catch (error) {
         Swal.fire({
-          title: "Task Canceled",
-          text: "The task has been marked as canceled.",
-          icon: "success",
+          title: "Error",
+          text: error.message,
+          icon: "error",
         });
-        fetchBorrowingData(techId); // Refresh data after canceling
-      } else {
-        throw new Error("Failed to cancel the task.");
       }
-    } catch (error) {
-      Swal.fire({
-        title: "Error",
-        text: error.message,
-        icon: "error",
-      });
     }
   };
+  
+
+  const openImagePopup = (imageUrl) => {
+    Swal.fire({
+      imageUrl: imageUrl,
+      imageAlt: "ID Card Image",
+      showCloseButton: true,
+      showConfirmButton: false,
+      background: "#fff",
+      width: "auto",
+    });
+  };
+
   return (
     <div className="p-8 rounded-lg shadow-lg w-full mx-auto font-inter h-full">
       <div className="flex justify-between items-center mb-4">
@@ -271,6 +295,7 @@ const BorrowProductTable = () => {
             <th className="border p-2 text-center">Return Date</th>
             <th className="border p-2 text-center">Status</th>
             <th className="border p-2 text-center">Task Type</th>
+            {role === 3 && <th className="border p-2 text-center">ID Card Image</th>}
             <th className="border p-2 text-center">Actions</th>
             <th className="border p-2 text-center">Warnings</th>
 
@@ -296,6 +321,20 @@ const BorrowProductTable = () => {
 
                 <td className="border p-2 text-center">{item.status_name}</td>
                 <td className="border p-2 text-center">{item.task_desc}</td>
+                {role === 3 && (
+                  <td className="border p-2 text-center">
+                    {item.id_card_image ? (
+                      <img
+                        src={item.id_card_image}
+                        alt="ID Card"
+                        className="w-16 h-16 object-cover cursor-pointer hover:scale-110 transition duration-200"
+                        onClick={() => openImagePopup(item.id_card_image)}
+                      />
+                    ) : (
+                      <p>No Image</p>
+                    )}
+                  </td>
+                )}
 
                 <td className="border p-2 text-center">
                   <div className="flex justify-center gap-2">

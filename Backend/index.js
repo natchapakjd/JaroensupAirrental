@@ -29,7 +29,8 @@ const chart = require("./routes/chart")
 const isAdmin = require("./middlewares/isAdmin");
 const cookieParser = require("cookie-parser");
 const shipping = require('./routes/shipping')
-
+const area_type = require('./routes/area_type')
+const area_images = require('./routes/area_images')
 // Middleware setup
 app.use(cors({
   origin: 'http://localhost:5173', 
@@ -66,8 +67,8 @@ app.use(status);
 app.use(cal_area)
 app.use(chart)
 app.use(shipping)
-
-
+app.use(area_type)
+app.use(area_images)
 app.listen(port, () => {
   console.log(`App is running at http://localhost:${port}`);
 });
