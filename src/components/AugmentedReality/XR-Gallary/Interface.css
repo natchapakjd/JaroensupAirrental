@@ -77,14 +77,14 @@
 }
 
 /* Dropdown */
-.dropdown-label {
+.dropdown-ar-label {
     color: white;
     font-size: 1rem;
     margin-bottom: 0.5rem;
     display: block;
 }
 
-.dropdown {
+.dropdown-ar {
     width: 100%;
     padding: 0.5rem;
     border-radius: 0.3rem;
@@ -136,7 +136,7 @@
 }
 
 /* 📌 Dropdown */
-.dropdown-container {
+.dropdown-ar-container {
     margin-bottom: 1rem;
 }
 
@@ -166,4 +166,92 @@
     display: flex;
     justify-content: flex-end; /* ✅ ชิดขวา */
     margin-top: 1rem;
+}
+
+
+@media screen and (max-width: 768px) {
+    .grid-container {
+        grid-template-columns: 1fr; /* ✅ ปรับให้เป็น 1 คอลัมน์ในหน้าจอเล็ก */
+    }
+    
+    .full-width {
+        grid-column: span 1; /* ✅ ปรับให้เต็ม 1 คอลัมน์ */
+    }
+
+    .popup-menu {
+        width: 95vw; /* ✅ ปรับขนาดเมนูให้เต็มหน้าจอ */
+        height: auto; /* ✅ ปรับให้สูงเท่ากับเนื้อหา */
+        max-height: 90vh; /* ✅ จำกัดความสูง */
+        overflow-y: auto; /* ✅ เลื่อนเมนูได้ถ้าสูงเกิน */
+    }
+
+    .menu-button {
+        right: 0.5rem; /* ✅ ปรับให้ชิดขวาบนมือถือ */
+        top: 0.5rem;
+        padding: 0.6rem 0.8rem;
+    }
+
+    .button-container {
+        flex-direction: column; /* ✅ ปรับปุ่มให้เรียงแนวตั้ง */
+        gap: 0.5rem;
+    }
+
+    .button {
+        width: 100%; /* ✅ ปรับปุ่มให้เต็มจอ */
+        padding: 0.8rem;
+    }
+
+    .save-button {
+        width: 100%; /* ✅ ปรับปุ่มเซฟให้เต็มจอ */
+        text-align: center;
+    }
+
+    .button-container-right {
+        justify-content: center; /* ✅ ปรับปุ่มเซฟให้อยู่ตรงกลางในมือถือ */
+    }
+}
+
+
+@media screen and (max-width: 1024px) {
+    .popup-menu {
+        width: 90vw; /* ✅ ปรับขนาดให้เต็มจอมากขึ้น */
+        max-height: 80vh;
+    }
+
+    .grid-container {
+        grid-template-columns: 1fr 1fr; /* ✅ ปรับให้เป็น 2 คอลัมน์ */
+    }
+}
+
+@media screen and (max-width: 768px) {
+    .popup-menu {
+        width: 95vw;
+        max-height: 90vh;
+    }
+
+    .grid-container {
+        grid-template-columns: 1fr; /* ✅ ปรับให้เป็น 1 คอลัมน์ */
+    }
+}
+
+@media screen and (max-width: 480px) {
+    .popup-menu {
+        width: 100vw;
+        height: auto;
+        max-height: 90vh;
+        padding: 0.5rem;
+    }
+
+    .menu-button {
+        font-size: 0.9rem;
+    }
+
+    .button {
+        font-size: 0.9rem;
+    }
+
+    .dropdown-ar, .input-field {
+        font-size: 0.9rem;
+        padding: 0.4rem;
+    }
 }
