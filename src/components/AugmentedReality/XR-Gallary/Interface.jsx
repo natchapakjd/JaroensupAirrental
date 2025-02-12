@@ -98,10 +98,10 @@ const Interface = forwardRef(({ props }, ref) => {
         {isMenuOpen && (
           <div className="popup-menu">
             {/* 🔥 ส่วนเลือกโมเดล */}
-            <div className="dropdown-container">
-              <label className="dropdown-label">Select Model:</label>
+            <div className="dropdown-ar-container">
+              <label className="dropdown-ar label">Select Model:</label>
               <select
-                className="dropdown"
+                className="dropdown-ar"
                 value={currentModelName}
                 onChange={(e) => setCurrentModelName(e.target.value)}
               >
@@ -170,10 +170,10 @@ const Interface = forwardRef(({ props }, ref) => {
             {/* 📌 Grid Container */}
             <div className="grid-container">
               {/* 🔥 Dropdown เลือก Appointment */}
-              <div className="dropdown-container">
-                <label className="dropdown-label">Select Appointment:</label>
+              <div className="dropdown-ar-container">
+                <label className="dropdown-ar-label">Select Appointment:</label>
                 <select
-                  className="dropdown"
+                  className="dropdown-ar"
                   value={selectedAppointment}
                   onChange={(e) => setSelectedAppointment(e.target.value)}
                 >
@@ -201,10 +201,10 @@ const Interface = forwardRef(({ props }, ref) => {
               </div>
 
               {/* 🔥 Dropdown เลือก Room Type */}
-              <div className="dropdown-container">
-                <label className="dropdown-label">Select Room Type:</label>
+              <div className="dropdown-container-ar">
+                <label className="dropdown-ar-label">Select Room Type:</label>
                 <select
-                  className="dropdown"
+                  className="dropdown-ar"
                   value={roomType}
                   onChange={(e) => setRoomType(e.target.value)}
                 >
