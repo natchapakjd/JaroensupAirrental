@@ -13,7 +13,7 @@ export default function Air5tonCC(props) {
   }, [setAnimations]);
 
   return (
-    <group {...props} dispose={null} scale={props.scale ? props.scale: 0.2}>
+    <group {...props} dispose={null} scale={props.scale ? props.scale: 1}>
       {/* 🔥 ควบคุมการแสดงผล Geometry */}
       {showGeometry && (
         <mesh material={materials.Material} material-transparent={true} material-opacity={0.5} />
@@ -31,7 +31,7 @@ export default function Air5tonCC(props) {
 
       {/* 🔥 แสดง Animation เมื่อ `isAnimating = true` */}
       {isAnimating && (
-        <mesh geometry={nodes.Cube.geometry} material={materials.Material} />
+        <mesh geometry={nodes.Cube.geometry} material={materials.Material}/>
       )}
     </group>
   );
