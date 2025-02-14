@@ -19,8 +19,7 @@ export default function Air20tonCC(props) {
   }, [setAnimations]);               
 
   return (
-    <group {...props} dispose={null} scale={props.scale ? props.scale: 1} >
-
+    <group {...props} dispose={null} scale={props.scale ? props.scale: 0.3} >
        {/* 🔥 ควบคุมการแสดงผล Geometry */}
        {showGeometry && (
         <mesh             material={materials['Material.002']}  

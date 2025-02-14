@@ -12,7 +12,7 @@ const TaskContent = () => {
   const [filterStatus, setFilterStatus] = useState("all");
   const [currentPage, setCurrentPage] = useState(1);
   const [tasksPerPage, setTasksPerPage] = useState(10);
-  const [totalTasks, setTotalTasks] = useState(0);
+  const [totalTasks, setTotalTasks] = useState(1);
   const [quantities, setQuantities] = useState({}); // Store quantities
   const cookies = new Cookies();
   const token = cookies.get("authToken");

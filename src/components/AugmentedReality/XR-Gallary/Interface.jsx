@@ -3,6 +3,12 @@ import { useCharacterAnimations } from "../contexts/CharacterAnimations";
 import "./Interface.css";
 import useModelsStore from "../stores/modelStore";
 import axios from "axios"
+import ImageUpload from "../ImageUpload";
+import Swal from "sweetalert2";
+import withReactContent from "sweetalert2-react-content";
+import { Navigate, useNavigate } from "react-router-dom";
+
+const MySwal = withReactContent(Swal);
 
 const Interface = forwardRef(({ props }, ref) => {
   const {
@@ -31,6 +37,7 @@ const Interface = forwardRef(({ props }, ref) => {
   const [roomTypes, setRoomTypes] = useState([]); // 📌 เก็บค่าห้องจาก API
   const [width, setWidth] = useState(""); // Optional Width
   const [height, setHeight] = useState(""); // Optional Height
+  const navigate  = useNavigate();
 
   useEffect(() => {
     axios
@@ -98,6 +105,20 @@ const Interface = forwardRef(({ props }, ref) => {
   
   const clearModels = () => {
     setModels([]); // ล้างโมเดลทั้งหมด
+  };
+
+  const openImageUploadPopup = (selectedAppointment) => {
+    if (!selectedAppointment) {
+      alert("กรุณาเลือก Appointment ก่อนอัปโหลดภาพ!");
+      return;
+    }
+  
+    MySwal.fire({
+      title: "อัปโหลดรูปภาพ",
+      html: <ImageUpload areaCalculationId={selectedAppointment} />, 
+      showConfirmButton: false, // ซ่อนปุ่ม OK เพราะอัปโหลดเสร็จเอง
+      width: "50%",
+    });
   };
 
   return (
@@ -254,14 +275,31 @@ const Interface = forwardRef(({ props }, ref) => {
                   placeholder="Enter height"
                 />
               </div>
-               {/* 📌 ปุ่มเซฟ */}
-           
+              {/* 📌 ปุ่มเซฟ */}
             </div>
-            <div className="button-container-right">
-            
-              <button className="button save-button" onClick={saveCalculation}>
-                Save Calculation
-              </button>
+            <div className="button-container-right gap-5">
+              <div className="flex justify-center mt-5">
+                <button
+                  onClick={() => navigate("/dashboard/area-cal")}
+                  className="btn bg-gray-500 text-white hover:bg-gray-500"
+                >
+                  กลับไปยัง Dashboard
+                </button>
+              </div>
+              <div className="flex justify-between gap-2">
+                <button
+                  className="button save-button"
+                  onClick={() => openImageUploadPopup(selectedAppointment)}
+                >
+                  Upload Image
+                </button>
+                <button
+                  className="button save-button"
+                  onClick={saveCalculation}
+                >
+                  Save Calculation
+                </button>
+              </div>
             </div>
           </div>
         )}

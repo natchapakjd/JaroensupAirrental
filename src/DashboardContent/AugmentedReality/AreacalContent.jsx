@@ -111,7 +111,7 @@ const AreacalContent = () => {
         <td className="border p-2 text-center">{calculation.width}</td>
         <td className="border p-2 text-center">{calculation.height}</td>
         <td className="border p-2 text-center">{calculation.air_conditioners_needed}</td>
-        <td className="border p-2 text-center">{calculation.area_type}</td>
+        <td className="border p-2 text-center">{calculation.room_type_name}</td>
         <td className="border p-2 text-center text-blue-600 font-bold">
           {calculation.air_5ton_used}
         </td>
@@ -122,6 +122,16 @@ const AreacalContent = () => {
           {calculation.air_20ton_used}
         </td>
         <td>
+        <button
+            onClick={() =>
+              navigate(
+                `/dashboard/area-cal/details/${calculation.calculation_id}`
+              )
+            }
+            className="btn  bg-blue mr-2 text-white hover:bg-blue"
+          >
+            View Details
+          </button>
           <button
             onClick={() =>
               navigate(
