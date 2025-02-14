@@ -31,7 +31,7 @@ export default function Air5tonCC(props) {
 
       {/* 🔥 แสดง Animation เมื่อ `isAnimating = true` */}
       {isAnimating && (
-        <mesh geometry={nodes.Cube.geometry} material={materials.Material} />
+        <mesh geometry={nodes.Cube.geometry} material={materials.Material}/>
       )}
     </group>
   );
