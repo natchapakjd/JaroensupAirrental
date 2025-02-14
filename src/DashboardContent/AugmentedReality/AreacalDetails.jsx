@@ -157,7 +157,7 @@ const AreacalDetails = () => {
   };
 
   return (
-    <div className="max-w-6xl mx-auto p-6 font-inter">
+    <div className="max-w-6xl mx-auto p-6 font-prompt">
       <h2 className="text-3xl font-bold text-center text-gray-800 mb-6">
          รูปภาพในแต่ละพื้นที่
       </h2>

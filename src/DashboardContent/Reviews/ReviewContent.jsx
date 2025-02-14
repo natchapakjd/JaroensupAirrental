@@ -4,6 +4,60 @@ import axios from "axios";
 import Swal from "sweetalert2";
 import Loading from "../../components/Loading";
 
+const translations = {
+  en: {
+    title: "Reviews",
+    addReview: "Add Review",
+    searchPlaceholder: "Search by comment, rating, user, or technician...",
+    reviewID: "Review ID",
+    user: "User",
+    tech: "Tech",
+    comment: "Comment",
+    rating: "Rating",
+    date: "Date",
+    actions: "Actions",
+    edit: "Edit",
+    delete: "Delete",
+    noReviews: "No reviews available",
+    previous: "Previous",
+    next: "Next",
+    confirmDeleteTitle: "Are you sure?",
+    confirmDeleteText: "This review will be permanently deleted!",
+    deleteSuccessTitle: "Deleted!",
+    deleteSuccessText: "The review has been deleted successfully.",
+    deleteError: "Failed to delete review.",
+    loadError: "Failed to load reviews.",
+    of: "of",
+    page: "page"
+
+  },
+  th: {
+    title: "รีวิว",
+    addReview: "เพิ่มรีวิว",
+    searchPlaceholder: "ค้นหาโดยความคิดเห็น คะแนน ผู้ใช้ หรือช่าง...",
+    reviewID: "รหัสรีวิว",
+    user: "ผู้ใช้",
+    tech: "ช่าง",
+    comment: "ความคิดเห็น",
+    rating: "คะแนน",
+    date: "วันที่",
+    actions: "การดำเนินการ",
+    edit: "แก้ไข",
+    delete: "ลบ",
+    noReviews: "ไม่มีรีวิว",
+    confirmDeleteTitle: "คุณแน่ใจหรือไม่?",
+    confirmDeleteText: "รีวิวนี้จะถูกลบอย่างถาวร!",
+    deleteSuccessTitle: "ลบแล้ว!",
+    deleteSuccessText: "รีวิวถูกลบเรียบร้อยแล้ว.",
+    deleteError: "ลบรีวิวไม่สำเร็จ.",
+    loadError: "โหลดรีวิวล้มเหลว.",
+    previous: "ก่อนหน้า",
+    next: "ถัดไป",
+    of: "จาก",
+    page: "หน้า"
+  },
+};
+
 const ReviewContent = () => {
   const [reviews, setReviews] = useState([]);
   const [filteredReviews, setFilteredReviews] = useState([]); // State for filtered reviews
@@ -13,6 +67,8 @@ const ReviewContent = () => {
   const [totalPages, setTotalPages] = useState(1);
   const [totalCount, setTotalCount] = useState(0);
   const [searchTerm, setSearchTerm] = useState(""); // State for search term
+  const [language, setLanguage] = useState(localStorage.getItem("language") || "en");
+
   const pageSize = 10;
   const apiUrl = import.meta.env.VITE_SERVER_URL;
 
@@ -29,8 +85,8 @@ const ReviewContent = () => {
       } catch (err) {
         setError(err.message);
         Swal.fire({
-          title: "Error",
-          text: "Failed to load reviews.",
+          title: translations[language].title,
+          text: translations[language].loadError,
           icon: "error",
         });
       } finally {
@@ -39,17 +95,17 @@ const ReviewContent = () => {
     };
 
     fetchReviews();
-  }, [currentPage]);
+  }, [currentPage, language]);
 
   const handleDelete = async (reviewId) => {
     const confirmDelete = await Swal.fire({
-      title: "Are you sure?",
-      text: "This review will be permanently deleted!",
+      title: translations[language].confirmDeleteTitle,
+      text: translations[language].confirmDeleteText,
       icon: "warning",
       showCancelButton: true,
       confirmButtonColor: "#d33",
       cancelButtonColor: "#3085d6",
-      confirmButtonText: "Yes, delete it!",
+      confirmButtonText: translations[language].delete,
     });
 
     if (confirmDelete.isConfirmed) {
@@ -66,14 +122,14 @@ const ReviewContent = () => {
 
         await Swal.fire({
           icon: "success",
-          title: "Deleted!",
-          text: response.data.message,
+          title: translations[language].deleteSuccessTitle,
+          text: translations[language].deleteSuccessText,
         });
       } catch (err) {
         console.error("Error deleting review:", err);
         await Swal.fire({
-          title: "Error",
-          text: "Failed to delete review.",
+          title: translations[language].title,
+          text: translations[language].deleteError,
           icon: "error",
         });
       }
@@ -108,9 +164,9 @@ const ReviewContent = () => {
   return (
     <div className="p-8 rounded-lg shadow-lg w-full mx-auto h-screen">
       <div className="flex justify-between items-center mb-6">
-        <h1 className="text-2xl font-semibold">Reviews</h1>
+        <h1 className="text-2xl font-semibold">{translations[language].title}</h1>
         <Link to="/dashboard/reviews/add" className="btn bg-blue text-white hover:bg-blue">
-          Add Review
+          {translations[language].addReview}
         </Link>
       </div>
 
@@ -120,7 +176,7 @@ const ReviewContent = () => {
           type="text"
           value={searchTerm}
           onChange={handleSearch}
-          placeholder="Search by comment, rating, user, or technician..."
+          placeholder={translations[language].searchPlaceholder}
           className="input input-bordered w-full"
         />
       </div>
@@ -128,20 +184,20 @@ const ReviewContent = () => {
       <table className="table w-full border-collapse border border-gray-300">
         <thead className="sticky-top bg-gray-200">
           <tr>
-            <th className="border p-2 text-center">Review ID</th>
-            <th className="border p-2 text-center">User</th>
-            <th className="border p-2 text-center">Tech</th>
-            <th className="border p-2 text-center">Comment</th>
-            <th className="border p-2 text-center">Rating</th>
-            <th className="border p-2 text-center">Date</th>
-            <th className="border p-2 text-center">Actions</th>
+            <th className="border p-2 text-center">{translations[language].reviewID}</th>
+            <th className="border p-2 text-center">{translations[language].user}</th>
+            <th className="border p-2 text-center">{translations[language].tech}</th>
+            <th className="border p-2 text-center">{translations[language].comment}</th>
+            <th className="border p-2 text-center">{translations[language].rating}</th>
+            <th className="border p-2 text-center">{translations[language].date}</th>
+            <th className="border p-2 text-center">{translations[language].actions}</th>
           </tr>
         </thead>
         <tbody className="text-center">
           {filteredReviews.length > 0 ? (
-            filteredReviews.map((review) => (
-              <tr key={review.review_id}>
-                <td className="border p-2 text-center">{review.review_id}</td>
+            filteredReviews.map((review, index) => (
+              <tr key={index + 1}>
+                <td className="border p-2 text-center">{index + 1}</td>
                 <td className="border p-2 text-center">
                   {review.member_firstname} {review.member_lastname}
                 </td>
@@ -155,16 +211,16 @@ const ReviewContent = () => {
                 </td>
                 <td className="border p-2 text-center">
                   <Link
-                    to={`/dashboard/reviews/${review.review_id}`} // Link to the edit page
+                    to={`/dashboard/reviews/${review.review_id}`}
                     className="btn btn-success text-white mr-2"
                   >
-                    Edit
+                    {translations[language].edit}
                   </Link>
                   <button
                     onClick={() => handleDelete(review.review_id)}
                     className="btn btn-error text-white"
                   >
-                    Delete
+                    {translations[language].delete}
                   </button>
                 </td>
               </tr>
@@ -172,7 +228,7 @@ const ReviewContent = () => {
           ) : (
             <tr>
               <td colSpan="7" className="border border-gray-300 p-4">
-                No reviews available
+                {translations[language].noReviews}
               </td>
             </tr>
           )}
@@ -184,16 +240,18 @@ const ReviewContent = () => {
           onClick={() => handlePageChange(currentPage - 1)}
           className={`cursor-pointer ${currentPage === totalPages ? "text-gray-400" : "text-black"}`}
         >
-          Previous
+         {translations[language].previous}
+
         </p>
         <span>
-          Page {currentPage} of {totalPages}
+        {translations[language].page} {currentPage}  {translations[language].of}  {totalPages}
         </span>
         <p
           onClick={() => handlePageChange(currentPage + 1)}
           className={`cursor-pointer ${currentPage === totalPages ? "text-gray-400" : "text-black"}`}
         >
-          Next
+                  {translations[language].next}
+
         </p>
       </div>
     </div>

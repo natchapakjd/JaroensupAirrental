@@ -1,14 +1,40 @@
-import React, { useState } from 'react';
-import axios from 'axios';
-import Swal from 'sweetalert2';
-import { useNavigate } from 'react-router-dom';
+import React, { useState } from "react";
+import axios from "axios";
+import Swal from "sweetalert2";
+import { useNavigate } from "react-router-dom";
+
+// Translation strings for localization
+const translations = {
+  en: {
+    heading: "Add New Category",
+    nameLabel: "Name",
+    descriptionLabel: "Description",
+    addButton: "Add Category",
+    successTitle: "Category added successfully",
+    errorTitle: "Error",
+    errorMessage: "Failed to add category.",
+  },
+  th: {
+    heading: "เพิ่มหมวดหมู่ใหม่",
+    nameLabel: "ชื่อ",
+    descriptionLabel: "คำอธิบาย",
+    addButton: "เพิ่มหมวดหมู่",
+    successTitle: "เพิ่มหมวดหมู่สำเร็จ",
+    errorTitle: "ข้อผิดพลาด",
+    errorMessage: "ไม่สามารถเพิ่มหมวดหมู่ได้",
+  },
+};
 
 const AddCategory = () => {
-  const navigate = useNavigate(); 
+  const navigate = useNavigate();
   const [formData, setFormData] = useState({
     name: "",
-    description: ""
+    description: "",
   });
+
+  // Get the language from localStorage, defaulting to 'en'
+  const language = localStorage.getItem("language") || "en";
+  const t = translations[language]; // Get the translation for the selected language
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -21,41 +47,41 @@ const AddCategory = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
-      const response = await axios.post(`${import.meta.env.VITE_SERVER_URL}/categories`, formData);
+      const response = await axios.post(
+        `${import.meta.env.VITE_SERVER_URL}/categories`,
+        formData
+      );
       if (response.status === 201) {
         Swal.fire({
-          title: 'Category added successfully',
-          icon: 'success',
+          title: t.successTitle,
+          icon: "success",
         });
         setFormData({
           name: "",
-          description: ""
+          description: "",
         });
         setTimeout(() => {
-          navigate('/dashboard/categories');
+          navigate("/dashboard/categories");
         }, 800);
       } else {
-        throw new Error('Failed to add category.');
+        throw new Error(t.errorMessage);
       }
     } catch (error) {
       Swal.fire({
-        title: 'Error',
+        title: t.errorTitle,
         text: error.message,
-        icon: 'error',
+        icon: "error",
       });
     }
   };
 
   return (
-    <div className="p-8 rounded-lg shadow-lg w-full mx-auto font-inter h-screen">
-      <h1 className="text-2xl font-semibold mb-6">Add New Category</h1>
+    <div className="p-8 rounded-lg shadow-lg w-full mx-auto font-prompt h-screen">
+      <h1 className="text-2xl font-semibold mb-6">{t.heading}</h1>
       <form onSubmit={handleSubmit}>
         <div className="mb-4">
-          <label
-            htmlFor="name"
-            className="block text-gray-700 font-medium mb-2"
-          >
-            Name:
+          <label htmlFor="name" className="block text-gray-700 font-medium mb-2">
+            {t.nameLabel}:
           </label>
           <input
             type="text"
@@ -72,7 +98,7 @@ const AddCategory = () => {
             htmlFor="description"
             className="block text-gray-700 font-medium mb-2"
           >
-            Description:
+            {t.descriptionLabel}:
           </label>
           <textarea
             id="description"
@@ -87,7 +113,7 @@ const AddCategory = () => {
           type="submit"
           className="text-white bg-blue hover:bg-blue focus:ring-4 focus:outline-none focus:ring-blue font-medium rounded-lg text-sm w-full sm:w-auto px-5 py-2.5 text-center"
         >
-          Add Category
+          {t.addButton}
         </button>
       </form>
     </div>

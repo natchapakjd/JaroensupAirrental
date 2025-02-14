@@ -5,6 +5,35 @@ import { MapContainer, TileLayer, Marker, useMapEvents } from "react-leaflet";
 import "leaflet/dist/leaflet.css";
 import Searchbox from "../../components/Searchbox";
 
+const translations = {
+  en: {
+    taskType: "Task Type",
+    description: "Description",
+    status: "Status",
+    rentalStartDate: "Rental Start Date",
+    rentalEndDate: "Rental End Date",
+    address: "Address",
+    quantityUsed: "Quantity Used",
+    user: "User",
+    selectLocation: "Select Location on the Map 📍",
+    hideMap: "Hide Map ❌",
+    saveTask: "Save Task",
+  },
+  th: {
+    taskType: "ประเภทงาน",
+    description: "คำอธิบาย",
+    status: "สถานะ",
+    rentalStartDate: "วันที่เริ่มเช่า",
+    rentalEndDate: "วันที่สิ้นสุดการเช่า",
+    address: "ที่อยู่",
+    quantityUsed: "จำนวนที่ใช้",
+    user: "ผู้ใช้",
+    selectLocation: "เลือกตำแหน่งบนแผนที่ 📍",
+    hideMap: "ซ่อนแผนที่ ❌",
+    saveTask: "บันทึกงาน",
+  },
+};
+
 const MapClickHandler = ({ setLatitude, setLongitude }) => {
   useMapEvents({
     click(e) {
@@ -38,6 +67,7 @@ const EditTask = () => {
   let addressFromSearchBox = "";
   const navigate = useNavigate();
   const apiUrl = import.meta.env.VITE_SERVER_URL; // Use the environment variable
+  const language = localStorage.getItem("language") || "en"; // Default to English
 
   useEffect(() => {
     // Fetch task types
@@ -59,7 +89,7 @@ const EditTask = () => {
     //     console.error("Error fetching products:", error);
     //   }
     // };
-
+    
     // Fetch users
     const fetchUsers = async () => {
       try {
@@ -107,8 +137,15 @@ const EditTask = () => {
     fetchUsers();
     fetchStatuses(); // Fetch statuses
     fetchTask();
-  }, [taskId, address]);
+  }, [taskId]);
 
+  const toggleMap = () => {
+    if (showMap) {
+      setLatitude(null);
+      setLongitude(null);
+    }
+    setShowMap(!showMap);
+  };
   const handleLocationSelect = (lat, lon, displayName) => {
     setAddress(displayName);
     setLatitude(lat);
@@ -123,12 +160,12 @@ const EditTask = () => {
         task_type_id: taskTypeId,
         description,
         appointment_date: appointmentDate,
-        address,
+        address : address,
         quantity_used: quantityUsed,
         // product_id: productId,
         user_id: userId,
-        latitude,
-        longitude,
+        latitude: latitude ,
+        longitude: longitude,
         status_id: statusId, // Use statusId in the request
         rental_start_date: startDate,
         rental_end_date: finishDate,
@@ -149,88 +186,88 @@ const EditTask = () => {
   };
 
   return (
-    <div className="p-8 rounded-lg shadow-lg w-full mx-auto font-inter">
-      <h2 className="text-2xl mb-4">Edit Task</h2>
-      <form onSubmit={handleSubmit} className="space-y-4">
-        <div>
-          <label className="block mb-2">Task Type</label>
-          <select
-            value={taskTypeId}
-            onChange={(e) => setTaskTypeId(e.target.value)}
-            className="border p-2 w-full"
-            required
-          >
-            <option value="">Select Task Type</option>
-            {taskTypes.map((taskType) => (
-              <option key={taskType.task_type_id} value={taskType.task_type_id}>
-                {taskType.type_name}
-              </option>
-            ))}
-          </select>
-        </div>
-        <div>
-          <label className="block mb-2">Description</label>
-          <textarea
-            value={description}
-            onChange={(e) => setDescription(e.target.value)}
-            className="border p-2 w-full"
-            required
-          />
-        </div>
+    <div className="p-8 rounded-lg shadow-lg w-full mx-auto font-prompt">
+    <h2 className="text-2xl mb-4">{translations[language].taskType}</h2>
+    <form onSubmit={handleSubmit} className="space-y-4">
+      <div>
+        <label className="block mb-2">{translations[language].taskType}</label>
+        <select
+          value={taskTypeId}
+          onChange={(e) => setTaskTypeId(e.target.value)}
+          className="border p-2 w-full"
+          required
+        >
+          <option value="">Select Task Type</option>
+          {taskTypes.map((taskType) => (
+            <option key={taskType.task_type_id} value={taskType.task_type_id}>
+              {taskType.type_name}
+            </option>
+          ))}
+        </select>
+      </div>
+      <div>
+        <label className="block mb-2">{translations[language].description}</label>
+        <textarea
+          value={description}
+          onChange={(e) => setDescription(e.target.value)}
+          className="border p-2 w-full"
+          required
+        />
+      </div>
 
-        <div>
-          <label className="block mb-2">Status</label>
-          <select
-            value={statusId}
-            onChange={(e) => setStatusId(e.target.value)} // Change to statusId
-            className="border p-2 w-full"
-            required
-          >
-            <option value="">Select Status</option>
-            {statuses.map((status) => (
-              <option key={status.status_id} value={status.status_id}>
-                {status.status_name}
-              </option>
-            ))}
-          </select>
-        </div>
-        <div>
-          <label className="block text-gray-700">Rental Start Date</label>
-          <input
-            type="datetime-local"
-            name="appointment_date"
-            value={appointmentDate}
-            onChange={(e) => {
-              const fullDate = e.target.value;
-              setAppointmentDate(fullDate);
-              setStartDate(fullDate.split("T")[0]); // Extract date part only
-            }}
-            min={new Date().toISOString().slice(0, 16)} // Prevent past dates
-            required
-            className="input input-bordered w-full"
-          />
-        </div>
-        <div>
-          <label className="block mb-2">Rental End Date</label>
-          <input
-            type="date"
-            value={finishDate}
-            onChange={(e) => setFinishDate(e.target.value)}
-            className="border p-2 w-full"
-            min={new Date().toISOString().split("T")[0]} // Ensure correct format for "date"
-          />
-        </div>
-        <div>
-          <label className="block mb-2">Address</label>
-          <input
-            type="text"
-            value={address}
-            onChange={(e) => setAddress(e.target.value)}
-            className="border p-2 w-full"
-          />
-        </div>
-        <div>
-          <label className="block mb-2">Quantity Used</label>
+      <div>
+        <label className="block mb-2">{translations[language].status}</label>
+        <select
+          value={statusId}
+          onChange={(e) => setStatusId(e.target.value)}
+          className="border p-2 w-full"
+          required
+        >
+          <option value="">Select Status</option>
+          {statuses.map((status,index) => (
+            <option key={index+1} value={status.status_id}>
+           {index+1}. {status.status_name}
+            </option>
+          ))}
+        </select>
+      </div>
+      <div>
+        <label className="block text-gray-700">{translations[language].rentalStartDate}</label>
+        <input
+          type="datetime-local"
+          name="appointment_date"
+          value={appointmentDate}
+          onChange={(e) => {
+            const fullDate = e.target.value;
+            setAppointmentDate(fullDate);
+            setStartDate(fullDate.split("T")[0]); // Extract date part only
+          }}
+          min={new Date().toISOString().slice(0, 16)} // Prevent past dates
+          required
+          className="input input-bordered w-full"
+        />
+      </div>
+      <div>
+        <label className="block mb-2">{translations[language].rentalEndDate}</label>
+        <input
+          type="date"
+          value={finishDate}
+          onChange={(e) => setFinishDate(e.target.value)}
+          className="border p-2 w-full"
+          min={new Date().toISOString().split("T")[0]} // Ensure correct format for "date"
+        />
+      </div>
+      <div>
+        <label className="block mb-2">{translations[language].address}</label>
+        <input
+          type="text"
+          value={address}
+          onChange={(e) => setAddress(e.target.value)}
+          className="border p-2 w-full"
+        />
+      </div>
+      <div>
+          <label className="block mb-2">{translations[language].quantityUsed}</label>
           <input
             type="number"
             value={quantityUsed}
@@ -238,43 +275,30 @@ const EditTask = () => {
             className="border p-2 w-full"
           />
         </div>
-        {/* <div>
-          <label className="block mb-2">Product</label>
-          <select
-            value={productId}
-            onChange={(e) => setProductId(e.target.value)}
-            className="border p-2 w-full"
-          >
-            <option value="">Select Product</option>
-            {products.map((product) => (
-              <option key={product.product_id} value={product.product_id}>
-                {product.name}
-              </option>
-            ))}
-          </select>
-        </div> */}
+
         <div>
-          <label className="block mb-2">User</label>
+          <label className="block mb-2">{translations[language].user}</label>
           <select
             value={userId}
             onChange={(e) => setUserId(e.target.value)}
             className="border p-2 w-full"
           >
             <option value="">Select User</option>
-            {users.map((user) => (
-              <option key={user.user_id} value={user.user_id}>
-                {user.firstname} - {user.lastname}
+            {users.map((user,index) => (
+              <option key={index+1} value={user.user_id}>
+               {index+1}. {user.firstname} - {user.lastname}
               </option>
             ))}
           </select>
         </div>
+
         <div className="mb-4">
           <p
             type="button"
-            onClick={() => setShowMap(!showMap)}
+            onClick={toggleMap}
             className="cursor-pointer underline text-right text-xl mt-2"
           >
-            {showMap ? "ซ่อนแผนที่ ❌" : "เลือกตำแหน่งบนแผนที่"}
+            {showMap ? translations[language].hideMap : translations[language].selectLocation}
           </p>
         </div>
 
@@ -304,7 +328,7 @@ const EditTask = () => {
         )}
 
         <button type="submit" className="bg-blue text-white py-2 px-4 rounded">
-          Save Task
+        {translations[language].saveTask}
         </button>
       </form>
     </div>

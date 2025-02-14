@@ -70,7 +70,7 @@ const ReportContent = () => {
   const combinedData = [...data, ...data01.map((d, i) => ({ ...d, type: "A school" })), ...data02.map((d, i) => ({ ...d, type: "B school" }))];
 
   return (
-    <div className="p-6 space-y-6 font-inter">
+    <div className="p-6 space-y-6 font-prompt">
         <div className="flex justify-end">
         <CSVLink
           data={combinedData}

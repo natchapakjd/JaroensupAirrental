@@ -1,13 +1,14 @@
-import React, { useState ,useEffect} from "react";
+import React, { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import axios from "axios";
 import Cookies from "universal-cookie";
 import { jwtDecode } from "jwt-decode";
 import Loading from "../../components/Loading";
+
 const BorrowProductContent = () => {
   const { productId } = useParams();
-  const [technician,setTechinician] = useState("");
-  const [loading,setLoading] = useState(true)
+  const [technician, setTechnician] = useState("");
+  const [loading, setLoading] = useState(true);
 
   const navigate = useNavigate();
   const cookies = new Cookies();
@@ -24,13 +25,35 @@ const BorrowProductContent = () => {
   });
   const [idCardImage, setIdCardImage] = useState(null);
 
-  // Handle text input changes
+  // Translation based on language in localStorage
+  const language = localStorage.getItem('language') || 'en';
 
+  const translations = {
+    en: {
+      borrow_equipment: "Borrow Equipment",
+      technician_name: "Technician Name",
+      borrow_date: "Borrow Date",
+      return_date: "Return Date",
+      upload_id_card: "Upload ID Card Image",
+      consent_text: "I consent to storing my data in the system",
+      submit: "Submit",
+    },
+    th: {
+      borrow_equipment: "ยืมอุปกรณ์",
+      technician_name: "ชื่อช่าง",
+      borrow_date: "วันที่ยืม",
+      return_date: "วันที่คืน",
+      upload_id_card: "อัพโหลดรูปบัตรประชาชน",
+      consent_text: "ฉันยินยอมให้เก็บข้อมูลของฉันลงในระบบ",
+      submit: "ยืนยัน",
+    },
+  };
 
-  useEffect(()=>{
+  const translation = translations[language];
+
+  useEffect(() => {
     fetchTechnicianById();
-    
-  },[])
+  }, []);
 
   const handleChange = (e) => {
     setFormData({
@@ -38,19 +61,22 @@ const BorrowProductContent = () => {
       [e.target.name]: e.target.value,
     });
   };
+
   const fetchTechnicianById = async () => {
     try {
       const techResult = await axios.get(`${import.meta.env.VITE_SERVER_URL}/user/${user_id}`);
-      setTechinician(techResult.data); // Assign the actual data to the state
+      setTechnician(techResult.data); // Assign the actual data to the state
       console.log(techResult.data); // Log the data
-      setLoading(false)
+      setLoading(false);
     } catch (err) {
       console.error("Error fetching technician details:", err);
     }
   };
-  if(loading){
-    return <Loading/>
+
+  if (loading) {
+    return <Loading />;
   }
+
   // Handle checkbox change
   const handleCheckboxChange = (e) => {
     setFormData({
@@ -107,17 +133,17 @@ const BorrowProductContent = () => {
 
   return (
     <div className="p-6 max-w-lg mx-auto bg-white rounded-xl shadow-md my-5">
-      <h2 className="text-2xl font-bold mb-4">Borrow Equipment</h2>
+      <h2 className="text-2xl font-bold mb-4">{translation.borrow_equipment}</h2>
       <form onSubmit={handleSubmit} encType="multipart/form-data">
         <div className="mb-4">
           <label htmlFor="tech_id" className="block text-sm font-medium">
-            Technician Name
+            {translation.technician_name}
           </label>
           <input
             type="text"
             name="tech_name"
             id="tech_name"
-            value={formData.tech_id  +'.' + ''+  technician.firstname +' '+  technician.lastname}
+            value={formData.tech_id + '.' + technician.firstname + ' ' + technician.lastname}
             onChange={handleChange}
             required
             disabled
@@ -136,10 +162,10 @@ const BorrowProductContent = () => {
         </div>
         <div className="mb-4">
           <label htmlFor="borrow_date" className="block text-sm font-medium">
-            Borrow Date
+            {translation.borrow_date}
           </label>
           <input
-            type="date" // Changed to 'date'
+            type="date"
             name="borrow_date"
             id="borrow_date"
             value={formData.borrow_date}
@@ -151,10 +177,10 @@ const BorrowProductContent = () => {
         </div>
         <div className="mb-4">
           <label htmlFor="return_date" className="block text-sm font-medium">
-            Return Date
+            {translation.return_date}
           </label>
           <input
-            type="date" // Changed to 'date'
+            type="date"
             name="return_date"
             id="return_date"
             value={formData.return_date}
@@ -165,7 +191,7 @@ const BorrowProductContent = () => {
         </div>
         <div className="mb-4">
           <label htmlFor="id_card_image" className="block text-sm font-medium">
-            Upload ID Card Image
+            {translation.upload_id_card}
           </label>
           <input
             type="file"
@@ -173,8 +199,8 @@ const BorrowProductContent = () => {
             id="id_card_image"
             onChange={handleFileChange}
             accept="image/*"
-            className=" file-input file-input-bordered w-full h-10"         
-             />
+            className="file-input file-input-bordered w-full h-10"
+          />
         </div>
         <div className="mb-4 flex items-center">
           <input
@@ -186,11 +212,11 @@ const BorrowProductContent = () => {
             required
           />
           <label htmlFor="consent" className="ml-2 text-sm">
-            ฉันยินยอมให้เก็บข้อมูลของฉันลงในระบบ
+            {translation.consent_text}
           </label>
         </div>
         <button type="submit" className="btn bg-blue text-white hover:bg-blue">
-          Submit
+          {translation.submit}
         </button>
       </form>
     </div>

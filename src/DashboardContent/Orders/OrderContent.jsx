@@ -4,6 +4,48 @@ import Swal from "sweetalert2";
 import { Link } from "react-router-dom";
 import Loading from "../../components/Loading";
 
+const translations = {
+  en: {
+    orders: "Orders",
+    addOrder: "Add Order",
+    searchPlaceholder: "Search orders...",
+    orderId: "Order ID",
+    user: "User",
+    totalAmount: "Total Amount",
+    orderDate: "Order Date",
+    actions: "Actions",
+    cancel: "Cancel",
+    viewDetails: "View Details",
+    noOrders: "No orders available",
+    previous: "Previous",
+    next: "Next",
+    error: "Error",
+    loading: "Loading...",
+    of: "of",
+    page: "page",
+
+  },
+  th: {
+    orders: "คำสั่งซื้อ",
+    addOrder: "เพิ่มคำสั่งซื้อ",
+    searchPlaceholder: "ค้นหาคำสั่งซื้อ...",
+    orderId: "รหัสคำสั่งซื้อ",
+    user: "ผู้ใช้",
+    totalAmount: "จำนวนเงินรวม",
+    orderDate: "วันที่คำสั่งซื้อ",
+    actions: "การกระทำ",
+    cancel: "ยกเลิก",
+    viewDetails: "ดูรายละเอียด",
+    noOrders: "ไม่มีคำสั่งซื้อ",
+    error: "ข้อผิดพลาด",
+    loading: "กำลังโหลด...",
+    of: "จาก",
+    page: "หน้า",
+    previous: "ก่อนหน้า",
+    next: "ถัดไป"
+  }
+};
+
 const OrderContent = () => {
   const [orders, setOrders] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -12,6 +54,11 @@ const OrderContent = () => {
   const [totalPages, setTotalPages] = useState(1); // Total pages state
   const [searchQuery, setSearchQuery] = useState(""); // State for search query
   const apiUrl = import.meta.env.VITE_SERVER_URL;
+  const [language,setLanguage] =useState(localStorage.getItem('language')||'th')
+
+  useEffect(() => {
+    fetchOrders();
+  }, [page, searchQuery]); // Fetch orders when page or search query changes
 
   useEffect(() => {
     fetchOrders();
@@ -31,8 +78,8 @@ const OrderContent = () => {
     } catch (err) {
       setError(err.message);
       Swal.fire({
-        title: "Error",
-        text: "Failed to load orders.",
+        title: translations[language].error,
+        text: translations[language].error,
         icon: "error",
       });
     } finally {
@@ -42,14 +89,14 @@ const OrderContent = () => {
 
   const handleDelete = async (orderId) => {
     const result = await Swal.fire({
-      title: "Are you sure?",
-      text: "This action cannot be undone.",
+      title: translations[language].areYouSure,
+      text: translations[language].thisActionCannotBeUndone,
       icon: "warning",
       showCancelButton: true,
       confirmButtonColor: "#3085d6",
       cancelButtonColor: "#d33",
-      confirmButtonText: "Yes, delete it!",
-      cancelButtonText: "Cancel",
+      confirmButtonText: translations[language].yesDeleteIt,
+      cancelButtonText: translations[language].cancel,
     });
 
     if (result.isConfirmed) {
@@ -57,8 +104,8 @@ const OrderContent = () => {
         const response = await axios.delete(`${apiUrl}/v1/orders/${orderId}`);
         if (response.status === 200) {
           Swal.fire({
-            title: "Deleted!",
-            text: "Order has been deleted.",
+            title: translations[language].deleted,
+            text: translations[language].orderDeleted,
             icon: "success",
           });
           setOrders(orders.filter((order) => order.id !== orderId));
@@ -67,7 +114,7 @@ const OrderContent = () => {
         }
       } catch (error) {
         Swal.fire({
-          title: "Error",
+          title: translations[language].error,
           text: error.message,
           icon: "error",
         });
@@ -95,12 +142,12 @@ const OrderContent = () => {
   if (error) return <div className="text-red-500 text-center">{error}</div>;
 
   return (
-    <div className="table p-8 rounded-lg shadow-lg w-full mx-auto font-inter h-full">
+    <div className="table p-8 rounded-lg shadow-lg w-full mx-auto font-prompt h-full">
       <div className="flex justify-between items-center mb-4">
-        <h2 className="text-xl font-semibold">Orders</h2>
+        <h2 className="text-xl font-semibold">{translations[language].orders}</h2>
         <Link to="/dashboard/orders/add">
           <button className="btn bg-blue text-white hover:bg-blue">
-            Add Order
+            {translations[language].addOrder}
           </button>
         </Link>
       </div>
@@ -111,7 +158,7 @@ const OrderContent = () => {
           type="text"
           value={searchQuery}
           onChange={handleSearchChange}
-          placeholder="Search orders..."
+          placeholder={translations[language].searchPlaceholder}
           className="input input-bordered w-full"
         />
       </div>
@@ -119,18 +166,18 @@ const OrderContent = () => {
       <table className="w-full border-collapse border border-gray-300">
         <thead className="sticky-top bg-gray-200">
           <tr>
-            <th className="border p-2 text-center">Order ID</th>
-            <th className="border p-2 text-center">User</th>
-            <th className="border p-2 text-center">Total Amount</th>
-            <th className="border p-2 text-center">Order Date</th>
-            <th className="border p-2 text-center">Actions</th>
+            <th className="border p-2 text-center">{translations[language].orderId}</th>
+            <th className="border p-2 text-center">{translations[language].user}</th>
+            <th className="border p-2 text-center">{translations[language].totalAmount}</th>
+            <th className="border p-2 text-center">{translations[language].orderDate}</th>
+            <th className="border p-2 text-center">{translations[language].actions}</th>
           </tr>
         </thead>
         <tbody className="text-center">
           {orders.length > 0 ? (
-            orders.map((order) => (
-              <tr key={order.id}>
-                <td className="border p-2 text-center">{order.id}</td>
+            orders.map((order, index) => (
+              <tr key={index + 1}>
+                <td className="border p-2 text-center">{index + 1}</td>
                 <td className="border p-2 text-center">
                   {order.firstname} {order.lastname}
                 </td>
@@ -144,11 +191,11 @@ const OrderContent = () => {
                       onClick={() => handleDelete(order.id)}
                       className="btn btn-error text-white"
                     >
-                      Cancel
+                      {translations[language].cancel}
                     </button>
                     <Link to={`/dashboard/orders/details/${order.id}`}>
                       <button className="btn btn-success  text-white">
-                        View Details
+                        {translations[language].viewDetails}
                       </button>
                     </Link>
                   </div>
@@ -158,7 +205,7 @@ const OrderContent = () => {
           ) : (
             <tr>
               <td colSpan="6" className="border border-gray-300 p-4">
-                No orders available
+                {translations[language].noOrders}
               </td>
             </tr>
           )}
@@ -171,21 +218,20 @@ const OrderContent = () => {
           className={`cursor-pointer ${page === 1 ? "text-gray-400" : "text-black"}`}
           style={{ pointerEvents: page === 1 ? "none" : "auto" }}
         >
-          Previous
+          {translations[language].previous}
         </p>
         <span>
-          Page {page} of {totalPages}
+          {translations[language].page} {page} {translations[language].of} {totalPages}
         </span>
         <p
           onClick={handleNextPage}
           className={`cursor-pointer ${page === totalPages ? "text-gray-400" : "text-black"}`}
           style={{ pointerEvents: page === totalPages ? "none" : "auto" }}
         >
-          Next
+          {translations[language].next}
         </p>
       </div>
     </div>
   );
 };
-
 export default OrderContent;

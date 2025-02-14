@@ -5,6 +5,39 @@ import { MapContainer, TileLayer, Marker, useMapEvents } from "react-leaflet";
 import "leaflet/dist/leaflet.css";
 import Searchbox from "../../components/Searchbox";
 
+const translations = {
+  en: {
+    addTaskTitle: "Add New Task",
+    taskType: "Task Type",
+    user: "User",
+    description: "Description",
+    rentalStartDate: "Rental Start Date",
+    rentalEndDate: "Rental End Date",
+    address: "Address",
+    quantityUsed: "Quantity Used",
+    selectTaskType: "Select Task Type",
+    selectUser: "Select User",
+    showMap: "Show Map 📍",
+    hideMap: "Hide Map ❌",
+    addTaskButton: "Add Task",
+  },
+  th: {
+    addTaskTitle: "เพิ่มงานใหม่",
+    taskType: "ประเภทงาน",
+    user: "ผู้ใช้",
+    description: "รายละเอียด",
+    rentalStartDate: "วันที่เริ่มเช่า",
+    rentalEndDate: "วันที่สิ้นสุดการเช่า",
+    address: "ที่อยู่",
+    quantityUsed: "จำนวนที่ใช้",
+    selectTaskType: "เลือกประเภทงาน",
+    selectUser: "เลือกผู้ใช้",
+    showMap: "เลือกตำแหน่งบนแผนที่ 📍",
+    hideMap: "ซ่อนแผนที่ ❌",
+    addTaskButton: "เพิ่มงาน",
+  },
+};
+
 const MapClickHandler = ({ setLatitude, setLongitude }) => {
   useMapEvents({
     click(e) {
@@ -34,6 +67,8 @@ const AddTask = () => {
 
   const navigate = useNavigate();
   const apiUrl = import.meta.env.VITE_SERVER_URL; // Use the environment variable
+  const currentLanguage = localStorage.getItem("language") || "en";
+  const t = translations[currentLanguage];
 
   useEffect(() => {
     const fetchTaskTypes = async () => {
@@ -66,7 +101,7 @@ const AddTask = () => {
     fetchTaskTypes();
     fetchProducts();
     fetchUsers();
-  }, [address]);
+  }, []);
 
   const handleLocationSelect = (lat, lon, displayName) => {
     setAddress(displayName);
@@ -74,6 +109,15 @@ const AddTask = () => {
     setLongitude(lon);
   };
 
+  const toggleMap = () => {
+    if (showMap) {
+      // 🔥 ถ้าปิดแผนที่ให้ล้างค่า latitude, longitude
+      setLatitude(null);
+      setLongitude(null);
+    }
+    setShowMap(!showMap);
+  };
+  
   const handleSubmit = async (e) => {
     e.preventDefault();
 
@@ -87,8 +131,8 @@ const AddTask = () => {
         address,
         quantity_used: quantityUsed,
         user_id: userId,
-        latitude,
-        longitude,
+        latitude: latitude, // ✅ ถ้าไม่เลือกแผนที่จะให้เป็น ""
+        longitude: longitude,
       });
 
       if (response.status === 201) {
@@ -106,42 +150,42 @@ const AddTask = () => {
   };
 
   return (
-    <div className="p-8 rounded-lg shadow-lg w-full mx-auto font-inter">
-      <h2 className="text-2xl mb-4">Add New Task</h2>
-      <form onSubmit={handleSubmit} className="space-y- text-sm font-medium">
+    <div className="p-8 rounded-lg shadow-lg w-full mx-auto font-prompt">
+      <h2 className="text-2xl mb-4">{t.addTaskTitle}</h2>
+      <form onSubmit={handleSubmit} className="space-y-4 text-sm font-medium">
         <div>
-          <label className="block mb-2">Task Type</label>
+          <label className="block mb-2">{t.taskType}</label>
           <select
             value={taskTypeId}
             onChange={(e) => setTaskTypeId(e.target.value)}
             className="border p-2 w-full"
             required
           >
-            <option value="">Select Task Type</option>
-            {taskTypes.map((taskType) => (
-              <option key={taskType.task_type_id} value={taskType.task_type_id}>
-                {taskType.type_name}
+            <option value="">{t.selectTaskType}</option>
+            {taskTypes.map((taskType,index) => (
+              <option key={index+1} value={taskType.task_type_id}>
+                 {index+1}. {taskType.type_name}
               </option>
             ))}
           </select>
-        </div>
+          </div>
         <div>
-          <label className="block mb-2">User</label>
+          <label className="block mb-2">{t.user}</label>
           <select
             value={userId}
             onChange={(e) => setUserId(e.target.value)}
             className="border p-2 w-full"
           >
-            <option value="">Select User</option>
-            {users.map((user) => (
-              <option key={user.user_id} value={user.user_id}>
-                {user.firstname} {user.lastname}
+            <option value="">{t.selectUser}</option>
+            {users.map((user,index) => (
+              <option key={index+1} value={user.user_id}>
+              {index+1}.  {user.firstname} {user.lastname}
               </option>
             ))}
           </select>
         </div>
         <div>
-          <label className="block mb-2">Description</label>
+          <label className="block mb-2">{t.description}</label>
           <textarea
             value={description}
             onChange={(e) => setDescription(e.target.value)}
@@ -151,37 +195,35 @@ const AddTask = () => {
         </div>
 
         <div>
-          <label className="block text-gray-700">Rental Start Date</label>
+          <label className="block mb-2">{t.rentalStartDate}</label>
           <input
             type="datetime-local"
-            name="appointment_date"
             value={appointmentDate}
             onChange={(e) => {
               const fullDate = e.target.value;
               setAppointmentDate(fullDate);
-              setRentalStartDate(fullDate.split("T")[0]); // Extract date part only
+              setRentalStartDate(fullDate.split("T")[0]);
             }}
-            min={new Date().toISOString().slice(0, 16)} // Prevent past dates
+            min={new Date().toISOString().slice(0, 16)}
             required
             className="input input-bordered w-full"
           />
         </div>
 
         <div>
-          <label className="block text-gray-700">Rental End Date</label>
+          <label className="block mb-2">{t.rentalEndDate}</label>
           <input
             type="date"
-            name="rental_end_date"
             value={rentalEndDate}
             onChange={(e) => setRentalEndDate(e.target.value)}
-            min={new Date().toISOString().split("T")[0]} // Ensure correct format for "date"
+            min={new Date().toISOString().split("T")[0]}
             required
             className="input input-bordered w-full"
           />
         </div>
 
         <div>
-          <label className="block mb-2">Address</label>
+          <label className="block mb-2">{t.address}</label>
           <input
             type="text"
             value={address}
@@ -190,7 +232,7 @@ const AddTask = () => {
           />
         </div>
         <div>
-          <label className="block mb-2">Quantity Used</label>
+          <label className="block mb-2">{t.quantityUsed}</label>
           <input
             type="number"
             value={quantityUsed}
@@ -198,23 +240,13 @@ const AddTask = () => {
             className="border p-2 w-full"
           />
         </div>
-        <input
-          type="hidden"
-          value={latitude}
-          onChange={(e) => setLatitude(e.target.value)}
-        />
-        <input
-          type="hidden"
-          value={longitude}
-          onChange={(e) => setLongitude(e.target.value)}
-        />
         <div className="mb-4">
           <p
             type="button"
-            onClick={() => setShowMap(!showMap)}
+            onClick={toggleMap}
             className="cursor-pointer underline text-right text-xl mt-2"
           >
-            {showMap ? "ซ่อนแผนที่ ❌" : "เลือกตำแหน่งบนแผนที่"}
+            {showMap ? t.hideMap : t.showMap}
           </p>
         </div>
 
@@ -243,7 +275,7 @@ const AddTask = () => {
           </div>
         )}
         <button type="submit" className="btn bg-blue text-white hover:bg-blue">
-          Add Task
+        {t.addTaskButton}
         </button>
       </form>
     </div>

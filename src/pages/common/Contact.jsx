@@ -1,22 +1,57 @@
-import React from "react";
+import React, { useState, useEffect } from "react";
 import Navbar from "../../components/Navbar";
 import Footer from "../../components/Footer";
 
+const translations = {
+  th: {
+    contactUs: "ติดต่อเรา",
+    description: "สำรวจโครงการและประสบการณ์สำคัญที่เรามีร่วมกับบริษัทต่าง ๆ",
+    companyName: "บริษัท เจริญทรัพย์ จำกัด",
+    address: "เลขที่ 425 ถ.นาคนิวาศ แขวงลาดพร้าว เขตลาดพร้าว กรุงเทพฯ 10230",
+    contactInfo: "ช่องทางการติดต่อ",
+    phone: "โทรศัพท์",
+    email: "อีเมล",
+    website: "เว็บไซต์",
+  },
+  en: {
+    contactUs: "Contact Us",
+    description: "Explore some of the significant projects and experiences we've had with various companies.",
+    companyName: "Jaroensup Co., Ltd.",
+    address: "425 Nak Niwat Rd, Lat Phrao, Bangkok 10230",
+    contactInfo: "Contact Information",
+    phone: "Phone",
+    email: "Email",
+    website: "Website",
+  },
+};
+
 const Contact = () => {
+  const [language, setLanguage] = useState(localStorage.getItem("language") || "th");
+
+  useEffect(() => {
+    const handleLanguageChange = () => {
+      setLanguage(localStorage.getItem("language") || "th");
+    };
+
+    window.addEventListener("storage", handleLanguageChange);
+
+    return () => {
+      window.removeEventListener("storage", handleLanguageChange);
+    };
+  }, []);
+
   return (
     <>
       <Navbar />
-      <div className="bg-gray-100 text-gray-800 font-prompt  py-8">
+      <div className="bg-gray-100 text-gray-800 font-prompt py-8">
         {/* Contact Header */}
         <header className="text-center mb-12">
-            <h1 className="text-4xl font-bold text-gray-800 mb-4 font-prompt">
-              ติดต่อเรา
-            </h1>
-            <p className="text-lg text-gray-600">
-              Explore some of the significant projects and experiences we've had
-              with various companies.
-            </p>
-          </header>
+          <h1 className="text-4xl font-bold text-gray-800 mb-4 font-prompt">
+            {translations[language].contactUs}
+          </h1>
+          <p className="text-lg text-gray-600">{translations[language].description}</p>
+        </header>
+
         {/* Google Maps */}
         <div className="container mx-auto px-4 mb-8">
           <iframe
@@ -31,13 +66,22 @@ const Contact = () => {
         {/* Contact Information */}
         <div className="container mx-auto px-4 pb-5">
           <div className="bg-white p-6 rounded-lg shadow-lg">
-            <h2 className="text-2xl font-bold mb-4">บริษัท เจริญทรัพย์ จำกัด</h2>
-            <p className="text-lg mb-2">เลขที่ 425 ถ.นาคนิวาศ แขวงลาดพร้าว เขตลาดพร้าว กรุงเทพฯ 10230</p>
-            <h3 className="text-xl font-semibold mb-2">ช่องทางการติดต่อ</h3>
+            <h2 className="text-2xl font-bold mb-4">{translations[language].companyName}</h2>
+            <p className="text-lg mb-2">{translations[language].address}</p>
+            <h3 className="text-xl font-semibold mb-2">{translations[language].contactInfo}</h3>
             <ul className="list-disc list-inside text-gray-700">
-              <li>โทรศัพท์: 086-975-0664</li>
-              <li>อีเมล: contact@example.com</li>
-              <li>เว็บไซต์: <a href="https://www.example.com" className="text-blue-500 hover:underline">www.example.com</a></li>
+              <li>
+                {translations[language].phone}: 086-975-0664
+              </li>
+              <li>
+                {translations[language].email}: contact@example.com
+              </li>
+              <li>
+                {translations[language].website}:{" "}
+                <a href="https://www.example.com" className="text-blue-500 hover:underline">
+                  www.example.com
+                </a>
+              </li>
             </ul>
           </div>
         </div>

@@ -22,6 +22,67 @@ const ProductContent = () => {
   const decodedToken = jwtDecode(token);
   const role = decodedToken.role;
 
+  const translation = {
+    en: {
+      productList: "Product List",
+      addProduct: "Add Product",
+      searchPlaceholder: "Search by product name",
+      allCategories: "All Categories",
+      allBrands: "All Brands",
+      id: "ID",
+      name: "Name",
+      description: "Description",
+      price: "Price",
+      stockQuantity: "Stock Quantity",
+      brand: "Brand",
+      category: "Category",
+      warehouse: "Warehouse",
+      productImage: "Product Image",
+      actions: "Actions",
+      noProducts: "No products available",
+      productDeleted: "Product deleted successfully",
+      error: "Error",
+      errorText: "Failed to load products.",
+      of: "of",
+      page: "page",
+      previous: "previous",
+      next: "next",
+      borrow: "borrow",
+      edit: "edit",
+      delete: "delete"
+    },
+    th: {
+      productList: "รายการสินค้า",
+      addProduct: "เพิ่มสินค้า",
+      searchPlaceholder: "ค้นหาชื่อสินค้า",
+      allCategories: "ทุกหมวดหมู่",
+      allBrands: "ทุกแบรนด์",
+      id: "รหัส",
+      name: "ชื่อ",
+      description: "คำอธิบาย",
+      price: "ราคา",
+      stockQuantity: "จำนวนในสต็อก",
+      brand: "แบรนด์",
+      category: "หมวดหมู่",
+      warehouse: "คลังสินค้า",
+      productImage: "ภาพสินค้า",
+      actions: "การกระทำ",
+      noProducts: "ไม่มีสินค้าที่พร้อมใช้งาน",
+      productDeleted: "ลบสินค้าสำเร็จ",
+      error: "ข้อผิดพลาด",
+      errorText: "ไม่สามารถโหลดสินค้าได้",
+      of: "จาก",
+      page: "หน้า",
+      previous: "ก่อนหน้า",
+      next: "ถัดไป",
+      borrow: "ยืมอุปกรณ์",
+      edit: "แก้ไข",
+      delete: "ลบสินค้า"
+    }
+  };
+
+  const [currentLanguage, setCurrentLanguage] = useState(localStorage.getItem('language','th')); // default language
+
   useEffect(() => {
     fetchProducts();
     fetchCategories();
@@ -46,8 +107,8 @@ const ProductContent = () => {
     } catch (error) {
       console.error("Error fetching products:", error);
       Swal.fire({
-        title: "Error",
-        text: "Failed to load products.",
+        title: translation[currentLanguage].error,
+        text: translation[currentLanguage].errorText,
         icon: "error",
       });
     }
@@ -107,14 +168,14 @@ const ProductContent = () => {
       );
       if (response.status === 200) {
         Swal.fire({
-          title: "Product deleted successfully",
+          title: translation[currentLanguage].productDeleted,
           icon: "success",
         });
         setProducts(products.filter((product) => product.product_id !== productId));
       }
     } catch (error) {
       Swal.fire({
-        title: "Error",
+        title: translation[currentLanguage].error,
         text: error.message,
         icon: "error",
       });
@@ -126,24 +187,26 @@ const ProductContent = () => {
       setCurrentPage(newPage);
     }
   };
+
   const openImagePopup = (imageUrl) => {
     Swal.fire({
       imageUrl: imageUrl,
-      imageAlt: "Product Image",
+      imageAlt: translation[currentLanguage].productImage,
       showCloseButton: true,
       showConfirmButton: false,
       background: "#fff",
       width: "auto",
     });
   };
+
   return (
-    <div className="p-8 rounded-lg shadow-lg w-full mx-auto font-inter h-full">
+    <div className="p-8 rounded-lg shadow-lg w-full mx-auto font-prompt h-full">
       <div className="flex flex-col sm:flex-row justify-between items-center mb-6 gap-4">
-        <h2 className="text-xl font-semibold">Product List</h2>
+        <h2 className="text-xl font-semibold">{translation[currentLanguage].productList}</h2>
         {role === 3 && (
           <Link to="/dashboard/products/add">
             <button className="btn bg-blue text-white hover:bg-blue">
-              Add Product
+              {translation[currentLanguage].addProduct}
             </button>
           </Link>
         )}
@@ -153,7 +216,7 @@ const ProductContent = () => {
       <div className="flex flex-col md:flex-row gap-4 mb-4">
         <input
           type="text"
-          placeholder="Search by product name"
+          placeholder={translation[currentLanguage].searchPlaceholder}
           value={searchTerm}
           onChange={(e) => setSearchTerm(e.target.value)}
           className="input input-bordered w-full md:w-1/3"
@@ -163,7 +226,7 @@ const ProductContent = () => {
           onChange={(e) => setSelectedCategory(e.target.value)}
           className="select select-bordered w-full md:w-1/3"
         >
-          <option value="">All Categories</option>
+          <option value="">{translation[currentLanguage].allCategories}</option>
           {categories.map((category) => (
             <option key={category.category_id} value={category.name}>
               {category.name}
@@ -175,7 +238,7 @@ const ProductContent = () => {
           onChange={(e) => setSelectedBrand(e.target.value)}
           className="select select-bordered w-full md:w-1/3"
         >
-          <option value="">All Brands</option>
+          <option value="">{translation[currentLanguage].allBrands}</option>
           {brands.map((brand) => (
             <option key={brand.brand_id} value={brand.name}>
               {brand.name}
@@ -184,26 +247,26 @@ const ProductContent = () => {
         </select>
       </div>
 
-      <table className="table w-full border-collapse border border-gray-300 font-inter">
+      <table className="table w-full border-collapse border border-gray-300 font-prompt">
         <thead className="sticky top-0 bg-gray-200">
           <tr>
-            <th className="border p-2 text-center">ID</th>
-            <th className="border p-2 text-center">Name</th>
-            <th className="border p-2 text-center">Description</th>
-            <th className="border p-2 text-center">Price</th>
-            <th className="border p-2 text-center">Stock Quantity</th>
-            <th className="border p-2 text-center">Brand</th>
-            <th className="border p-2 text-center">Category</th>
-            <th className="border p-2 text-center">Warehouse</th>
-            <th className="border p-2 text-center">Product Image</th>
-            <th className="border p-2 text-center">Actions</th>
+            <th className="border p-2 text-center">{translation[currentLanguage].id}</th>
+            <th className="border p-2 text-center">{translation[currentLanguage].name}</th>
+            <th className="border p-2 text-center">{translation[currentLanguage].description}</th>
+            <th className="border p-2 text-center">{translation[currentLanguage].price}</th>
+            <th className="border p-2 text-center">{translation[currentLanguage].stockQuantity}</th>
+            <th className="border p-2 text-center">{translation[currentLanguage].brand}</th>
+            <th className="border p-2 text-center">{translation[currentLanguage].category}</th>
+            <th className="border p-2 text-center">{translation[currentLanguage].warehouse}</th>
+            <th className="border p-2 text-center">{translation[currentLanguage].productImage}</th>
+            <th className="border p-2 text-center">{translation[currentLanguage].actions}</th>
           </tr>
         </thead>
         <tbody className="text-center">
           {filteredProducts.length > 0 ? (
-            filteredProducts.map((product) => (
-              <tr key={product.product_id}>
-                <td className="border p-2 text-center">{product.product_id}</td>
+            filteredProducts.map((product, index) => (
+              <tr key={index + 1}>
+                <td className="border p-2 text-center">{index + 1}</td>
                 <td className="border p-2 text-center">{product.name}</td>
                 <td className="border p-2 text-center">{product.description}</td>
                 <td className="border p-2 text-center">{product.price}</td>
@@ -220,7 +283,7 @@ const ProductContent = () => {
                       onClick={() => openImagePopup(product.image_url)}
                     />
                   ) : (
-                    "No image"
+                    translation[currentLanguage].noImage
                   )}
                 </td>
                 <td className="border p-2 text-center">
@@ -228,18 +291,18 @@ const ProductContent = () => {
                     {role === 3 ? (
                       <>
                         <Link to={`/dashboard/products/edit/${product.product_id}`}>
-                          <button className="btn btn-success text-white">Edit</button>
+                          <button className="btn btn-success text-white">{translation[currentLanguage].edit}</button>
                         </Link>
                         <button
                           onClick={() => handleDelete(product.product_id)}
                           className="btn btn-error text-white"
                         >
-                          Delete
+                          {translation[currentLanguage].delete}
                         </button>
                       </>
                     ) : (
                       <Link to={`/dashboard/borrows/${product.product_id}`}>
-                        <button className="btn btn-success text-white">Borrow</button>
+                        <button className="btn btn-success text-white">{translation[currentLanguage].borrow}</button>
                       </Link>
                     )}
                   </div>
@@ -249,7 +312,7 @@ const ProductContent = () => {
           ) : (
             <tr>
               <td colSpan="10" className="border border-gray-300 p-4">
-                No products available
+                {translation[currentLanguage].noProducts}
               </td>
             </tr>
           )}
@@ -258,22 +321,22 @@ const ProductContent = () => {
 
       {/* Pagination */}
       <div className="flex justify-between mt-4">
-      <p
+        <p
           onClick={() => handlePageChange(currentPage - 1)}
           disabled={currentPage <= 1}
           className={`cursor-pointer ${currentPage === totalPages ? "text-gray-400" : "text-black"}`}
-          >
-          Previous
+        >
+          {translation[currentLanguage].previous}
         </p>
         <span className="flex items-center justify-center">
-          Page {currentPage} of {totalPages}
+          {translation[currentLanguage].page} {currentPage} {translation[currentLanguage].of} {totalPages}
         </span>
         <p
           onClick={() => handlePageChange(currentPage + 1)}
           disabled={currentPage >= totalPages}
           className={`cursor-pointer ${currentPage === totalPages ? "text-gray-400" : "text-black"}`}
-          >
-          Next
+        >
+          {translation[currentLanguage].next}
         </p>
       </div>
     </div>

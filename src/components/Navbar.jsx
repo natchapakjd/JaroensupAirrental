@@ -4,17 +4,63 @@ import Cookies from "universal-cookie";
 import { jwtDecode } from "jwt-decode";
 import axios from "axios";
 
+// ✅ Object สำหรับแปลภาษา
+const translations = {
+  th: {
+    home: "หน้าหลัก",
+    product: "สินค้า",
+    services: "บริการของเรา",
+    experience: "ผลงานของเรา",
+    registerTech: "ร่วมงานกับเรา",
+    contact: "ติดต่อเรา",
+    arFeature: "AR Feature",
+    profile: "โปรไฟล์",
+    history: "ประวัติ",
+    changePassword: "เปลี่ยนรหัสผ่าน",
+    notification: "การแจ้งเตือน",
+    logout: "ออกจากระบบ",
+    login: "สมัครสมาชิก/เข้าสู่ระบบ",
+  },
+  en: {
+    home: "Home",
+    product: "Products",
+    services: "Our Services",
+    experience: "Our Work",
+    registerTech: "Join Us",
+    contact: "Contact",
+    arFeature: "AR Feature",
+    profile: "Profile",
+    history: "History",
+    changePassword: "Change Password",
+    notification: "Notifications",
+    logout: "Logout",
+    login: "Sign Up / Login",
+  },
+};
+
 const Navbar = () => {
   const cookies = new Cookies();
   const [isToggle, setIsToggle] = useState(false);
   const [userId, setUserId] = useState();
-  const [image, setImage] = useState(null); // Start as null
+  const [image, setImage] = useState(null);
   const token = cookies.get("authToken");
   const navigate = useNavigate();
 
-  const toggleNavbar = () => {
-    setIsToggle(!isToggle);
-  };
+  // ✅ โหลดค่าภาษาเริ่มต้นจาก localStorage
+  const [language, setLanguage] = useState(
+    localStorage.getItem("language") || "th"
+  );
+
+  useEffect(() => {
+    const handleLanguageChange = () => {
+      setLanguage(localStorage.getItem("language") || "th");
+    };
+
+    window.addEventListener("storage", handleLanguageChange);
+    return () => {
+      window.removeEventListener("storage", handleLanguageChange);
+    };
+  }, []);
 
   useEffect(() => {
     if (token) {
@@ -24,8 +70,16 @@ const Navbar = () => {
     }
   }, [token]);
 
+  const toggleNavbar = () => {
+    setIsToggle(!isToggle);
+    console.log(isToggle);
+  };
+
   const handleLogout = () => {
+    console.log("Logging out...");
     cookies.remove("authToken", { path: "/" });
+    console.log("Token after remove:", cookies.get("authToken"));
+    setIsToggle(false); // ✅ ปิด Dropdown Menu
     navigate("/login");
   };
 
@@ -42,10 +96,15 @@ const Navbar = () => {
       setImage(null);
     }
   };
-
+  const toggleLanguage = () => {
+    const newLanguage = language === "th" ? "en" : "th";
+    localStorage.setItem("language", newLanguage);
+    setLanguage(newLanguage);
+    window.dispatchEvent(new Event("storage")); // บอกทุกหน้าว่าภาษาเปลี่ยน
+  };
   return (
     <nav>
-      <div className="navbar bg-white text-black font-prompt ">
+      <div className="navbar bg-white text-black font-prompt">
         <div className="navbar-start">
           <div className="dropdown">
             <div
@@ -70,30 +129,33 @@ const Navbar = () => {
               </svg>
             </div>
             {isToggle && (
-              <ul
-                tabIndex="0"
-                className="menu menu-sm dropdown-content bg-white text-black rounded-box z-[1] mt-3 w-52 p-2 shadow"
-              >
+              <ul className="menu menu-sm dropdown-content bg-white text-black rounded-box z-[1] mt-3 w-52 p-2 shadow">
                 <li>
-                  <Link to="/">หน้าหลัก</Link>
+                  <Link to="/">{translations[language].home}</Link>
                 </li>
                 <li>
-                  <Link to="/product">สินค้า</Link>
+                  <Link to="/product">{translations[language].product}</Link>
                 </li>
                 <li>
-                  <Link to="/services">บริการของเรา</Link>
+                  <Link to="/services">{translations[language].services}</Link>
                 </li>
                 <li>
-                  <Link to="/experience">ผลงานของเรา</Link>
+                  <Link to="/experience">
+                    {translations[language].experience}
+                  </Link>
                 </li>
                 <li>
-                    <Link to="/register-tech">ร่วมงานกับเรา</Link>
-                  </li>
-                <li>
-                  <Link to="/contact">ติดต่อเรา</Link>
+                  <Link to="/register-tech">
+                    {translations[language].registerTech}
+                  </Link>
                 </li>
                 <li>
-                  <Link to="/test-xr-gallary">AR Feature</Link>
+                  <Link to="/contact">{translations[language].contact}</Link>
+                </li>
+                <li>
+                  <Link to="/test-xr-gallary">
+                    {translations[language].arFeature}
+                  </Link>
                 </li>
               </ul>
             )}
@@ -103,33 +165,43 @@ const Navbar = () => {
         <div className="navbar-center hidden lg:flex">
           <ul className="menu menu-horizontal px-1">
             <li>
-              <Link to="/">หน้าหลัก</Link>
+              <Link to="/">{translations[language].home}</Link>
             </li>
             <li>
-              <Link to="/product">สินค้า</Link>
-            </li>
-            <li className="z-40">
-              <a href="/services">บริการของเรา</a>
+              <Link to="/product">{translations[language].product}</Link>
             </li>
             <li>
-              <Link to="/experience">ผลงานของเรา</Link>
+              <Link to="/services">{translations[language].services}</Link>
             </li>
             <li>
-              <Link to="/register-tech">ร่วมงานกับเรา</Link>
+              <Link to="/experience">{translations[language].experience}</Link>
             </li>
             <li>
-              <Link to="/contact">ติดต่อเรา</Link>
+              <Link to="/register-tech">
+                {translations[language].registerTech}
+              </Link>
             </li>
             <li>
-                  <Link to="/test-xr-gallary">AR Feature</Link>
-                </li>
+              <Link to="/contact">{translations[language].contact}</Link>
+            </li>
+            <li>
+              <Link to="/test-xr-gallary">
+                {translations[language].arFeature}
+              </Link>
+            </li>
           </ul>
         </div>
-        <div className="navbar-end ">
-          <li className="list-none ">
+        <div className="navbar-end">
+          <button
+            onClick={toggleLanguage}
+            className="badge badge-outline cursor-pointer p-2 text-sm mx-2"
+          >
+            {language === "th" ? "🇹🇭 ไทย" : "🇬🇧 English"}
+          </button>
+          <li className="list-none">
             {!token && (
               <Link to="/login" className="text-sm md:text-base">
-                สมัครสมาชิก/เข้าสู่ระบบ
+                {translations[language].login}
               </Link>
             )}
           </li>
@@ -146,37 +218,36 @@ const Navbar = () => {
                     <img alt="User Avatar" src={`${image}`} />
                   ) : (
                     <div className="w-10 h-10 bg-gray-200 rounded-full flex items-center justify-center">
-                      <span className="text-gray-500">?</span>{" "}
-                      {/* Fallback UI */}
+                      <span className="text-gray-500">No image</span>
                     </div>
                   )}
                 </div>
               </div>
-              {isToggle && (
-                <ul
-                  tabIndex={0}
-                  className="menu menu-sm dropdown-content bg-base-100 rounded-box z-[1] mt-3 w-52 p-2 shadow bg-white text-black"
-                >
-                  <li>
-                    <a className="justify-between" href="/profile-setting">
-                      โปรไฟล์
-                      <span className="badge">New</span>
-                    </a>
-                  </li>
-                  <li>
-                    <a href="/history">ประวัติ</a>
-                  </li>
-                  <li>
-                    <a href="/change-password">เปลี่ยนรหัสผ่าน</a>
-                  </li>
-                  <li>
-                    <a href="/settings">การแจ้งเตือน</a>
-                  </li>
-                  <li>
-                    <a onClick={handleLogout}>ออกจากระบบ</a>
-                  </li>
-                </ul>
-              )}
+              <ul
+                tabIndex={0}
+                className="menu menu-sm dropdown-content bg-base-100 rounded-box z-[1] mt-3 w-52 p-2 shadow bg-white text-black"
+              >
+                <li>
+                  <a className="justify-between" href="/profile-setting">
+                    {translations[language].profile}
+                    <span className="badge">New</span>
+                  </a>
+                </li>
+                <li>
+                  <a href="/history">{translations[language].history}</a>
+                </li>
+                <li>
+                  <a href="/change-password">
+                    {translations[language].changePassword}
+                  </a>
+                </li>
+                <li>
+                  <a href="/settings">{translations[language].notification}</a>
+                </li>
+                <li>
+                  <a onClick={handleLogout}>{translations[language].logout}</a>
+                </li>
+              </ul>
             </div>
           )}
         </div>

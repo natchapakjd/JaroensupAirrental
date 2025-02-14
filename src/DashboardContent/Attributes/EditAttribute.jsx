@@ -10,7 +10,33 @@ const EditAttribute = () => {
   const [name, setName] = useState('');
   const [loading, setLoading] = useState(false);
   const [isLoadingData, setIsLoadingData] = useState(true);
+  
+  // Placeholder for language toggle
+  const [language, setLanguage] = useState(localStorage.getItem("language") || "en");
+  
+  // Add language-specific strings
+  const translations = {
+    en: {
+      editAttribute: "Edit Attribute",
+      name: "Name",
+      updateAttribute: "Update Attribute",
+      updating: "Updating...",
+      successMessage: "Attribute updated successfully.",
+      errorMessage: "Failed to load attribute data.",
+      buttonText: "Update Attribute"
+    },
+    th: {
+      editAttribute: "แก้ไขคุณสมบัติ",
+      name: "ชื่อ",
+      updateAttribute: "อัปเดตคุณสมบัติ",
+      updating: "กำลังอัปเดต...",
+      successMessage: "อัปเดตคุณสมบัติสำเร็จ",
+      errorMessage: "ไม่สามารถโหลดข้อมูลคุณสมบัติได้",
+      buttonText: "อัปเดตคุณสมบัติ"
+    }
+  };
 
+  // Fetch the attribute data
   useEffect(() => {
     const fetchAttribute = async () => {
       try {
@@ -20,13 +46,14 @@ const EditAttribute = () => {
           setIsLoadingData(false);
         }
       } catch (error) {
-        Swal.fire('Error!', 'Failed to load attribute data.', 'error');
+        Swal.fire('Error!', translations[language].errorMessage, 'error');
       }
     };
 
     fetchAttribute();
-  }, [attributeId]);
+  }, [attributeId, language]);
 
+  // Handle form submission
   const handleSubmit = async (e) => {
     e.preventDefault();
     setLoading(true);
@@ -34,7 +61,7 @@ const EditAttribute = () => {
     try {
       const response = await axios.put(`${import.meta.env.VITE_SERVER_URL}/attribute/${attributeId}`, { name });
       if (response.status === 200) {
-        Swal.fire('Success!', 'Attribute updated successfully.', 'success');
+        Swal.fire('Success!', translations[language].successMessage, 'success');
         setTimeout(() => {
           navigate('/dashboard/attributes');
         }, 800);
@@ -50,13 +77,13 @@ const EditAttribute = () => {
 
   return (
     <div className="p-8 rounded-lg shadow-lg w-full mx-auto max-w-md mt-5">
-      <h1 className="text-2xl font-semibold mb-6 ">Edit Attribute</h1>
+      <h1 className="text-2xl font-semibold mb-6">{translations[language].editAttribute}</h1>
       {isLoadingData ? (
-        <Loading/>
+        <Loading />
       ) : (
-        <form onSubmit={handleSubmit} className='text-sm font-medium'>
+        <form onSubmit={handleSubmit} className="text-sm font-medium">
           <div className="mb-4">
-            <label htmlFor="name" className="block text-sm font-medium text-gray-700">Name</label>
+            <label htmlFor="name" className="block text-sm font-medium text-gray-700">{translations[language].name}</label>
             <input
               type="text"
               id="name"
@@ -71,7 +98,7 @@ const EditAttribute = () => {
             className={`btn bg-blue text-white hover:bg-blue focus:ring-4 focus:outline-none focus:ring-blue font-medium rounded-lg text-sm w-full sm:w-auto px-5 py-2.5 text-center ${loading ? 'opacity-50 cursor-not-allowed' : ''}`}
             disabled={loading}
           >
-            {loading ? 'Updating...' : 'Update Attribute'}
+            {loading ? translations[language].updating : translations[language].buttonText}
           </button>
         </form>
       )}

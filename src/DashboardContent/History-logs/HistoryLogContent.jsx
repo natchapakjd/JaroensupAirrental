@@ -3,6 +3,43 @@ import axios from 'axios';
 import Swal from 'sweetalert2';
 import Loading from '../../components/Loading';
 
+const translations = {
+  th: {
+    adminLogs: "บันทึกการทำงานของแอดมิน",
+    taskLogs: "บันทึกการทำงานของงาน",
+    logId: "รหัสบันทึก",
+    adminId: "รหัสผู้ดูแล",
+    taskId: "รหัสงาน",
+    userId: "รหัสผู้ใช้",
+    action: "การกระทำ",
+    date: "วันที่",
+    noLogs: "ไม่มีบันทึก",
+    page: "หน้า",
+    previous: "ก่อนหน้า",
+    next: "ถัดไป",
+    errorFetch: "ไม่สามารถโหลดข้อมูลบันทึกได้",
+    of: "จาก",
+
+  },
+  en: {
+    adminLogs: "Admin Logs",
+    taskLogs: "Task Logs",
+    logId: "Log ID",
+    adminId: "Admin ID",
+    taskId: "Task ID",
+    userId: "User ID",
+    action: "Action",
+    date: "Date",
+    noLogs: "No logs available",
+    page: "Page",
+    previous: "Previous",
+    next: "Next",
+    errorFetch: "Failed to load logs.",
+    of: "of",
+
+  },
+};
+
 const HistoryLogContent = () => {
   const [adminLogs, setAdminLogs] = useState([]);
   const [taskLogs, setTaskLogs] = useState([]);
@@ -12,8 +49,20 @@ const HistoryLogContent = () => {
   const [taskCurrentPage, setTaskCurrentPage] = useState(1);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [language, setLanguage] = useState(localStorage.getItem("language") || "en");
   const apiUrl = import.meta.env.VITE_SERVER_URL;
   const logsPerPage = 10;
+
+  useEffect(() => {
+    const interval = setInterval(() => {
+      const currentLanguage = localStorage.getItem("language") || "en";
+      if (currentLanguage !== language) {
+        setLanguage(currentLanguage);
+      }
+    }, 500);
+
+    return () => clearInterval(interval);
+  }, [language]);
 
   const fetchAdminLogs = async (page) => {
     try {
@@ -26,7 +75,7 @@ const HistoryLogContent = () => {
       setError(err.message);
       Swal.fire({
         title: 'Error',
-        text: 'Failed to load admin logs.',
+        text: translations[language].errorFetch,
         icon: 'error',
       });
     }
@@ -43,7 +92,7 @@ const HistoryLogContent = () => {
       setError(err.message);
       Swal.fire({
         title: 'Error',
-        text: 'Failed to load task logs.',
+        text: translations[language].errorFetch,
         icon: 'error',
       });
     }
@@ -66,21 +115,21 @@ const HistoryLogContent = () => {
 
   return (
     <div className="p-8 rounded-lg shadow-lg w-full mx-auto h-screen">
-      <h2 className="text-xl font-semibold mb-4">Admin Logs</h2>
+      <h2 className="text-xl font-semibold mb-4">{translations[language].adminLogs}</h2>
       <table className="table w-full border-collapse border border-gray-300 mb-4">
         <thead className="bg-gray-200">
           <tr>
-            <th className="border p-2 text-center">Log ID</th>
-            <th className="border p-2 text-center">Admin ID</th>
-            <th className="border p-2 text-center">Action</th>
-            <th className="border p-2 text-center">Date</th>
+            <th className="border p-2 text-center">{translations[language].logId}</th>
+            <th className="border p-2 text-center">{translations[language].adminId}</th>
+            <th className="border p-2 text-center">{translations[language].action}</th>
+            <th className="border p-2 text-center">{translations[language].date}</th>
           </tr>
         </thead>
         <tbody className="text-center">
           {adminLogs.length > 0 ? (
-            adminLogs.map((log) => (
-              <tr key={log.log_id}>
-                <td className="border p-2">{log.log_id}</td>
+            adminLogs.map((log, index) => (
+              <tr key={index + 1}>
+                <td className="border p-2">{index + 1}</td>
                 <td className="border p-2">{log.admin_id}</td>
                 <td className="border p-2">{log.action}</td>
                 <td className="border p-2">{new Date(log.timestamp).toLocaleString()}</td>
@@ -88,7 +137,7 @@ const HistoryLogContent = () => {
             ))
           ) : (
             <tr>
-              <td colSpan="4" className="border p-4">No admin logs available</td>
+              <td colSpan="4" className="border p-4">{translations[language].noLogs}</td>
             </tr>
           )}
         </tbody>
@@ -100,39 +149,37 @@ const HistoryLogContent = () => {
           }
           className={`cursor-pointer ${adminCurrentPage === 1 ? 'text-gray-400' : 'text-black'}`}
         >
-          Previous
+          {translations[language].previous}
         </p>
         <span>
-          Page {adminCurrentPage} of {adminTotalPages}
+          {translations[language].page} {adminCurrentPage} {translations[language].of} {adminTotalPages}
         </span>
         <p
           onClick={() =>
             handlePageChange(setAdminCurrentPage, adminCurrentPage, true, adminTotalPages)
           }
-          className={`cursor-pointer ${
-            adminCurrentPage === adminTotalPages ? 'text-gray-400' : 'text-black'
-          }`}
+          className={`cursor-pointer ${adminCurrentPage === adminTotalPages ? 'text-gray-400' : 'text-black'}`}
         >
-          Next
+          {translations[language].next}
         </p>
       </div>
 
-      <h2 className="text-xl font-semibold mt-8 mb-4">Task Logs</h2>
+      <h2 className="text-xl font-semibold mt-8 mb-4">{translations[language].taskLogs}</h2>
       <table className="table w-full border-collapse border border-gray-300">
         <thead className="bg-gray-200">
           <tr>
-            <th className="border p-2 text-center">Log ID</th>
-            <th className="border p-2 text-center">Task ID</th>
-            <th className="border p-2 text-center">User ID</th>
-            <th className="border p-2 text-center">Action</th>
-            <th className="border p-2 text-center">Date</th>
+            <th className="border p-2 text-center">{translations[language].logId}</th>
+            <th className="border p-2 text-center">{translations[language].taskId}</th>
+            <th className="border p-2 text-center">{translations[language].userId}</th>
+            <th className="border p-2 text-center">{translations[language].action}</th>
+            <th className="border p-2 text-center">{translations[language].date}</th>
           </tr>
         </thead>
         <tbody className="text-center">
           {taskLogs.length > 0 ? (
-            taskLogs.map((log) => (
-              <tr key={log.log_id}>
-                <td className="border p-2">{log.log_id}</td>
+            taskLogs.map((log, index) => (
+              <tr key={index + 1}>
+                <td className="border p-2">{index + 1}</td>
                 <td className="border p-2">{log.task_id}</td>
                 <td className="border p-2">{log.user_id}</td>
                 <td className="border p-2">{log.action}</td>
@@ -141,7 +188,7 @@ const HistoryLogContent = () => {
             ))
           ) : (
             <tr>
-              <td colSpan="5" className="border p-4">No task logs available</td>
+              <td colSpan="5" className="border p-4">{translations[language].noLogs}</td>
             </tr>
           )}
         </tbody>
@@ -153,20 +200,18 @@ const HistoryLogContent = () => {
           }
           className={`cursor-pointer ${taskCurrentPage === 1 ? 'text-gray-400' : 'text-black'}`}
         >
-          Previous
+          {translations[language].previous}
         </p>
         <span>
-          Page {taskCurrentPage} of {taskTotalPages}
+          {translations[language].page} {taskCurrentPage} {translations[language].of} {taskTotalPages}
         </span>
         <p
           onClick={() =>
             handlePageChange(setTaskCurrentPage, taskCurrentPage, true, taskTotalPages)
           }
-          className={`cursor-pointer ${
-            taskCurrentPage === taskTotalPages ? 'text-gray-400' : 'text-black'
-          }`}
+          className={`cursor-pointer ${taskCurrentPage === taskTotalPages ? 'text-gray-400' : 'text-black'}`}
         >
-          Next
+          {translations[language].next}
         </p>
       </div>
     </div>

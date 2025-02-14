@@ -7,6 +7,36 @@ import Swal from "sweetalert2";
 import { useAuth } from "../../context/AuthContext";
 import { MdOutlineStar } from "react-icons/md";
 
+// 🔥 แปลภาษา
+const translations = {
+  th: {
+    submitReview: "ให้คะแนนรีวิว",
+    rating: "คะแนน",
+    comment: "ความคิดเห็น",
+    submit: "ส่งรีวิว",
+    success: "สำเร็จ!",
+    successMessage: "รีวิวของคุณถูกส่งเรียบร้อยแล้ว",
+    error: "เกิดข้อผิดพลาด",
+    errorMessage: "ไม่สามารถส่งรีวิวได้",
+    alreadyReviewed: "คุณได้ทำการรีวิวงานนี้แล้ว",
+    yourReview: "รีวิวของคุณ",
+    loading: "กำลังโหลด...",
+  },
+  en: {
+    submitReview: "Submit Your Review",
+    rating: "Rating",
+    comment: "Comment",
+    submit: "Submit Review",
+    success: "Success!",
+    successMessage: "Your review has been submitted successfully",
+    error: "Oops...",
+    errorMessage: "Failed to submit review",
+    alreadyReviewed: "You have already submitted a review for this task.",
+    yourReview: "Your Review",
+    loading: "Loading...",
+  },
+};
+
 const Review = () => {
   const { taskId } = useParams();
   const user = useAuth();
@@ -17,7 +47,20 @@ const Review = () => {
   const [rating, setRating] = useState(0);
   const [comment, setComment] = useState("");
   const [existingReview, setExistingReview] = useState(null);
-  const [loading, setLoading] = useState(true); // Loading state
+  const [loading, setLoading] = useState(true);
+  const [language, setLanguage] = useState(localStorage.getItem("language") || "th");
+
+  // ✅ อัปเดตภาษาแบบ real-time
+  useEffect(() => {
+    const handleLanguageChange = () => {
+      setLanguage(localStorage.getItem("language") || "th");
+    };
+
+    window.addEventListener("storage", handleLanguageChange);
+    return () => {
+      window.removeEventListener("storage", handleLanguageChange);
+    };
+  }, []);
 
   useEffect(() => {
     const fetchTaskDetails = async () => {
@@ -50,9 +93,25 @@ const Review = () => {
 
   useEffect(() => {
     if (tech_id && existingReview !== null) {
-      setLoading(false); // Set loading to false once data is fetched
+      setLoading(false);
     }
   }, [tech_id, existingReview]);
+
+  // ✅ ทำให้รีวิวอัปเดตแบบ real-time
+  useEffect(() => {
+    const interval = setInterval(() => {
+      axios
+        .get(`${import.meta.env.VITE_SERVER_URL}/review/${taskId}/${user_id}`)
+        .then((response) => {
+          if (response.data) {
+            setExistingReview(response.data);
+          }
+        })
+        .catch((error) => console.error("Error fetching review:", error));
+    }, 5000); // ดึงข้อมูลทุก 5 วินาที
+
+    return () => clearInterval(interval);
+  }, [taskId, user_id]);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -69,22 +128,20 @@ const Review = () => {
         }
       );
 
-      // Show success message using SweetAlert2
       await Swal.fire({
         icon: "success",
-        title: "Success!",
-        text: response.data.message,
+        title: translations[language].success,
+        text: translations[language].successMessage,
       });
 
-      navigate("/history"); // Navigate back to user history or another page
+      navigate("/history");
     } catch (error) {
       console.error("Error submitting review:", error);
 
-      // Show error message using SweetAlert2
       await Swal.fire({
         icon: "error",
-        title: "Oops...",
-        text: "Failed to submit review",
+        title: translations[language].error,
+        text: translations[language].errorMessage,
       });
     }
   };
@@ -92,46 +149,42 @@ const Review = () => {
   if (loading) {
     return (
       <>
-        <Navbar/>
+        <Navbar />
         <div className="flex justify-center items-center h-screen">
-        <div className="spinner-border animate-spin inline-block w-12 h-12 border-4 rounded-full border-t-4 border-blue-500"></div>
-      </div>
+          <div className="spinner-border animate-spin inline-block w-12 h-12 border-4 rounded-full border-t-4 border-blue-500"></div>
+          <p className="ml-4">{translations[language].loading}</p>
+        </div>
       </>
-      
-    ); // Show loading spinner while waiting for data
+    );
   }
 
   return (
     <div>
       <Navbar />
       <div className="container mx-auto mt-10 font-prompt">
-        <h2 className="text-2xl font-bold mb-4">Submit Your Review</h2>
+        <h2 className="text-2xl font-bold mb-4">
+          {translations[language].submitReview}
+        </h2>
         {existingReview ? (
-          <div className=" bg-white text-gray-800 p-4 my-5 rounded-lg shadow-md">
+          <div className="bg-white text-gray-800 p-4 my-5 rounded-lg shadow-md">
             <strong className="block font-semibold">
-              You have already submitted a review for this task.
+              {translations[language].alreadyReviewed}
             </strong>
-            <p className="mt-2">Your Review:</p>
+            <p className="mt-2">{translations[language].yourReview}:</p>
             <p className="italic">{existingReview.comment}</p>
             <p className="font-bold flex items-center">
-              Rating: {existingReview.rating}
+              {translations[language].rating}: {existingReview.rating}
               <MdOutlineStar className="text-yellow-400 ml-1" />
             </p>
           </div>
         ) : (
           <form onSubmit={handleSubmit}>
             <div className="mb-4">
-
-              <input
-                type="hidden" // Use hidden input for tech_id
-                id="tech_id"
-                value={tech_id}
-                readOnly
-              />
+              <input type="hidden" id="tech_id" value={tech_id} readOnly />
             </div>
             <div className="mb-4">
               <label className="block mb-2" htmlFor="rating">
-                Rating:
+                {translations[language].rating}:
               </label>
               <input
                 type="number"
@@ -146,7 +199,7 @@ const Review = () => {
             </div>
             <div className="mb-4">
               <label className="block mb-2" htmlFor="comment">
-                Comment:
+                {translations[language].comment}:
               </label>
               <textarea
                 id="comment"
@@ -160,7 +213,7 @@ const Review = () => {
               type="submit"
               className="btn bg-blue text-white hover:bg-blue"
             >
-              Submit Review
+              {translations[language].submit}
             </button>
           </form>
         )}

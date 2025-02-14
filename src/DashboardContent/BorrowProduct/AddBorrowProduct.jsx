@@ -6,37 +6,64 @@ import { jwtDecode } from 'jwt-decode';
 import Loading from '../../components/Loading';
 
 const AddBorrowProduct = () => {
-  const [products, setProducts] = useState([]); // State to store products
-  const [technicians, setTechnicians] = useState([]); // State to store technicians
+  const [products, setProducts] = useState([]);
+  const [technicians, setTechnicians] = useState([]);
   const [today, setToday] = useState("");
-  const [loading,setLoading] = useState(true)
-
+  const [loading, setLoading] = useState(true);
   const [formData, setFormData] = useState({
     tech_id: '',
     user_id: '',
     product_id: '',
     borrow_date: '',
     return_date: '',
-    consent: false, // New state for consent checkbox
+    consent: false,
   });
-  const [idCardImage, setIdCardImage] = useState(null); // State for image file
+  const [idCardImage, setIdCardImage] = useState(null);
   const navigate = useNavigate();
   const cookies = new Cookies();
   const token = cookies.get('authToken');
   const decodedToken = jwtDecode(token);
-  const user_id = decodedToken.id; // Get user_id from decoded token
-  const role = decodedToken.role
-  const [techUserId,setTechUserId] = useState();
-  
+  const user_id = decodedToken.id;
+  const role = decodedToken.role;
+  const [techUserId, setTechUserId] = useState();
 
+  const translation = {
+    en: {
+      title: 'Add Borrow Product',
+      selectTechnician: 'Select Technician',
+      selectProduct: 'Select Product',
+      borrowDate: 'Borrow Date',
+      returnDate: 'Return Date',
+      uploadIdCardImage: 'Upload ID Card Image',
+      consent: 'I consent to the collection of my data in the system',
+      submit: 'Submit',
+      termsAgreementError: 'You must agree to the terms to proceed',
+      techIdError: 'Tech ID is missing',
+      techUserIdError: 'Tech User ID is not yet available.',
+    },
+    th: {
+      title: 'เพิ่มข้อมูลการยืมสินค้า',
+      selectTechnician: 'เลือกช่างเทคนิค',
+      selectProduct: 'เลือกสินค้า',
+      borrowDate: 'วันที่ยืม',
+      returnDate: 'วันที่ส่งคืน',
+      uploadIdCardImage: 'อัปโหลดภาพบัตรประชาชน',
+      consent: 'ฉันยินยอมให้เก็บข้อมูลของฉันลงในระบบ',
+      submit: 'ส่งข้อมูล',
+      termsAgreementError: 'คุณต้องยอมรับข้อตกลงเพื่อดำเนินการต่อ',
+      techIdError: 'รหัสช่างเทคนิคขาดหายไป',
+      techUserIdError: 'ยังไม่มีรหัสผู้ใช้ของช่างเทคนิค',
+    },
+  };
 
+  const currentLang = 'th'; // You can dynamically set this based on user preference
 
   useEffect(() => {
     const fetchProducts = async () => {
       try {
         const response = await axios.get(`${import.meta.env.VITE_SERVER_URL}/products`);
         setProducts(response.data);
-        setLoading(false)
+        setLoading(false);
       } catch (error) {
         console.error('Error fetching products:', error);
       }
@@ -44,7 +71,7 @@ const AddBorrowProduct = () => {
 
     const fetchTechnicians = async () => {
       try {
-        const response = await axios.get(`${import.meta.env.VITE_SERVER_URL}/technicians`); // Adjust the URL according to your API
+        const response = await axios.get(`${import.meta.env.VITE_SERVER_URL}/technicians`);
         setTechnicians(response.data);
       } catch (error) {
         console.error('Error fetching technicians:', error);
@@ -57,7 +84,6 @@ const AddBorrowProduct = () => {
     fetchTechnicians();
   }, []);
 
-  // Handle input changes
   const handleChange = (e) => {
     setFormData({
       ...formData,
@@ -65,34 +91,30 @@ const AddBorrowProduct = () => {
     });
   };
 
-  // Handle checkbox change
   const handleCheckboxChange = (e) => {
     setFormData({
       ...formData,
-      consent: e.target.checked, // Update consent state
+      consent: e.target.checked,
     });
   };
 
-  // Handle file input change
   const handleFileChange = (e) => {
     setIdCardImage(e.target.files[0]);
   };
 
-  // Handle form submission
   const handleSubmit = async (e) => {
     e.preventDefault();
-  
+
     if (!formData.consent) {
-      alert('You must agree to the terms to proceed');
+      alert(translation[currentLang].termsAgreementError);
       return;
     }
-  
-    // Ensure tech_id is present if role is 3 (technician)
+
     if (role === 3 && !formData.tech_id) {
-      console.error("Tech ID is missing");
+      console.error(translation[currentLang].techIdError);
       return;
     }
-    // If the role is 3, fetch technician data to get techUserId
+
     let id = formData.tech_id;
     let techId;
 
@@ -101,36 +123,34 @@ const AddBorrowProduct = () => {
         const response = await axios.get(
           `${import.meta.env.VITE_SERVER_URL}/v2/technician/${id}`
         );
-        techId  =  response.data[0].user_id;  
+        techId = response.data[0].user_id;
       } catch (error) {
         console.error("Error fetching technician data:", error);
-        return; // Don't proceed if there's an error fetching technician data
+        return;
       }
     }
-  
-    // Wait until techUserId is set before continuing
+
     if (role === 3 && !techId) {
-      console.error("Tech User ID is not yet available.");
+      console.error(translation[currentLang].techUserIdError);
       return;
     }
-  
+
     const formDataToSubmit = new FormData();
     formDataToSubmit.append('tech_id', formData.tech_id);
     formDataToSubmit.append('borrow_date', formData.borrow_date);
     formDataToSubmit.append('return_date', formData.return_date);
     formDataToSubmit.append('product_id', formData.product_id);
-  
+
     if (role === 2) {
-      formDataToSubmit.append('user_id', user_id); // Add user_id for role 2
-    } else if(role ===3){
-      formDataToSubmit.append('user_id', techId); //
-      //  Add techUserId for role 3
+      formDataToSubmit.append('user_id', user_id);
+    } else if (role === 3) {
+      formDataToSubmit.append('user_id', techId);
     }
+
     if (idCardImage) {
-      formDataToSubmit.append('id_card_image', idCardImage); // Add the image file
+      formDataToSubmit.append('id_card_image', idCardImage);
     }
-  
-    console.log(formData)
+
     try {
       const res = await axios.post(
         `${import.meta.env.VITE_SERVER_URL}/equipment-borrowing`,
@@ -141,40 +161,37 @@ const AddBorrowProduct = () => {
           },
         }
       );
-  
+
       if (res.status === 200) {
-        // Add to task-log after a successful submission
         const taskLogResponse = await axios.post(
           `${import.meta.env.VITE_SERVER_URL}/task-log`,
           {
-            task_id: res.data.task_id, // Assuming task_id is returned from borrowing product API
+            task_id: res.data.task_id,
             user_id: user_id,
-            action: "ยืมอุปกรณ์", // Action description in Thai
+            action: "ยืมอุปกรณ์",
           }
         );
-  
-        // Navigate after both the borrowing action and task-log have been recorded
+
         if (taskLogResponse.status === 201) {
-          navigate('/dashboard/borrows'); // Redirect on success
+          navigate('/dashboard/borrows');
         }
       }
     } catch (error) {
       console.error('Error borrowing product:', error);
     }
   };
-  
-  if(loading){
-    return <Loading/>
+
+  if (loading) {
+    return <Loading />;
   }
 
-
   return (
-    <div className="p-6 max-w-lg mx-auto bg-white rounded-xl shadow-md my-5 font-inter">
-      <h2 className="text-2xl font-bold mb-4">Add Borrow Product</h2>
+    <div className="p-6 max-w-lg mx-auto bg-white rounded-xl shadow-md my-5 font-prompt">
+      <h2 className="text-2xl font-bold mb-4">{translation[currentLang].title}</h2>
       <form onSubmit={handleSubmit} encType="multipart/form-data">
         <div className="mb-4">
           <label htmlFor="tech_id" className="block text-sm font-medium">
-            Select Technician
+            {translation[currentLang].selectTechnician}
           </label>
           <select
             name="tech_id"
@@ -185,16 +202,16 @@ const AddBorrowProduct = () => {
             className="select select-bordered w-full"
           >
             <option value="" disabled>Select a technician</option>
-            {technicians.map((technician) => (
-              <option key={technician.tech_id} value={technician.tech_id}>
-                {technician.firstname} {technician.lastname}
+            {technicians.map((technician,index) => (
+              <option key={index+1} value={technician.tech_id}>
+               {index+1}. {technician.firstname} {technician.lastname}
               </option>
             ))}
           </select>
         </div>
         <div className="mb-4">
           <label htmlFor="product_id" className="block text-sm font-medium">
-            Select Product
+            {translation[currentLang].selectProduct}
           </label>
           <select
             name="product_id"
@@ -205,16 +222,16 @@ const AddBorrowProduct = () => {
             className="select select-bordered w-full"
           >
             <option value="" disabled>Select a product</option>
-            {products.map((product) => (
-              <option key={product.product_id} value={product.product_id}>
-                {product.name}
+            {products.map((product,index) => (
+              <option key={index+1} value={product.product_id}>
+                {index+1}. {product.name}
               </option>
             ))}
           </select>
         </div>
         <div className="mb-4">
           <label htmlFor="borrow_date" className="block text-sm font-medium">
-            Borrow Date
+            {translation[currentLang].borrowDate}
           </label>
           <input
             type="date"
@@ -223,13 +240,13 @@ const AddBorrowProduct = () => {
             value={formData.borrow_date}
             onChange={handleChange}
             required
-            min={today} // Prevent selecting past dates
+            min={today}
             className="input input-bordered w-full"
           />
         </div>
         <div className="mb-4">
           <label htmlFor="return_date" className="block text-sm font-medium">
-            Return Date
+            {translation[currentLang].returnDate}
           </label>
           <input
             type="date"
@@ -243,7 +260,7 @@ const AddBorrowProduct = () => {
         </div>
         <div className="mb-4">
           <label htmlFor="id_card_image" className="block text-sm font-medium">
-            Upload ID Card Image
+            {translation[currentLang].uploadIdCardImage}
           </label>
           <input
             type="file"
@@ -251,7 +268,8 @@ const AddBorrowProduct = () => {
             id="id_card_image"
             onChange={handleFileChange}
             accept="image/*"
-            className=" file-input file-input-bordered w-full h-10"/>
+            className=" file-input file-input-bordered w-full h-10"
+          />
         </div>
         <div className="mb-4 flex items-center">
           <input
@@ -262,10 +280,12 @@ const AddBorrowProduct = () => {
             onChange={handleCheckboxChange}
             required
           />
-          <label htmlFor="consent" className="ml-2 text-2sm font-inter">ฉันยินยอมให้เก็บข้อมูลของฉันลงในระบบ</label>
-            </div>
+          <label htmlFor="consent" className="ml-2 text-2sm font-prompt">
+            {translation[currentLang].consent}
+          </label>
+        </div>
         <button type="submit" className="btn bg-blue text-white hover:bg-blue">
-          Submit
+          {translation[currentLang].submit}
         </button>
       </form>
     </div>

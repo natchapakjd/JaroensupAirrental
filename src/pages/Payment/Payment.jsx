@@ -6,13 +6,66 @@ import Footer from '../../components/Footer';
 import Swal from 'sweetalert2';  // Import SweetAlert2
 import QRCode from "../../assets/images/IMG_0896.png";
 
+const translations = {
+  en: {
+    payment_management: "Admin Payment Management",
+    qr_code_for_payment: "QR Code for Payment",
+    orders: "Orders",
+    order_id: "Order ID",
+    total_price: "Total Price",
+    order_date: "Order Date",
+    slip_image: "Slip Image",
+    action: "Action",
+    no_slip_uploaded: "No slip uploaded",
+    upload_change_slip: "Upload/Change Slip",
+    select_payment_slip_image: "Select Payment Slip Image",
+    upload_slip: "Upload Slip",
+    no_orders_found: "No orders found.",
+    error_select_slip: "Please select a slip image to upload.",
+    success_slip_updated: "Slip image updated successfully!",
+    error_update_slip: "Failed to update slip image.",
+  },
+  th: {
+    payment_management: "การจัดการการชำระเงินของผู้ดูแลระบบ",
+    qr_code_for_payment: "รหัส QR สำหรับการชำระเงิน",
+    orders: "คำสั่งซื้อ",
+    order_id: "หมายเลขคำสั่งซื้อ",
+    total_price: "ราคารวม",
+    order_date: "วันที่คำสั่งซื้อ",
+    slip_image: "ภาพใบเสร็จ",
+    action: "การดำเนินการ",
+    no_slip_uploaded: "ยังไม่มีการอัปโหลดใบเสร็จ",
+    upload_change_slip: "อัปโหลด/เปลี่ยนใบเสร็จ",
+    select_payment_slip_image: "เลือกภาพใบเสร็จการชำระเงิน",
+    upload_slip: "อัปโหลดใบเสร็จ",
+    no_orders_found: "ไม่พบคำสั่งซื้อ",
+    error_select_slip: "โปรดเลือกภาพใบเสร็จเพื่ออัปโหลด",
+    success_slip_updated: "อัปเดตภาพใบเสร็จสำเร็จ!",
+    error_update_slip: "ไม่สามารถอัปเดตภาพใบเสร็จได้",
+  }
+};
+
 const Payment = () => {
   // Extract paymentId from the URL
   const { paymentId } = useParams();
   const [orders, setOrders] = useState([]);
   const [selectedOrder, setSelectedOrder] = useState(null); // Store selected order
   const [newSlipImage, setNewSlipImage] = useState(null); // Store new slip image
+  const [language,setLanguage] =useState(localStorage.getItem("language"||"th"))  
+  const t = translations[language];
+  
+  useEffect(() => {
+    const interval = setInterval(() => {
+      const currentLanguage = localStorage.getItem("language") || "th";
+      if (currentLanguage !== language) {
+        setLanguage(currentLanguage);
+      }
+    }, 100);
 
+    return () => clearInterval(interval);
+  }, [language]);
+      
+  
   useEffect(() => {
     // Fetch orders created by the admin
     const fetchOrders = async () => {
@@ -40,8 +93,7 @@ const Payment = () => {
     if (!newSlipImage) {
       // Use Swal instead of alert
       Swal.fire({
-        title: 'Error!',
-        text: 'Please select a slip image to upload.',
+        title: t.error_select_slip,
         icon: 'error',
         confirmButtonText: 'OK',
       });
@@ -60,8 +112,7 @@ const Payment = () => {
 
       // Success notification with SweetAlert
       Swal.fire({
-        title: 'Success!',
-        text: 'Slip image updated successfully!',
+        title: t.success_slip_updated,
         icon: 'success',
         confirmButtonText: 'OK',
       });
@@ -72,8 +123,7 @@ const Payment = () => {
 
       // Error notification with SweetAlert
       Swal.fire({
-        title: 'Error!',
-        text: 'Failed to update slip image.',
+        title: t.error_update_slip,
         icon: 'error',
         confirmButtonText: 'OK',
       });
@@ -84,10 +134,10 @@ const Payment = () => {
     <>
       <Navbar />
       <div className="container mx-auto mt-10 font-prompt">
-        <h2 className="text-2xl font-bold mb-4 text-center md:text-left">Admin Payment Management</h2>
+        <h2 className="text-2xl font-bold mb-4 text-center md:text-left">{t.payment_management}</h2>
 
         <div className="mb-8 text-center">
-          <h3 className="text-xl font-semibold mb-4">QR Code for Payment</h3>
+          <h3 className="text-xl font-semibold mb-4">{t.qr_code_for_payment}</h3>
           <div className="flex justify-center">
             <img 
               src={QRCode}
@@ -96,17 +146,17 @@ const Payment = () => {
             />
           </div>
         </div>
-        {/* Display orders fetched from the server */}
+
         <div className="mb-8">
-          <h3 className="text-xl font-semibold mb-2">Orders</h3>
+          <h3 className="text-xl font-semibold mb-2">{t.orders}</h3>
           <table className="table table-zebra w-full">
             <thead>
               <tr>
-                <th>Order ID</th>
-                <th>Total Price</th>
-                <th>Order Date</th>
-                <th>Slip Image</th>
-                <th>Action</th>
+                <th>{t.order_id}</th>
+                <th>{t.total_price}</th>
+                <th>{t.order_date}</th>
+                <th>{t.slip_image}</th>
+                <th>{t.action}</th>
               </tr>
             </thead>
             <tbody>
@@ -124,7 +174,7 @@ const Payment = () => {
                           className="w-20 h-20 object-cover"
                         />
                       ) : (
-                        <span>No slip uploaded</span>
+                        <span>{t.no_slip_uploaded}</span>
                       )}
                     </td>
                     <td>
@@ -132,14 +182,14 @@ const Payment = () => {
                         onClick={() => setSelectedOrder(order.payment_id)}
                         className="btn bg-blue hover:bg-blue text-white"
                       >
-                        Upload/Change Slip
+                        {t.upload_change_slip}
                       </button>
                     </td>
                   </tr>
                 ))
               ) : (
                 <tr>
-                  <td colSpan="5" className="text-center">No orders found.</td>
+                  <td colSpan="5" className="text-center">{t.no_orders_found}</td>
                 </tr>
               )}
             </tbody>
@@ -148,22 +198,23 @@ const Payment = () => {
 
         {selectedOrder && (
           <div className="mt-5">
-            <h3 className="text-xl font-semibold mb-2">Upload/Change Payment Slip</h3>
+            <h3 className="text-xl font-semibold mb-2">{t.upload_change_slip}</h3>
             <form onSubmit={(e) => { e.preventDefault(); handleSubmit(selectedOrder); }}>
               <div className="mb-4">
                 <label className="block text-sm font-medium text-gray-700" htmlFor="slip_image">
-                  Select Payment Slip Image
+                  {t.select_payment_slip_image}
                 </label>
                 <input
                   type="file"
                   id="slip_image"
                   name="slip_image"
                   onChange={handleImageUpload}
-                  className=" file-input file-input-bordered w-full h-10"                />
+                  className="file-input file-input-bordered w-full h-10"
+                />
               </div>
 
               <button type="submit" className="btn bg-blue hover:bg-blue text-white">
-                Upload Slip
+                {t.upload_slip}
               </button>
             </form>
           </div>

@@ -12,6 +12,25 @@ const EditAssignmentTask = () => {
   const navigate = useNavigate();
   const apiUrl = import.meta.env.VITE_SERVER_URL; // Use the environment variable
 
+  // Determine language from localStorage
+  const language = localStorage.getItem("language") || "en";
+
+  // Translation object
+  const translation = {
+    en: {
+      pageTitle: "Edit Assignment",
+      selectTask: "Select Task",
+      selectTechnician: "Select Technician",
+      updateButton: "Update Assignment",
+    },
+    th: {
+      pageTitle: "แก้ไขการมอบหมายงาน",
+      selectTask: "เลือกงาน",
+      selectTechnician: "เลือกช่างเทคนิค",
+      updateButton: "อัปเดตการมอบหมาย",
+    },
+  };
+
   // Fetch task and technician data
   useEffect(() => {
     const fetchAssignmentData = async () => {
@@ -55,46 +74,48 @@ const EditAssignmentTask = () => {
 
   // Render loading state or form
   if (!task || !technician) {
-    return <Loading/>;
+    return <Loading />;
   }
 
   return (
-    <div className="p-8 rounded-lg shadow-lg w-full mx-auto font-inter h-full">
-      <h2 className="text-2xl mb-4">Edit Assignment</h2>
+    <div className="p-8 rounded-lg shadow-lg w-full mx-auto font-prompt h-full">
+      <h2 className="text-2xl mb-4">{translation[language].pageTitle}</h2>
       <form onSubmit={handleSubmit} className="space-y-4">
         <div>
-          <label className="block mb-2">Select Task</label>
+          <label className="block mb-2">{translation[language].selectTask}</label>
           <select
             value={selectedTaskId}
             onChange={(e) => setSelectedTaskId(e.target.value)}
             className="border p-2 w-full"
             required
           >
-            <option value="">Select Task</option>
-            {task.map((taskItem) => (
-              <option key={taskItem.task_id} value={taskItem.task_id}>
-                {taskItem.task_id}. {taskItem.description}
+            <option value="">{translation[language].selectTask}</option>
+            {task.map((taskItem,index) => (
+              <option key={index+1} value={taskItem.task_id}>
+                {index+1}. {taskItem.description}
               </option>
             ))}
           </select>
         </div>
         <div>
-          <label className="block mb-2">Select Technician</label>
+          <label className="block mb-2">{translation[language].selectTechnician}</label>
           <select
             value={selectedTechId}
             onChange={(e) => setSelectedTechId(e.target.value)}
             className="border p-2 w-full"
             required
           >
-            <option value="">Select Technician</option>
-            {technician.map((tech) => (
-              <option key={tech.tech_id} value={tech.tech_id}>
-                {tech.tech_id}. {tech.firstname} {tech.lastname}
+            <option value="">{translation[language].selectTechnician}</option>
+            {technician.map((tech,index) => (
+              <option key={index+1} value={tech.tech_id}>
+                {index+1}. {tech.firstname} {tech.lastname}
               </option>
             ))}
           </select>
         </div>
-        <button type="submit" className="btn bg-blue text-white hover:bg-blue">Update Assignment</button>
+        <button type="submit" className="btn bg-blue text-white hover:bg-blue">
+          {translation[language].updateButton}
+        </button>
       </form>
     </div>
   );

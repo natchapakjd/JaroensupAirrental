@@ -16,11 +16,62 @@ const AddPayment = () => {
   const [tasks, setTasks] = useState([]);
   const [orders, setOrders] = useState([]);
   const [statuses, setStatuses] = useState([]);
-  const [paymentMethods, setPaymentMethods] = useState([]); // New state for payment methods
+  const [paymentMethods, setPaymentMethods] = useState([]);
   const [selectionMode, setSelectionMode] = useState('task');
 
   const navigate = useNavigate();
   const apiUrl = import.meta.env.VITE_SERVER_URL;
+
+  // Translations object for English (en) and Thai (th)
+  const translations = {
+    en: {
+      title: "Add Payment",
+      selectMode: "Select Mode",
+      task: "Task",
+      order: "Order",
+      taskId: "Task ID",
+      orderId: "Order ID",
+      userId: "User ID",
+      amount: "Amount",
+      paymentMethod: "Payment Method",
+      paymentDate: "Payment Date",
+      status: "Status",
+      slipImages: "Slip Images",
+      addPayment: "Add Payment",
+      selectOption: "Select",
+      noUsers: "No users available",
+      noTasks: "No tasks available",
+      noOrders: "No orders available",
+      noStatuses: "No statuses available",
+      error: "Error",
+      paymentAdded: "Payment added successfully",
+    },
+    th: {
+      title: "เพิ่มการชำระเงิน",
+      selectMode: "เลือกโหมด",
+      task: "งานเช่า",
+      order: "คำสั่งซื้อ",
+      taskId: "รหัสงาน",
+      orderId: "รหัสคำสั่งซื้อ",
+      userId: "รหัสผู้ใช้",
+      amount: "จำนวนเงิน",
+      paymentMethod: "วิธีการชำระเงิน",
+      paymentDate: "วันที่ชำระเงิน",
+      status: "สถานะ",
+      slipImages: "รูปภาพใบเสร็จ",
+      addPayment: "เพิ่มการชำระเงิน",
+      selectOption: "เลือก",
+      noUsers: "ไม่มีผู้ใช้",
+      noTasks: "ไม่มีงาน",
+      noOrders: "ไม่มีคำสั่งซื้อ",
+      noStatuses: "ไม่มีสถานะ",
+      error: "ข้อผิดพลาด",
+      paymentAdded: "เพิ่มการชำระเงินสำเร็จ",
+    }
+  };
+
+  const language = localStorage.getItem('language') || 'en'; // Default to 'en' if not set
+  const t = translations[language];
 
   useEffect(() => {
     const fetchData = async () => {
@@ -30,16 +81,16 @@ const AddPayment = () => {
           axios.get(`${apiUrl}/tasks`),
           axios.get(`${apiUrl}/v3/orders`),
           axios.get(`${apiUrl}/statuses`),
-          axios.get(`${apiUrl}/payment-methods`), // Fetch payment methods
+          axios.get(`${apiUrl}/payment-methods`),
         ]);
         setUsers(usersResponse.data);
         setTasks(tasksResponse.data);
         setOrders(ordersResponse.data);
         setStatuses(statusesResponse.data);
-        setPaymentMethods(paymentMethodsResponse.data); // Store fetched payment methods
+        setPaymentMethods(paymentMethodsResponse.data);
       } catch (error) {
         Swal.fire({
-          title: "Error",
+          title: t.error,
           text: error.message,
           icon: "error",
         });
@@ -63,6 +114,7 @@ const AddPayment = () => {
     formData.append('order_id', selectionMode === 'order' ? orderId : null);
     formData.append('task_id', selectionMode === 'task' ? taskId : null);
     formData.append('status_id', status);
+
     try {
       await axios.post(`${apiUrl}/payments`, formData, {
         headers: {
@@ -70,13 +122,13 @@ const AddPayment = () => {
         },
       });
       Swal.fire({
-        title: "Payment added successfully",
+        title: t.paymentAdded,
         icon: "success",
       });
       navigate('/dashboard/payments');
     } catch (error) {
       Swal.fire({
-        title: "Error",
+        title: t.error,
         text: error.message,
         icon: "error",
       });
@@ -84,80 +136,81 @@ const AddPayment = () => {
   };
 
   return (
-    <div className="p-8 font-inter">
-      <h2 className="text-2xl font-semibold mb-4">Add Payment</h2>
+    <div className="p-8 font-prompt">
+      <h2 className="text-2xl font-semibold mb-4">{t.title}</h2>
       <form onSubmit={handleSubmit} className='text-sm font-medium'>
         <div className="mb-4">
-          <label className="block mb-2 ">Select Mode</label>
+          <label className="block mb-2">{t.selectMode}</label>
           <select value={selectionMode} onChange={(e) => setSelectionMode(e.target.value)} className="input w-full border-gray-300">
-            <option value="task">Task</option>
-            {/* <option value="order">Order</option> */}
+            <option value="task">{t.task}</option>
+            {/* <option value="order">{t.order}</option> */}
           </select>
         </div>
         {selectionMode === 'task' && (
           <div className="mb-4">
-            <label className="block mb-2">Task ID</label>
+            <label className="block mb-2">{t.taskId}</label>
             <select value={taskId} onChange={(e) => setTaskId(e.target.value)} className="input w-full border border-gray-300" required>
-              <option value="">Select Task</option>
-              {tasks.map(task => (
-                <option key={task.task_id} value={task.task_id}>{task.task_id}. {task.description}</option>
-              ))}
+              <option value="">{t.selectOption}</option>
+              {tasks.length > 0 ? tasks.map((task,index) => (
+                <option key={index+1} value={task.task_id}>{index+1}. {task.description}</option>
+              )) : <option value="">{t.noTasks}</option>}
             </select>
           </div>
         )}
         {selectionMode === 'order' && (
           <div className="mb-4">
-            <label className="block mb-2">Order ID</label>
+            <label className="block mb-2">{t.orderId}</label>
             <select value={orderId} onChange={(e) => setOrderId(e.target.value)} className="input w-full border border-gray-300" required>
-              <option value="">Select Order</option>
-              {orders.map(order => (
+              <option value="">{t.selectOption}</option>
+              {orders.length > 0 ? orders.map(order => (
                 <option key={order.id} value={order.id}>{order.id}</option>
-              ))}
+              )) : <option value="">{t.noOrders}</option>}
             </select>
           </div>
         )}
         <div className="mb-4">
-          <label className="block mb-2">User ID</label>
+          <label className="block mb-2">{t.userId}</label>
           <select value={userId} onChange={(e) => setUserId(e.target.value)} className="input w-full border-gray-300" required>
-            <option value="">Select User</option>
-            {users.map(user => (
-              <option key={user.user_id} value={user.user_id}>{user.firstname} {user.lastname}</option>
-            ))}
+            <option value="">{t.selectOption}</option>
+            {users.length > 0 ? users.map((user,index) => (
+              <option key={index+1} value={user.user_id}>{index+1}. {user.firstname} {user.lastname}</option>
+            )) : <option value="">{t.noUsers}</option>}
           </select>
         </div>
         <div className="mb-4">
-          <label className="block mb-2">Amount</label>
+          <label className="block mb-2">{t.amount}</label>
           <input type="number" value={amount} onChange={(e) => setAmount(e.target.value)} className="input w-full border-gray-300" required />
         </div>
         <div className="mb-4">
-          <label className="block mb-2">Payment Method</label>
+          <label className="block mb-2">{t.paymentMethod}</label>
           <select value={paymentMethod} onChange={(e) => setPaymentMethod(e.target.value)} className="input w-full border-gray-300" required>
-            <option value="">Select Payment Method</option>
-            {paymentMethods.map(method => (
+            <option value="">{t.selectOption}</option>
+            {paymentMethods.length > 0 ? paymentMethods.map(method => (
               <option key={method.method_id} value={method.method_id}>{method.method_name}</option>
-            ))}
+            )) : <option value="">{t.noUsers}</option>}
           </select>
         </div>
         <div className="mb-4">
-          <label className="block mb-2">Payment Date</label>
+          <label className="block mb-2">{t.paymentDate}</label>
           <input type="datetime-local" value={paymentDate} onChange={(e) => setPaymentDate(e.target.value)} className="input w-full border-gray-300" required />
         </div>
 
         <div className="mb-4">
-          <label className="block mb-2">Status</label>
+          <label className="block mb-2">{t.status}</label>
           <select value={status} onChange={(e) => setStatus(e.target.value)} className="input w-full border-gray-300">
-            <option value="">Select Status</option>
-            {statuses.map(statusOption => (
+            <option value="">{t.selectOption}</option>
+            {statuses.length > 0 ? statuses.map(statusOption => (
               <option key={statusOption.status_id} value={statusOption.status_id}>{statusOption.status_name}</option>
-            ))}
+            )) : <option value="">{t.noStatuses}</option>}
           </select>
-          <div className="mb-4">
-          <label className="block mb-2">Slip Images</label>
-          <input type="file" onChange={(e) => setSlipImages(e.target.files[0])}             className=" file-input file-input-bordered w-full h-10"
- />
         </div>
+
+        <div className="mb-4">
+          <label className="block mb-2">{t.slipImages}</label>
+          <input type="file" onChange={(e) => setSlipImages(e.target.files[0])} className="file-input file-input-bordered w-full h-10" />
         </div>
-        <button type="submit" className="btn bg-blue text-white">Add Payment</button>
+
+        <button type="submit" className="btn bg-blue text-white hover:bg-blue">{t.addPayment}</button>
       </form>
     </div>
   );

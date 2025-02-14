@@ -427,7 +427,7 @@ router.get("/v2/orders/count", (req, res) => {
     }
   
     const query = `
-      SELECT o.id AS order_id, o.created_at, oi.product_id, oi.product_name, oi.quantity, oi.total_price,oi.price
+      SELECT o.id AS order_id, o.created_at, oi.product_id, oi.product_name, oi.quantity, oi.total_price, oi.price, o.user_id
       FROM orders o
       JOIN order_items oi ON o.id = oi.order_id
       WHERE o.id = ?
@@ -457,6 +457,7 @@ router.get("/v2/orders/count", (req, res) => {
               acc[orderId] = {
                 order_id: orderId,
                 created_at: row.created_at,
+                user_id: row.user_id, // Include user_id in the response
                 items: [],
               };
             }
@@ -466,7 +467,7 @@ router.get("/v2/orders/count", (req, res) => {
               product_name: row.product_name,
               quantity: row.quantity,
               total_price: row.total_price,
-              price:row.price,
+              price: row.price,
             });
   
             return acc;
@@ -479,7 +480,8 @@ router.get("/v2/orders/count", (req, res) => {
         }
       );
     });
-  });
+});
+
   
   
 

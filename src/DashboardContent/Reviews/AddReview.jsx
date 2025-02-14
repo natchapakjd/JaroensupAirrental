@@ -6,68 +6,99 @@ import { useAuth } from '../../context/AuthContext'; // Adjust the import based 
 
 const AddReview = () => {
   const navigate = useNavigate();
-  const user = useAuth(); // Get user data for authorization
+  const user = useAuth();
   const [review, setReview] = useState({
     task_id: '',
     tech_id: '',
-    user_id: user.user.id, // Assuming user ID is from context
+    user_id: user.user.id,
     rating: 0,
     comment: '',
   });
-  const [tasks, setTasks] = useState([]); // State to store tasks
-  const [technicians, setTechnicians] = useState([]); // State to store technicians
-  const [users, setUsers] = useState([]); // State to store users
+  const [tasks, setTasks] = useState([]);
+  const [technicians, setTechnicians] = useState([]);
+  const [users, setUsers] = useState([]);
   const [loading, setLoading] = useState(false);
+  const [language, setLanguage] = useState(localStorage.getItem('language') || 'en');
 
-  // Fetch tasks, technicians, and users
+  const translations = {
+    en: {
+      pageTitle: 'Add Review',
+      taskLabel: 'Task ID:',
+      techLabel: 'Technician ID:',
+      userLabel: 'User ID:',
+      ratingLabel: 'Rating:',
+      commentLabel: 'Comment:',
+      addButton: 'Add Review',
+      addingButton: 'Adding...',
+      successAdd: 'Review Added!',
+      errorFetch: 'Failed to load tasks, technicians, or users.',
+      errorAdd: 'Failed to add review.',
+    },
+    th: {
+      pageTitle: 'เพิ่มรีวิว',
+      taskLabel: 'รหัสงาน:',
+      techLabel: 'รหัสช่าง:',
+      userLabel: 'รหัสผู้ใช้:',
+      ratingLabel: 'คะแนน:',
+      commentLabel: 'ความคิดเห็น:',
+      addButton: 'เพิ่มรีวิว',
+      addingButton: 'กำลังเพิ่ม...',
+      successAdd: 'เพิ่มรีวิวแล้ว!',
+      errorFetch: 'โหลดงาน ช่าง หรือผู้ใช้ไม่สำเร็จ',
+      errorAdd: 'เพิ่มรีวิวไม่สำเร็จ',
+    },
+  };
+
   useEffect(() => {
     const fetchData = async () => {
       try {
         const [tasksResponse, techniciansResponse, usersResponse] = await Promise.all([
-          axios.get(`${import.meta.env.VITE_SERVER_URL}/tasks`), // Adjust the endpoint based on your API
-          axios.get(`${import.meta.env.VITE_SERVER_URL}/technicians`), // Adjust the endpoint based on your API
-          axios.get(`${import.meta.env.VITE_SERVER_URL}/users`), // Adjust the endpoint based on your API
+          axios.get(`${import.meta.env.VITE_SERVER_URL}/tasks`),
+          axios.get(`${import.meta.env.VITE_SERVER_URL}/technicians`),
+          axios.get(`${import.meta.env.VITE_SERVER_URL}/users`),
         ]);
         setTasks(tasksResponse.data);
         setTechnicians(techniciansResponse.data);
-        setUsers(usersResponse.data); // Set fetched users
+        setUsers(usersResponse.data);
       } catch (error) {
-        console.error('Error fetching data:', error);
         Swal.fire({
           title: 'Error',
-          text: 'Failed to load tasks, technicians, or users.',
+          text: translations[language].errorFetch,
           icon: 'error',
         });
       }
     };
-
     fetchData();
-  }, []);
+  }, [language]);
 
   const handleChange = (e) => {
     const { name, value } = e.target;
     setReview((prev) => ({ ...prev, [name]: value }));
   };
 
+  const handleLanguageChange = (e) => {
+    const selectedLanguage = e.target.value;
+    setLanguage(selectedLanguage);
+    localStorage.setItem('language', selectedLanguage);
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     setLoading(true);
-
     try {
       const response = await axios.post(`${import.meta.env.VITE_SERVER_URL}/review`, review);
       if (response.status === 201) {
         await Swal.fire({
           icon: 'success',
-          title: 'Review Added!',
+          title: translations[language].successAdd,
           text: response.data.message,
         });
-        navigate('/dashboard/reviews'); // Redirect to the reviews list or any other page
+        navigate('/dashboard/reviews');
       }
     } catch (err) {
-      console.error('Error adding review:', err);
-      await Swal.fire({
+      Swal.fire({
         title: 'Error',
-        text: 'Failed to add review.',
+        text: translations[language].errorAdd,
         icon: 'error',
       });
     } finally {
@@ -77,10 +108,14 @@ const AddReview = () => {
 
   return (
     <div className="container mx-auto p-8">
-      <h2 className="text-2xl font-bold mb-4">Add Review</h2>
-      <form onSubmit={handleSubmit} className="bg-white p-6 rounded-lg shadow-md text-sm font-medium">
+      <div className="flex justify-between items-center mb-4">
+        <h2 className="text-2xl font-bold">{translations[language].pageTitle}</h2>
+      </div>
+      <form onSubmit={handleSubmit} className="bg-white p-6 rounded-lg shadow-md">
         <div className="mb-4">
-          <label className="block mb-2" htmlFor="task_id">Task ID:</label>
+          <label className="block mb-2" htmlFor="task_id">
+            {translations[language].taskLabel}
+          </label>
           <select
             id="task_id"
             name="task_id"
@@ -89,16 +124,18 @@ const AddReview = () => {
             required
             className="select select-bordered w-full"
           >
-            <option value="">Select a task</option>
+            <option value="">{translations[language].taskLabel}</option>
             {tasks.map((task) => (
               <option key={task.task_id} value={task.task_id}>
-                {task.task_id} {task.description} {/* Adjust based on your task object structure */}
+                {task.task_id} {task.description}
               </option>
             ))}
           </select>
         </div>
         <div className="mb-4">
-          <label className="block mb-2" htmlFor="tech_id">Technician ID:</label>
+          <label className="block mb-2" htmlFor="tech_id">
+            {translations[language].techLabel}
+          </label>
           <select
             id="tech_id"
             name="tech_id"
@@ -107,16 +144,18 @@ const AddReview = () => {
             required
             className="select select-bordered w-full"
           >
-            <option value="">Select a technician</option>
+            <option value="">{translations[language].techLabel}</option>
             {technicians.map((tech) => (
               <option key={tech.tech_id} value={tech.tech_id}>
-                {tech.tech_id} {/* Adjust based on your technician object structure */}
+                {tech.tech_id}
               </option>
             ))}
           </select>
         </div>
         <div className="mb-4">
-          <label className="block mb-2" htmlFor="user_id">User ID:</label>
+          <label className="block mb-2" htmlFor="user_id">
+            {translations[language].userLabel}
+          </label>
           <select
             id="user_id"
             name="user_id"
@@ -125,7 +164,7 @@ const AddReview = () => {
             required
             className="select select-bordered w-full"
           >
-            <option value="">Select a user</option>
+            <option value="">{translations[language].userLabel}</option>
             {users.map((user) => (
               <option key={user.user_id} value={user.user_id}>
                 {user.user_id}
@@ -134,7 +173,9 @@ const AddReview = () => {
           </select>
         </div>
         <div className="mb-4">
-          <label className="block mb-2" htmlFor="rating">Rating:</label>
+          <label className="block mb-2" htmlFor="rating">
+            {translations[language].ratingLabel}
+          </label>
           <input
             type="number"
             id="rating"
@@ -148,7 +189,9 @@ const AddReview = () => {
           />
         </div>
         <div className="mb-4">
-          <label className="block mb-2" htmlFor="comment">Comment:</label>
+          <label className="block mb-2" htmlFor="comment">
+            {translations[language].commentLabel}
+          </label>
           <textarea
             id="comment"
             name="comment"
@@ -163,7 +206,7 @@ const AddReview = () => {
           className={`btn bg-blue text-white hover:bg-blue ${loading ? 'opacity-50 cursor-not-allowed' : ''}`}
           disabled={loading}
         >
-          {loading ? 'Adding...' : 'Add Review'}
+          {loading ? translations[language].addingButton : translations[language].addButton}
         </button>
       </form>
     </div>

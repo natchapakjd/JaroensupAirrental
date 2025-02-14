@@ -10,20 +10,62 @@ import Cookies from "universal-cookie";
 import { jwtDecode } from "jwt-decode";
 import Loading from "../../components/Loading";
 
+// 🔥 แปลภาษา
+const translations = {
+  th: {
+    hello: "สวัสดี",
+    uid: "รหัสผู้ใช้",
+    lineNotification: "การตั้งค่าการแจ้งเตือน LINE",
+    enabled: "เปิดการแจ้งเตือน",
+    disabled: "ปิดการแจ้งเตือน",
+    logout: "ออกจากระบบ",
+  },
+  en: {
+    hello: "Hello",
+    uid: "UID",
+    lineNotification: "LINE Notification Settings",
+    enabled: "Notifications Enabled",
+    disabled: "Notifications Disabled",
+    logout: "Logout",
+  },
+};
+
 const LineProfile = () => {
   const cookies = new Cookies();
   const token = cookies.get("authToken");
   const decodeToken = jwtDecode(token);
   const id = decodeToken.id;
+
   const [profile, setProfile] = useState(null);
-  const [notificationsEnabled, setNotificationsEnabled] = useState(false);
+  const [notificationsEnabled, setNotificationsEnabled] = useState(
+    JSON.parse(localStorage.getItem("notificationsEnabled")) || false
+  );
   const [userId, setUserId] = useState(null);
-  
+  const [language, setLanguage] = useState("th");
+
   const navigate = useNavigate();
 
   useEffect(() => {
     setUserId(id);
     login();
+    // ✅ โหลดค่าภาษาเมื่อเข้าเว็บ
+    const savedLanguage = localStorage.getItem("language") || "th";
+    setLanguage(savedLanguage);
+  }, []);
+
+  useEffect(() => {
+    // ✅ ฟัง `localStorage` event ถ้ามีการเปลี่ยนค่าก็อัปเดต `notificationsEnabled` และภาษา
+    const handleStorageChange = () => {
+      setNotificationsEnabled(
+        JSON.parse(localStorage.getItem("notificationsEnabled")) || false
+      );
+      setLanguage(localStorage.getItem("language") || "th");
+    };
+
+    window.addEventListener("storage", handleStorageChange);
+    return () => {
+      window.removeEventListener("storage", handleStorageChange);
+    };
   }, []);
 
   const login = async () => {
@@ -36,24 +78,27 @@ const LineProfile = () => {
         setProfile(userProfile);
       }
     } catch (error) {
-      console.log(error)
+      console.log(error);
     }
   };
 
   const logout = async () => {
     await liff.logout();
     setProfile(null);
-    if(isDashboard){
+    if (isDashboard) {
       navigate("/dashboard/home");
-    }else{
+    } else {
       navigate("/settings");
     }
   };
 
   const toggleNotifications = async () => {
-    setNotificationsEnabled(!notificationsEnabled);
+    const newStatus = !notificationsEnabled;
+    setNotificationsEnabled(newStatus);
+    localStorage.setItem("notificationsEnabled", JSON.stringify(newStatus));
+
     const lineToken = profile.userId;
-    await updateLineToken(userId, lineToken);
+    await updateLineToken(userId, newStatus ? lineToken : null);
   };
 
   const updateLineToken = async (userId, lineToken) => {
@@ -61,7 +106,7 @@ const LineProfile = () => {
       await axios.put(
         `${import.meta.env.VITE_SERVER_URL}/line-token/${userId}`,
         {
-          lineToken: !notificationsEnabled ? lineToken : null, // Send null if notifications are disabled
+          lineToken: lineToken,
         }
       );
     } catch (error) {
@@ -75,7 +120,7 @@ const LineProfile = () => {
   };
 
   // ตรวจสอบว่าอยู่ที่หน้า dashboard หรือไม่
-  const isDashboard = window.location.pathname.startsWith('/dashboard');
+  const isDashboard = window.location.pathname.startsWith("/dashboard");
 
   return (
     <div>
@@ -89,13 +134,15 @@ const LineProfile = () => {
               className="w-40 rounded-full mx-auto mb-4"
             />
             <h2 className="text-xl font-bold text-center mb-2">
-              Hello, {profile.displayName}
+              {translations[language].hello}, {profile.displayName}
             </h2>
-            <div className="text-center mb-4">UID: {profile.userId}</div>
+            <div className="text-center mb-4">
+              {translations[language].uid}: {profile.userId}
+            </div>
 
             <div className="mt-6 flex justify-between">
               <h3 className="text-lg font-semibold mt-6">
-                LINE Notification Settings
+                {translations[language].lineNotification}
               </h3>
               <div className="flex items-center justify-center mt-2">
                 <input
@@ -106,8 +153,8 @@ const LineProfile = () => {
                 />
                 <label className="label">
                   {notificationsEnabled
-                    ? "Notifications Enabled"
-                    : "Notifications Disabled"}
+                    ? translations[language].enabled
+                    : translations[language].disabled}
                 </label>
               </div>
             </div>
@@ -117,12 +164,12 @@ const LineProfile = () => {
                 onClick={logout}
                 className="btn bg-blue text-white hover:bg-blue"
               >
-                Logout
+                {translations[language].logout}
               </button>
             </div>
           </div>
         ) : (
-          <Loading/>
+          <Loading />
         )}
       </div>
       {!isDashboard && <Footer />}

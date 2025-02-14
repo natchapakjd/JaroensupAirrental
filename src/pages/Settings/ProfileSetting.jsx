@@ -8,6 +8,42 @@ import axios from "axios";
 import { useLocation } from "react-router-dom";
 import Loading from "../../components/Loading";
 
+// 📌 ระบบแปลภาษา
+const translations = {
+  th: {
+    profileSettings: "ตั้งค่าข้อมูลส่วนตัว",
+    firstName: "ชื่อจริง",
+    lastName: "นามสกุล",
+    email: "อีเมล",
+    phone: "เบอร์โทร",
+    age: "อายุ",
+    address: "ที่อยู่",
+    gender: "เพศ",
+    dateOfBirth: "วันเกิด",
+    profileImage: "รูปโปรไฟล์",
+    saveChanges: "บันทึกการเปลี่ยนแปลง",
+    successTitle: "สำเร็จ!",
+    successMessage: "ข้อมูลถูกอัปเดตเรียบร้อย!",
+    errorTitle: "เกิดข้อผิดพลาด!",
+  },
+  en: {
+    profileSettings: "Profile Settings",
+    firstName: "First Name",
+    lastName: "Last Name",
+    email: "Email",
+    phone: "Phone",
+    age: "Age",
+    address: "Address",
+    gender: "Gender",
+    dateOfBirth: "Date of Birth",
+    profileImage: "Profile Image",
+    saveChanges: "Save Changes",
+    successTitle: "Success!",
+    successMessage: "Profile updated successfully!",
+    errorTitle: "Error!",
+  },
+};
+
 const ProfileSetting = () => {
   const [profile, setProfile] = useState(null);
   const [error, setError] = useState(null);
@@ -15,7 +51,21 @@ const ProfileSetting = () => {
   const token = cookies.get("authToken");
   const decodedToken = jwtDecode(token);
   const userId = decodedToken.id;
-  
+  const location = useLocation();
+
+  const [language, setLanguage] = useState(localStorage.getItem("language") || "th");
+
+  useEffect(() => {
+    const handleLanguageChange = () => {
+      setLanguage(localStorage.getItem("language") || "th");
+    };
+
+    window.addEventListener("storage", handleLanguageChange);
+    return () => {
+      window.removeEventListener("storage", handleLanguageChange);
+    };
+  }, []);
+
   const [formData, setFormData] = useState({
     firstname: "",
     lastname: "",
@@ -28,8 +78,6 @@ const ProfileSetting = () => {
     profile_image: null,
   });
 
-  const location = useLocation();
-
   useEffect(() => {
     fetchProfile();
   }, []);
@@ -38,7 +86,7 @@ const ProfileSetting = () => {
     try {
       const response = await axios.get(`${import.meta.env.VITE_SERVER_URL}/user/${userId}`);
       if (response.status === 200) {
-        const data = response.data; 
+        const data = response.data;
         setProfile(data);
         setFormData({
           firstname: data.firstname || "",
@@ -76,11 +124,11 @@ const ProfileSetting = () => {
     try {
       const response = await axios.put(`${import.meta.env.VITE_SERVER_URL}/user/${userId}`, formDataToSend);
       if (response.status === 200) {
-        const updatedProfile = response.data; 
+        const updatedProfile = response.data;
         setProfile(updatedProfile);
         Swal.fire({
-          title: "Success!",
-          text: "Profile updated successfully!",
+          title: translations[language].successTitle,
+          text: translations[language].successMessage,
           icon: "success",
           confirmButtonText: "OK",
         });
@@ -88,7 +136,7 @@ const ProfileSetting = () => {
     } catch (err) {
       setError(err.message);
       Swal.fire({
-        title: "Error!",
+        title: translations[language].errorTitle,
         text: err.message,
         icon: "error",
         confirmButtonText: "OK",
@@ -96,14 +144,13 @@ const ProfileSetting = () => {
     }
   };
 
-  
-  const isDashboard = location.pathname.startsWith('/dashboard');
+  const isDashboard = location.pathname.startsWith("/dashboard");
 
   return (
     <>
       {!isDashboard && <Navbar />}
       <div className="container mx-auto p-6 font-prompt bg-white my-5">
-        <h1 className="text-2xl font-bold mb-4">Profile Settings</h1>
+        <h1 className="text-2xl font-bold mb-4">{translations[language].profileSettings}</h1>
         {error && <div className="alert alert-error">{error}</div>}
         {profile ? (
           <div className="bg-white shadow-md rounded-lg p-6">
@@ -112,136 +159,47 @@ const ProfileSetting = () => {
             </h2>
             <div className="flex items-center mb-4">
               <img
-                src={`${profile.image_url}`} 
+                src={`${profile.image_url}`}
                 alt={profile.firstname}
                 className="w-24 h-24 rounded-xl mr-4"
               />
             </div>
             <form onSubmit={handleSubmit}>
               <div>
-                <label htmlFor="firstname" className="label">First Name</label>
-                <input
-                  type="text"
-                  id="firstname"
-                  name="firstname"
-                  value={formData.firstname}
-                  onChange={handleChange}
-                  className="input input-bordered w-full mt-2"
-                />
+                <label className="label">{translations[language].firstName}</label>
+                <input type="text" name="firstname" value={formData.firstname} onChange={handleChange} className="input input-bordered w-full mt-2" />
               </div>
               <div>
-                <label htmlFor="lastname" className="label">Last Name</label>
-                <input
-                  type="text"
-                  id="lastname"
-                  name="lastname"
-                  value={formData.lastname}
-                  onChange={handleChange}
-                  className="input input-bordered w-full mt-2"
-                />
+                <label className="label">{translations[language].lastName}</label>
+                <input type="text" name="lastname" value={formData.lastname} onChange={handleChange} className="input input-bordered w-full mt-2" />
               </div>
               <div>
-                <label htmlFor="email" className="label">Email</label>
-                <input
-                  type="email"
-                  id="email"
-                  name="email"
-                  value={formData.email}
-                  onChange={handleChange}
-                  pattern="^[^\s@]+@[^\s@]+\.[^\s@]+$"
-                  title="Please enter a valid email address."
-                  className="input input-bordered w-full mt-2"
-                />
+                <label className="label">{translations[language].email}</label>
+                <input type="email" name="email" value={formData.email} onChange={handleChange} className="input input-bordered w-full mt-2" />
               </div>
               <div>
-                <label htmlFor="phone" className="label">Phone</label>
-                <input
-                  type="text"
-                  id="phone"
-                  name="phone"
-                  value={formData.phone}
-                  onChange={handleChange}
-                  className="input input-bordered w-full mt-2"
-                  pattern="^[0-9]{10}$" 
-                  title="Phone number must be exactly 10 digits"
-                  required
-                />
-              </div>
-
-              <div>
-                <label htmlFor="age" className="label">Age</label>
-                <input
-                  type="number"
-                  id="age"
-                  name="age"
-                  value={formData.age}
-                  onChange={handleChange}
-                  className="input input-bordered w-full mt-2"
-                  min="18" 
-                  max="100" 
-                  required
-                />
-              </div>
-
-              <div>
-                <label htmlFor="address" className="label">Address</label>
-                <input
-                  type="text"
-                  id="address"
-                  name="address"
-                  value={formData.address}
-                  onChange={handleChange}
-                  className="input input-bordered w-full mt-2"
-                />
+                <label className="label">{translations[language].phone}</label>
+                <input type="text" name="phone" value={formData.phone} onChange={handleChange} className="input input-bordered w-full mt-2" />
               </div>
               <div>
-                <label htmlFor="gender" className="label">Gender</label>
-                <select
-                  id="gender"
-                  name="gender"
-                  value={formData.gender}
-                  onChange={handleChange}
-                  className="select select-bordered w-full mt-2"
-                >
-                  <option value="">Select Gender</option>
+                <label className="label">{translations[language].gender}</label>
+                <select name="gender" value={formData.gender} onChange={handleChange} className="select select-bordered w-full mt-2">
                   <option value="male">Male</option>
                   <option value="female">Female</option>
                   <option value="other">Other</option>
                 </select>
               </div>
               <div>
-                <label htmlFor="date_of_birth" className="label">Date of Birth</label>
-                <input
-                  type="date"
-                  id="date_of_birth"
-                  name="date_of_birth"
-                  value={formData.date_of_birth}
-                  onChange={handleChange}
-                  className="input input-bordered w-full mt-2"
-                  max={new Date().toISOString().split("T")[0]}
-                  min={new Date(
-                    new Date().setFullYear(new Date().getFullYear() - 18) // คำนวณวันที่อย่างน้อย 18 ปีที่แล้ว
-                  )
-                    .toISOString()
-                    .split("T")[0]} // ตั้ง min เป็น 18 ปีที่แล้ว
-                />
-              </div>
-              <div>
-                <label htmlFor="profile_image" className="label">Profile Image</label>
-                <input
-                  type="file"
-                  id="profile_image"
-                  name="profile_image"
-                  onChange={handleFileChange}
-                  className=" file-input file-input-bordered w-full h-10"                />
+                <label className="label">{translations[language].profileImage}</label>
+                <input type="file" name="profile_image" onChange={handleFileChange} className="file-input file-input-bordered w-full h-10" />
               </div>
               <button className="btn bg-blue mt-4 text-white hover:bg-blue-700" type="submit">
-                Save Changes
+                {translations[language].saveChanges}
               </button>
             </form>
           </div>
         ) : (
-          <Loading/>
+          <Loading />
         )}
       </div>
       {!isDashboard && <Footer />}
