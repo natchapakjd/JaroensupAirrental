@@ -18,7 +18,91 @@ const BorrowProductTable = () => {
   const decodedToken = jwtDecode(token);
   const techId = decodedToken.id;
   const role = decodedToken.role;
-  
+  const language = localStorage.getItem("language") || "en"; // Default to "en" if no language is set
+
+  const translation = {
+    en: {
+      borrowedEquipmentList: "Borrowed Equipment List",
+      createBorrowingTask: "Create borrowing task",
+      searchByNameOrProduct: "Search by name or product",
+      allStatus: "All Status",
+      pending: "Pending",
+      approve: "Approved",
+      completed: "Completed",
+      noImage: "No Image",
+      notApproved: "Not Approved",
+      return: "Return",
+      approveSuccess: "Equipment approved successfully",
+      equipmentReturned: "Equipment returned successfully",
+      equipmentNotReturned: "Not Returned",
+      noWarning: "No Warning",
+      warning: "⚠️",
+      areYouSure: "Are you sure?",
+      thisActionCannotBeUndone: "This action cannot be undone.",
+      cancel: "Cancel",
+      confirmDelete: "Yes, delete it!",
+      deleted: "Deleted!",
+      deletingError: "Failed to cancel the task.",
+      equipmentReturnError: "The equipment return has not been approved yet.",
+      errorFetchingData: "Failed to load borrowing data.",
+      of: "of",
+      page: "page",
+      previous: "previous",
+      next: "next",
+      edit: "edit",
+      borrowingID: "borrowing ID",
+      technicianName: "tech name",
+      productName: "product name]",
+      borrowDate: "borrow date",
+      returnDate: "return date",
+      status: "status",
+      taskType: "type",
+      idCardImage: "id card image",
+      actions: "action",
+      warningTH: "warning",
+    },
+    th: {
+      borrowedEquipmentList: "รายการอุปกรณ์ที่ยืม",
+      createBorrowingTask: "สร้างงานยืมอุปกรณ์",
+      searchByNameOrProduct: "ค้นหาตามชื่อหรือผลิตภัณฑ์",
+      allStatus: "สถานะทั้งหมด",
+      pending: "รอการอนุมัติ",
+      approve: "อนุมัติ",
+      completed: "เสร็จสิ้น",
+      noImage: "ไม่มีภาพ",
+      notApproved: "ยังไม่ได้รับการอนุมัติ",
+      return: "คืนอุปกรณ์",
+      approveSuccess: "อนุมัติอุปกรณ์สำเร็จ",
+      equipmentReturned: "คืนอุปกรณ์สำเร็จ",
+      equipmentNotReturned: "ยังไม่คืน",
+      noWarning: "ไม่มีคำเตือน",
+      warning: "⚠️",
+      areYouSure: "คุณแน่ใจหรือไม่?",
+      thisActionCannotBeUndone: "การกระทำนี้ไม่สามารถย้อนกลับได้",
+      cancel: "ยกเลิก",
+      confirmDelete: "ใช่, ลบมัน!",
+      deleted: "ลบแล้ว!",
+      deletingError: "ไม่สามารถยกเลิกงานได้",
+      equipmentReturnError: "การคืนอุปกรณ์ยังไม่ได้รับการอนุมัติ",
+      errorFetchingData: "ไม่สามารถโหลดข้อมูลการยืมได้",
+      of: "จาก",
+      page: "หน้า",
+      previous: "ก่อนหน้า",
+      next: "ถัดไป",
+      edit: "แก้ไข",
+      borrowingID: "รหัสการยืม",
+      technicianName: "ชื่อช่าง",
+      productName: "ชื่อสินค้า",
+      borrowDate: "วันที่ยืม",
+      returnDate: "วันที่คืน",
+      status: "สถานะ",
+      taskType: "ประเภทงาน",
+      idCardImage: "รูปบัตรประชาชน",
+      actions: "การดำเนินการ",
+      warningTH: "คำเตือน",
+    },
+  };
+  const currentLang = translation[language] || translation.en;
 
   useEffect(() => {
     fetchBorrowingData(techId);
@@ -40,12 +124,13 @@ const BorrowProductTable = () => {
         );
       } else if (role === 2) {
         response = await axios.get(
-          `${import.meta.env.VITE_SERVER_URL}/equipment-borrowing-paging/${techId}`,
+          `${
+            import.meta.env.VITE_SERVER_URL
+          }/equipment-borrowing-paging/${techId}`,
           { params: { page: currentPage, limit: rowsPerPage } }
         );
-        
       }
-      
+
       const { data, total } = response.data;
       const today = new Date();
       const updatedData = data.map((item) => {
@@ -61,8 +146,9 @@ const BorrowProductTable = () => {
       });
 
       setBorrowingData(updatedData);
-      total === 0 ? setTotalPages(1) : setTotalPages(Math.ceil(total / rowsPerPage));
-
+      total === 0
+        ? setTotalPages(1)
+        : setTotalPages(Math.ceil(total / rowsPerPage));
     } catch (error) {
       console.error("Error fetching borrowing data:", error);
       Swal.fire({
@@ -78,18 +164,18 @@ const BorrowProductTable = () => {
       const today = new Date().toISOString().split("T")[0]; // รูปแบบวันที่ YYYY-MM-DD
       const notificationKey = `notification_${technicianId}_${borrowingId}`;
       const lastSentDate = localStorage.getItem(notificationKey);
-  
+
       if (lastSentDate === today) {
         console.log("Notification already sent today.");
-        return; 
+        return;
       }
-  
+
       const message = `อุปกรณ์สำหรับการยืม รหัสการยืม ${borrowingId} เกินวันกำหนดคืนแล้ว กรุณานำสินค้ามาคืนโดยทันที`;
       const body = {
         userId: technicianId,
         message,
       };
-  
+
       await axios.post(`${import.meta.env.VITE_SERVER_URL}/send-message`, body);
       localStorage.setItem(notificationKey, today);
       console.log("Notification sent successfully.");
@@ -97,7 +183,6 @@ const BorrowProductTable = () => {
       console.error("Error sending LINE notification:", error);
     }
   };
-  
 
   const applyFilters = () => {
     let filtered = borrowingData;
@@ -134,41 +219,37 @@ const BorrowProductTable = () => {
   };
   const handleReturn = async (taskId) => {
     try {
-      // Check the status of the task
       const statusResponse = await axios.get(
         `${import.meta.env.VITE_SERVER_URL}/approve/${taskId}`
       );
+      const statusId = statusResponse.data.status_id;
 
-      const statusId = statusResponse.data.status_id; // Assuming your API returns the status_id
-
-      // Check if the status_id is 4 (approved)
       if (statusId !== 4) {
         Swal.fire({
-          title: "Not Approved",
-          text: "The equipment return has not been approved yet.",
+          title: currentLang.equipmentReturnError,
           icon: "warning",
         });
         return;
       }
 
-      // If approved, proceed to return the equipment
-      const response = await axios.put(`
-        ${
+      const response = await axios.put(
+        `${
           import.meta.env.VITE_SERVER_URL
-        }/equipment-borrowing/return/${taskId}`);
+        }/equipment-borrowing/return/${taskId}`
+      );
 
       if (response.status === 200) {
         Swal.fire({
-          title: "Equipment returned successfully",
+          title: currentLang.equipmentReturned,
           icon: "success",
         });
         fetchBorrowingData(); // Refresh data after returning equipment
       } else {
-        throw new Error("Failed to return equipment.");
+        throw new Error(currentLang.deletingError);
       }
     } catch (error) {
       Swal.fire({
-        title: "Error",
+        title: currentLang.error,
         text: error.message,
         icon: "error",
       });
@@ -177,19 +258,20 @@ const BorrowProductTable = () => {
 
   const handleApprove = async (taskId) => {
     try {
-      const response = await axios.put(`
-        ${
+      const response = await axios.put(
+        `${
           import.meta.env.VITE_SERVER_URL
-        }/equipment-borrowing/approve/${taskId}`);
+        }/equipment-borrowing/approve/${taskId}`
+      );
 
       if (response.status === 200) {
         Swal.fire({
-          title: "Equipment approved successfully",
+          title: currentLang.approveSuccess,
           icon: "success",
         });
-        fetchBorrowingData(); // Refresh data after returning equipment
+        fetchBorrowingData(); // Refresh data after approving equipment
       } else {
-        throw new Error("Failed to approved equipment.");
+        throw new Error("Failed to approve equipment.");
       }
     } catch (error) {
       Swal.fire({
@@ -202,43 +284,44 @@ const BorrowProductTable = () => {
 
   const handleCancel = async (borrowing_id) => {
     const result = await Swal.fire({
-      title: "Are you sure?",
-      text: "This action cannot be undone.",
+      title: currentLang.areYouSure,
+      text: currentLang.thisActionCannotBeUndone,
       icon: "warning",
       showCancelButton: true,
       confirmButtonColor: "#d33",
       cancelButtonColor: "#3085d6",
-      confirmButtonText: "Yes, delete it!",
-      cancelButtonText: "Cancel",
+      confirmButtonText: currentLang.confirmDelete,
+      cancelButtonText: currentLang.cancel,
     });
-  
+
     if (result.isConfirmed) {
       try {
         const response = await axios.delete(
-          `${import.meta.env.VITE_SERVER_URL}/equipment-borrowing/${borrowing_id}`,
+          `${
+            import.meta.env.VITE_SERVER_URL
+          }/equipment-borrowing/${borrowing_id}`,
           { withCredentials: true }
         );
-  
+
         if (response.status === 200) {
           Swal.fire({
-            title: "Deleted!",
-            text: "The borrowing task has been deleted.",
+            title: currentLang.deleted,
+            text: currentLang.deletingError,
             icon: "success",
           });
           fetchBorrowingData(techId); // Refresh data after deletion
         } else {
-          throw new Error("Failed to cancel the task.");
+          throw new Error(currentLang.deletingError);
         }
       } catch (error) {
         Swal.fire({
-          title: "Error",
+          title: currentLang.error,
           text: error.message,
           icon: "error",
         });
       }
     }
   };
-  
 
   const openImagePopup = (imageUrl) => {
     Swal.fire({
@@ -252,14 +335,16 @@ const BorrowProductTable = () => {
   };
 
   return (
-    <div className="p-8 rounded-lg shadow-lg w-full mx-auto font-inter h-full">
+    <div className="p-8 rounded-lg shadow-lg w-full mx-auto font-prompt h-full">
       <div className="flex justify-between items-center mb-4">
-        <h2 className="text-xl font-semibold ">Borrowed Equipment List</h2>
+        <h2 className="text-xl font-semibold">
+          {currentLang.borrowedEquipmentList}
+        </h2>
 
         {role === 3 && (
           <Link to="/dashboard/borrows/add">
             <button className="btn bg-blue text-white hover:bg-blue">
-              Create borrowing task
+              {currentLang.createBorrowingTask}
             </button>
           </Link>
         )}
@@ -279,34 +364,43 @@ const BorrowProductTable = () => {
           value={statusFilter}
           onChange={handleStatusFilterChange}
         >
-          <option value="">All Status</option>
-          <option value="pending">Pending</option>
-          <option value="approve">Approved</option>
-          <option value="completed">Completed</option>
+          <option value="">{currentLang.allStatus}</option>
+          <option value="pending">{currentLang.pending}</option>
+          <option value="approve">{currentLang.approve}</option>
+          <option value="completed">{currentLang.completed}</option>
         </select>
       </div>
 
       <table className="table w-full border-collapse border border-gray-300">
         <thead className="sticky-top bg-gray-200">
           <tr>
-            <th className="border p-2 text-center">Borrowing ID</th>
-            <th className="border p-2 text-center">Technician Name</th>
-            <th className="border p-2 text-center">Product Name</th>
-            <th className="border p-2 text-center">Borrow Date</th>
-            <th className="border p-2 text-center">Return Date</th>
-            <th className="border p-2 text-center">Status</th>
-            <th className="border p-2 text-center">Task Type</th>
-            {role === 3 && <th className="border p-2 text-center">ID Card Image</th>}
-            <th className="border p-2 text-center">Actions</th>
-            <th className="border p-2 text-center">Warnings</th>
-
+            <th className="border p-2 text-center">
+              {currentLang.borrowingID}
+            </th>
+            <th className="border p-2 text-center">
+              {currentLang.technicianName}
+            </th>
+            <th className="border p-2 text-center">
+              {currentLang.productName}
+            </th>
+            <th className="border p-2 text-center">{currentLang.borrowDate}</th>
+            <th className="border p-2 text-center">{currentLang.returnDate}</th>
+            <th className="border p-2 text-center">{currentLang.status}</th>
+            <th className="border p-2 text-center">{currentLang.taskType}</th>
+            {role === 3 && (
+              <th className="border p-2 text-center">
+                {currentLang.idCardImage}
+              </th>
+            )}
+            <th className="border p-2 text-center">{currentLang.actions}</th>
+            <th className="border p-2 text-center">{currentLang.warnings}</th>
           </tr>
         </thead>
         <tbody className="text-center">
           {filteredData.length > 0 ? (
-            filteredData.map((item) => (
-              <tr key={item.borrowing_id}>
-                <td className="border p-2 text-center">{item.borrowing_id}</td>
+            filteredData.map((item, index) => (
+              <tr key={index + 1}>
+                <td className="border p-2 text-center">{index + 1}</td>
                 <td className="border p-2 text-center">
                   {item.firstname} {item.lastname}
                 </td>
@@ -317,7 +411,7 @@ const BorrowProductTable = () => {
                 <td className="border p-2 text-center">
                   {item.return_date
                     ? new Date(item.return_date).toLocaleDateString()
-                    : "Not Returned"}
+                    : currentLang.equipmentNotReturned}
                 </td>
 
                 <td className="border p-2 text-center">{item.status_name}</td>
@@ -332,7 +426,7 @@ const BorrowProductTable = () => {
                         onClick={() => openImagePopup(item.id_card_image)}
                       />
                     ) : (
-                      <p>No Image</p>
+                      <p>{currentLang.noImage}</p>
                     )}
                   </td>
                 )}
@@ -352,7 +446,7 @@ const BorrowProductTable = () => {
                         onClick={() => handleReturn(item.task_id)}
                         className="btn bg-blue text-white hover:bg-blue"
                       >
-                        Return
+                        {currentLang.return}
                       </button>
                     ) : null}
 
@@ -363,33 +457,34 @@ const BorrowProductTable = () => {
                         onClick={() => handleApprove(item.task_id)}
                         className="btn btn-success text-white"
                       >
-                        Approve
+                        {currentLang.approve}
                       </button>
                     ) : null}
                     {role === 3 ? (
                       <Link to={`/dashboard/borrows/edit/${item.borrowing_id}`}>
                         <button className="btn bg-success text-white hover:bg-success">
-                          Edit
+                        {currentLang.edit}
+
                         </button>
                       </Link>
                     ) : null}
-                    
+
                     {role === 3 ? (
                       <button
                         onClick={() => handleCancel(item.task_id)}
                         className="btn btn-error text-white"
                       >
-                        Cancel
+                                                {currentLang.cancel}
+
                       </button>
                     ) : null}
-                    
                   </div>
                 </td>
                 <td className="border p-2 text-center">
                   {item.isOverdue ? (
                     <span className="text-red-500 font-bold">⚠️</span>
                   ) : (
-                    "No Warning"
+                    currentLang.noWarning
                   )}
                 </td>
               </tr>
@@ -397,7 +492,7 @@ const BorrowProductTable = () => {
           ) : (
             <tr>
               <td colSpan="8" className="border p-4">
-                No borrowing data available
+                {currentLang.noBorrowingData}
               </td>
             </tr>
           )}
@@ -409,16 +504,18 @@ const BorrowProductTable = () => {
           onClick={() => handlePageChange(currentPage - 1)}
           disabled={currentPage === 1}
         >
-          Previous
+          {currentLang.previous}
         </p>
         <span>
-          Page {currentPage} of {totalPages}
+          {currentLang.page}
+          {currentPage} {currentLang.of}
+          {totalPages}
         </span>
         <p
           onClick={() => handlePageChange(currentPage + 1)}
           disabled={currentPage === totalPages}
         >
-          Next
+          {currentLang.next}
         </p>
       </div>
     </div>

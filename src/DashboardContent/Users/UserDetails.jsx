@@ -5,9 +5,67 @@ import { format } from "date-fns"; // สำหรับจัดรูปแบ
 import Loading from "../../components/Loading";
 
 const UserDetails = () => {
+  const { userId } = useParams();
   const [user, setUser] = useState(null);
   const [error, setError] = useState(null);
-  const { userId } = useParams();
+  const [language, setLanguage] = useState(localStorage.getItem('language')||'th'); // State for language selection
+
+  const translations = {
+    en: {
+      details: "Details",
+      username: "Username",
+      firstname: "First Name",
+      lastname: "Last Name",
+      email: "Email",
+      phone: "Phone",
+      age: "Age",
+      address: "Address",
+      gender: "Gender",
+      dateOfBirth: "Date of Birth",
+      role: "Role",
+      createdAt: "Created At",
+      technicianDetails: "Technician Details",
+      nationality: "Nationality",
+      isOutsource: "Is Outsource",
+      workExperience: "Work Experience",
+      specialSkills: "Special Skills",
+      backgroundCheckStatus: "Background Check Status",
+      startDate: "Start Date",
+      statusId: "Status ID",
+      idCard: "ID Card",
+      driversLicense: "Driver's License",
+      criminalRecord: "Criminal Record",
+      additionalDocument: "Additional Document",
+      failedToLoad: "Failed to load user details. Please try again later.",
+    },
+    th: {
+      details: "รายละเอียด",
+      username: "ชื่อผู้ใช้",
+      firstname: "ชื่อจริง",
+      lastname: "นามสกุล",
+      email: "อีเมล์",
+      phone: "โทรศัพท์",
+      age: "อายุ",
+      address: "ที่อยู่",
+      gender: "เพศ",
+      dateOfBirth: "วันเกิด",
+      role: "บทบาท",
+      createdAt: "วันที่สร้าง",
+      technicianDetails: "รายละเอียดช่างเทคนิค",
+      nationality: "สัญชาติ",
+      isOutsource: "เป็นผู้รับจ้าง",
+      workExperience: "ประสบการณ์การทำงาน",
+      specialSkills: "ทักษะพิเศษ",
+      backgroundCheckStatus: "สถานะการตรวจสอบประวัติ",
+      startDate: "วันที่เริ่มงาน",
+      statusId: "สถานะ ID",
+      idCard: "บัตรประชาชน",
+      driversLicense: "ใบขับขี่",
+      criminalRecord: "ประวัติอาชญากรรม",
+      additionalDocument: "เอกสารเพิ่มเติม",
+      failedToLoad: "ไม่สามารถโหลดข้อมูลผู้ใช้ได้ กรุณาลองใหม่ภายหลัง",
+    },
+  };
 
   useEffect(() => {
     const fetchUser = async () => {
@@ -18,12 +76,12 @@ const UserDetails = () => {
         setUser(response.data[0] || response.data);
       } catch (error) {
         console.error("Error fetching user details:", error);
-        setError("Failed to load user details. Please try again later.");
+        setError(translations[language].failedToLoad);
       }
     };
 
     fetchUser();
-  }, [userId]);
+  }, [userId, language]);
 
   if (error) {
     return <div className="p-6 text-red-600">{error}</div>;
@@ -36,7 +94,7 @@ const UserDetails = () => {
   return (
     <div className="container mx-auto p-8 bg-white shadow-xl rounded-lg mt-8">
       <h1 className="text-3xl font-bold mb-6 text-gray-800">
-        {user.username}'s Details
+        {user.username}'s {translations[language].details}
       </h1>
 
       {/* Profile Section */}
@@ -52,19 +110,19 @@ const UserDetails = () => {
         )}
         <div className="text-center md:text-left">
           <p className="text-lg font-medium text-gray-700">
-            <strong>Username:</strong> {user.username}
+            <strong>{translations[language].username}:</strong> {user.username}
           </p>
           <p className="text-lg font-medium text-gray-700">
-            <strong>First Name:</strong> {user.firstname}
+            <strong>{translations[language].firstname}:</strong> {user.firstname}
           </p>
           <p className="text-lg font-medium text-gray-700">
-            <strong>Last Name:</strong> {user.lastname}
+            <strong>{translations[language].lastname}:</strong> {user.lastname}
           </p>
           <p className="text-lg font-medium text-gray-700">
-            <strong>Email:</strong> {user.email}
+            <strong>{translations[language].email}:</strong> {user.email}
           </p>
           <p className="text-lg font-medium text-gray-700">
-            <strong>Phone:</strong> {user.phone}
+            <strong>{translations[language].phone}:</strong> {user.phone}
           </p>
         </div>
       </div>
@@ -73,25 +131,25 @@ const UserDetails = () => {
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         <div>
           <p className="text-lg font-medium text-gray-700">
-            <strong>Age:</strong> {user.age}
+            <strong>{translations[language].age}:</strong> {user.age}
           </p>
           <p className="text-lg font-medium text-gray-700">
-            <strong>Address:</strong> {user.address}
+            <strong>{translations[language].address}:</strong> {user.address}
           </p>
           <p className="text-lg font-medium text-gray-700">
-            <strong>Gender:</strong> {user.gender_name}
+            <strong>{translations[language].gender}:</strong> {user.gender_name}
           </p>
         </div>
         <div>
           <p className="text-lg font-medium text-gray-700">
-            <strong>Date of Birth:</strong>{" "}
+            <strong>{translations[language].dateOfBirth}:</strong>{" "}
             {format(new Date(user.date_of_birth), "MM/dd/yyyy")}
           </p>
           <p className="text-lg font-medium text-gray-700">
-            <strong>Role:</strong> {user.role_name}
+            <strong>{translations[language].role}:</strong> {user.role_name}
           </p>
           <p className="text-lg font-medium text-gray-700">
-            <strong>Created At:</strong>{" "}
+            <strong>{translations[language].createdAt}:</strong>{" "}
             {format(new Date(user.created_at), "MM/dd/yyyy")}
           </p>
         </div>
@@ -100,40 +158,46 @@ const UserDetails = () => {
       {user.role_id === 2 && user.technician_details && (
         <div className="mt-8 bg-gray-100 p-6 rounded-lg shadow">
           <h2 className="text-2xl font-bold text-gray-800 mb-4">
-            Technician Details
+            {translations[language].technicianDetails}
           </h2>
           <p className="text-lg font-medium text-gray-700">
-            <strong>Nationality:</strong> {user.technician_details.nationality}
+            <strong>{translations[language].nationality}:</strong>{" "}
+            {user.technician_details.nationality}
           </p>
           <p className="text-lg font-medium text-gray-700">
-            <strong>Is Outsource:</strong>{" "}
-            {user.technician_details.isOutsource.data[0] === 1 ? "Yes" : "No"}
+            <strong>{translations[language].isOutsource}:</strong>{" "}
+            {user.technician_details.isOutsource.data[0] === 1
+              ? "Yes"
+              : "No"}
           </p>
           <p className="text-lg font-medium text-gray-700">
-            <strong>Work Experience:</strong>{" "}
+            <strong>{translations[language].workExperience}:</strong>{" "}
             {user.technician_details.work_experience}
           </p>
           <p className="text-lg font-medium text-gray-700">
-            <strong>Special Skills:</strong>{" "}
+            <strong>{translations[language].specialSkills}:</strong>{" "}
             {user.technician_details.special_skills}
           </p>
           <p className="text-lg font-medium text-gray-700">
-            <strong>Background Check Status:</strong>{" "}
+            <strong>{translations[language].backgroundCheckStatus}:</strong>{" "}
             {user.technician_details.background_check_status}
           </p>
           <p className="text-lg font-medium text-gray-700">
-            <strong>Start Date:</strong>{" "}
+            <strong>{translations[language].startDate}:</strong>{" "}
             {format(new Date(user.technician_details.start_date), "MM/dd/yyyy")}
           </p>
           <p className="text-lg font-medium text-gray-700">
-            <strong>Status ID:</strong> {user.technician_details.status_id}
+            <strong>{translations[language].statusId}:</strong>{" "}
+            {user.technician_details.status_id}
           </p>
 
           {/* Display images if available */}
           <div className="mt-6">
             {user.technician_details.id_card_image_url && (
               <div className="mb-4">
-                <h3 className="text-lg font-bold text-gray-700">ID Card:</h3>
+                <h3 className="text-lg font-bold text-gray-700">
+                  {translations[language].idCard}:
+                </h3>
                 <img
                   src={user.technician_details.id_card_image_url}
                   alt="ID Card"
@@ -144,7 +208,7 @@ const UserDetails = () => {
             {user.technician_details.driver_license_image_url && (
               <div className="mb-4">
                 <h3 className="text-lg font-bold text-gray-700">
-                  Driver's License:
+                  {translations[language].driversLicense}:
                 </h3>
                 <img
                   src={user.technician_details.driver_license_image_url}
@@ -156,7 +220,7 @@ const UserDetails = () => {
             {user.technician_details.criminal_record_image_url && (
               <div className="mb-4">
                 <h3 className="text-lg font-bold text-gray-700">
-                  Criminal Record:
+                  {translations[language].criminalRecord}:
                 </h3>
                 <img
                   src={user.technician_details.criminal_record_image_url}
@@ -168,7 +232,7 @@ const UserDetails = () => {
             {user.technician_details.additional_image_url && (
               <div className="mb-4">
                 <h3 className="text-lg font-bold text-gray-700">
-                  Additional Document:
+                  {translations[language].additionalDocument}:
                 </h3>
                 <img
                   src={user.technician_details.additional_image_url}

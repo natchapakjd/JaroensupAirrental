@@ -1,41 +1,69 @@
-import React, { useEffect, useState } from 'react';
-import { useParams, useNavigate } from 'react-router-dom';
-import axios from 'axios';
-import Swal from 'sweetalert2';
-import { useAuth } from '../../context/AuthContext'; // Adjust the import based on your Auth context path
+import React, { useEffect, useState } from "react";
+import { useParams, useNavigate } from "react-router-dom";
+import axios from "axios";
+import Swal from "sweetalert2";
+import { useAuth } from "../../context/AuthContext";
 
 const EditReview = () => {
-  const { id } = useParams(); // Get the review ID from the URL
+  const { id } = useParams();
   const navigate = useNavigate();
-  const user = useAuth(); // Get user data for authorization
+  const user = useAuth();
   const [review, setReview] = useState({
-    task_id: '',
-    tech_id: '',
-    user_id: user.user.id, // Assuming user ID is from context
+    task_id: "",
+    tech_id: "",
+    user_id: user.user.id,
     rating: 0,
-    comment: ''
+    comment: "",
   });
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-  
-  // Fetch the existing review details
+  const [language, setLanguage] = useState(localStorage.getItem("language") || "en"); // Default to stored language or English
+
+  const translations = {
+    en: {
+      pageTitle: "Edit Review",
+      taskLabel: "Task ID:",
+      techLabel: "Technician ID:",
+      ratingLabel: "Rating:",
+      commentLabel: "Comment:",
+      updateButton: "Update Review",
+      loading: "Loading...",
+      errorLoading: "Failed to load review.",
+      successUpdate: "Updated!",
+      errorUpdate: "Failed to update review.",
+    },
+    th: {
+      pageTitle: "แก้ไขรีวิว",
+      taskLabel: "รหัสงาน:",
+      techLabel: "รหัสช่าง:",
+      ratingLabel: "คะแนน:",
+      commentLabel: "ความคิดเห็น:",
+      updateButton: "อัปเดตรีวิว",
+      loading: "กำลังโหลด...",
+      errorLoading: "โหลดรีวิวไม่สำเร็จ",
+      successUpdate: "อัปเดตแล้ว!",
+      errorUpdate: "อัปเดตรีวิวไม่สำเร็จ",
+    },
+  };
+
   useEffect(() => {
     const fetchReview = async () => {
       try {
-        const response = await axios.get(`${import.meta.env.VITE_SERVER_URL}/review/${id}`);
+        const response = await axios.get(
+          `${import.meta.env.VITE_SERVER_URL}/review/${id}`
+        );
         setReview(response.data);
       } catch (err) {
         setError(err.message);
         Swal.fire({
           title: "Error",
-          text: "Failed to load review.",
+          text: translations[language].errorLoading,
           icon: "error",
         });
       } finally {
         setLoading(false);
       }
     };
-
     fetchReview();
   }, [id]);
 
@@ -44,36 +72,48 @@ const EditReview = () => {
     setReview((prev) => ({ ...prev, [name]: value }));
   };
 
+  const handleLanguageChange = (e) => {
+    const selectedLanguage = e.target.value;
+    setLanguage(selectedLanguage);
+    localStorage.setItem("language", selectedLanguage); // Persist language choice
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
-
     try {
-      const response = await axios.put(`${import.meta.env.VITE_SERVER_URL}/review/${id}`, review);
+      const response = await axios.put(
+        `${import.meta.env.VITE_SERVER_URL}/review/${id}`,
+        review
+      );
       await Swal.fire({
         icon: "success",
-        title: "Updated!",
+        title: translations[language].successUpdate,
         text: response.data.message,
       });
-      navigate("/reviews"); // Redirect to reviews list or any other page
+      navigate("/reviews");
     } catch (err) {
       console.error("Error updating review:", err);
       await Swal.fire({
         title: "Error",
-        text: "Failed to update review.",
+        text: translations[language].errorUpdate,
         icon: "error",
       });
     }
   };
 
-  if (loading) return <div className="text-center">Loading...</div>;
+  if (loading) return <div className="text-center">{translations[language].loading}</div>;
   if (error) return <div className="text-red-500 text-center">{error}</div>;
 
   return (
     <div className="container mx-auto p-8">
-      <h2 className="text-2xl font-bold mb-4">Edit Review</h2>
+      <div className="flex justify-between items-center mb-4">
+        <h2 className="text-2xl font-bold">{translations[language].pageTitle}</h2>
+      </div>
       <form onSubmit={handleSubmit} className="bg-white p-6 rounded-lg shadow-md">
         <div className="mb-4">
-          <label className="block mb-2" htmlFor="task_id">Task ID:</label>
+          <label className="block mb-2" htmlFor="task_id">
+            {translations[language].taskLabel}
+          </label>
           <input
             type="text"
             id="task_id"
@@ -86,7 +126,9 @@ const EditReview = () => {
           />
         </div>
         <div className="mb-4">
-          <label className="block mb-2" htmlFor="tech_id">Technician ID:</label>
+          <label className="block mb-2" htmlFor="tech_id">
+            {translations[language].techLabel}
+          </label>
           <input
             type="text"
             id="tech_id"
@@ -99,7 +141,9 @@ const EditReview = () => {
           />
         </div>
         <div className="mb-4">
-          <label className="block mb-2" htmlFor="rating">Rating:</label>
+          <label className="block mb-2" htmlFor="rating">
+            {translations[language].ratingLabel}
+          </label>
           <input
             type="number"
             id="rating"
@@ -113,7 +157,9 @@ const EditReview = () => {
           />
         </div>
         <div className="mb-4">
-          <label className="block mb-2" htmlFor="comment">Comment:</label>
+          <label className="block mb-2" htmlFor="comment">
+            {translations[language].commentLabel}
+          </label>
           <textarea
             id="comment"
             name="comment"
@@ -124,7 +170,7 @@ const EditReview = () => {
           />
         </div>
         <button type="submit" className="btn bg-blue text-white hover:bg-blue-600">
-          Update Review
+          {translations[language].updateButton}
         </button>
       </form>
     </div>

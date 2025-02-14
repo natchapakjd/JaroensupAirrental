@@ -68,7 +68,7 @@ const ImageUpload = () => {
   };
 
   return (
-    <div className="p-4 bg-white shadow-md rounded-md font-inter">
+    <div className="p-4 bg-white shadow-md rounded-md font-prompt">
       <h2 className="text-lg font-bold mb-3">อัปโหลดรูปภาพพื้นที่</h2>
 
       {/* 📌 Dropdown เลือกพื้นที่ */}

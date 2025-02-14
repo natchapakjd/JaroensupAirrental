@@ -13,6 +13,47 @@ const BrandContent = () => {
   const [totalPages, setTotalPages] = useState(1);
   const [rowsPerPage] = useState(10); // You can set this to any number you want
   const [searchTerm, setSearchTerm] = useState(""); // Add search term state
+  
+  // Placeholder for language toggle
+  const [language, setLanguage] = useState(localStorage.getItem("language") || "en"); // Assuming default language is English
+  
+  // Add language-specific strings
+  const translations = {
+    en: {
+      brands: "Brands",
+      addBrand: "Add Brand",
+      search: "Search by brand name...",
+      noBrands: "No brands available",
+      edit: "Edit",
+      delete: "Delete",
+      confirmDelete: "Are you sure?",
+      confirmText: "You won't be able to revert this!",
+      confirmButtonText: "Yes, delete it!",
+      successMessage: "Deleted!",
+      successText: "Your brand has been deleted.",
+      paginationPrev: "Previous",
+      paginationNext: "Next",
+      page: "Page",
+      of: "of",
+    },
+    th: {
+      brands: "แบรนด์",
+      addBrand: "เพิ่มแบรนด์",
+      search: "ค้นหาตามชื่อแบรนด์...",
+      noBrands: "ไม่มีแบรนด์ที่มีอยู่",
+      edit: "แก้ไข",
+      delete: "ลบ",
+      confirmDelete: "คุณแน่ใจหรือไม่?",
+      confirmText: "คุณจะไม่สามารถย้อนกลับได้!",
+      confirmButtonText: "ใช่, ลบเลย!",
+      successMessage: "ลบแล้ว!",
+      successText: "แบรนด์ของคุณถูกลบแล้ว",
+      paginationPrev: "ก่อนหน้า",
+      paginationNext: "ถัดไป",
+      page: "หน้า",
+      of: "จาก",
+    },
+  };
 
   useEffect(() => {
     const fetchBrands = async () => {
@@ -41,20 +82,20 @@ const BrandContent = () => {
   const handleDelete = async (id) => {
     try {
       const result = await Swal.fire({
-        title: "Are you sure?",
-        text: "You won't be able to revert this!",
+        title: translations[language].confirmDelete,
+        text: translations[language].confirmText,
         icon: "warning",
         showCancelButton: true,
         confirmButtonColor: "#3085d6",
         cancelButtonColor: "#d33",
-        confirmButtonText: "Yes, delete it!",
+        confirmButtonText: translations[language].confirmButtonText,
       });
 
       if (result.isConfirmed) {
         await axios.delete(`${import.meta.env.VITE_SERVER_URL}/brand/${id}`);
         setBrands(brands.filter((brand) => brand.brand_id !== id));
         setFilteredBrands(filteredBrands.filter((brand) => brand.brand_id !== id)); // Update filtered brands
-        Swal.fire("Deleted!", "Your brand has been deleted.", "success");
+        Swal.fire(translations[language].successMessage, translations[language].successText, "success");
       }
     } catch (err) {
       Swal.fire("Error!", "Failed to delete brand.", "error");
@@ -80,12 +121,12 @@ const BrandContent = () => {
   if (error) return <p>{error}</p>;
 
   return (
-    <div className="p-8 rounded-lg shadow-lg w-full mx-auto h-screen ">
+    <div className="p-8 rounded-lg shadow-lg w-full mx-auto h-screen font-prompt">
       <div className="flex justify-between items-center mb-6">
-        <h1 className="text-2xl font-semibold">Brands</h1>
+        <h1 className="text-2xl font-semibold">{translations[language].brands}</h1>
         <Link to="/dashboard/brands/add">
           <button className="btn bg-blue text-white hover:bg-blue">
-            Add Brand
+            {translations[language].addBrand}
           </button>
         </Link>
       </div>
@@ -96,44 +137,42 @@ const BrandContent = () => {
           type="text"
           value={searchTerm}
           onChange={handleSearch}
-          placeholder="Search by brand name..."
+          placeholder={translations[language].search}
           className="input input-bordered w-full"
         />
       </div>
 
       {filteredBrands.length === 0 ? (
-        <p>No brands available</p>
+        <p>{translations[language].noBrands}</p>
       ) : (
         <>
-          <table className="table w-full border-collapse border border-gray-300 text-center font-inter">
+          <table className="table w-full border-collapse border border-gray-300 text-center font-prompt">
             <thead className="sticky-top bg-gray-200">
               <tr>
                 <th className="border p-2 text-center">ID</th>
                 <th className="border p-2 text-center">Name</th>
                 <th className="border p-2 text-center">Description</th>
-                <th className="border p-2 text-center">Actions</th>
+                <th className="border p-2 text-center">{translations[language].actions}</th>
               </tr>
             </thead>
             <tbody>
-              {filteredBrands.map((brand) => (
-                <tr key={brand.brand_id}>
-                  <td className="border p-2 text-center">{brand.brand_id}</td>
+              {filteredBrands.map((brand, index) => (
+                <tr key={index + 1}>
+                  <td className="border p-2 text-center">{index + 1}</td>
                   <td className="border p-2 text-center">{brand.name}</td>
-                  <td className="border p-2 text-center">
-                    {brand.description}
-                  </td>
+                  <td className="border p-2 text-center">{brand.description}</td>
                   <td className="border p-2 text-center">
                     <Link
                       to={`/dashboard/brands/edit/${brand.brand_id}`}
                       className="btn btn-success text-white mr-2"
                     >
-                      Edit
+                      {translations[language].edit}
                     </Link>
                     <button
                       onClick={() => handleDelete(brand.brand_id)}
                       className="btn btn-error text-white"
                     >
-                      Delete
+                      {translations[language].delete}
                     </button>
                   </td>
                 </tr>
@@ -148,17 +187,17 @@ const BrandContent = () => {
               disabled={currentPage <= 1}
               className={`cursor-pointer ${currentPage === totalPages ? "text-gray-400" : "text-black"}`}
             >
-              Previous
+              {translations[language].paginationPrev}
             </p>
             <span className="flex items-center justify-center">
-              Page {currentPage} of {totalPages}
+              {translations[language].page} {currentPage} {translations[language].of} {totalPages}
             </span>
             <p
               onClick={() => handlePageChange(currentPage + 1)}
               disabled={currentPage >= totalPages}
               className={`cursor-pointer ${currentPage === totalPages ? "text-gray-400" : "text-black"}`}
             >
-              Next
+              {translations[language].paginationNext}
             </p>
           </div>
         </>

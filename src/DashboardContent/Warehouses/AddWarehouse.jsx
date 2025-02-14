@@ -1,14 +1,49 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import Swal from 'sweetalert2';
 import { useNavigate } from 'react-router-dom'; // Import useNavigate
 
+const translations = {
+  th: {
+    addWarehouse: "เพิ่มคลังสินค้า",
+    name: "ชื่อ",
+    location: "ที่ตั้ง",
+    capacity: "ความจุ",
+    add: "เพิ่ม",
+    adding: "กำลังเพิ่ม...",
+    success: "สำเร็จ!",
+    error: "เกิดข้อผิดพลาด!",
+  },
+  en: {
+    addWarehouse: "Add Warehouse",
+    name: "Name",
+    location: "Location",
+    capacity: "Capacity",
+    add: "Add",
+    adding: "Adding...",
+    success: "Success!",
+    error: "Error!",
+  },
+};
+
 const AddWarehouse = () => {
   const [name, setName] = useState('');
   const [location, setLocation] = useState('');
-  const [capacity, setCapacity] = useState(''); // New state for capacity
+  const [capacity, setCapacity] = useState('');
   const [loading, setLoading] = useState(false);
-  const navigate = useNavigate(); // Initialize useNavigate
+  const [language, setLanguage] = useState(localStorage.getItem('language') || 'en');
+  const navigate = useNavigate();
+
+  useEffect(() => {
+    const interval = setInterval(() => {
+      const currentLanguage = localStorage.getItem('language') || 'en';
+      if (currentLanguage !== language) {
+        setLanguage(currentLanguage);
+      }
+    }, 500);
+
+    return () => clearInterval(interval);
+  }, [language]);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -21,22 +56,22 @@ const AddWarehouse = () => {
         capacity: parseInt(capacity, 10), // Convert capacity to integer
       });
       if (response.status === 201) {
-        Swal.fire('Success!', 'Warehouse added successfully.', 'success');
-        navigate('/dashboard/warehouses'); // Redirect to the warehouses list page
+        Swal.fire(translations[language].success, 'Warehouse added successfully.', 'success');
+        navigate('/dashboard/warehouses');
       }
     } catch (err) {
-      Swal.fire('Error!', 'Failed to add warehouse.', 'error');
+      Swal.fire(translations[language].error, 'Failed to add warehouse.', 'error');
     } finally {
       setLoading(false);
     }
   };
 
   return (
-    <div className="p-8 rounded-lg shadow-lg w-full mx-auto h-screen max-w-md">
-      <h1 className="text-2xl font-semibold mb-6">Add New Warehouse</h1>
+    <div className="p-8 rounded-lg shadow-lg w-full mx-auto h-screen max-w-md font-prompt">
+      <h1 className="text-2xl font-semibold mb-6">{translations[language].addWarehouse}</h1>
       <form onSubmit={handleSubmit} className='text-sm font-medium'>
         <div className="mb-4">
-          <label htmlFor="name" className="block text-sm font-medium text-gray-700">Name</label>
+          <label htmlFor="name" className="block text-sm font-medium text-gray-700">{translations[language].name}</label>
           <input
             type="text"
             id="name"
@@ -47,7 +82,7 @@ const AddWarehouse = () => {
           />
         </div>
         <div className="mb-4">
-          <label htmlFor="location" className="block text-sm font-medium text-gray-700">Location</label>
+          <label htmlFor="location" className="block text-sm font-medium text-gray-700">{translations[language].location}</label>
           <input
             type="text"
             id="location"
@@ -58,7 +93,7 @@ const AddWarehouse = () => {
           />
         </div>
         <div className="mb-4">
-          <label htmlFor="capacity" className="block text-sm font-medium text-gray-700">Capacity</label>
+          <label htmlFor="capacity" className="block text-sm font-medium text-gray-700">{translations[language].capacity}</label>
           <input
             type="number"
             id="capacity"
@@ -75,7 +110,7 @@ const AddWarehouse = () => {
           className={`btn bg-blue text-white hover:bg-blue-700 ${loading ? 'opacity-50 cursor-not-allowed' : ''}`}
           disabled={loading}
         >
-          {loading ? 'Adding...' : 'Add Warehouse'}
+          {loading ? translations[language].adding : translations[language].add}
         </button>
       </form>
     </div>

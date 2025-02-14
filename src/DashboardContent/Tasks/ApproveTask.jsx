@@ -4,14 +4,46 @@ import axios from "axios";
 import Swal from "sweetalert2";
 import { useNavigate } from "react-router-dom";
 
+const translations = {
+  en: {
+    title: "Approve Task No ",
+    selectProduct: "Select Product",
+    quantity: "Quantity",
+    addProduct: "Add Another Product",
+    addRentals: "Add Rentals",
+    clear: "Clear",
+    success: "Rental data added successfully.",
+    duplicateProduct: "You cannot select the same product more than once.",
+    invalidQuantity: "The quantity cannot exceed the available stock of",
+    invalidInput: "Please select a product and specify a valid quantity for all products.",
+  },
+  th: {
+    title: "อนุมัติงาน หมายเลข ",
+    selectProduct: "เลือกสินค้า",
+    quantity: "จำนวน",
+    addProduct: "เพิ่มสินค้าสำหรับงาน",
+    addRentals: "เพิ่มการเช่า",
+    clear: "ล้างข้อมูล",
+    success: "เพิ่มข้อมูลการเช่าเรียบร้อยแล้ว",
+    duplicateProduct: "ไม่สามารถเลือกสินค้าซ้ำได้",
+    invalidQuantity: "จำนวนต้องไม่เกินจำนวนสินค้าที่มีอยู่",
+    invalidInput: "กรุณาเลือกสินค้าและระบุจำนวนที่ถูกต้องสำหรับทุกสินค้า",
+  },
+};
+
 const ApproveTask = () => {
-  const { taskId } = useParams(); // ดึง taskId จาก params
-  const [products, setProducts] = useState([]); // เก็บข้อมูลสินค้า
-  const [productSelections, setProductSelections] = useState([]); // เก็บข้อมูลสินค้าที่เลือกและจำนวน
+  const { taskId } = useParams();
+  const [products, setProducts] = useState([]);
+  const [productSelections, setProductSelections] = useState([]);
+  const [language, setLanguage] = useState("en"); // Default language
   const navigate = useNavigate();
-  
+
   useEffect(() => {
-    // ดึงข้อมูลสินค้า (product_id) จาก API
+    // Set language from localStorage or default to "en"
+    const savedLanguage = localStorage.getItem("language") || "en";
+    setLanguage(savedLanguage);
+
+    // Fetch products
     const fetchProducts = async () => {
       try {
         const response = await axios.get(
@@ -22,7 +54,6 @@ const ApproveTask = () => {
         );
         setProducts(filteredProducts);
       } catch (error) {
-        console.error("Error fetching products:", error);
         Swal.fire({
           title: "Error",
           text: "Failed to load products.",
@@ -34,42 +65,40 @@ const ApproveTask = () => {
     fetchProducts();
   }, []);
 
-  // ฟังก์ชันเพื่อจัดการการเพิ่มสินค้าใน productSelections
-  // ฟังก์ชันเพื่อจัดการการเพิ่มสินค้าใน productSelections
-const handleAddProduct = () => {
-    // ตรวจสอบก่อนว่า product_id ที่เลือกมีอยู่ใน productSelections แล้วหรือไม่
+  const t = (key) => translations[language][key]; // Translation function
+
+  const handleAddProduct = () => {
     const newSelections = [...productSelections];
-    if (newSelections.some(selection => selection.product_id === "")) {
+    if (newSelections.some((selection) => selection.product_id === "")) {
       Swal.fire({
-        title: "Invalid Selection",
-        text: "You cannot add the same product more than once.",
+        title: t("duplicateProduct"),
         icon: "warning",
       });
       return;
     }
     setProductSelections([
       ...productSelections,
-      { product_id: "", quantity: 1, stock_quantity: 0 }, // เพิ่ม stock_quantity
+      { product_id: "", quantity: 1, stock_quantity: 0 },
     ]);
   };
-  
-  // ฟังก์ชันเพื่อจัดการการแก้ไขข้อมูลสินค้าใน productSelections
+
   const handleProductChange = (index, field, value) => {
     const newSelections = [...productSelections];
     newSelections[index][field] = value;
-  
-    // If the product is changed, update stock_quantity
+
     if (field === "product_id") {
-      // ตรวจสอบว่าเลือกสินค้าที่ซ้ำไหม
-      if (newSelections.some((selection, i) => selection.product_id === value && i !== index)) {
+      if (
+        newSelections.some(
+          (selection, i) => selection.product_id === value && i !== index
+        )
+      ) {
         Swal.fire({
-          title: "Duplicate Product",
-          text: "You cannot select the same product more than once.",
+          title: t("duplicateProduct"),
           icon: "warning",
         });
         return;
       }
-  
+
       const selectedProduct = products.find(
         (product) => product.product_id === value
       );
@@ -77,54 +106,45 @@ const handleAddProduct = () => {
         newSelections[index].stock_quantity = selectedProduct.stock_quantity;
       }
     }
-  
-    // ตรวจสอบจำนวนสินค้า
+
     if (field === "quantity") {
       const quantity = parseInt(value, 10);
-  
       const product = products.find(
         (product) => product.product_id == newSelections[index].product_id
       );
       if (quantity > product?.stock_quantity) {
         Swal.fire({
-          title: "Invalid Quantity",
-          text: `The quantity cannot exceed the available stock of ${product?.stock_quantity}`,
+          title: t("invalidQuantity"),
+          text: `${t("invalidQuantity")} ${product?.stock_quantity}`,
           icon: "warning",
         });
-        return; // ไม่ให้เปลี่ยนจำนวนสินค้าเมื่อเกิน stock_quantity
+        return;
       }
     }
-  
+
     setProductSelections(newSelections);
   };
-  
-  
 
-  // ฟังก์ชันในการเคลียร์ข้อมูล
   const handleClear = () => {
-    setProductSelections([]); // รีเซ็ตค่า productSelections
+    setProductSelections([]);
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
 
-    // ตรวจสอบให้แน่ใจว่าผู้ใช้เลือกสินค้าทุกตัวและจำนวนที่ถูกต้อง
     if (
       productSelections.some(
         (selection) => !selection.product_id || selection.quantity <= 0
       )
     ) {
       Swal.fire({
-        title: "Invalid input",
-        text: "Please select a product and specify a valid quantity for all products.",
+        title: t("invalidInput"),
         icon: "warning",
       });
-      
       return;
     }
 
     try {
-      // ส่งข้อมูลทั้งหมดไปที่ API เพื่อเพิ่มข้อมูลในตาราง rental
       const response = await axios.post(
         `${import.meta.env.VITE_SERVER_URL}/rental`,
         {
@@ -141,12 +161,10 @@ const handleAddProduct = () => {
       if (response.status === 200) {
         Swal.fire({
           title: "Success",
-          text: "Rental data added successfully.",
+          text: t("success"),
           icon: "success",
         });
-
         navigate("/dashboard/tasks");
-
       } else {
         Swal.fire({
           title: "Error",
@@ -164,8 +182,10 @@ const handleAddProduct = () => {
   };
 
   return (
-    <div className="p-8 rounded-lg shadow-lg w-full mx-auto font-inter h-full">
-      <h2 className="text-xl font-semibold mb-6">Approve Task {taskId}</h2>
+    <div className="p-8 rounded-lg shadow-lg w-full mx-auto font-prompt h-full">
+      <h2 className="text-xl font-semibold mb-6">
+        {t("title")} {taskId}
+      </h2>
 
       <form onSubmit={handleSubmit}>
         {productSelections.map((selection, index) => (
@@ -175,7 +195,7 @@ const handleAddProduct = () => {
                 htmlFor={`product-${index}`}
                 className="block text-sm font-medium text-gray-700"
               >
-                Select Product {index + 1}
+                {t("selectProduct")} {index + 1}
               </label>
               <select
                 id={`product-${index}`}
@@ -185,10 +205,10 @@ const handleAddProduct = () => {
                 }
                 className="select select-bordered w-full"
               >
-                <option value="">-- Select a product --</option>
-                {products.map((product) => (
-                  <option key={product.product_id} value={product.product_id}>
-                    {product.name}
+                <option value="">{t("selectProduct")}</option>
+                {products.map((product, idx) => (
+                  <option key={idx + 1} value={product.product_id}>
+                    {idx + 1}. {product.name}
                   </option>
                 ))}
               </select>
@@ -199,7 +219,7 @@ const handleAddProduct = () => {
                 htmlFor={`quantity-${index}`}
                 className="block text-sm font-medium text-gray-700 mt-2"
               >
-                Quantity
+                {t("quantity")}
               </label>
               <input
                 type="number"
@@ -220,14 +240,14 @@ const handleAddProduct = () => {
           onClick={handleAddProduct}
           className="btn btn-success mb-4 text-white"
         >
-          Add Another Product
+          {t("addProduct")}
         </button>
 
         <button
           type="submit"
           className="btn bg-blue hover:bg-blue text-white mx-2"
         >
-          Add Rentals
+          {t("addRentals")}
         </button>
 
         <button
@@ -235,7 +255,7 @@ const handleAddProduct = () => {
           onClick={handleClear}
           className="btn btn-error text-white"
         >
-          Clear
+          {t("clear")}
         </button>
       </form>
     </div>

@@ -190,95 +190,101 @@ const Checkout = () => {
 
   return (
     <>
-      <Navbar />
-      <div className="bg-gray-100 min-h-screen flex flex-col font-prompt">
-        <main className="flex-grow">
-          <section className="container mx-auto p-6">
-            <h1 className="text-4xl font-bold text-gray-800 mb-4 text-center">
-              ตรวจสอบรายการสินค้า
-            </h1>
-            <div className="bg-white shadow-md rounded-lg p-6">
-              {Object.entries(itemCounts).map(([name, quantity]) => {
-                const item = cartItems.find((i) => i.name === name);
-                return (
-                  <div
-                    key={name}
-                    className="flex justify-between mb-4 border-b pb-2"
-                  >
-                    <div>
-                      <h2 className="text-lg font-semibold">{name}</h2>
-                      <p className="text-gray-600">
-                        Price: ${item.price.toFixed(2)}
-                      </p>
-                      <p className="text-gray-500">
-                        Stock: {item.stock_quantity}
-                      </p>
-                    </div>
-                    <div className="self-center flex items-center">
-                      <span className="text-lg font-bold text-gray-900">
-                        Quantity: {quantity}
-                      </span>
-                      <button
-                        onClick={() => handleRemoveItem(item.product_id)}
-                        className="ml-4 text-red-600 hover:text-red-800 transition duration-200"
-                      >
-                        Remove
-                      </button>
-                    </div>
+    <Navbar />
+    <div className="bg-gray-100 min-h-screen flex flex-col font-prompt">
+      <main className="flex-grow">
+        <section className="container mx-auto p-6">
+          <h1 className="text-4xl font-bold text-gray-800 mb-4 text-center">
+            ตรวจสอบรายการสินค้า
+          </h1>
+          <div className="bg-white shadow-md rounded-lg p-6">
+            {Object.entries(itemCounts).map(([name, quantity]) => {
+              const item = cartItems.find((i) => i.name === name);
+              return (
+                <div
+                  key={name}
+                  className="flex justify-between mb-4 border-b pb-2"
+                >
+                  <div>
+                    <h2 className="text-lg font-semibold">{name}</h2>
+                    <p className="text-gray-600">
+                      Price: ${item.price.toFixed(2)}
+                    </p>
+                    <p className="text-gray-500">
+                      Stock: {item.stock_quantity}
+                    </p>
                   </div>
-                );
-              })}
-
-              {/* Payment Method Selection */}
-              <div className="mb-4">
-                <label
-                  htmlFor="paymentMethod"
-                  className="block text-sm font-medium text-gray-700"
-                >
-                  วิธีการชำระเงิน
-                </label>
-                <select
-                  id="paymentMethod"
-                  className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-1 focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
-                  value={selectedPaymentMethod}
-                  onChange={(e) => setSelectedPaymentMethod(e.target.value)}
-                >
-                  <option value="">เลือกวิธีการชำระเงิน</option>
-                  {paymentMethods.map((method) => (
-                    <option key={method.method_id} value={method.method_id}>
-                      {method.method_name}
-                    </option>
-                  ))}
-                </select>
+                  <div className="self-center flex items-center">
+                    <span className="text-lg font-bold text-gray-900">
+                      Quantity: {quantity}
+                    </span>
+                    <button
+                      onClick={() => handleRemoveItem(item.product_id)}
+                      className="ml-4 text-red-600 hover:text-red-800 transition duration-200"
+                    >
+                      Remove
+                    </button>
+                  </div>
+                </div>
+              );
+            })}
+  
+            {/* 📌 แจ้งเตือนเรื่องที่อยู่ */}
+            <div className="p-4 bg-yellow-100 border-l-4 border-yellow-500 text-yellow-800 rounded-md mb-4">
+              ⚠️ โปรดตรวจสอบและกรอกที่อยู่ให้ถูกต้อง เนื่องจากบริการจัดส่งของเราจะดำเนินการตามข้อมูลที่อยู่ในโปรไฟล์ของคุณ
+            </div>
+  
+            {/* Payment Method Selection */}
+            <div className="mb-4">
+              <label
+                htmlFor="paymentMethod"
+                className="block text-sm font-medium text-gray-700"
+              >
+                วิธีการชำระเงิน
+              </label>
+              <select
+                id="paymentMethod"
+                className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-1 focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
+                value={selectedPaymentMethod}
+                onChange={(e) => setSelectedPaymentMethod(e.target.value)}
+              >
+                <option value="">เลือกวิธีการชำระเงิน</option>
+                {paymentMethods.map((method) => (
+                  <option key={method.method_id} value={method.method_id}>
+                    {method.method_name}
+                  </option>
+                ))}
+              </select>
+            </div>
+  
+            <div className="flex justify-between">
+              <div>
+                <h3 className="text-lg font-semibold text-gray-800">
+                  Total: {totalPrice}
+                </h3>
               </div>
-
-              <div className="flex justify-between">
-                <div>
-                  <h3 className="text-lg font-semibold text-gray-800">
-                    Total: {totalPrice}
-                  </h3>
-                </div>
-                <div className="flex space-x-4">
-                  <button
-                    onClick={handleContinueShopping}
-                    className="bg-gray-500 text-white px-4 py-2 rounded-md hover:bg-gray-600 transition duration-200"
-                  >
-                    Continue Shopping
-                  </button>
-                  <button
-                    onClick={handleCheckout}
-                    className="bg-blue text-white px-4 py-2 rounded-md hover:bg-blue transition duration-200"
-                  >
-                    Checkout
-                  </button>
-                </div>
+              <div className="flex space-x-4">
+                <button
+                  onClick={handleContinueShopping}
+                  className="bg-gray-500 text-white px-4 py-2 rounded-md hover:bg-gray-600 transition duration-200"
+                >
+                  Continue Shopping
+                </button>
+                <button
+                  onClick={handleCheckout}
+                  className="bg-blue text-white px-4 py-2 rounded-md hover:bg-blue transition duration-200"
+                >
+                  Checkout
+                </button>
               </div>
             </div>
-          </section>
-        </main>
-        <Footer />
-      </div>
-    </>
+          </div>
+        </section>
+      </main>
+      <Footer />
+    </div>
+  </>
+  
   );
 };
 

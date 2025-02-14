@@ -489,7 +489,6 @@ router.put("/task-tech/:id", (req, res) => {
     }
   );
 });
-
 router.post('/rental', (req, res) => {
   const { task_id, rentals } = req.body;
 
@@ -517,8 +516,8 @@ router.post('/rental', (req, res) => {
     const rentalValues = rentals.map((rental) => [
       task_id,
       rental.product_id,
-      existingRentalDates.rental_start_date || new Date().toISOString().split('T')[0], // ใช้วันที่เดิมหรือวันที่ปัจจุบัน
-      existingRentalDates.rental_end_date || new Date().toISOString().split('T')[0], // ใช้วันที่เดิมหรือวันที่ปัจจุบัน
+      existingRentalDates.rental_start_date || new Date().toISOString().split('T')[0],
+      existingRentalDates.rental_end_date || new Date().toISOString().split('T')[0],
       rental.quantity,
     ]);
 
@@ -575,10 +574,20 @@ router.post('/rental', (req, res) => {
         });
       });
 
-      return res.status(200).json({ message: 'Rental data added successfully and quantities updated' });
+      // อัพเดทสถานะของงานเป็น status_id = 4
+      const updateTaskStatusQuery = 'UPDATE tasks SET status_id = 4 WHERE task_id = ?';
+      db.query(updateTaskStatusQuery, [task_id], (err) => {
+        if (err) {
+          console.error('Error updating task status:', err);
+          return res.status(500).json({ message: 'Failed to update task status' });
+        }
+
+        return res.status(200).json({ message: 'Rental data added successfully, quantities updated, and task status updated' });
+      });
     });
   });
 });
+
 
 // rental/return endpoint สำหรับคืนทรัพยากร
 router.put('/rental/return/:taskId', async (req, res) => {

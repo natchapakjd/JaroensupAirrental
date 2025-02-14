@@ -136,7 +136,7 @@ const ThreeScence = () => {
   };
 
   return (
-    <div className="p-5 font-inter">
+    <div className="p-5 font-prompt">
       <h1 className="text-2xl font-bold ">ระบบประเมินพื้นที่และ BTU</h1>
       <div className="mt-4">
         <label className="block">

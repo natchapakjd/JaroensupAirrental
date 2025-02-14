@@ -7,6 +7,28 @@ import { useLocation } from 'react-router-dom';
 import { jwtDecode } from 'jwt-decode';
 import Cookies from 'universal-cookie';
 
+// ✅ Object สำหรับแปลภาษา
+const translations = {
+  th: {
+    title: "เปลี่ยนรหัสผ่าน",
+    newPassword: "รหัสผ่านใหม่",
+    confirmNewPassword: "ยืนยันรหัสผ่านใหม่",
+    changePassword: "เปลี่ยนรหัสผ่าน",
+    success: "เปลี่ยนรหัสผ่านสำเร็จ!",
+    error: "เกิดข้อผิดพลาดในการเปลี่ยนรหัสผ่าน",
+    mismatch: "รหัสผ่านไม่ตรงกัน",
+  },
+  en: {
+    title: "Change Password",
+    newPassword: "New Password",
+    confirmNewPassword: "Confirm New Password",
+    changePassword: "Change Password",
+    success: "Password changed successfully!",
+    error: "Error changing password.",
+    mismatch: "Passwords do not match.",
+  },
+};
+
 const ChangePassword = () => {
   const [userId, setUserId] = useState('');
   const [newPassword, setNewPassword] = useState('');
@@ -16,20 +38,29 @@ const ChangePassword = () => {
   const token = cookies.get("authToken");
   const decodeToken = jwtDecode(token);
   const id = decodeToken.id;
+  
+  // ✅ โหลดค่าภาษาเริ่มต้นจาก localStorage
+  const [language, setLanguage] = useState(localStorage.getItem("language") || "th");
 
   useEffect(() => {
     setUserId(id);
+    const handleLanguageChange = () => {
+      setLanguage(localStorage.getItem("language") || "th");
+    };
+    window.addEventListener("storage", handleLanguageChange);
+    return () => {
+      window.removeEventListener("storage", handleLanguageChange);
+    };
   }, []);
 
   const handleChangePassword = async (e) => {
     e.preventDefault();
-
     if (newPassword !== confirmPassword) {
       Swal.fire({
-        title: 'Error!',
-        text: 'Passwords do not match.',
+        title: translations[language].error,
+        text: translations[language].mismatch,
         icon: 'error',
-        confirmButtonText: 'Okay',
+        confirmButtonText: 'OK',
       });
       return;
     }
@@ -40,17 +71,15 @@ const ChangePassword = () => {
         newPassword,
       });
       Swal.fire({
-        title: 'Success!',
-        text: 'Password changed successfully!',
+        title: translations[language].success,
         icon: 'success',
-        confirmButtonText: 'Okay',
+        confirmButtonText: 'OK',
       });
     } catch (error) {
       Swal.fire({
-        title: 'Error!',
-        text: 'Error changing password.',
+        title: translations[language].error,
         icon: 'error',
-        confirmButtonText: 'Okay',
+        confirmButtonText: 'OK',
       });
       console.error(error);
     }
@@ -63,11 +92,11 @@ const ChangePassword = () => {
       {!isDashboard && <Navbar />}
       <div className="flex items-center justify-center min-h-screen bg-gray-100 font-prompt">
         <div className="bg-white p-8 rounded-lg shadow-md w-full max-w-md">
-          <h2 className="text-2xl font-bold text-center mb-6">Change Password</h2>
+          <h2 className="text-2xl font-bold text-center mb-6">{translations[language].title}</h2>
           <form onSubmit={handleChangePassword} className="space-y-4">
             <div>
               <label className="label">
-                <span className="label-text">New Password</span>
+                <span className="label-text">{translations[language].newPassword}</span>
               </label>
               <input
                 type="password"
@@ -79,7 +108,7 @@ const ChangePassword = () => {
             </div>
             <div>
               <label className="label">
-                <span className="label-text">Confirm New Password</span>
+                <span className="label-text">{translations[language].confirmNewPassword}</span>
               </label>
               <input
                 type="password"
@@ -90,7 +119,7 @@ const ChangePassword = () => {
               />
             </div>
             <button type="submit" className="btn bg-blue hover:bg-blue text-white w-full">
-              Change Password
+              {translations[language].changePassword}
             </button>
           </form>
         </div>

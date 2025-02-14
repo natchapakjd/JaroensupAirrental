@@ -6,6 +6,53 @@ import { useNavigate } from 'react-router-dom';
 const AddProduct = () => {
   const navigate = useNavigate(); 
 
+  // Translation object for localization
+  const translation = {
+    en: {
+      title: "Add New Product",
+      name: "Name:",
+      description: "Description:",
+      price: "Price:",
+      stock_quantity: "Stock Quantity:",
+      brand: "Brand:",
+      category: "Category:",
+      warehouse: "Warehouse:",
+      product_type: "Product Type:",
+      product_image: "Product Image:",
+      submit: "Submit",
+      selectBrand: "Select Brand",
+      selectCategory: "Select Category",
+      selectWarehouse: "Select Warehouse",
+      selectProductType: "Select Product Type",
+      errorFetching: "Failed to fetch data.",
+      productAdded: "Product added successfully",
+      error: "Error",
+    },
+    th: {
+      title: "เพิ่มสินค้าผลิตภัณฑ์ใหม่",
+      name: "ชื่อ:",
+      description: "คำอธิบาย:",
+      price: "ราคา:",
+      stock_quantity: "จำนวนในสต็อก:",
+      brand: "แบรนด์:",
+      category: "หมวดหมู่:",
+      warehouse: "คลังสินค้า:",
+      product_type: "ประเภทสินค้า:",
+      product_image: "รูปภาพสินค้า:",
+      submit: "ส่งข้อมูล",
+      selectBrand: "เลือกแบรนด์",
+      selectCategory: "เลือกหมวดหมู่",
+      selectWarehouse: "เลือกคลังสินค้า",
+      selectProductType: "เลือกประเภทสินค้า",
+      errorFetching: "ไม่สามารถดึงข้อมูลได้",
+      productAdded: "เพิ่มสินค้าสำเร็จ",
+      error: "ข้อผิดพลาด",
+    }
+  };
+
+  // Set the default language to English (can be switched dynamically based on user's preference)
+  const [language, setLanguage] = useState(localStorage.getItem('language')||'th');
+
   const [formData, setFormData] = useState({
     name: "",
     description: "",
@@ -14,21 +61,21 @@ const AddProduct = () => {
     brand_id: "",
     category_id: "",
     warehouse_id: "",
-    product_type_id: "",  // Add this line
+    product_type_id: "",  
     product_image: null,
-    model_file: null,  // Add state for .gltf file
+    model_file: null,
   });
 
   const [brands, setBrands] = useState([]);
   const [categories, setCategories] = useState([]);
   const [warehouses, setWarehouses] = useState([]);
-  const [productTypes, setProductTypes] = useState([]);  // Add state for product types
+  const [productTypes, setProductTypes] = useState([]);
 
   useEffect(() => {
     fetchBrands();
     fetchCategories();
     fetchWarehouses();
-    fetchProductTypes();  // Fetch product types on component mount
+    fetchProductTypes();
   }, []);
 
   const fetchBrands = async () => {
@@ -38,8 +85,8 @@ const AddProduct = () => {
     } catch (error) {
       console.error("Error fetching brands:", error);
       Swal.fire({
-        title: "Error",
-        text: "Failed to fetch brands.",
+        title: translation[language].error,
+        text: translation[language].errorFetching,
         icon: "error",
       });
     }
@@ -52,8 +99,8 @@ const AddProduct = () => {
     } catch (error) {
       console.error("Error fetching categories:", error);
       Swal.fire({
-        title: "Error",
-        text: "Failed to fetch categories.",
+        title: translation[language].error,
+        text: translation[language].errorFetching,
         icon: "error",
       });
     }
@@ -66,22 +113,22 @@ const AddProduct = () => {
     } catch (error) {
       console.error("Error fetching warehouses:", error);
       Swal.fire({
-        title: "Error",
-        text: "Failed to fetch warehouses.",
+        title: translation[language].error,
+        text: translation[language].errorFetching,
         icon: "error",
       });
     }
   };
 
-  const fetchProductTypes = async () => {  // Function to fetch product types
+  const fetchProductTypes = async () => {
     try {
       const response = await axios.get(`${import.meta.env.VITE_SERVER_URL}/product-type`);
       setProductTypes(response.data);
     } catch (error) {
       console.error("Error fetching product types:", error);
       Swal.fire({
-        title: "Error",
-        text: "Failed to fetch product types.",
+        title: translation[language].error,
+        text: translation[language].errorFetching,
         icon: "error",
       });
     }
@@ -104,7 +151,7 @@ const AddProduct = () => {
       brand_id: "",
       category_id: "",
       warehouse_id: "",
-      product_type_id: "",  // Reset product type on clear
+      product_type_id: "",  
       product_image: null,
     });
   };
@@ -130,7 +177,7 @@ const AddProduct = () => {
 
       if (response.status === 200) {
         Swal.fire({
-          title: "Product added successfully",
+          title: translation[language].productAdded,
           icon: "success",
         });
         clearFormData();
@@ -143,19 +190,19 @@ const AddProduct = () => {
     } catch (error) {
       console.log(error)
       Swal.fire({
-        title: "Error",
-        text: error.response.data.error,
+        title: translation[language].error,
+        text: error.response?.data?.error || "An unknown error occurred.",
         icon: "error",
       });
     }
   };
 
   return (
-    <div className="p-8 rounded-lg shadow-lg w-full mx-auto font-inter h-full">
-      <h1 className="text-2xl font-semibold mb-6">Add New Product</h1>
+    <div className="p-8 rounded-lg shadow-lg w-full mx-auto font-prompt h-full">
+      <h1 className="text-2xl font-semibold mb-6">{translation[language].title}</h1>
       <form onSubmit={handleSubmit} className="text-sm font-medium">
         <div className="mb-4">
-          <label htmlFor="name" className="block text-gray-700 font-medium mb-2">Name:</label>
+          <label htmlFor="name" className="block text-gray-700 font-medium mb-2">{translation[language].name}</label>
           <input
             type="text"
             id="name"
@@ -167,7 +214,7 @@ const AddProduct = () => {
           />
         </div>
         <div className="mb-4">
-          <label htmlFor="description" className="block text-gray-700 font-medium mb-2">Description:</label>
+          <label htmlFor="description" className="block text-gray-700 font-medium mb-2">{translation[language].description}</label>
           <textarea
             id="description"
             name="description"
@@ -179,7 +226,7 @@ const AddProduct = () => {
           />
         </div>
         <div className="mb-4">
-          <label htmlFor="price" className="block text-gray-700 font-medium mb-2">Price:</label>
+          <label htmlFor="price" className="block text-gray-700 font-medium mb-2">{translation[language].price}</label>
           <input
             type="number"
             id="price"
@@ -192,7 +239,7 @@ const AddProduct = () => {
           />
         </div>
         <div className="mb-4">
-          <label htmlFor="stock_quantity" className="block text-gray-700 font-medium mb-2">Stock Quantity:</label>
+          <label htmlFor="stock_quantity" className="block text-gray-700 font-medium mb-2">{translation[language].stock_quantity}</label>
           <input
             type="number"
             id="stock_quantity"
@@ -204,7 +251,7 @@ const AddProduct = () => {
           />
         </div>
         <div className="mb-4">
-          <label htmlFor="brand_id" className="block text-gray-700 font-medium mb-2">Brand:</label>
+          <label htmlFor="brand_id" className="block text-gray-700 font-medium mb-2">{translation[language].brand}</label>
           <select
             id="brand_id"
             name="brand_id"
@@ -213,7 +260,7 @@ const AddProduct = () => {
             className="w-full p-2 border border-gray-300 rounded-lg"
             required
           >
-            <option value="">Select Brand</option>
+            <option value="">{translation[language].selectBrand}</option>
             {brands.map((brand) => (
               <option key={brand.brand_id} value={brand.brand_id}>
                 {brand.name}
@@ -222,7 +269,7 @@ const AddProduct = () => {
           </select>
         </div>
         <div className="mb-4">
-          <label htmlFor="category_id" className="block text-gray-700 font-medium mb-2">Category:</label>
+          <label htmlFor="category_id" className="block text-gray-700 font-medium mb-2">{translation[language].category}</label>
           <select
             id="category_id"
             name="category_id"
@@ -231,7 +278,7 @@ const AddProduct = () => {
             className="w-full p-2 border border-gray-300 rounded-lg"
             required
           >
-            <option value="">Select Category</option>
+            <option value="">{translation[language].selectCategory}</option>
             {categories.map((category) => (
               <option key={category.category_id} value={category.category_id}>
                 {category.name}
@@ -240,7 +287,7 @@ const AddProduct = () => {
           </select>
         </div>
         <div className="mb-4">
-          <label htmlFor="warehouse_id" className="block text-gray-700 font-medium mb-2">Warehouse:</label>
+          <label htmlFor="warehouse_id" className="block text-gray-700 font-medium mb-2">{translation[language].warehouse}</label>
           <select
             id="warehouse_id"
             name="warehouse_id"
@@ -249,7 +296,7 @@ const AddProduct = () => {
             className="w-full p-2 border border-gray-300 rounded-lg"
             required
           >
-            <option value="">Select Warehouse</option>
+            <option value="">{translation[language].selectWarehouse}</option>
             {warehouses.map((warehouse) => (
               <option key={warehouse.warehouse_id} value={warehouse.warehouse_id}>
                 {warehouse.location}
@@ -258,7 +305,7 @@ const AddProduct = () => {
           </select>
         </div>
         <div className="mb-4">
-          <label htmlFor="product_type_id" className="block text-gray-700 font-medium mb-2">Product Type:</label>
+          <label htmlFor="product_type_id" className="block text-gray-700 font-medium mb-2">{translation[language].product_type}</label>
           <select
             id="product_type_id"
             name="product_type_id"
@@ -267,17 +314,17 @@ const AddProduct = () => {
             className="w-full p-2 border border-gray-300 rounded-lg"
             required
           >
-            <option value="">Select Product Type</option>
+            <option value="">{translation[language].selectProductType}</option>
             {productTypes.map((productType) => (
               <option key={productType.product_type_id} value={productType.product_type_id}>
-                {productType.product_type_name}  {/* Assuming type_name is the field for product type name */}
+                {productType.product_type_name}
               </option>
             ))}
           </select>
         </div>
 
         <div className="mb-4">
-          <label htmlFor="product_image" className="block text-gray-700 font-medium mb-2">Product Image:</label>
+          <label htmlFor="product_image" className="block text-gray-700 font-medium mb-2">{translation[language].product_image}</label>
           <input
             type="file"
             id="product_image"
@@ -290,7 +337,7 @@ const AddProduct = () => {
           type="submit"
           className="text-white bg-blue hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm w-full sm:w-auto px-5 py-2.5 text-center"
         >
-          Submit
+          {translation[language].submit}
         </button>
       </form>
     </div>

@@ -4,6 +4,62 @@ import { Link } from "react-router-dom";
 import Swal from "sweetalert2";
 import { format } from "date-fns";
 import Loading from "../../components/Loading";
+const translations = {
+  en: {
+    userList: "User List",
+    addTechnician: "Add Technician",
+    addUser: "Add User",
+    searchUser: "Search User",
+    allRoles: "All Roles",
+    avatar: "Avatar",
+    username: "Username",
+    email: "Email",
+    role: "Role",
+    createdAt: "Created At",
+    actions: "Actions",
+    noUsersFound: "No users found.",
+    details: "Details",
+    edit: "Edit",
+    delete: "Delete",
+    confirmDeleteTitle: "Are you sure?",
+    confirmDeleteText: "You won't be able to revert this!",
+    confirmDeleteButton: "Yes, delete it!",
+    cancelButton: "Cancel",
+    deleted: "Deleted!",
+    deletedText: "User has been deleted.",
+    previous: "previous",
+    next: "next",
+    of: "of",
+    page: "page"
+  },
+  th: {
+    userList: "รายการผู้ใช้",
+    addTechnician: "เพิ่มช่างเทคนิค",
+    addUser: "เพิ่มผู้ใช้",
+    searchUser: "ค้นหาผู้ใช้",
+    allRoles: "ทุกบทบาท",
+    avatar: "อวาตาร์",
+    username: "ชื่อผู้ใช้",
+    email: "อีเมล",
+    role: "บทบาท",
+    createdAt: "วันที่สร้าง",
+    actions: "การกระทำ",
+    noUsersFound: "ไม่พบผู้ใช้",
+    details: "รายละเอียด",
+    edit: "แก้ไข",
+    delete: "ลบ",
+    confirmDeleteTitle: "คุณแน่ใจหรือไม่?",
+    confirmDeleteText: "คุณจะไม่สามารถกู้คืนข้อมูลนี้ได้!",
+    confirmDeleteButton: "ใช่, ลบมัน!",
+    cancelButton: "ยกเลิก",
+    deleted: "ลบแล้ว!",
+    deletedText: "ผู้ใช้ได้ถูกลบแล้ว",
+    previous: "ก่อนหน้า",
+    next: "ถัดไป",
+    of: "จาก",
+    page: "หน้า"
+  },
+};
 
 const UserContent = () => {
   const [users, setUsers] = useState([]);
@@ -14,6 +70,8 @@ const UserContent = () => {
   const [currentPage, setCurrentPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
   const [loading,setLoading] =useState(true)
+  const [language, setLanguage] = useState(localStorage.getItem("language"||"th"));
+
   const pageLimit = 10;
 
   useEffect(() => {
@@ -124,18 +182,20 @@ const UserContent = () => {
     return <Loading/>
   }
   return (
-    <div className="font-inter mt-5 mx-16">
+    <div className="font-prompt mt-5 mx-16">
       <div className="flex justify-between items-center mb-4">
-        <h2 className="text-xl font-semibold my-5">User List</h2>
+        <h2 className="text-xl font-semibold my-5">
+          {translations[language].userList}
+        </h2>
         <div className="flex justify-end gap-2 mb-4">
           <Link to="/dashboard/user/add-tech">
             <button className="btn bg-success hover:bg-success text-white">
-              Add Technician
+              {translations[language].addTechnician}
             </button>
           </Link>
           <Link to="/dashboard/user/add">
             <button className="btn bg-blue hover:bg-blue text-white">
-              Add User
+              {translations[language].addUser}
             </button>
           </Link>
         </div>
@@ -155,7 +215,7 @@ const UserContent = () => {
             value={selectedRole}
             onChange={handleRoleChange}
           >
-            <option value="">All Roles</option>
+            <option value=""> {translations[language].role}</option>
             {roles.map((role) => (
               <option key={role.role_id} value={role.role_name}>
                 {role.role_name}
@@ -169,12 +229,12 @@ const UserContent = () => {
         <table className="table w-full">
           <thead>
             <tr>
-              <th>Avatar</th>
-              <th>Username</th>
-              <th>Email</th>
-              <th>Role</th>
-              <th>Created At</th>
-              <th>Actions</th>
+              <th> {translations[language].avatar}</th>
+              <th> {translations[language].username}</th>
+              <th> {translations[language].email}</th>
+              <th> {translations[language].role}</th>
+              <th> {translations[language].createdAt}</th>
+              <th> {translations[language].actions}</th>
             </tr>
           </thead>
           <tbody>
@@ -204,19 +264,19 @@ const UserContent = () => {
                     <div className="flex gap-2">
                       <Link to={`/dashboard/user/${user.user_id}`}>
                         <button className="btn btn-ghost btn-xs">
-                          Details
+                          {translations[language].details}
                         </button>
                       </Link>
                       <Link to={`/dashboard/user/edit/${user.user_id}`}>
                         <button className="btn btn-success text-white btn-xs">
-                          Edit
+                          {translations[language].edit}
                         </button>
                       </Link>
                       <button
                         className="btn btn-error btn-xs text-white"
                         onClick={() => handleDelete(user.user_id)}
                       >
-                        Delete
+                        {translations[language].delete}
                       </button>
                     </div>
                   </td>
@@ -242,10 +302,10 @@ const UserContent = () => {
             currentPage === totalPages ? "text-gray-400" : "text-black"
           }`}
         >
-          Previous
+          {translations[language].previous}
         </p>
         <span className="flex items-center justify-center">
-          Page {currentPage} of {totalPages}
+          {translations[language].page} {currentPage} {translations[language].of}  {totalPages}
         </span>
         <p
           onClick={() => handlePageChange(currentPage + 1)}
@@ -254,7 +314,7 @@ const UserContent = () => {
             currentPage === totalPages ? "text-gray-400" : "text-black"
           }`}
         >
-          Next
+          {translations[language].next}
         </p>
       </div>
     </div>

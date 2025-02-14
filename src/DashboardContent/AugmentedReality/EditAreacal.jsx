@@ -1,8 +1,36 @@
 import React, { useState, useEffect } from "react";
-import { useParams, useNavigate } from "react-router-dom";
 import axios from "axios";
 import Swal from "sweetalert2";
+import { useNavigate, useParams } from "react-router-dom";
 import Loading from "../../components/Loading";
+
+// Translations object
+const translations = {
+  en: {
+    editAreacal: "Edit Area Calculation",
+    locationName: "Location Name",
+    width: "Width",
+    height: "Height",
+    airConditionersNeeded: "Air Conditioners Needed",
+    fiveTonUsed: "5 Ton AC Used",
+    tenTonUsed: "10 Ton AC Used",
+    twentyTonUsed: "20 Ton AC Used",
+    areaType: "Area Type",
+    submit: "Update",
+  },
+  th: {
+    editAreacal: "แก้ไขการคำนวณพื้นที่",
+    locationName: "ชื่อสถานที่",
+    width: "ความกว้าง",
+    height: "ความสูง",
+    airConditionersNeeded: "จำนวนเครื่องปรับอากาศที่ต้องการ",
+    fiveTonUsed: "เครื่องปรับอากาศ 5 ตันที่ใช้",
+    tenTonUsed: "เครื่องปรับอากาศ 10 ตันที่ใช้",
+    twentyTonUsed: "เครื่องปรับอากาศ 20 ตันที่ใช้",
+    areaType: "ประเภทพื้นที่",
+    submit: "อัปเดต",
+  },
+};
 
 const EditAreacal = () => {
   const { areaId } = useParams();
@@ -13,13 +41,40 @@ const EditAreacal = () => {
     width: "",
     height: "",
     air_conditioners_needed: "",
-    area_type: "",
+    room_type_id: "",
     air_5ton_used: "",
     air_10ton_used: "",
     air_20ton_used: "",
   });
   const [loading, setLoading] = useState(true);
+  const [language, setLanguage] = useState(localStorage.getItem("language") || "en");
+  const [areaTypes, setAreaTypes] = useState([]);
 
+  useEffect(() => {
+    const fetchAreaTypes = async () => {
+      try {
+        const res = await axios.get(`${import.meta.env.VITE_SERVER_URL}/area-types`);
+        setAreaTypes(res.data);
+      } catch (err) {
+        console.error("Error fetching area types:", err);
+      }
+    };
+
+    fetchAreaTypes();
+  }, []);
+
+  useEffect(() => {
+    const interval = setInterval(() => {
+      const currentLanguage = localStorage.getItem("language") || "en";
+      if (currentLanguage !== language) {
+        setLanguage(currentLanguage);
+      }
+    }, 500);
+
+    return () => clearInterval(interval);
+  }, [language]);
+
+  // Fetch area calculation data
   useEffect(() => {
     const fetchData = async () => {
       try {
@@ -72,23 +127,11 @@ const EditAreacal = () => {
   }
 
   return (
-    <div className="mx-auto p-6 bg-white shadow rounded-lg font-inter">
-      <h2 className="text-2xl font-bold mb-4">Edit Area Calculation</h2>
+    <div className="mx-auto p-6 bg-white shadow rounded-lg font-prompt">
+      <h2 className="text-2xl font-bold mb-4">{translations[language].editAreacal}</h2>
       <form onSubmit={handleSubmit} className="space-y-4">
         <label className="block">
-          Assignment ID
-          <input
-            type="text"
-            name="assignment_id"
-            value={formData.assignment_id}
-            onChange={handleChange}
-            className="w-full p-2 border rounded"
-            disabled
-          />
-        </label>
-
-        <label className="block">
-          Location Name
+          {translations[language].locationName}
           <input
             type="text"
             name="location_name"
@@ -100,7 +143,7 @@ const EditAreacal = () => {
         </label>
 
         <label className="block">
-          Width (m)
+          {translations[language].width} (m)
           <input
             type="number"
             name="width"
@@ -112,7 +155,7 @@ const EditAreacal = () => {
         </label>
 
         <label className="block">
-          Height (m)
+          {translations[language].height} (m)
           <input
             type="number"
             name="height"
@@ -124,7 +167,7 @@ const EditAreacal = () => {
         </label>
 
         <label className="block">
-          AC Needed
+          {translations[language].airConditionersNeeded}
           <input
             type="number"
             name="air_conditioners_needed"
@@ -136,7 +179,7 @@ const EditAreacal = () => {
         </label>
 
         <label className="block">
-          5 Ton AC Used
+          {translations[language].fiveTonUsed}
           <input
             type="number"
             name="air_5ton_used"
@@ -148,7 +191,7 @@ const EditAreacal = () => {
         </label>
 
         <label className="block">
-          10 Ton AC Used
+          {translations[language].tenTonUsed}
           <input
             type="number"
             name="air_10ton_used"
@@ -160,7 +203,7 @@ const EditAreacal = () => {
         </label>
 
         <label className="block">
-          20 Ton AC Used
+          {translations[language].twentyTonUsed}
           <input
             type="number"
             name="air_20ton_used"
@@ -172,7 +215,7 @@ const EditAreacal = () => {
         </label>
 
         <label className="block">
-          Area Type
+          {translations[language].areaType}
           <select
             name="area_type"
             value={formData.area_type}
@@ -180,15 +223,12 @@ const EditAreacal = () => {
             className="w-full p-2 border rounded"
             required
           >
-            <option value="750">1. ห้องนอนปกติ - ไม่โดนแดดโดยตรง</option>
-            <option value="800">2. ห้องนอนปกติ - โดนแดดมาก</option>
-            <option value="850">3. ห้องทำงาน - ไม่โดนแดดโดยตรง</option>
-            <option value="900">4. ห้องทำงาน - โดนแดดมาก</option>
-            <option value="950">5. ร้านอาหาร/ร้านค้า - ไม่โดนแดด</option>
-            <option value="1000">6. ร้านอาหาร/ร้านค้า - โดนแดดมาก</option>
-            <option value="1100">7. ห้องประชุม</option>
-            <option value="1200">8. ห้องประชุมขนาดใหญ่เพดานสูง</option>
-            <option value="1300">9. สนามเปิด/พื้นที่เปิด</option>
+            <option value="">Select an area type</option>
+            {areaTypes.map((type,index) => (
+              <option key={index+1} value={type.id}>
+                {index+1} {type.room_name}
+              </option>
+            ))}
           </select>
         </label>
 
@@ -196,7 +236,7 @@ const EditAreacal = () => {
           type="submit"
           className="w-full bg-blue text-white py-2 rounded hover:bg-blue"
         >
-          Update
+          {translations[language].submit}
         </button>
       </form>
     </div>

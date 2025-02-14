@@ -2,6 +2,51 @@ import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import Swal from 'sweetalert2';
 
+ const translations = {
+  en: {
+    selectUser: 'Select User',
+    specialization: 'Specialization',
+    nationality: 'Nationality',
+    bankAccount: 'Bank Account Number',
+    specialSkills: 'Special Skills',
+    workExperience: 'Work Experience',
+    backgroundCheckStatus: 'Background Check Status',
+    startDate: 'Start Date',
+    idCardImage: 'ID Card Image URL',
+    criminalRecordImage: 'Criminal Record Image URL',
+    driverLicenseImage: 'Driver License Image URL',
+    additionalImage: 'Additional Image URL',
+    outsourceTechnician: 'Outsourced Technician',
+    addTechnician: 'Add Technician',
+    successMessage: 'Technician added successfully',
+    errorMessage: 'Error adding technician',
+    pending: 'Pending',
+    completed: 'Completed',
+    failed: 'Failed',
+  },
+  th: {
+    selectUser: 'เลือกผู้ใช้',
+    specialization: 'ความชำนาญ',
+    nationality: 'สัญชาติ',
+    bankAccount: 'หมายเลขบัญชีธนาคาร',
+    specialSkills: 'ทักษะพิเศษ',
+    workExperience: 'ประสบการณ์การทำงาน',
+    backgroundCheckStatus: 'สถานะการตรวจสอบประวัติ',
+    startDate: 'วันที่เริ่มงาน',
+    idCardImage: 'URL รูปบัตรประชาชน',
+    criminalRecordImage: 'URL รูปประวัติอาชญากรรม',
+    driverLicenseImage: 'URL รูปใบขับขี่',
+    additionalImage: 'URL รูปภาพเพิ่มเติม',
+    outsourceTechnician: 'ช่างภายนอก?',
+    addTechnician: 'เพิ่มช่างเทคนิค',
+    successMessage: 'เพิ่มช่างเทคนิคสำเร็จ',
+    errorMessage: 'เกิดข้อผิดพลาดในการเพิ่มช่างเทคนิค',
+    pending: 'รอดำเนินการ',
+    completed: 'เสร็จสิ้น',
+    failed: 'ล้มเหลว',
+  },
+};
+
 const AddTechnician = () => {
   const [users, setUsers] = useState([]);
   const [formData, setFormData] = useState({
@@ -23,6 +68,8 @@ const AddTechnician = () => {
     criminal_record_image_url: '',
     additional_image_url: '',
   });
+  
+  const [language, setLanguage] = useState(localStorage.getItem('language'||'th')); // You can change this dynamically
 
   useEffect(() => {
     const fetchUsers = async () => {
@@ -50,7 +97,7 @@ const AddTechnician = () => {
       const response = await axios.post(`${import.meta.env.VITE_SERVER_URL}/technician`, formData);
       if (response.status === 201) {
         Swal.fire({
-          title: 'Technician added successfully',
+          title: translations[language].successMessage,
           icon: 'success',
         });
         setFormData({
@@ -75,7 +122,7 @@ const AddTechnician = () => {
       }
     } catch (error) {
       Swal.fire({
-        title: 'Error',
+        title: translations[language].errorMessage,
         text: error.response?.data?.message || error.message,
         icon: 'error',
       });
@@ -84,11 +131,11 @@ const AddTechnician = () => {
 
   return (
     <div className="mx-auto p-6 bg-white rounded-lg shadow-md h-screen">
-      <h2 className="text-2xl font-bold mb-4">Add Technician</h2>
+      <h2 className="text-2xl font-bold mb-4">{translations[language].addTechnician}</h2>
       <form onSubmit={handleSubmit} className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm font-medium">
         {/* User Selection */}
         <div>
-          <label htmlFor="user_id" className="block mb-1">Select User</label>
+          <label htmlFor="user_id" className="block mb-1">{translations[language].selectUser}</label>
           <select
             name="user_id"
             id="user_id"
@@ -97,7 +144,7 @@ const AddTechnician = () => {
             required
             className="select select-bordered w-full"
           >
-            <option value="">-- Select User --</option>
+            <option value="">-- {translations[language].selectUser} --</option>
             {users.map((user) => (
               <option key={user.user_id} value={user.user_id}>
                 {user.firstname} {user.lastname} - {user.email}
@@ -108,7 +155,7 @@ const AddTechnician = () => {
 
         {/* Specialization */}
         <div >
-          <label htmlFor="specialization" className="block mb-1">Specialization</label>
+          <label htmlFor="specialization" className="block mb-1">{translations[language].specialization}</label>
           <input
             type="text"
             name="specialization"
@@ -122,7 +169,7 @@ const AddTechnician = () => {
 
         {/* Nationality */}
         <div>
-          <label htmlFor="nationality" className="block mb-1">Nationality</label>
+          <label htmlFor="nationality" className="block mb-1">{translations[language].nationality}</label>
           <input
             type="text"
             name="nationality"
@@ -134,8 +181,9 @@ const AddTechnician = () => {
           />
         </div>
 
+        {/* Bank Account */}
         <div>
-          <label htmlFor="bank_account_number" className="block mb-1">Bank Account Number</label>
+          <label htmlFor="bank_account_number" className="block mb-1">{translations[language].bankAccount}</label>
           <input
             type="text"
             name="bank_account_number"
@@ -145,11 +193,10 @@ const AddTechnician = () => {
             className="input input-bordered w-full"
           />
         </div>
-       
 
         {/* Special Skills */}
         <div>
-          <label htmlFor="special_skills" className="block mb-1">Special Skills</label>
+          <label htmlFor="special_skills" className="block mb-1">{translations[language].specialSkills}</label>
           <textarea
             name="special_skills"
             id="special_skills"
@@ -159,10 +206,9 @@ const AddTechnician = () => {
           />
         </div>
 
-        {/* Background Check Status */}
-        
+        {/* Work Experience */}
         <div>
-          <label htmlFor="work_experience" className="block mb-1">Work Experience</label>
+          <label htmlFor="work_experience" className="block mb-1">{translations[language].workExperience}</label>
           <textarea
             name="work_experience"
             id="work_experience"
@@ -172,8 +218,9 @@ const AddTechnician = () => {
           />
         </div>
 
+        {/* Background Check Status */}
         <div>
-          <label htmlFor="background_check_status" className="block mb-1">Background Check Status</label>
+          <label htmlFor="background_check_status" className="block mb-1">{translations[language].backgroundCheckStatus}</label>
           <select
             name="background_check_status"
             id="background_check_status"
@@ -181,17 +228,15 @@ const AddTechnician = () => {
             onChange={handleChange}
             className="select select-bordered w-full"
           >
-            <option value="pending">Pending</option>
-            <option value="completed">Completed</option>
-            <option value="failed">Failed</option>
+            <option value="pending">{translations[language].pending}</option>
+            <option value="completed">{translations[language].completed}</option>
+            <option value="failed">{translations[language].failed}</option>
           </select>
         </div>
-        
-        
 
         {/* Start Date */}
         <div>
-          <label htmlFor="start_date" className="block mb-1">Start Date</label>
+          <label htmlFor="start_date" className="block mb-1">{translations[language].startDate}</label>
           <input
             type="date"
             name="start_date"
@@ -202,10 +247,9 @@ const AddTechnician = () => {
           />
         </div>
 
-
         {/* ID Card Image URL */}
         <div>
-          <label htmlFor="id_card_image_url" className="block mb-1">ID Card Image URL</label>
+          <label htmlFor="id_card_image_url" className="block mb-1">{translations[language].idCardImage}</label>
           <input
             type="text"
             name="id_card_image_url"
@@ -218,7 +262,7 @@ const AddTechnician = () => {
 
         {/* Criminal Record Image URL */}
         <div>
-          <label htmlFor="criminal_record_image_url" className="block mb-1">Criminal Record Image URL</label>
+          <label htmlFor="criminal_record_image_url" className="block mb-1">{translations[language].criminalRecordImage}</label>
           <input
             type="text"
             name="criminal_record_image_url"
@@ -228,8 +272,10 @@ const AddTechnician = () => {
             className="input input-bordered w-full"
           />
         </div>
+
+        {/* Driver License Image URL */}
         <div>
-          <label htmlFor="driver_license_image_url" className="block mb-1">Driver License Image URL</label>
+          <label htmlFor="driver_license_image_url" className="block mb-1">{translations[language].driverLicenseImage}</label>
           <input
             type="text"
             name="driver_license_image_url"
@@ -239,8 +285,10 @@ const AddTechnician = () => {
             className="input input-bordered w-full"
           />
         </div>
+
+        {/* Additional Image URL */}
         <div>
-          <label htmlFor="additional_image_url" className="block mb-1">Additional Image URL</label>
+          <label htmlFor="additional_image_url" className="block mb-1">{translations[language].additionalImage}</label>
           <input
             type="text"
             name="additional_image_url"
@@ -250,6 +298,8 @@ const AddTechnician = () => {
             className="input input-bordered w-full"
           />
         </div>
+
+        {/* Outsource Technician */}
         <div>
           <label htmlFor="isOutsource" className="flex items-center">
             <input
@@ -258,15 +308,15 @@ const AddTechnician = () => {
               id="isOutsource"
               checked={formData.isOutsource}
               onChange={handleChange}
-              className="checkbox"
             />
-            Outsourced Technician
+            <span className="ml-2">{translations[language].outsourceTechnician}</span>
           </label>
         </div>
+
         {/* Submit Button */}
-        <div className="col-span-2 flex justify-end">
-          <button type="submit" className="btn bg-blue hover:bg-blue text-white ">
-            Add Technician
+        <div className="col-span-2 text-center mt-4">
+          <button type="submit" className="btn bg-blue w-full text-white hover:bg-blue">
+            {translations[language].addTechnician}
           </button>
         </div>
       </form>

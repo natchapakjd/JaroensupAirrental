@@ -63,15 +63,17 @@ import AddAreacal from '../DashboardContent/AugmentedReality/AddAreacal'
 import EditAreacal from '../DashboardContent/AugmentedReality/EditAreacal'
 import EditBorrowProduct from '../DashboardContent/BorrowProduct/EditBorrowProduct'
 import AreacalDetails from '../DashboardContent/AugmentedReality/AreacalDetails'
+import Setting from '../DashboardContent/Settings/Setting'
 
 const DashboardRoute = () => {
   return (
       <div className='flex'>
         <Sidebar />
-        <div className='w-full bg-gray-50'>
+        <div className='w-full bg-gray-50 font-prompt'>
           <Header/>
           <Routes>
             <Route path="*" element={<PageNotFound />} />
+            <Route path="settings" element={<Setting />} />
             <Route path="home" element={<DashboardContent />} />
             <Route path="change-password" element={<ChangePassword />} />
             <Route path="profile" element={<ProfileSetting />} />
@@ -85,7 +87,7 @@ const DashboardRoute = () => {
             <Route path="applicants/add" element={<AddApplicant />} />
             <Route path="applicants/edit/:applicantId" element={<EditApplicant />} />
             <Route path="applicants/:id" element={<ApplicantDetails />} />
-            <Route path="applicant/sending-email/:id" element={<SendApplicantEmail />} />
+            <Route path="applicants/sending-email/:id" element={<SendApplicantEmail />} />
             <Route path="history-log" element={<HistoryLogContent />} />
             <Route path="reviews" element={<ReviewContent />} />
             <Route path="reviews/add" element={<AddReview />} />
@@ -131,7 +133,7 @@ const DashboardRoute = () => {
             <Route path="area-cal/add" element={<AddAreacal />} /> 
             <Route path="area-cal/edit/:areaId" element={<EditAreacal />} /> 
             <Route path="borrows/edit/:borrowingId" element={<EditBorrowProduct />} /> 
-            <Route path="/area-cal/details/:area_calculation_id" element={<AreacalDetails />} />
+            <Route path="area-cal/details/:area_calculation_id" element={<AreacalDetails />} />
 
           </Routes>
         </div>

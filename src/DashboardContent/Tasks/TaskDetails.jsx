@@ -12,6 +12,41 @@ const TaskDetails = () => {
   const [error, setError] = useState(null);
   const apiUrl = import.meta.env.VITE_SERVER_URL; // Use environment variable
 
+  // Determine language from localStorage
+  const language = localStorage.getItem("language") || "en";
+
+  // Translation object
+  const translations = {
+    en: {
+      taskDetails: "Task Details",
+      id: "ID",
+      description: "Description",
+      status: "Status",
+      startDate: "Start Date",
+      finishDate: "Finish Date",
+      address: "Address",
+      quantityUsed: "Quantity Used",
+      name: "Name",
+      noTaskFound: "No task found.",
+      failedToLoad: "Failed to load task details.",
+    },
+    th: {
+      taskDetails: "รายละเอียดงาน",
+      id: "รหัสงาน",
+      description: "รายละเอียด",
+      status: "สถานะ",
+      startDate: "วันที่เริ่มต้น",
+      finishDate: "วันที่สิ้นสุด",
+      address: "ที่อยู่",
+      quantityUsed: "จำนวนที่ใช้",
+      name: "ชื่อ",
+      noTaskFound: "ไม่พบงาน",
+      failedToLoad: "ไม่สามารถโหลดรายละเอียดงานได้",
+    },
+  };
+
+  const t = translations[language];
+
   useEffect(() => {
     fetchTaskDetails();
   }, [taskId]);
@@ -22,36 +57,36 @@ const TaskDetails = () => {
       setTask(response.data);
     } catch (error) {
       console.error("Error fetching task details:", error);
-      setError("Failed to load task details.");
+      setError(t.failedToLoad);
     } finally {
       setLoading(false);
     }
   };
 
-  if (loading) return <Loading/>;
-
+  if (loading) return <Loading />;
 
   if (error) {
     return <p>{error}</p>;
   }
 
   if (!task) {
-    return <p>No task found.</p>;
+    return <p>{t.noTaskFound}</p>;
   }
 
   return (
-    <div className="p-8 rounded-lg shadow-lg w-full mx-auto font-inter h-screen">
-      <h2 className="text-2xl mb-4">Task Details: {task.title}</h2>
+    <div className="p-8 rounded-lg shadow-lg w-full mx-auto font-prompt h-screen">
+      <h2 className="text-2xl mb-4">
+        {t.taskDetails}: {task.title}
+      </h2>
       <div className="mb-4">
-        {task.task_id && <p><strong>ID:</strong> {task.task_id}</p>}
-        {task.description && <p><strong>Description:</strong> {task.description}</p>}
-        {task.status_id && <p><strong>Status:</strong> {task.status_name}</p>}
-        {/* {task.created_at && <p><strong>Created At:</strong> {new Date(task.created_at).toLocaleString()}</p>} */}
-        {task.appointment_date && <p><strong>Start Date:</strong> {new Date(task.appointment_date).toLocaleString()}</p>}
-        {task.rental_end_date && <p><strong>Finish Date:</strong> {new Date(task.rental_end_date).toLocaleDateString()}</p>}
-        {task.address && <p><strong>Address:</strong> {task.address}</p>}
-        {task.quantity_used && <p><strong>Quantity Used:</strong> {task.quantity_used}</p>}
-        {task.user_id && <p><strong>Name:</strong> {task.firstname} {task.lastname} </p>}
+        {task.task_id && <p><strong>{t.id}:</strong> {task.task_id}</p>}
+        {task.description && <p><strong>{t.description}:</strong> {task.description}</p>}
+        {task.status_id && <p><strong>{t.status}:</strong> {task.status_name}</p>}
+        {task.appointment_date && <p><strong>{t.startDate}:</strong> {new Date(task.appointment_date).toLocaleString()}</p>}
+        {task.rental_end_date && <p><strong>{t.finishDate}:</strong> {new Date(task.rental_end_date).toLocaleDateString()}</p>}
+        {task.address && <p><strong>{t.address}:</strong> {task.address}</p>}
+        {task.quantity_used && <p><strong>{t.quantityUsed}:</strong> {task.quantity_used}</p>}
+        {task.user_id && <p><strong>{t.name}:</strong> {task.firstname} {task.lastname}</p>}
       </div>
 
       {/* Map Section */}

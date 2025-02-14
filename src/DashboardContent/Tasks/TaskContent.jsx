@@ -19,6 +19,61 @@ const TaskContent = () => {
   const decodedToken = jwtDecode(token);
   const role = decodedToken.role;
   const techId = decodedToken.technicianId;
+  const apiUrl = import.meta.env.VITE_SERVER_URL;
+  const language = localStorage.getItem("language") || "en";
+
+  const translation = {
+    en: {
+      taskList: "Task List",
+      addTask: "Add Task",
+      assignTask: "Assign Task",
+      searchPlaceholder: "Search by description or type...",
+      allStatus: "All Status",
+      id: "ID",
+      type: "Type",
+      description: "Description",
+      dueDate: "Due Date",
+      dueTime: "Due Time",
+      status: "Status",
+      actions: "Actions",
+      approve: "Approve",
+      return: "Return",
+      edit: "Edit",
+      delete: "Delete",
+      viewDetails: "View Details",
+      noTasksFound: "No tasks found",
+      previous: "Previous",
+      next: "Next",
+      of: "of",
+      page: "page",
+    },
+    th: {
+      taskList: "รายการงาน",
+      addTask: "เพิ่มงาน",
+      assignTask: "มอบหมายงาน",
+      searchPlaceholder: "ค้นหาโดยคำอธิบายหรือลักษณะ...",
+      allStatus: "สถานะทั้งหมด",
+      id: "รหัส",
+      type: "ประเภท",
+      description: "คำอธิบาย",
+      dueDate: "วันที่ครบกำหนด",
+      dueTime: "เวลาที่ครบกำหนด",
+      status: "สถานะ",
+      actions: "การดำเนินการ",
+      approve: "อนุมัติ",
+      return: "คืนอุปกรณ์",
+      edit: "แก้ไข",
+      delete: "ลบ",
+      viewDetails: "ดูรายละเอียด",
+      noTasksFound: "ไม่พบงาน",
+      previous: "ก่อนหน้า",
+      next: "ถัดไป",
+      of: "จาก",
+      page: "หน้า",
+    },
+  };
+
+  const currentLang = translation[language];
 
   const navigate = useNavigate();
   useEffect(() => {
@@ -157,20 +212,20 @@ const TaskContent = () => {
   };
 
   return (
-    <div className="p-8 rounded-lg shadow-lg w-full mx-auto font-inter h-full">
+    <div className="p-8 rounded-lg shadow-lg w-full mx-auto font-prompt h-full">
       <div className="flex justify-between items-center mb-4">
-        <h2 className="text-xl font-semibold ">Task List</h2>
+        <h2 className="text-xl font-semibold ">{currentLang.taskList}</h2>
         <div className="flex gap-2">
           {role === 3 && (
             <>
               <Link to="/dashboard/tasks/add">
                 <button className="btn bg-blue text-white hover:bg-blue">
-                  Add Task
+                  {currentLang.addTask}
                 </button>
               </Link>
               <Link to="/dashboard/tasks/assign">
                 <button className="btn btn-success text-white">
-                  Assign Task
+                  {currentLang.assignTask}
                 </button>
               </Link>
             </>
@@ -191,7 +246,7 @@ const TaskContent = () => {
           value={filterStatus}
           onChange={(e) => setFilterStatus(e.target.value)}
         >
-          <option value="all">All Status</option>
+          <option value="all">{currentLang.allStatus}</option>
           {statuses.map((status) => (
             <option key={status.status_id} value={status.status_name}>
               {status.status_name}
@@ -203,20 +258,22 @@ const TaskContent = () => {
       <table className="table w-full border-collapse border border-gray-300">
         <thead className="sticky top-0 bg-gray-200">
           <tr>
-            <th className="border p-2 text-center">ID</th>
-            <th className="border p-2 text-center">Type</th>
-            <th className="border p-2 text-center">Description</th>
-            <th className="border p-2 text-center">Due Date</th>
-            <th className="border p-2 text-center">Due Time</th>
-            <th className="border p-2 text-center">Status</th>
-            <th className="border p-2 text-center">Actions</th>
+            <th className="border p-2 text-center">{currentLang.id}</th>
+            <th className="border p-2 text-center">{currentLang.type}</th>
+            <th className="border p-2 text-center">
+              {currentLang.description}
+            </th>
+            <th className="border p-2 text-center">{currentLang.dueDate}</th>
+            <th className="border p-2 text-center">{currentLang.dueTime}</th>
+            <th className="border p-2 text-center">{currentLang.status}</th>
+            <th className="border p-2 text-center">{currentLang.actions}</th>
           </tr>
         </thead>
         <tbody>
           {filteredTasks.length > 0 ? (
-            filteredTasks.map((task) => (
-              <tr key={task.task_id} className="hover:bg-gray-100">
-                <td className="border p-2 text-center">{task.task_id}</td>
+            filteredTasks.map((task, index) => (
+              <tr key={index + 1} className="hover:bg-gray-100">
+                <td className="border p-2 text-center">{index + 1}</td>
                 <td className="border p-2 text-center">{task.type_name}</td>
                 <td className="border p-2 text-center">{task.description}</td>
                 <td className="border p-2 text-center">
@@ -233,10 +290,10 @@ const TaskContent = () => {
                   <div className="flex justify-center gap-2">
                     {role === 3 && (
                       <>
-                        {task.status_id !== 2 && (
+                        {task.status_id !== 4 && task.status_id !== 2 && (
                           <Link to={`/dashboard/tasks/approve/${task.task_id}`}>
                             <button className="btn btn-success text-white">
-                              Approve
+                              {currentLang.approve}
                             </button>
                           </Link>
                         )}
@@ -246,19 +303,19 @@ const TaskContent = () => {
                             className="btn btn-success text-white"
                             onClick={() => handleReturn(task.task_id)}
                           >
-                            Return
+                            {currentLang.return}
                           </button>
                         )}
                         <Link to={`/dashboard/tasks/edit/${task.task_id}`}>
                           <button className="btn btn-success text-white">
-                            Edit
+                            {currentLang.edit}
                           </button>
                         </Link>
                         <button
                           onClick={() => handleDelete(task.task_id)}
                           className="btn bg-red-500 text-white hover:bg-red-600"
                         >
-                          Delete
+                          {currentLang.delete}
                         </button>
                       </>
                     )}
@@ -266,7 +323,7 @@ const TaskContent = () => {
                       onClick={() => handleViewDetails(task.task_id)}
                       className="btn bg-blue text-white hover:bg-blue"
                     >
-                      View Details
+                      {currentLang.viewDetails}
                     </button>
                   </div>
                 </td>
@@ -275,7 +332,7 @@ const TaskContent = () => {
           ) : (
             <tr>
               <td colSpan="7" className="border p-4 text-center">
-                No tasks found
+                {currentLang.noTasksFound}
               </td>
             </tr>
           )}
@@ -289,11 +346,11 @@ const TaskContent = () => {
           }`}
           style={{ pointerEvents: currentPage === 1 ? "none" : "auto" }}
         >
-          Previous
+          {currentLang.previous}
         </p>
 
         <span>
-          Page {currentPage} of {totalPages}
+          {currentLang.page} {currentPage} {currentLang.of} {totalPages}
         </span>
         <p
           onClick={() => handlePageChange(currentPage + 1)}
@@ -304,7 +361,7 @@ const TaskContent = () => {
             pointerEvents: currentPage === totalPages ? "none" : "auto",
           }}
         >
-          Next
+          {currentLang.next}
         </p>
       </div>
     </div>

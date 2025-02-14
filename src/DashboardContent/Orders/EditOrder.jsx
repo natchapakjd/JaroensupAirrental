@@ -1,9 +1,8 @@
 import React, { useState, useEffect } from "react";
 import axios from "axios";
 import Swal from "sweetalert2";
-import { useParams } from "react-router-dom";
+import { useNavigate, useParams } from "react-router-dom";
 import Loading from "../../components/Loading";
-
 const EditOrder = () => {
   const { orderId } = useParams();
   const [userId, setUserId] = useState("");
@@ -12,8 +11,27 @@ const EditOrder = () => {
   const [users, setUsers] = useState([]);
   const [products, setProducts] = useState([]);
   const [loading, setLoading] = useState(true);
-
+  const navigate = useNavigate();
   const apiUrl = import.meta.env.VITE_SERVER_URL;
+
+  // Translation variables
+  const translations = {
+    editOrderTitle: "แก้ไขคำสั่งซื้อ",
+    productLabel: "สินค้า",
+    quantityLabel: "จำนวน",
+    priceLabel: "ราคา",
+    totalPriceLabel: "ราคาทั้งหมด",
+    selectProduct: "เลือกสินค้าที่ต้องการ",
+    addItemButton: "เพิ่มสินค้า",
+    removeItemButton: "ลบสินค้า",
+    totalOrderPrice: "ราคาสั่งซื้อรวม",
+    updateOrderButton: "อัปเดตคำสั่งซื้อ",
+    selectProductOption: (product_id, name, stock_quantity) =>
+      `${product_id}. ${name} (คงเหลือ: ${stock_quantity})`,
+    errorFetchingData: "เกิดข้อผิดพลาดในการดึงข้อมูล",
+    errorUpdatingOrder: "ไม่สามารถอัปเดตคำสั่งซื้อได้",
+    successUpdatingOrder: "อัปเดตคำสั่งซื้อสำเร็จ",
+  };
 
   useEffect(() => {
     const fetchAllData = async () => {
@@ -43,7 +61,7 @@ const EditOrder = () => {
           order.items.reduce((total, item) => total + item.total_price, 0)
         );
       } catch (error) {
-        console.error("Error fetching data:", error);
+        console.error(translations.errorFetchingData, error);
       } finally {
         setLoading(false);
       }
@@ -80,9 +98,9 @@ const EditOrder = () => {
       if (productDetails) {
         newItems[index].name = productDetails.name;
         newItems[index].price = productDetails.price;
-        newItems[index].maxQuantity = productDetails.stock_quantity; // Add max quantity based on stock
-        newItems[index].quantity = 0; // Reset quantity
-        newItems[index].total_price = 0; // Reset total price
+        newItems[index].maxQuantity = productDetails.stock_quantity;
+        newItems[index].quantity = 0;
+        newItems[index].total_price = 0;
       } else {
         newItems[index].name = "";
         newItems[index].price = 0;
@@ -94,7 +112,7 @@ const EditOrder = () => {
 
     if (field === "quantity") {
       const maxQuantity = newItems[index].maxQuantity || 0;
-      newItems[index].quantity = Math.min(value, maxQuantity); // Limit quantity to max available
+      newItems[index].quantity = Math.min(value, maxQuantity);
       newItems[index].total_price = newItems[index].quantity * newItems[index].price;
     }
 
@@ -139,15 +157,16 @@ const EditOrder = () => {
       if (response.status === 200) {
         await Swal.fire({
           icon: "success",
-          title: "Order updated successfully!",
+          title: translations.successUpdatingOrder,
           confirmButtonText: "OK",
         });
       }
+      navigate('/dashboard/orders')
     } catch (error) {
       console.error("Error:", error);
       await Swal.fire({
         icon: "error",
-        title: "Failed to update order",
+        title: translations.errorUpdatingOrder,
         text: "Please check the console for details.",
         confirmButtonText: "OK",
       });
@@ -159,14 +178,14 @@ const EditOrder = () => {
   }
 
   return (
-    <div className="p-8 rounded-lg shadow-lg w-full mx-auto font-inter bg-base-100 h-full">
-      <h2 className="text-2xl mb-4 font-bold">Edit Order</h2>
+    <div className="p-8 rounded-lg shadow-lg w-full mx-auto font-prompt bg-base-100 h-full">
+      <h2 className="text-2xl mb-4 font-bold">{translations.editOrderTitle}</h2>
       <form onSubmit={handleSubmit} className="space-y-4 text-sm font-medium">
         {items.map((item, index) => (
           <div key={index} className="flex items-center space-x-4">
             <div className="flex-1">
               <label className="label">
-                <span className="label-text">Product</span>
+                <span className="label-text">{translations.productLabel}</span>
               </label>
               <select
                 value={item.productId}
@@ -177,18 +196,18 @@ const EditOrder = () => {
                 required
               >
                 <option value="" disabled>
-                  Select a product
+                  {translations.selectProduct}
                 </option>
-                {getFilteredProducts(index).map((product) => (
-                  <option key={product.product_id} value={product.product_id}>
-                    {product.product_id}. {product.name} (Stock: {product.stock_quantity})
+                {getFilteredProducts(index).map((product,index) => (
+                  <option key={index+1} value={product.product_id}>
+                    {index+1}. {translations.selectProductOption(product.name, product.stock_quantity)}
                   </option>
                 ))}
               </select>
             </div>
             <div className="flex-1">
               <label className="label">
-                <span className="label-text">Quantity</span>
+                <span className="label-text">{translations.quantityLabel}</span>
               </label>
               <input
                 type="number"
@@ -203,7 +222,7 @@ const EditOrder = () => {
             </div>
             <div className="flex-1">
               <label className="label">
-                <span className="label-text">Price</span>
+                <span className="label-text">{translations.priceLabel}</span>
               </label>
               <input
                 type="number"
@@ -214,7 +233,7 @@ const EditOrder = () => {
             </div>
             <div className="flex-1">
               <label className="label">
-                <span className="label-text">Total Price</span>
+                <span className="label-text">{translations.totalPriceLabel}</span>
               </label>
               <input
                 type="number"
@@ -228,7 +247,7 @@ const EditOrder = () => {
               onClick={() => handleRemoveItem(index)}
               className="btn btn-error text-white mt-9"
             >
-              Remove
+              {translations.removeItemButton}
             </button>
           </div>
         ))}
@@ -238,15 +257,15 @@ const EditOrder = () => {
           onClick={handleAddItem}
           className="btn bg-blue hover:bg-blue text-white"
         >
-          Add Item
+          {translations.addItemButton}
         </button>
 
         <div className="mt-4">
-          <strong>Total Order Price: </strong> {totalOrderPrice}
+          <strong>{translations.totalOrderPrice}: </strong> {totalOrderPrice}
         </div>
 
         <button type="submit" className="btn btn-success text-white">
-          Update Order
+          {translations.updateOrderButton}
         </button>
       </form>
     </div>

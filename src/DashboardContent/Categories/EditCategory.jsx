@@ -1,15 +1,43 @@
-import React, { useState, useEffect } from 'react';
-import axios from 'axios';
-import Swal from 'sweetalert2';
-import { useNavigate, useParams } from 'react-router-dom';
+import React, { useState, useEffect } from "react";
+import axios from "axios";
+import Swal from "sweetalert2";
+import { useNavigate, useParams } from "react-router-dom";
+
+// Translation strings for localization
+const translations = {
+  en: {
+    heading: "Edit Category",
+    nameLabel: "Name",
+    descriptionLabel: "Description",
+    updateButton: "Update Category",
+    successTitle: "Category updated successfully",
+    errorTitle: "Error",
+    errorMessage: "Failed to update category.",
+    fetchError: "Failed to fetch category data.",
+  },
+  th: {
+    heading: "แก้ไขหมวดหมู่",
+    nameLabel: "ชื่อ",
+    descriptionLabel: "คำอธิบาย",
+    updateButton: "อัพเดตหมวดหมู่",
+    successTitle: "อัพเดตหมวดหมู่สำเร็จ",
+    errorTitle: "ข้อผิดพลาด",
+    errorMessage: "ไม่สามารถอัพเดตหมวดหมู่ได้",
+    fetchError: "ไม่สามารถดึงข้อมูลหมวดหมู่ได้",
+  },
+};
 
 const EditCategory = () => {
   const navigate = useNavigate();
-  const { categoryId } = useParams(); // Get the category categoryId from the URL
+  const { categoryId } = useParams(); // Get the categoryId from the URL
   const [formData, setFormData] = useState({
     name: "",
-    description: ""
+    description: "",
   });
+
+  // Get the language from localStorage, defaulting to 'en'
+  const language = localStorage.getItem("language") || "en";
+  const t = translations[language]; // Get the translation for the selected language
 
   useEffect(() => {
     const fetchCategory = async () => {
@@ -17,13 +45,13 @@ const EditCategory = () => {
         const response = await axios.get(`${import.meta.env.VITE_SERVER_URL}/category/${categoryId}`);
         setFormData({
           name: response.data.name,
-          description: response.data.description
+          description: response.data.description,
         });
       } catch (error) {
         Swal.fire({
-          title: 'Error',
-          text: 'Failed to fetch category data.',
-          icon: 'error',
+          title: t.errorTitle,
+          text: t.fetchError,
+          icon: "error",
         });
       }
     };
@@ -45,34 +73,31 @@ const EditCategory = () => {
       const response = await axios.put(`${import.meta.env.VITE_SERVER_URL}/category/${categoryId}`, formData);
       if (response.status === 200) {
         Swal.fire({
-          title: 'Category updated successfully',
-          icon: 'success',
+          title: t.successTitle,
+          icon: "success",
         });
         setTimeout(() => {
-          navigate('/dashboard/categories');
+          navigate("/dashboard/categories");
         }, 800);
       } else {
-        throw new Error('Failed to update category.');
+        throw new Error(t.errorMessage);
       }
     } catch (error) {
       Swal.fire({
-        title: 'Error',
+        title: t.errorTitle,
         text: error.message,
-        icon: 'error',
+        icon: "error",
       });
     }
   };
 
   return (
-    <div className="p-8 rounded-lg shadow-lg w-full mx-auto font-inter h-screen">
-      <h1 className="text-2xl font-semibold mb-6">Edit Category</h1>
+    <div className="p-8 rounded-lg shadow-lg w-full mx-auto font-prompt h-screen">
+      <h1 className="text-2xl font-semibold mb-6">{t.heading}</h1>
       <form onSubmit={handleSubmit}>
         <div className="mb-4">
-          <label
-            htmlFor="name"
-            className="block text-gray-700 font-medium mb-2"
-          >
-            Name:
+          <label htmlFor="name" className="block text-gray-700 font-medium mb-2">
+            {t.nameLabel}:
           </label>
           <input
             type="text"
@@ -85,11 +110,8 @@ const EditCategory = () => {
           />
         </div>
         <div className="mb-4">
-          <label
-            htmlFor="description"
-            className="block text-gray-700 font-medium mb-2"
-          >
-            Description:
+          <label htmlFor="description" className="block text-gray-700 font-medium mb-2">
+            {t.descriptionLabel}:
           </label>
           <textarea
             id="description"
@@ -104,7 +126,7 @@ const EditCategory = () => {
           type="submit"
           className="text-white bg-blue hover:bg-blue focus:ring-4 focus:outline-none focus:ring-blue font-medium rounded-lg text-sm w-full sm:w-auto px-5 py-2.5 text-center"
         >
-          Update Category
+          {t.updateButton}
         </button>
       </form>
     </div>

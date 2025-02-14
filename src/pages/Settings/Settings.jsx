@@ -1,11 +1,36 @@
 // src/pages/Settings.js
-import React from "react";
-import { useNavigate } from "react-router-dom"; // Import useNavigate for navigation
+import React, { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
 import Navbar from "../../components/Navbar";
 import Footer from "../../components/Footer";
 
+const translations = {
+  th: {
+    allowNotification: "อนุญาตให้ส่งข้อความแจ้งเตือนผ่าน LINE หรือไม่?",
+    allow: "อนุญาต",
+  },
+  en: {
+    allowNotification: "Allow notifications via LINE?",
+    allow: "Allow",
+  },
+};
+
 const Settings = () => {
-  const navigate = useNavigate(); // Initialize navigate function
+  const navigate = useNavigate();
+  const [language, setLanguage] = useState(localStorage.getItem("language") || "th");
+
+  // ✅ ใช้ Event Listener ฟังการเปลี่ยนแปลงของ localStorage (Real-time Update)
+  useEffect(() => {
+    const handleStorageChange = () => {
+      setLanguage(localStorage.getItem("language") || "th");
+    };
+
+    window.addEventListener("storage", handleStorageChange);
+
+    return () => {
+      window.removeEventListener("storage", handleStorageChange);
+    };
+  }, []);
 
   // Navigate to line-profile page
   const goToLineProfile = () => {
@@ -17,13 +42,15 @@ const Settings = () => {
       <Navbar />
       <div className="container mx-auto p-6 font-prompt">
         <div className="bg-white shadow-md rounded-lg p-6 text-center">
-          <h2 className="text-lg font-bold">อนุญาตให้ส่งข้อความแจ้งเตือนผ่าน LINE หรือไม่?</h2>
+          <h2 className="text-lg font-bold">
+            {translations[language].allowNotification}
+          </h2>
           <div className="flex justify-center mt-4">
             <button
               onClick={goToLineProfile}
               className="btn bg-success text-white hover:bg-success"
             >
-              อนุญาต
+              {translations[language].allow}
             </button>
           </div>
         </div>

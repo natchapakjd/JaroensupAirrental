@@ -4,6 +4,46 @@ import { useParams, useNavigate } from "react-router-dom";
 import Swal from "sweetalert2";
 import Loading from "../../components/Loading";
 import { Link } from "react-router-dom";
+
+const translations = {
+  en: {
+    username: "Username",
+    firstname: "First Name",
+    lastname: "Last Name",
+    email: "Email",
+    phone: "Phone",
+    age: "Age",
+    address: "Address",
+    gender: "Gender",
+    date_of_birth: "Date of Birth",
+    profile_picture: "Profile Picture",
+    save_changes: "Save Changes",
+    edit_technician_profile: "Edit Technician Profile",
+    age_error: "You must be at least 18 years old",
+    invalid_dob: "Invalid Date of Birth",
+    edit_user: "Edit user",
+
+  },
+  th: {
+    username: "ชื่อผู้ใช้",
+    firstname: "ชื่อจริง",
+    lastname: "นามสกุล",
+    email: "อีเมล",
+    phone: "โทรศัพท์",
+    age: "อายุ",
+    address: "ที่อยู่",
+    gender: "เพศ",
+    date_of_birth: "วันเกิด",
+    profile_picture: "รูปโปรไฟล์",
+    save_changes: "บันทึกการเปลี่ยนแปลง",
+    edit_technician_profile: "แก้ไขโปรไฟล์ช่างเทคนิค",
+    age_error: "คุณต้องมีอายุอย่างน้อย 18 ปี",
+    invalid_dob: "วันเกิดไม่ถูกต้อง",
+    edit_user: "แก้ไขผู้ใช้งาน",
+
+  },
+};
+
 const EditUser = () => {
   const { userId } = useParams(); // Retrieve userId from URL
   const navigate = useNavigate();
@@ -23,6 +63,7 @@ const EditUser = () => {
   const [profileImage, setProfileImage] = useState(null);
   const [submitLoading, setSubmitLoading] = useState(false);
   const [genders, setGenders] = useState([]); // State to store gender options
+  const [language, setLanguage] = useState("th"); // State to store language (default: Thai)
 
   useEffect(() => {
     const fetchUserAndGenders = async () => {
@@ -74,8 +115,8 @@ const EditUser = () => {
 
     if (!isValidDateOfBirth(user.date_of_birth)) {
       Swal.fire({
-        title: "วันเกิดไม่ถูกต้อง",
-        text: "คุณต้องมีอายุอย่างน้อย 18 ปี",
+        title: translations[language].invalid_dob,
+        text: translations[language].age_error,
         icon: "error",
       });
       return;
@@ -110,14 +151,14 @@ const EditUser = () => {
   }
 
   return (
-    <div className="mx-auto p-6 bg-white rounded-lg shadow-md font-inter h-screen">
+    <div className="mx-auto p-6 bg-white rounded-lg shadow-md font-prompt h-screen">
       <div className="flex justify-between items-center mb-4">
-        <h1 className="text-2xl font-bold mb-6">Edit User</h1>
+        <h1 className="text-2xl font-bold mb-6">{translations[language].edit_user}</h1>
         {user.role_id === 2 ? (
           <div className="flex justify-end gap-2 mb-4">
             <Link to={`/dashboard/user/edit-tech/${userId}`}>
               <button className="btn bg-success hover:bg-success text-white">
-                Edit Technician Profile
+                {translations[language].edit_technician_profile}
               </button>
             </Link>
           </div>
@@ -127,7 +168,7 @@ const EditUser = () => {
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2 gap-6">
           {/* Username */}
           <div>
-            <label className="block text-gray-700">Username:</label>
+            <label className="block text-gray-700">{translations[language].username}:</label>
             <input
               type="text"
               name="username"
@@ -141,7 +182,7 @@ const EditUser = () => {
 
           {/* First Name */}
           <div>
-            <label className="block text-gray-700">First Name:</label>
+            <label className="block text-gray-700">{translations[language].firstname}:</label>
             <input
               type="text"
               name="firstname"
@@ -153,7 +194,7 @@ const EditUser = () => {
 
           {/* Last Name */}
           <div>
-            <label className="block text-gray-700">Last Name:</label>
+            <label className="block text-gray-700">{translations[language].lastname}:</label>
             <input
               type="text"
               name="lastname"
@@ -165,7 +206,7 @@ const EditUser = () => {
 
           {/* Email */}
           <div>
-            <label className="block text-gray-700">Email:</label>
+            <label className="block text-gray-700">{translations[language].email}:</label>
             <input
               type="email"
               name="email"
@@ -177,7 +218,7 @@ const EditUser = () => {
 
           {/* Phone */}
           <div>
-            <label className="block text-gray-700">Phone:</label>
+            <label className="block text-gray-700">{translations[language].phone}:</label>
             <input
               type="text"
               name="phone"
@@ -189,7 +230,7 @@ const EditUser = () => {
 
           {/* Age */}
           <div>
-            <label className="block text-gray-700">Age:</label>
+            <label className="block text-gray-700">{translations[language].age}:</label>
             <input
               type="number"
               name="age"
@@ -202,7 +243,7 @@ const EditUser = () => {
 
           {/* Address */}
           <div className="col-span-2">
-            <label className="block text-gray-700">Address:</label>
+            <label className="block text-gray-700">{translations[language].address}:</label>
             <textarea
               name="address"
               value={user.address}
@@ -213,14 +254,14 @@ const EditUser = () => {
 
           {/* Gender */}
           <div>
-            <label className="block text-gray-700">Gender:</label>
+            <label className="block text-gray-700">{translations[language].gender}:</label>
             <select
               name="gender_id"
               value={user.gender_id}
               onChange={handleChange}
               className="mt-1 block w-full p-2 border border-gray-300 rounded"
             >
-              <option value="">Select Gender</option>
+              <option value="">{translations[language].select_gender}</option>
               {genders.map((gender) => (
                 <option key={gender.gender_id} value={gender.gender_id}>
                   {gender.gender_name}
@@ -231,7 +272,7 @@ const EditUser = () => {
 
           {/* Date of Birth */}
           <div>
-            <label className="block text-gray-700">Date of Birth:</label>
+            <label className="block text-gray-700">{translations[language].date_of_birth}:</label>
             <input
               type="date"
               name="date_of_birth"
@@ -243,7 +284,7 @@ const EditUser = () => {
 
           {/* Profile Image */}
           <div>
-            <label className="block text-gray-700">Profile Picture:</label>
+            <label className="block text-gray-700">{translations[language].profile_picture}:</label>
             <input
               type="file"
               name="profile_image"
@@ -259,7 +300,7 @@ const EditUser = () => {
             type="submit"
             className={`bg-blue text-white hover:bg-blue py-2 px-4 rounded`}
           >
-            Save Changes
+            {translations[language].save_changes}
           </button>
         </div>
       </form>

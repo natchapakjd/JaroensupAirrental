@@ -4,6 +4,58 @@ import Swal from "sweetalert2";
 import { useParams } from "react-router-dom";
 import Loading from "../../components/Loading";
 import { useNavigate } from "react-router-dom";
+
+const translations = {
+  en: {
+    title: "Register as Technician",
+    description: "Please fill in the form below to register",
+    firstNameLabel: "First Name",
+    lastNameLabel: "Last Name",
+    birthDateLabel: "Date of Birth",
+    phoneLabel: "Phone Number",
+    emailLabel: "Email",
+    addressLabel: "Address",
+    positionLabel: "Position Applied",
+    notesLabel: "Notes",
+    consentLabel: "I agree to the collection of my data",
+    submitButton: "Edit Application",
+    files: "Upload Files",
+    id_card_image: "ID Card Copy",
+    driver_license_image: "Driver License",
+    criminal_record_image: "Criminal Record",
+    additional_image: "Additional Documents",
+    editApplicantLabel: "Edit Applicant",
+    statusLabel: "Status",
+    interviewDateLabel: "interview date"
+    
+    // Add other translations here
+  },
+  th: {
+    title: "สมัครเป็นช่าง",
+    description: "กรุณากรอกข้อมูลด้านล่างเพื่อลงทะเบียน",
+    firstNameLabel: "ชื่อ",
+    lastNameLabel: "นามสกุล",
+    birthDateLabel: "วันเกิด",
+    phoneLabel: "หมายเลขโทรศัพท์",
+    emailLabel: "อีเมล",
+    addressLabel: "ที่อยู่",
+    positionLabel: "ตำแหน่งที่สมัคร",
+    notesLabel: "หมายเหตุ",
+    consentLabel: "ฉันยินยอมให้เก็บข้อมูลของฉันลงในระบบ",
+    submitButton: "แก้ไขผู้สมัคร",
+    files: "แนบไฟล์",
+    id_card_image: "สำเนาบัตรประชาชน",
+    driver_license_image: "ใบขับขี่",
+    criminal_record_image: "ประวัติอาชญากรรม",
+    additional_image: "เอกสารเพิ่มเติม",
+    editApplicantLabel: "แก้ไขผู้สมัคร",
+    statusLabel: "สถานะ",
+    interviewDateLabel: "วันสัมภาษณ์"
+
+    // Add other translations here
+  },
+};
+
 const EditApplicant = () => {
   const { applicantId } = useParams();
   const [applicant, setApplicant] = useState({
@@ -27,6 +79,7 @@ const EditApplicant = () => {
   const navigate = useNavigate(); // for navigation
   const [loading, setLoading] = useState(true); // เพิ่มสถานะการโหลด
   const [statuses, setStatuses] = useState([]);
+  const [language,setLanguage] = useState(localStorage.getItem('language')||'th')
 
   useEffect(() => {
     const fetchApplicantData = async () => {
@@ -165,16 +218,17 @@ const EditApplicant = () => {
     return <Loading />;
   }
   return (
-    <div className="mx-auto p-8 bg-white rounded-lg shadow-md font-inter">
-      <h2 className="text-2xl font-semibold text-center mb-6">
-        Edit Applicant
+    <div className="mx-auto p-8 bg-white rounded-lg shadow-md font-prompt">
+      <h2 className="text-2xl font-semibold  mb-6 text-left">
+        {translations[language].editApplicantLabel}
       </h2>
       <form onSubmit={handleSubmit}>
         <div className="grid grid-cols-1 gap-4">
           {/* First Name and Last Name */}
           <div className="grid grid-cols-2 gap-4">
             <div>
-              <label className="label">First Name</label>
+              <label className="label">{translations[language].firstNameLabel}
+              </label>
               <input
                 type="text"
                 name="first_name"
@@ -185,7 +239,7 @@ const EditApplicant = () => {
               />
             </div>
             <div>
-              <label className="label">Last Name</label>
+              <label className="label">{translations[language].lastNameLabel}</label>
               <input
                 type="text"
                 name="last_name"
@@ -200,7 +254,7 @@ const EditApplicant = () => {
           {/* Date of Birth, Address, Email */}
           <div className="grid grid-cols-2 gap-4">
             <div>
-              <label className="label">Date of Birth</label>
+              <label className="label">{translations[language].birthDateLabel}</label>
               <input
                 type="date"
                 name="date_of_birth"
@@ -218,7 +272,7 @@ const EditApplicant = () => {
             </div>
             
             <div>
-              <label className="label">Email</label>
+              <label className="label">{translations[language].emailLabel}</label>
               <input
                 type="email"
                 name="email"
@@ -233,7 +287,7 @@ const EditApplicant = () => {
           {/* Phone Number and Position Applied */}
           <div className="grid grid-cols-2 gap-4">
             <div>
-              <label className="label">Phone Number</label>
+              <label className="label">{translations[language].phoneLabel}</label>
               <input
                 type="tel"
                 name="phone_number"
@@ -244,7 +298,7 @@ const EditApplicant = () => {
               />
             </div>
             <div>
-              <label className="label">Position Applied</label>
+              <label className="label">{translations[language].positionLabel}</label>
               <select
                 name="position_applied"
                 value={applicant.position_applied}
@@ -264,7 +318,7 @@ const EditApplicant = () => {
           {/* Interview Date and Status */}
           <div className="grid grid-cols-2 gap-4">
             <div>
-              <label className="label">Interview Date</label>
+              <label className="label">{translations[language].interviewDateLabel}</label>
               <input
                 type="date"
                 name="interview_date"
@@ -274,7 +328,7 @@ const EditApplicant = () => {
               />
             </div>
             <div>
-              <label className="label">Status</label>
+              <label className="label">{translations[language].statusLabel}</label>
               <select
                 name="status_id"
                 value={applicant.status_id}
@@ -296,7 +350,7 @@ const EditApplicant = () => {
           </div>
 
           <div>
-              <label className="label">Address</label>
+              <label className="label">{translations[language].addressLabel}</label>
               <textarea
                 name="address"
                 value={applicant.address}
@@ -307,7 +361,7 @@ const EditApplicant = () => {
             </div>
           {/* Notes */}
           <div>
-            <label className="label">Notes</label>
+            <label className="label">{translations[language].notesLabel}</label>
             <textarea
               name="notes"
               value={applicant.notes}
@@ -319,7 +373,7 @@ const EditApplicant = () => {
           {/* Image Uploads */}
           <div className="grid grid-cols-2 gap-4">
             <div>
-              <label className="label">ID Card</label>
+              <label className="label">{translations[language].id_card_image}</label>
               <input
                 type="file"
                 name="id_card_image"
@@ -328,7 +382,7 @@ const EditApplicant = () => {
               />
             </div>
             <div>
-              <label className="label">Driver License</label>
+              <label className="label">{translations[language].driver_license_image}</label>
               <input
                 type="file"
                 name="driver_license_image"
@@ -340,7 +394,7 @@ const EditApplicant = () => {
 
           <div className="grid grid-cols-2 gap-4">
             <div>
-              <label className="label">Criminal Record</label>
+              <label className="label">{translations[language].criminal_record_image}</label>
               <input
                 type="file"
                 name="criminal_record_image"
@@ -349,7 +403,7 @@ const EditApplicant = () => {
               />
             </div>
             <div>
-              <label className="label">Additional Image</label>
+              <label className="label">{translations[language].statusLabel}</label>
               <input
                 type="file"
                 name="additional_image"
@@ -364,7 +418,7 @@ const EditApplicant = () => {
               type="submit"
               className="btn bg-blue hover:bg-blue text-white w-full"
             >
-              Update Applicant
+              {translations[language].submitButton}
             </button>
           </div>
         </div>

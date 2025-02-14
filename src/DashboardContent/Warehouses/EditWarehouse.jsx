@@ -4,12 +4,47 @@ import Swal from 'sweetalert2';
 import { useParams, useNavigate } from 'react-router-dom';
 import Loading from '../../components/Loading';
 
+const translations = {
+  th: {
+    editWarehouse: "แก้ไขคลังสินค้า",
+    location: "ที่ตั้ง",
+    capacity: "ความจุ",
+    updateWarehouse: "อัปเดตคลังสินค้า",
+    updating: "กำลังอัปเดต...",
+    errorFetch: "ไม่สามารถดึงข้อมูลคลังสินค้าได้",
+    successUpdate: "อัปเดตคลังสินค้าสำเร็จ",
+    errorUpdate: "ไม่สามารถอัปเดตคลังสินค้าได้",
+  },
+  en: {
+    editWarehouse: "Edit Warehouse",
+    location: "Location",
+    capacity: "Capacity",
+    updateWarehouse: "Update Warehouse",
+    updating: "Updating...",
+    errorFetch: "Failed to fetch warehouse details.",
+    successUpdate: "Warehouse updated successfully.",
+    errorUpdate: "Failed to update warehouse.",
+  },
+};
+
 const EditWarehouse = () => {
   const { warehouseId } = useParams(); // Get the warehouse ID from the URL parameters
   const [location, setLocation] = useState('');
   const [capacity, setCapacity] = useState('');
   const [loading, setLoading] = useState(true);
+  const [language, setLanguage] = useState(localStorage.getItem("language") || "en");
   const navigate = useNavigate();
+
+  useEffect(() => {
+    const interval = setInterval(() => {
+      const currentLanguage = localStorage.getItem("language") || "en";
+      if (currentLanguage !== language) {
+        setLanguage(currentLanguage);
+      }
+    }, 500);
+
+    return () => clearInterval(interval);
+  }, [language]);
 
   useEffect(() => {
     const fetchWarehouse = async () => {
@@ -19,7 +54,7 @@ const EditWarehouse = () => {
         setLocation(location);
         setCapacity(capacity);
       } catch (err) {
-        Swal.fire('Error!', 'Failed to fetch warehouse details.', 'error');
+        Swal.fire('Error!', translations[language].errorFetch, 'error');
         console.error(err);
       } finally {
         setLoading(false);
@@ -27,7 +62,7 @@ const EditWarehouse = () => {
     };
 
     fetchWarehouse();
-  }, [warehouseId]);
+  }, [warehouseId, language]);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -35,30 +70,29 @@ const EditWarehouse = () => {
 
     try {
       const response = await axios.put(`${import.meta.env.VITE_SERVER_URL}/warehouse/${warehouseId}`, {
-        name,
         location,
         capacity: parseInt(capacity, 10),
       });
       if (response.status === 200) {
-        Swal.fire('Success!', 'Warehouse updated successfully.', 'success');
+        Swal.fire('Success!', translations[language].successUpdate, 'success');
         navigate('/dashboard/warehouses'); // Redirect to the warehouses list page
       }
     } catch (err) {
-      Swal.fire('Error!', 'Failed to update warehouse.', 'error');
+      Swal.fire('Error!', translations[language].errorUpdate, 'error');
     } finally {
       setLoading(false);
     }
   };
 
   return (
-    <div className="p-8 rounded-lg shadow-lg w-full mx-auto  max-w-md mt-5">
-      <h1 className="text-2xl font-semibold mb-6">Edit Warehouse</h1>
+    <div className="p-8 rounded-lg shadow-lg w-full mx-auto max-w-md mt-5">
+      <h1 className="text-2xl font-semibold mb-6">{translations[language].editWarehouse}</h1>
       {loading ? (
-        <Loading/>
+        <Loading />
       ) : (
-        <form onSubmit={handleSubmit} className='text-sm font-medium'>
+        <form onSubmit={handleSubmit} className="text-sm font-medium">
           <div className="mb-4">
-            <label htmlFor="location" className="block text-sm font-medium text-gray-700">Location</label>
+            <label htmlFor="location" className="block text-sm font-medium text-gray-700">{translations[language].location}</label>
             <input
               type="text"
               id="location"
@@ -69,7 +103,7 @@ const EditWarehouse = () => {
             />
           </div>
           <div className="mb-4">
-            <label htmlFor="capacity" className="block text-sm font-medium text-gray-700">Capacity</label>
+            <label htmlFor="capacity" className="block text-sm font-medium text-gray-700">{translations[language].capacity}</label>
             <input
               type="number"
               id="capacity"
@@ -86,7 +120,7 @@ const EditWarehouse = () => {
             className={`btn bg-blue text-white hover:bg-blue ${loading ? 'opacity-50 cursor-not-allowed' : ''}`}
             disabled={loading}
           >
-            {loading ? 'Updating...' : 'Update Warehouse'}
+            {loading ? translations[language].updating : translations[language].updateWarehouse}
           </button>
         </form>
       )}

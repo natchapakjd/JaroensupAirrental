@@ -13,6 +13,7 @@ import imgSrc9 from "../../assets/images/IMG_0894.png";
 import imgSrc10 from "../../assets/images/IMG_0895.png";
 import imgSrc11 from "../../assets/images/IMG_0896.png";
 import { Link } from "react-router-dom";
+import { useState,useEffect } from "react";
 
 export const workExperiences = [
   {
@@ -57,19 +58,47 @@ export const workExperiences = [
   },
 ];
 
+const translations = {
+  th: {
+    header: "ผลงานเก่าของเรา",
+    subText:
+      "สำรวจโครงการและประสบการณ์สำคัญที่เรามีร่วมกับบริษัทต่าง ๆ",
+    details: "ดูรายละเอียด",
+  },
+  en: {
+    header: "Our Past Work",
+    subText:
+      "Explore some of the significant projects and experiences we've had with various companies.",
+    details: "View Details",
+  },
+};
+
 const WorkExperience = () => {
+  const [language, setLanguage] = useState(localStorage.getItem("language") || "th");
+
+  useEffect(() => {
+    const handleLanguageChange = () => {
+      setLanguage(localStorage.getItem("language") || "th");
+    };
+
+    window.addEventListener("storage", handleLanguageChange);
+
+    return () => {
+      window.removeEventListener("storage", handleLanguageChange);
+    };
+  }, []);
+
   return (
     <>
       <Navbar />
       <div className="bg-gray-100 min-h-screen py-8 font-prompt">
         <div className="container mx-auto px-6">
           <header className="text-center mb-12">
-            <h1 className="text-4xl font-bold text-gray-800 mb-4 ">
-              ผลงานเก่าของเรา
+            <h1 className="text-4xl font-bold text-gray-800 mb-4">
+              {translations[language].header}
             </h1>
             <p className="text-lg text-gray-600">
-              Explore some of the significant projects and experiences we've had
-              with various companies.
+              {translations[language].subText}
             </p>
           </header>
 
@@ -98,9 +127,9 @@ const WorkExperience = () => {
                     <div className="flex justify-end">
                       <Link
                         to={`/experience/${id}`}
-                        className="btn bg-blue hover:bg-blue text-white "
+                        className="btn bg-blue hover:bg-blue text-white"
                       >
-                        ดูรายละเอียด
+                        {translations[language].details}
                       </Link>
                     </div>
                   </div>

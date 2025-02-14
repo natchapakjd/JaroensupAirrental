@@ -2,13 +2,34 @@ import React, { useState } from 'react';
 import axios from 'axios';
 import Swal from 'sweetalert2';
 import { useNavigate } from 'react-router-dom'; // Import useNavigate
+const translations = {
+  en: {
+    heading: 'Add New Brand',
+    nameLabel: 'Name',
+    descriptionLabel: 'Description',
+    addButton: 'Add Brand',
+    addingButton: 'Adding...',
+    successMessage: 'Brand added successfully.',
+    errorMessage: 'Failed to add brand.',
+  },
+  th: {
+    heading: 'เพิ่มแบรนด์ใหม่',
+    nameLabel: 'ชื่อแบรนด์',
+    descriptionLabel: 'คำอธิบาย',
+    addButton: 'เพิ่มแบรนด์',
+    addingButton: 'กำลังเพิ่ม...',
+    successMessage: 'เพิ่มแบรนด์เรียบร้อยแล้ว.',
+    errorMessage: 'ไม่สามารถเพิ่มแบรนด์ได้.',
+  }
+};
 
 const AddBrand = () => {
   const [name, setName] = useState('');
   const [description, setDescription] = useState('');
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate(); // Initialize useNavigate
-
+  const language = localStorage.getItem('language') || 'en';
+  const t = translations[language]; // Get the translation for the selected language
   const handleSubmit = async (e) => {
     e.preventDefault();
     setLoading(true);
@@ -30,11 +51,11 @@ const AddBrand = () => {
   };
 
   return (
-    <div className="p-8 rounded-lg shadow-lg w-full mx-auto  max-w-md mt-5">
-      <h1 className="text-2xl font-semibold mb-6">Add New Brand</h1>
+    <div className="p-8 rounded-lg shadow-lg w-full mx-auto max-w-md mt-5">
+      <h1 className="text-2xl font-semibold mb-6">{t.heading}</h1>
       <form onSubmit={handleSubmit} className='text-sm font-medium'>
         <div className="mb-4">
-          <label htmlFor="name" className="block text-sm font-medium text-gray-700">Name</label>
+          <label htmlFor="name" className="block text-sm font-medium text-gray-700">{t.nameLabel}</label>
           <input
             type="text"
             id="name"
@@ -45,7 +66,7 @@ const AddBrand = () => {
           />
         </div>
         <div className="mb-4">
-          <label htmlFor="description" className="block text-sm font-medium text-gray-700">Description</label>
+          <label htmlFor="description" className="block text-sm font-medium text-gray-700">{t.descriptionLabel}</label>
           <textarea
             id="description"
             value={description}
@@ -60,7 +81,7 @@ const AddBrand = () => {
           className={`btn bg-blue text-white hover:bg-blue focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm w-full sm:w-auto px-5 py-2.5 text-center ${loading ? 'opacity-50 cursor-not-allowed' : ''}`}
           disabled={loading}
         >
-          {loading ? 'Adding...' : 'Add Brand'}
+          {loading ? t.addingButton : t.addButton}
         </button>
       </form>
     </div>

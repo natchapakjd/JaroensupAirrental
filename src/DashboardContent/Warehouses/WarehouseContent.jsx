@@ -1,9 +1,50 @@
-import React, { useState, useEffect } from 'react';
-import axios from 'axios';
-import Swal from 'sweetalert2';
-import { Link } from 'react-router-dom'; // Import Link for navigation
-import Loading from '../../components/Loading';
-
+import React, { useState, useEffect } from "react";
+import axios from "axios";
+import Swal from "sweetalert2";
+import { Link } from "react-router-dom"; // Import Link for navigation
+import Loading from "../../components/Loading";
+const translations = {
+  th: {
+    warehouses: "คลังสินค้า",
+    addWarehouse: "เพิ่มคลังสินค้า",
+    searchPlaceholder: "ค้นหาตามที่ตั้งหรือความจุ...",
+    noWarehouses: "ไม่มีคลังสินค้า",
+    id: "รหัส",
+    location: "ที่ตั้ง",
+    capacity: "ความจุ",
+    actions: "การกระทำ",
+    edit: "แก้ไข",
+    delete: "ลบ",
+    previous: "ก่อนหน้า",
+    next: "ถัดไป",
+    page: "หน้า",
+    of: "จาก",
+    deleteConfirm: "คุณแน่ใจหรือไม่?",
+    deleteText: "คุณจะไม่สามารถย้อนกลับได้!",
+    deleteSuccess: "ลบเรียบร้อย!",
+    deleteFail: "ลบไม่สำเร็จ",
+  },
+  en: {
+    warehouses: "Warehouses",
+    addWarehouse: "Add Warehouse",
+    searchPlaceholder: "Search by location or capacity...",
+    noWarehouses: "No warehouses available",
+    id: "ID",
+    location: "Location",
+    capacity: "Capacity",
+    actions: "Actions",
+    edit: "Edit",
+    delete: "Delete",
+    previous: "Previous",
+    next: "Next",
+    page: "Page",
+    of: "of",
+    deleteConfirm: "Are you sure?",
+    deleteText: "You won't be able to revert this!",
+    deleteSuccess: "Deleted!",
+    deleteFail: "Failed to delete warehouse.",
+  },
+};
 const WarehouseContent = () => {
   const [warehouses, setWarehouses] = useState([]);
   const [filteredWarehouses, setFilteredWarehouses] = useState([]); // State for filtered warehouses
@@ -12,7 +53,21 @@ const WarehouseContent = () => {
   const [currentPage, setCurrentPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
   const [rowsPerPage] = useState(10);
-  const [searchTerm, setSearchTerm] = useState(''); // State for search term
+  const [searchTerm, setSearchTerm] = useState(""); // State for search term
+  const [language, setLanguage] = useState(
+    localStorage.getItem("language") || "en"
+  );
+
+  useEffect(() => {
+    const interval = setInterval(() => {
+      const currentLanguage = localStorage.getItem("language") || "en";
+      if (currentLanguage !== language) {
+        setLanguage(currentLanguage);
+      }
+    }, 500);
+
+    return () => clearInterval(interval);
+  }, [language]);
 
   useEffect(() => {
     const fetchWarehouses = async () => {
@@ -27,7 +82,7 @@ const WarehouseContent = () => {
         setTotalPages(response.data.totalPages);
         setFilteredWarehouses(response.data.data); // Initialize filtered warehouses
       } catch (err) {
-        setError('Failed to fetch warehouses.');
+        setError("Failed to fetch warehouses.");
         console.error(err);
       } finally {
         setLoading(false);
@@ -40,23 +95,31 @@ const WarehouseContent = () => {
   const handleDelete = async (id) => {
     try {
       const result = await Swal.fire({
-        title: 'Are you sure?',
-        text: 'You won\'t be able to revert this!',
-        icon: 'warning',
+        title: "Are you sure?",
+        text: "You won't be able to revert this!",
+        icon: "warning",
         showCancelButton: true,
-        confirmButtonColor: '#3085d6',
-        cancelButtonColor: '#d33',
-        confirmButtonText: 'Yes, delete it!',
+        confirmButtonColor: "#3085d6",
+        cancelButtonColor: "#d33",
+        confirmButtonText: "Yes, delete it!",
       });
 
       if (result.isConfirmed) {
-        await axios.delete(`${import.meta.env.VITE_SERVER_URL}/warehouse/${id}`);
-        setWarehouses(warehouses.filter(warehouse => warehouse.warehouse_id !== id));
-        setFilteredWarehouses(filteredWarehouses.filter(warehouse => warehouse.warehouse_id !== id));
-        Swal.fire('Deleted!', 'Your warehouse has been deleted.', 'success');
+        await axios.delete(
+          `${import.meta.env.VITE_SERVER_URL}/warehouse/${id}`
+        );
+        setWarehouses(
+          warehouses.filter((warehouse) => warehouse.warehouse_id !== id)
+        );
+        setFilteredWarehouses(
+          filteredWarehouses.filter(
+            (warehouse) => warehouse.warehouse_id !== id
+          )
+        );
+        Swal.fire("Deleted!", "Your warehouse has been deleted.", "success");
       }
     } catch (err) {
-      Swal.fire('Error!', 'Failed to delete warehouse.', 'error');
+      Swal.fire("Error!", "Failed to delete warehouse.", "error");
     }
   };
 
@@ -64,9 +127,10 @@ const WarehouseContent = () => {
     const term = e.target.value.toLowerCase();
     setSearchTerm(term);
     setFilteredWarehouses(
-      warehouses.filter((warehouse) =>
-        warehouse.location.toLowerCase().includes(term) || 
-        warehouse.capacity.toString().includes(term) // Optional: Include capacity in search
+      warehouses.filter(
+        (warehouse) =>
+          warehouse.location.toLowerCase().includes(term) ||
+          warehouse.capacity.toString().includes(term) // Optional: Include capacity in search
       )
     );
   };
@@ -77,10 +141,12 @@ const WarehouseContent = () => {
   return (
     <div className="p-8 rounded-lg shadow-lg w-full mx-auto h-screen">
       <div className="flex justify-between items-center mb-6">
-        <h1 className="text-2xl font-semibold">Warehouses</h1>
+        <h1 className="text-2xl font-semibold">
+          {translations[language].warehouses}
+        </h1>
         <Link to="/dashboard/warehouses/add">
           <button className="btn bg-blue text-white hover:bg-blue">
-            Add Warehouse
+            {translations[language].addWarehouse}
           </button>
         </Link>
       </div>
@@ -91,40 +157,42 @@ const WarehouseContent = () => {
           type="text"
           value={searchTerm}
           onChange={handleSearch}
-          placeholder="Search by location or capacity..."
+          placeholder={translations[language].searchPlaceholder}
           className="input input-bordered w-full"
         />
       </div>
 
       {filteredWarehouses.length === 0 ? (
-        <p>No warehouses available</p>
+        <p>{translations[language].noWarehouses}</p>
       ) : (
-        <table className="table w-full border-collapse border border-gray-300 text-center font-inter">
+        <table className="table w-full border-collapse border border-gray-300 text-center font-prompt">
           <thead className="sticky-top bg-gray-200">
             <tr>
-              <th className="border p-2 text-center">ID</th>
-              <th className="border p-2 text-center">Location</th>
-              <th className="border p-2 text-center">Capacity</th>
-              <th className="border p-2 text-center">Actions</th>
+              <th>{translations[language].id}</th>
+              <th>{translations[language].location}</th>
+              <th>{translations[language].capacity}</th>
+              <th>{translations[language].actions}</th>
             </tr>
           </thead>
           <tbody>
-            {filteredWarehouses.map(warehouse => (
-              <tr key={warehouse.warehouse_id}>
-                <td className="border p-2 text-center">{warehouse.warehouse_id}</td>
+            {filteredWarehouses.map((warehouse, index) => (
+              <tr key={index + 1}>
+                <td className="border p-2 text-center">{index + 1}</td>
                 <td className="border p-2 text-center">{warehouse.location}</td>
                 <td className="border p-2 text-center">{warehouse.capacity}</td>
                 <td className="border p-2 text-center">
-                  <Link to={`/dashboard/warehouses/edit/${warehouse.warehouse_id}`}>
+                  <Link
+                    to={`/dashboard/warehouses/edit/${warehouse.warehouse_id}`}
+                  >
                     <button className="btn btn-success text-white mr-2">
-                      Edit
+                      {translations[language].edit}
                     </button>
                   </Link>
                   <button
                     onClick={() => handleDelete(warehouse.warehouse_id)}
                     className="btn btn-error text-white"
                   >
-                    Delete
+                    {translations[language].delete}
                   </button>
                 </td>
               </tr>
@@ -138,19 +206,23 @@ const WarehouseContent = () => {
         <p
           onClick={() => setCurrentPage(currentPage - 1)}
           disabled={currentPage <= 1}
-          className={`cursor-pointer ${currentPage === 1 ? "text-gray-400" : "text-black"}`}
+          className={`cursor-pointer ${
+            currentPage === 1 ? "text-gray-400" : "text-black"
+          }`}
         >
-          Previous
+          {translations[language].previous}
         </p>
         <span className="flex items-center justify-center">
-          Page {currentPage} of {totalPages}
+          {translations[language].page} {currentPage} {translations[language].of} {totalPages}
         </span>
         <p
           onClick={() => setCurrentPage(currentPage + 1)}
           disabled={currentPage >= totalPages}
-          className={`cursor-pointer ${currentPage === totalPages ? "text-gray-400" : "text-black"}`}
+          className={`cursor-pointer ${
+            currentPage === totalPages ? "text-gray-400" : "text-black"
+          }`}
         >
-          Next
+          {translations[language].next}
         </p>
       </div>
     </div>

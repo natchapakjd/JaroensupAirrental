@@ -4,9 +4,26 @@ import Navbar from "../../components/Navbar";
 import axios from "axios";
 import Loading from "../../components/Loading";
 
+// ✅ Object สำหรับแปลภาษา
+const translations = {
+  th: {
+    title: "บริการของเรา",
+    noService: "ไม่มีบริการที่เกี่ยวข้อง",
+    noRental: "ไม่มีบริการให้เช่าหรือซื้อสินค้า",
+    details: "ดูรายละเอียดเพิ่มเติม",
+  },
+  en: {
+    title: "Our Services",
+    noService: "No related services",
+    noRental: "No available rental or purchase services",
+    details: "View Details",
+  },
+};
+
 const Service = () => {
   const [taskTypes, setTaskTypes] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [language, setLanguage] = useState(localStorage.getItem("language") || "th");
 
   useEffect(() => {
     const fetchTaskTypes = async () => {
@@ -25,6 +42,18 @@ const Service = () => {
     fetchTaskTypes();
   }, []);
 
+  useEffect(() => {
+    const handleLanguageChange = () => {
+      setLanguage(localStorage.getItem("language") || "th");
+    };
+
+    window.addEventListener("storage", handleLanguageChange);
+
+    return () => {
+      window.removeEventListener("storage", handleLanguageChange);
+    };
+  }, []);
+
   const filteredTaskTypes = taskTypes.filter(
     (taskType) =>
       taskType.type_name === "งานเช่าเครื่องปรับอากาศ" ||
@@ -32,16 +61,17 @@ const Service = () => {
       taskType.type_name === "งานซ่อมบำรุงเครื่องปรับอากาศ"
   );
 
- 
-
   return (
     <>
       <Navbar />
       <div className="bg-gray-100 min-h-screen flex flex-col font-prompt">
         <div className="container mx-auto p-6">
-          <h1 className="text-4xl font-bold text-center mb-6">บริการของเรา</h1>
-          {/* ตรวจสอบว่ามี taskTypes หรือไม่ */}
-          {taskTypes && taskTypes.length > 0 ? (
+          <h1 className="text-4xl font-bold text-center mb-6">
+            {translations[language].title}
+          </h1>
+          {loading ? (
+            <Loading />
+          ) : taskTypes.length > 0 ? (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
               {filteredTaskTypes.length > 0 ? (
                 filteredTaskTypes.map((taskType) => (
@@ -73,18 +103,18 @@ const Service = () => {
                           }
                           className="bg-blue text-white py-2 px-4 rounded hover:bg-blue-700 transition duration-200"
                         >
-                          ดูรายละเอียดเพิ่มเติม
+                          {translations[language].details}
                         </Link>
                       </div>
                     </div>
                   </div>
                 ))
               ) : (
-                <p className="text-center">ไม่มีบริการให้เช่าหรือซื้อสินค้า</p>
+                <p className="text-center">{translations[language].noRental}</p>
               )}
             </div>
           ) : (
-            <p className="text-center">ไม่มีบริการที่เกี่ยวข้อง</p>
+            <p className="text-center">{translations[language].noService}</p>
           )}
         </div>
       </div>

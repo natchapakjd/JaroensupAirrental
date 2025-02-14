@@ -4,6 +4,7 @@ import { useNavigate } from "react-router-dom";
 import Swal from "sweetalert2";
 import Loading from "../../components/Loading";
 import { Link } from "react-router-dom";
+
 const ApplicantContent = () => {
   const [applicants, setApplicants] = useState([]);
   const [filteredApplicants, setFilteredApplicants] = useState([]);
@@ -16,6 +17,58 @@ const ApplicantContent = () => {
   const [searchQuery, setSearchQuery] = useState("");
   const [filterStatus, setFilterStatus] = useState("");
   const navigate = useNavigate();
+
+  // Fetch language from localStorage
+  const language = localStorage.getItem("language") || "en"; // Default to 'en' if no language is set
+
+  const translations = {
+    en: {
+      title: "Applicants List",
+      addApplicant: "Add Applicant",
+      searchPlaceholder: "Search by Firstname or Lastname",
+      filterStatus: "Filter by Status",
+      filterPending: "Pending",
+      filterHiring: "Hiring",
+      noApplicantsFound: "No applicants found",
+      accept: "Accept",
+      sendEmail: "Send Email",
+      viewDetails: "View details",
+      reject: "Reject",
+      previous: "Previous",
+      next: "Next",
+      confirmDelete: "Are you sure you want to delete this applicant?",
+      confirmAccept: "Are you sure you want to accept this applicant?",
+      deleteSuccess: "Applicant deleted successfully!",
+      acceptSuccess: "Applicant accepted and email sent!",
+      errorOccurred: "An error occurred!",
+      of: "of",
+      page: "page",
+    },
+    th: {
+      title: "รายชื่อผู้สมัคร",
+      addApplicant: "เพิ่มผู้สมัคร",
+      searchPlaceholder: "ค้นหาตามชื่อหรือนามสกุล",
+      filterStatus: "กรองตามสถานะ",
+      filterPending: "รอดำเนินการ",
+      filterHiring: "กำลังพิจารณา",
+      noApplicantsFound: "ไม่พบผู้สมัคร",
+      accept: "ยอมรับ",
+      sendEmail: "ส่งอีเมล",
+      viewDetails: "ดูรายละเอียด",
+      reject: "ปฏิเสธ",
+      previous: "ก่อนหน้า",
+      next: "ถัดไป",
+      confirmDelete: "คุณแน่ใจหรือว่าต้องการลบผู้สมัครนี้?",
+      confirmAccept: "คุณแน่ใจหรือว่าต้องการยอมรับผู้สมัครนี้?",
+      deleteSuccess: "ลบผู้สมัครสำเร็จ!",
+      acceptSuccess: "ยอมรับผู้สมัครและส่งอีเมลสำเร็จ!",
+      errorOccurred: "เกิดข้อผิดพลาด!",
+      of: "จาก",
+      page: "หน้า",
+    },
+  };
+
+  const t = translations[language]; // Get the current translations
 
   useEffect(() => {
     const fetchApplicants = async () => {
@@ -40,7 +93,6 @@ const ApplicantContent = () => {
   }, [currentPage, pageSize]); // Re-fetch when page or pageSize changes
 
   useEffect(() => {
-    // Filter applicants based on search query and status
     const filtered = applicants.filter((applicant) => {
       const matchesSearch =
         applicant.first_name
@@ -57,7 +109,7 @@ const ApplicantContent = () => {
 
   const handleDelete = async (id) => {
     const confirmation = await Swal.fire({
-      title: "Are you sure you want to delete this applicant?",
+      title: t.confirmDelete,
       icon: "warning",
       showCancelButton: true,
       confirmButtonText: "Yes, Delete",
@@ -71,7 +123,7 @@ const ApplicantContent = () => {
         );
         if (response.status === 200) {
           Swal.fire({
-            title: "Applicant deleted successfully!",
+            title: t.deleteSuccess,
             icon: "success",
           });
           setApplicants(
@@ -82,7 +134,7 @@ const ApplicantContent = () => {
         }
       } catch (error) {
         Swal.fire({
-          title: "An error occurred!",
+          title: t.errorOccurred,
           text: error.message,
           icon: "error",
         });
@@ -92,7 +144,7 @@ const ApplicantContent = () => {
 
   const handleAccept = async (id) => {
     const confirmation = await Swal.fire({
-      title: "Are you sure you want to accept this applicant?",
+      title: t.confirmAccept,
       icon: "warning",
       showCancelButton: true,
       confirmButtonText: "Yes, Accept",
@@ -110,7 +162,7 @@ const ApplicantContent = () => {
           );
           if (emailResponse.status === 200) {
             Swal.fire({
-              title: "Applicant accepted and email sent!",
+              title: t.acceptSuccess,
               icon: "success",
             });
           } else {
@@ -119,7 +171,7 @@ const ApplicantContent = () => {
         }
       } catch (error) {
         Swal.fire({
-          title: "An error occurred!",
+          title: t.errorOccurred,
           text: error.message,
           icon: "error",
         });
@@ -132,7 +184,7 @@ const ApplicantContent = () => {
   };
 
   const handleSendEmail = (id) => {
-    navigate(`/dashboard/applicant/sending-email/${id}`);
+    navigate(`/dashboard/applicants/sending-email/${id}`);
   };
 
   const handlePageChange = (newPage) => {
@@ -145,12 +197,12 @@ const ApplicantContent = () => {
   if (error) return <p>{error}</p>;
 
   return (
-    <div className="table p-8 rounded-lg shadow-lg w-full mx-auto h-full font-inter">
+    <div className="table p-8 rounded-lg shadow-lg w-full mx-auto h-full font-prompt">
       <div className="flex justify-between items-center mb-4">
-        <h2 className="text-xl font-semibold mt-8 mb-5">Applicants list</h2>
+        <h2 className="text-xl font-semibold mt-8 mb-5">{t.title}</h2>
         <Link to="/dashboard/applicants/add">
           <button className="btn bg-blue text-white hover:bg-blue">
-            Add Applicant
+            {t.addApplicant}
           </button>
         </Link>
       </div>
@@ -158,7 +210,7 @@ const ApplicantContent = () => {
       <div className="flex justify-between items-center mb-4 gap-4">
         <input
           type="text"
-          placeholder="Search by Firstname or Lastname"
+          placeholder={t.searchPlaceholder}
           value={searchQuery}
           onChange={(e) => setSearchQuery(e.target.value)}
           className="input input-bordered w-full"
@@ -168,13 +220,13 @@ const ApplicantContent = () => {
           onChange={(e) => setFilterStatus(e.target.value)}
           className="input input-bordered w-full md:w-1/3"
         >
-          <option value="">Filter by Status</option>
-          <option value="1">Pending</option>
-          <option value="7">Hiring</option>
+          <option value="">{t.filterStatus}</option>
+          <option value="1">{t.filterPending}</option>
+          <option value="7">{t.filterHiring}</option>
         </select>
       </div>
 
-      <table className="w-full border-collapse border border-gray-300 font-inter">
+      <table className="w-full border-collapse border border-gray-300 font-prompt">
         <thead className="sticky-top bg-gray-200">
           <tr>
             <th className="border p-2 text-center">Applicant ID</th>
@@ -193,11 +245,9 @@ const ApplicantContent = () => {
           {filteredApplicants.length > 0 ? (
             filteredApplicants
               .slice((currentPage - 1) * pageSize, currentPage * pageSize)
-              .map((applicant) => (
-                <tr key={applicant.applicant_id}>
-                  <td className="border p-2 text-center">
-                    {applicant.applicant_id}
-                  </td>
+              .map((applicant, index) => (
+                <tr key={index + 1}>
+                  <td className="border p-2 text-center">{index + 1}</td>
                   <td className="border p-2 text-center">
                     {applicant.first_name}
                   </td>
@@ -230,7 +280,7 @@ const ApplicantContent = () => {
                         className="btn btn-success text-white mr-2"
                         onClick={() => handleAccept(applicant.applicant_id)}
                       >
-                        Accept
+                        {t.accept}
                       </button>
                     )}
                     {applicant.status_id === 7 && (
@@ -238,21 +288,21 @@ const ApplicantContent = () => {
                         className="btn btn-success text-white mr-2"
                         onClick={() => handleSendEmail(applicant.applicant_id)}
                       >
-                        Send Email
+                        {t.sendEmail}
                       </button>
                     )}
                     <button
                       className="btn bg-blue hover:bg-blue text-white"
                       onClick={() => handleViewDetails(applicant.applicant_id)}
                     >
-                      View details
+                      {t.viewDetails}
                     </button>
 
                     <button
                       className="btn btn-error text-white ml-2"
                       onClick={() => handleDelete(applicant.applicant_id)}
                     >
-                      Reject
+                      {t.reject}
                     </button>
                   </td>
                 </tr>
@@ -260,7 +310,7 @@ const ApplicantContent = () => {
           ) : (
             <tr>
               <td colSpan="9" className="border border-gray-300 p-4">
-                No applicants found
+                {t.noApplicantsFound}
               </td>
             </tr>
           )}
@@ -269,20 +319,22 @@ const ApplicantContent = () => {
 
       <div className="flex justify-between items-center mt-4">
         <p
-                     className={`cursor-pointer ${currentPage === totalPages ? "text-gray-400" : "text-black"}`}
-
+          className={`cursor-pointer ${
+            currentPage === totalPages ? "text-gray-400" : "text-black"
+          }`}
           onClick={() => handlePageChange(currentPage - 1)}
-          disabled={currentPage === 1}
         >
-          Previous
+          {t.previous}
         </p>
-        <span>{`Page ${currentPage} of ${totalPages}`}</span>
+        <span>{`${t.page}
+${currentPage} ${t.of} ${totalPages}`}</span>
         <p
           onClick={() => handlePageChange(currentPage + 1)}
-          className={`cursor-pointer ${currentPage === totalPages ? "text-gray-400" : "text-black"}`}
-
+          className={`cursor-pointer ${
+            currentPage === totalPages ? "text-gray-400" : "text-black"
+          }`}
         >
-          Next
+          {t.next}
         </p>
       </div>
     </div>
