@@ -4,7 +4,7 @@ import { useCharacterAnimations } from "../../src/components/AugmentedReality/co
 import useModelsStore from "../../src/components/AugmentedReality/stores/modelStore";
 import { useEffect } from "react";
 export default function Air5tonCC(props) {
-  const { nodes, materials } = useGLTF("models/5ton_AC_CC.gltf");
+  const { nodes, materials } = useGLTF("/models/5ton_AC_CC.gltf");
   const { setAnimations } = useCharacterAnimations();
   const { isAnimating, showGeometry } = useModelsStore(); // ดึง state จาก Zustand
 
@@ -13,7 +13,7 @@ export default function Air5tonCC(props) {
   }, [setAnimations]);
 
   return (
-    <group {...props} dispose={null} scale={props.scale ? props.scale: 0.2}>
+    <group {...props} dispose={null} scale={props.scale ? props.scale: 0.3}>
       {/* 🔥 ควบคุมการแสดงผล Geometry */}
       {showGeometry && (
         <mesh material={materials.Material} material-transparent={true} material-opacity={0.5} />
@@ -37,4 +37,4 @@ export default function Air5tonCC(props) {
   );
 }
 
-useGLTF.preload("models/5ton_AC_CC.gltf");
+useGLTF.preload("/models/5ton_AC_CC.gltf");

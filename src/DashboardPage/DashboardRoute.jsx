@@ -62,6 +62,7 @@ import AreacalContent from '../DashboardContent/AugmentedReality/AreacalContent'
 import AddAreacal from '../DashboardContent/AugmentedReality/AddAreacal'
 import EditAreacal from '../DashboardContent/AugmentedReality/EditAreacal'
 import EditBorrowProduct from '../DashboardContent/BorrowProduct/EditBorrowProduct'
+import AreacalDetails from '../DashboardContent/AugmentedReality/AreacalDetails'
 
 const DashboardRoute = () => {
   return (
@@ -130,6 +131,7 @@ const DashboardRoute = () => {
             <Route path="area-cal/add" element={<AddAreacal />} /> 
             <Route path="area-cal/edit/:areaId" element={<EditAreacal />} /> 
             <Route path="borrows/edit/:borrowingId" element={<EditBorrowProduct />} /> 
+            <Route path="/area-cal/details/:area_calculation_id" element={<AreacalDetails />} />
 
           </Routes>
         </div>

@@ -61,7 +61,8 @@ const BorrowProductTable = () => {
       });
 
       setBorrowingData(updatedData);
-      setTotalPages(Math.ceil(total / rowsPerPage));
+      total === 0 ? setTotalPages(1) : setTotalPages(Math.ceil(total / rowsPerPage));
+
     } catch (error) {
       console.error("Error fetching borrowing data:", error);
       Swal.fire({

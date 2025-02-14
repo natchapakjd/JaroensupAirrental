@@ -18,7 +18,7 @@ export default function Air10tonCC(props) {
   }, [setAnimations]);
 
   return (
-    <group {...props} dispose={null} scale={props.scale ? props.scale: 0.2}>
+    <group {...props} dispose={null} scale={props.scale ? props.scale: 0.3}>
       {/* Apply transparency to this mesh */}
        {showGeometry && (
         <mesh         material={materials['Material.005']} 

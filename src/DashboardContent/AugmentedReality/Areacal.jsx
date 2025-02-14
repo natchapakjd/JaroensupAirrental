@@ -1658,7 +1658,7 @@ function placeACInOptimalPosition(uncoveredCells, gridWidth, gridHeight, acType)
         return 4;
     }
   }
-
+  
   const handleSelectAssignmentGrid = async () => {
     const { value: selectedId } = await Swal.fire({
       title: "เลือกการนัดหมายที่ต้องการ",
@@ -1679,6 +1679,10 @@ function placeACInOptimalPosition(uncoveredCells, gridWidth, gridHeight, acType)
       Swal.fire("สำเร็จ!", `เลือก Assignment ID: ${selectedId}`, "success");
     }
   };
+
+  const handleNavigateToAR = () => {
+    navigate("/test-xr-gallary");
+  };
   return (
     <>
       <div className="mx-5 my-5 font-inter">
@@ -1686,6 +1690,12 @@ function placeACInOptimalPosition(uncoveredCells, gridWidth, gridHeight, acType)
           <h2 className="text-2xl font-bold mb-4">Area Calculations</h2>
 
           <div className="flex justify-between">
+            <button
+              onClick={handleNavigateToAR}
+              className="btn bg-yellow-500 text-white hover:bg-yellow-500"
+            >
+              ใช้ AR Feature
+            </button>
             <button
               onClick={selectAssignmentAndLoadGrid}
               className="btn bg-error text-white hover:bg-error"
