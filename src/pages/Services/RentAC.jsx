@@ -44,6 +44,8 @@ const RentAC = () => {
   const [loading, setLoading] = useState(true);
   const [selectedLocation, setSelectedLocation] = useState(null);
   const [profile, setProfile] = useState();
+  const [showMap, setShowMap] = useState(false); // ✅ ควบคุมการแสดงแผนที่
+
   const token = cookies.get("authToken");
   const decodedToken = jwtDecode(token);
   const userId = decodedToken.id;
@@ -166,17 +168,15 @@ const RentAC = () => {
     e.preventDefault();
 
     try {
-      // Extract date portion of `appointment_date` for `rental_start_date`
       const rentalStartDate = formData.appointment_date.split("T")[0];
 
-      const response = await axios.post(
-        `${import.meta.env.VITE_SERVER_URL}/tasks`,
-        {
-          ...formData,
-          rental_start_date: rentalStartDate, // Add derived value
-          user_id: userId,
-        }
-      );
+      const response = await axios.post(`${import.meta.env.VITE_SERVER_URL}/tasks`, {
+        ...formData,
+        rental_start_date: rentalStartDate,
+        user_id: userId,
+        latitude: selectedLocation ? formData.latitude : "",  // ✅ ถ้าไม่ได้เลือกแผนที่จะไม่ส่งค่า
+        longitude: selectedLocation ? formData.longitude : "",
+      });
 
       Swal.fire({
         title: "สำเร็จ!",
@@ -194,6 +194,7 @@ const RentAC = () => {
           rental_end_date: "",
         });
         setSelectedLocation(null);
+        setShowMap(false);
         navigate("/history");
       });
     } catch (error) {
@@ -284,7 +285,18 @@ const RentAC = () => {
               />
             </div>
 
-            <MapContainer
+             {/* 🔥 ปุ่มเลือกแผนที่ */}
+             <div className="mb-4">
+              <p
+                type="button"
+                onClick={() => setShowMap(!showMap)}
+                className="cursor-pointer underline text-right"
+              >
+                {showMap ? "ซ่อนแผนที่ ❌" : "เลือกตำแหน่งบนแผนที่"}
+              </p>
+            </div>
+
+                {showMap && (<MapContainer
               center={[13.7563, 100.5018]}
               zoom={10}
               style={{ height: "400px", width: "100%", maxHeight: "400px" }}
@@ -304,7 +316,8 @@ const RentAC = () => {
               <div className="absolute top-0 left-12 z-[1000]">
                 <Searchbox onSelectLocation={handleLocationSelect} />
               </div>
-            </MapContainer>
+            </MapContainer>)}
+            
 
             <button
               type="submit"

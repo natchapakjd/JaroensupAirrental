@@ -19,6 +19,7 @@ const TaskContent = () => {
   const decodedToken = jwtDecode(token);
   const role = decodedToken.role;
   const techId = decodedToken.technicianId;
+  const apiUrl = import.meta.env.VITE_SERVER_URL;
 
   const navigate = useNavigate();
   useEffect(() => {

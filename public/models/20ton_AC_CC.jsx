@@ -10,7 +10,7 @@ import { useCharacterAnimations } from '../../src/components/AugmentedReality/co
 import useModelsStore from '../../src/components/AugmentedReality/stores/modelStore'
 
 export default function Air20tonCC(props) {
-  const { nodes, materials } = useGLTF('models/20ton_AC_CC.gltf')
+  const { nodes, materials } = useGLTF('/models/20ton_AC_CC.gltf')
   const { isAnimating, showGeometry } = useModelsStore(); // ดึง state จาก Zustand
   const {setAnimations} = useCharacterAnimations();
 
@@ -19,7 +19,7 @@ export default function Air20tonCC(props) {
   }, [setAnimations]);               
 
   return (
-    <group {...props} dispose={null} scale={props.scale ? props.scale: 0.3} >
+    <group {...props} dispose={null} scale={props.scale ? props.scale: 0.2} >
        {/* 🔥 ควบคุมการแสดงผล Geometry */}
        {showGeometry && (
         <mesh             material={materials['Material.002']}  
@@ -48,4 +48,4 @@ export default function Air20tonCC(props) {
   )
 }
 
-useGLTF.preload('models/20ton_AC_CC.gltf')
+useGLTF.preload('/models/20ton_AC_CC.gltf')

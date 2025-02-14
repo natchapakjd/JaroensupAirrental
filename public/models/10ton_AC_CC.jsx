@@ -9,7 +9,7 @@ import { useCharacterAnimations } from '../../src/components/AugmentedReality/co
 import useModelsStore from '../../src/components/AugmentedReality/stores/modelStore';
 
 export default function Air10tonCC(props) {
-  const { nodes, materials } = useGLTF('models/10ton_AC_CC.gltf');
+  const { nodes, materials } = useGLTF('/models/10ton_AC_CC.gltf');
   const { isAnimating, showGeometry } = useModelsStore(); // ดึง state จาก Zustand
   const { setAnimations } = useCharacterAnimations();
 
@@ -18,7 +18,7 @@ export default function Air10tonCC(props) {
   }, [setAnimations]);
 
   return (
-    <group {...props} dispose={null} scale={props.scale ? props.scale: 0.3}>
+    <group {...props} dispose={null} scale={props.scale ? props.scale: 0.2}>
       {/* Apply transparency to this mesh */}
        {showGeometry && (
         <mesh         material={materials['Material.005']} 
@@ -47,4 +47,4 @@ export default function Air10tonCC(props) {
   );
 }
 
-useGLTF.preload('models/10ton_AC_CC.gltf');
+useGLTF.preload('/models/10ton_AC_CC.gltf');

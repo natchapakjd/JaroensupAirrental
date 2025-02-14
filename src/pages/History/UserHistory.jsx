@@ -230,7 +230,7 @@ const UserHistory = () => {
                         onClick={() => handleCompleteTask(task.task_id)} // Mark task as completed
                         className="ml-5 text-green-600"
                       >
-                        งานเสร็จสิ้น
+                        Mark as done
                       </button>
 
                     )}

@@ -31,10 +31,11 @@ const EditTask = () => {
   const [startDate, setStartDate] = useState("");
   const [finishDate, setFinishDate] = useState("");
   const [taskTypes, setTaskTypes] = useState([]);
+  const [showMap, setShowMap] = useState(false);
   // const [products, setProducts] = useState([]);
   const [users, setUsers] = useState([]);
   const [statuses, setStatuses] = useState([]); // Add statuses state
-  let addressFromSearchBox  = ""
+  let addressFromSearchBox = "";
   const navigate = useNavigate();
   const apiUrl = import.meta.env.VITE_SERVER_URL; // Use the environment variable
 
@@ -68,7 +69,6 @@ const EditTask = () => {
         console.error("Error fetching users:", error);
       }
     };
-
 
     // Fetch statuses
     const fetchStatuses = async () => {
@@ -107,8 +107,7 @@ const EditTask = () => {
     fetchUsers();
     fetchStatuses(); // Fetch statuses
     fetchTask();
-  }, [taskId,address]);
-
+  }, [taskId, address]);
 
   const handleLocationSelect = (lat, lon, displayName) => {
     setAddress(displayName);
@@ -218,8 +217,7 @@ const EditTask = () => {
             value={finishDate}
             onChange={(e) => setFinishDate(e.target.value)}
             className="border p-2 w-full"
-            min={new Date().toISOString().split('T')[0]} // Ensure correct format for "date"
-
+            min={new Date().toISOString().split("T")[0]} // Ensure correct format for "date"
           />
         </div>
         <div>
@@ -270,28 +268,41 @@ const EditTask = () => {
             ))}
           </select>
         </div>
-        <div className="my-4">
-          <MapContainer
-            center={[13.7563, 100.5018]} // Default center (Bangkok)
-            zoom={13}
-            style={{ height: "400px", width: "100%" }}
+        <div className="mb-4">
+          <p
+            type="button"
+            onClick={() => setShowMap(!showMap)}
+            className="cursor-pointer underline text-right text-xl mt-2"
           >
-            <TileLayer
-              url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
-              attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
-            />
-            <MapClickHandler
-              setLatitude={setLatitude}
-              setLongitude={setLongitude}
-            />
-            {latitude && longitude && (
-              <Marker position={[latitude, longitude]} />
-            )}
-            <div className="absolute top-0 left-12 z-[1000]">
-              <Searchbox onSelectLocation={handleLocationSelect} />
-            </div>
-          </MapContainer>
+            {showMap ? "ซ่อนแผนที่ ❌" : "เลือกตำแหน่งบนแผนที่"}
+          </p>
         </div>
+
+        {showMap && (
+          <div className="my-4">
+            <MapContainer
+              center={[13.7563, 100.5018]} // Default center (Bangkok)
+              zoom={13}
+              style={{ height: "400px", width: "100%" }}
+            >
+              <TileLayer
+                url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+                attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+              />
+              <MapClickHandler
+                setLatitude={setLatitude}
+                setLongitude={setLongitude}
+              />
+              {latitude && longitude && (
+                <Marker position={[latitude, longitude]} />
+              )}
+              <div className="absolute top-0 left-12 z-[1000]">
+                <Searchbox onSelectLocation={handleLocationSelect} />
+              </div>
+            </MapContainer>
+          </div>
+        )}
+
         <button type="submit" className="bg-blue text-white py-2 px-4 rounded">
           Save Task
         </button>
