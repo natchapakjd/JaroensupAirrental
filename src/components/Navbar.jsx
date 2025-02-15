@@ -178,7 +178,7 @@ const Navbar = () => {
                   <Link to="/contact">{translations[language].contact}</Link>
                 </li>
                 <li>
-                  <Link to="/text-xr-gallary">{translations[language].arFeature}</Link>
+                  <Link to="/text-xr-gallery">{translations[language].arFeature}</Link>
                 </li>
           </ul>
         </div>
