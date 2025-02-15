@@ -3,8 +3,6 @@ import { Link, useNavigate } from "react-router-dom";
 import Cookies from "universal-cookie";
 import { jwtDecode } from "jwt-decode";
 import axios from "axios";
-
-// ✅ Object สำหรับแปลภาษา
 const translations = {
   th: {
     home: "หน้าหลัก",
@@ -46,7 +44,6 @@ const Navbar = () => {
   const token = cookies.get("authToken");
   const navigate = useNavigate();
 
-  // ✅ โหลดค่าภาษาเริ่มต้นจาก localStorage
   const [language, setLanguage] = useState(
     localStorage.getItem("language") || "th"
   );
@@ -102,9 +99,10 @@ const Navbar = () => {
     setLanguage(newLanguage);
     window.dispatchEvent(new Event("storage")); // บอกทุกหน้าว่าภาษาเปลี่ยน
   };
+
   return (
     <nav>
-      <div className="navbar bg-white text-black font-prompt">
+      <div className="navbar bg-white text-black font-prompt ">
         <div className="navbar-start">
           <div className="dropdown">
             <div
@@ -129,7 +127,10 @@ const Navbar = () => {
               </svg>
             </div>
             {isToggle && (
-              <ul className="menu menu-sm dropdown-content bg-white text-black rounded-box z-[1] mt-3 w-52 p-2 shadow">
+              <ul
+                tabIndex="0"
+                className="menu menu-sm dropdown-content bg-white text-black rounded-box z-[1] mt-3 w-52 p-2 shadow"
+              >
                 <li>
                   <Link to="/">{translations[language].home}</Link>
                 </li>
@@ -140,22 +141,16 @@ const Navbar = () => {
                   <Link to="/services">{translations[language].services}</Link>
                 </li>
                 <li>
-                  <Link to="/experience">
-                    {translations[language].experience}
-                  </Link>
+                  <Link to="/experience">{translations[language].experience}</Link>
                 </li>
                 <li>
-                  <Link to="/register-tech">
-                    {translations[language].registerTech}
-                  </Link>
+                  <Link to="/register-tech">{translations[language].registerTech}</Link>
                 </li>
                 <li>
                   <Link to="/contact">{translations[language].contact}</Link>
                 </li>
                 <li>
-                  <Link to="/test-xr-gallary">
-                    {translations[language].arFeature}
-                  </Link>
+                 <Link to="/test-xr-gallary">{translations[language].arFeature}</Link>
                 </li>
               </ul>
             )}
@@ -164,41 +159,37 @@ const Navbar = () => {
         </div>
         <div className="navbar-center hidden lg:flex">
           <ul className="menu menu-horizontal px-1">
-            <li>
-              <Link to="/">{translations[language].home}</Link>
-            </li>
-            <li>
-              <Link to="/product">{translations[language].product}</Link>
-            </li>
-            <li>
-              <Link to="/services">{translations[language].services}</Link>
-            </li>
-            <li>
-              <Link to="/experience">{translations[language].experience}</Link>
-            </li>
-            <li>
-              <Link to="/register-tech">
-                {translations[language].registerTech}
-              </Link>
-            </li>
-            <li>
-              <Link to="/contact">{translations[language].contact}</Link>
-            </li>
-            <li>
-              <Link to="/test-xr-gallary">
-                {translations[language].arFeature}
-              </Link>
-            </li>
+           <li>
+                  <Link to="/">{translations[language].home}</Link>
+                </li>
+                <li>
+                  <Link to="/product">{translations[language].product}</Link>
+                </li>
+                <li>
+                  <Link to="/services">{translations[language].services}</Link>
+                </li>
+                <li>
+                  <Link to="/experience">{translations[language].experience}</Link>
+                </li>
+                <li>
+                    <Link to="/register-tech">{translations[language].registerTech}</Link>
+                </li>
+                <li>
+                  <Link to="/contact">{translations[language].contact}</Link>
+                </li>
+                <li>
+                  <Link to="/test-xr-gallary">{translations[language].arFeature}</Link>
+                </li>
           </ul>
         </div>
-        <div className="navbar-end">
-          <button
+        <div className="navbar-end ">
+        <button
             onClick={toggleLanguage}
             className="badge badge-outline cursor-pointer p-2 text-sm mx-2"
           >
             {language === "th" ? "🇹🇭 ไทย" : "🇬🇧 English"}
           </button>
-          <li className="list-none">
+          <li className="list-none ">
             {!token && (
               <Link to="/login" className="text-sm md:text-base">
                 {translations[language].login}
@@ -218,36 +209,37 @@ const Navbar = () => {
                     <img alt="User Avatar" src={`${image}`} />
                   ) : (
                     <div className="w-10 h-10 bg-gray-200 rounded-full flex items-center justify-center">
-                      <span className="text-gray-500">No image</span>
+                      <span className="text-gray-500">no image</span>{" "}
+                      {/* Fallback UI */}
                     </div>
                   )}
                 </div>
               </div>
-              <ul
-                tabIndex={0}
-                className="menu menu-sm dropdown-content bg-base-100 rounded-box z-[1] mt-3 w-52 p-2 shadow bg-white text-black"
-              >
-                <li>
-                  <a className="justify-between" href="/profile-setting">
+              {isToggle && (
+                <ul
+                  tabIndex={0}
+                  className="menu menu-sm dropdown-content bg-base-100 rounded-box z-[1] mt-3 w-52 p-2 shadow bg-white text-black"
+                >
+                  <li>
+                    <a className="justify-between" href="/profile-setting">
                     {translations[language].profile}
-                    <span className="badge">New</span>
-                  </a>
-                </li>
-                <li>
-                  <a href="/history">{translations[language].history}</a>
-                </li>
-                <li>
-                  <a href="/change-password">
-                    {translations[language].changePassword}
-                  </a>
-                </li>
-                <li>
-                  <a href="/settings">{translations[language].notification}</a>
-                </li>
-                <li>
-                  <a onClick={handleLogout}>{translations[language].logout}</a>
-                </li>
-              </ul>
+                      <span className="badge">New</span>
+                    </a>
+                  </li>
+                  <li>
+                    <a href="/history">{translations[language].history}</a>
+                  </li>
+                  <li>
+                    <a href="/change-password">{translations[language].changePassword}</a>
+                  </li>
+                  <li>
+                    <a href="/settings">{translations[language].notification}</a>
+                  </li>
+                  <li>
+                    <a onClick={handleLogout}>{translations[language].logout}</a>
+                  </li>
+                </ul>
+              )}
             </div>
           )}
         </div>
