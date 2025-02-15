@@ -49,7 +49,7 @@ const ProductContent = () => {
       next: "next",
       borrow: "borrow",
       edit: "edit",
-      delete: "delete"
+      delete: "delete",
     },
     th: {
       productList: "รายการสินค้า",
@@ -77,11 +77,13 @@ const ProductContent = () => {
       next: "ถัดไป",
       borrow: "ยืมอุปกรณ์",
       edit: "แก้ไข",
-      delete: "ลบสินค้า"
-    }
+      delete: "ลบสินค้า",
+    },
   };
 
-  const [currentLanguage, setCurrentLanguage] = useState(localStorage.getItem('language','th')); // default language
+  const [currentLanguage, setCurrentLanguage] = useState(
+    localStorage.getItem("language", "th")
+  ); // default language
 
   useEffect(() => {
     fetchProducts();
@@ -171,7 +173,9 @@ const ProductContent = () => {
           title: translation[currentLanguage].productDeleted,
           icon: "success",
         });
-        setProducts(products.filter((product) => product.product_id !== productId));
+        setProducts(
+          products.filter((product) => product.product_id !== productId)
+        );
       }
     } catch (error) {
       Swal.fire({
@@ -201,8 +205,10 @@ const ProductContent = () => {
 
   return (
     <div className="p-8 rounded-lg shadow-lg w-full mx-auto font-prompt h-full">
-      <div className="flex flex-col sm:flex-row justify-between items-center mb-6 gap-4">
-        <h2 className="text-xl font-semibold">{translation[currentLanguage].productList}</h2>
+      <div className="flex sm:flex-row justify-between items-center mb-6 gap-4">
+        <h2 className="text-xl font-semibold">
+          {translation[currentLanguage].productList}
+        </h2>
         {role === 3 && (
           <Link to="/dashboard/products/add">
             <button className="btn bg-blue text-white hover:bg-blue">
@@ -247,94 +253,135 @@ const ProductContent = () => {
         </select>
       </div>
 
-      <table className="table w-full border-collapse border border-gray-300 font-prompt">
-        <thead className="sticky top-0 bg-gray-200">
-          <tr>
-            <th className="border p-2 text-center">{translation[currentLanguage].id}</th>
-            <th className="border p-2 text-center">{translation[currentLanguage].name}</th>
-            <th className="border p-2 text-center">{translation[currentLanguage].description}</th>
-            <th className="border p-2 text-center">{translation[currentLanguage].price}</th>
-            <th className="border p-2 text-center">{translation[currentLanguage].stockQuantity}</th>
-            <th className="border p-2 text-center">{translation[currentLanguage].brand}</th>
-            <th className="border p-2 text-center">{translation[currentLanguage].category}</th>
-            <th className="border p-2 text-center">{translation[currentLanguage].warehouse}</th>
-            <th className="border p-2 text-center">{translation[currentLanguage].productImage}</th>
-            <th className="border p-2 text-center">{translation[currentLanguage].actions}</th>
-          </tr>
-        </thead>
-        <tbody className="text-center">
-          {filteredProducts.length > 0 ? (
-            filteredProducts.map((product, index) => (
-              <tr key={index + 1}>
-                <td className="border p-2 text-center">{index + 1}</td>
-                <td className="border p-2 text-center">{product.name}</td>
-                <td className="border p-2 text-center">{product.description}</td>
-                <td className="border p-2 text-center">{product.price}</td>
-                <td className="border p-2 text-center">{product.stock_quantity}</td>
-                <td className="border p-2 text-center">{product.brand_name}</td>
-                <td className="border p-2 text-center">{product.category_name}</td>
-                <td className="border p-2 text-center">{product.location}</td>
-                <td>
-                  {product.image_url ? (
-                    <img
-                      src={product.image_url}
-                      alt={product.name}
-                      className="w-16 h-16 object-cover cursor-pointer mx-auto"
-                      onClick={() => openImagePopup(product.image_url)}
-                    />
-                  ) : (
-                    translation[currentLanguage].noImage
-                  )}
-                </td>
-                <td className="border p-2 text-center">
-                  <div className="flex justify-center gap-2">
-                    {role === 3 ? (
-                      <>
-                        <Link to={`/dashboard/products/edit/${product.product_id}`}>
-                          <button className="btn btn-success text-white">{translation[currentLanguage].edit}</button>
-                        </Link>
-                        <button
-                          onClick={() => handleDelete(product.product_id)}
-                          className="btn btn-error text-white"
-                        >
-                          {translation[currentLanguage].delete}
-                        </button>
-                      </>
+      <div className="overflow-x-auto">
+        <table className="table w-full border-collapse border border-gray-300 font-prompt">
+          <thead className="sticky top-0 bg-gray-200">
+            <tr>
+              <th className="border p-2 text-center">
+                {translation[currentLanguage].id}
+              </th>
+              <th className="border p-2 text-center">
+                {translation[currentLanguage].name}
+              </th>
+              <th className="border p-2 text-center">
+                {translation[currentLanguage].description}
+              </th>
+              <th className="border p-2 text-center">
+                {translation[currentLanguage].price}
+              </th>
+              <th className="border p-2 text-center">
+                {translation[currentLanguage].stockQuantity}
+              </th>
+              <th className="border p-2 text-center">
+                {translation[currentLanguage].brand}
+              </th>
+              <th className="border p-2 text-center">
+                {translation[currentLanguage].category}
+              </th>
+              <th className="border p-2 text-center">
+                {translation[currentLanguage].warehouse}
+              </th>
+              <th className="border p-2 text-center">
+                {translation[currentLanguage].productImage}
+              </th>
+              <th className="border p-2 text-center">
+                {translation[currentLanguage].actions}
+              </th>
+            </tr>
+          </thead>
+          <tbody className="text-center">
+            {filteredProducts.length > 0 ? (
+              filteredProducts.map((product, index) => (
+                <tr key={index + 1}>
+                  <td className="border p-2 text-center">{index + 1}</td>
+                  <td className="border p-2 text-center">{product.name}</td>
+                  <td className="border p-2 text-center">
+                    {product.description}
+                  </td>
+                  <td className="border p-2 text-center">{product.price}</td>
+                  <td className="border p-2 text-center">
+                    {product.stock_quantity}
+                  </td>
+                  <td className="border p-2 text-center">
+                    {product.brand_name}
+                  </td>
+                  <td className="border p-2 text-center">
+                    {product.category_name}
+                  </td>
+                  <td className="border p-2 text-center">{product.location}</td>
+                  <td>
+                    {product.image_url ? (
+                      <img
+                        src={product.image_url}
+                        alt={product.name}
+                        className="w-16 h-16 object-cover cursor-pointer mx-auto"
+                        onClick={() => openImagePopup(product.image_url)}
+                      />
                     ) : (
-                      <Link to={`/dashboard/borrows/${product.product_id}`}>
-                        <button className="btn btn-success text-white">{translation[currentLanguage].borrow}</button>
-                      </Link>
+                      translation[currentLanguage].noImage
                     )}
-                  </div>
+                  </td>
+                  <td className="border p-2 text-center">
+                    <div className="flex justify-center gap-2">
+                      {role === 3 ? (
+                        <>
+                          <Link
+                            to={`/dashboard/products/edit/${product.product_id}`}
+                          >
+                            <button className="btn btn-success text-white">
+                              {translation[currentLanguage].edit}
+                            </button>
+                          </Link>
+                          <button
+                            onClick={() => handleDelete(product.product_id)}
+                            className="btn btn-error text-white"
+                          >
+                            {translation[currentLanguage].delete}
+                          </button>
+                        </>
+                      ) : (
+                        <Link to={`/dashboard/borrows/${product.product_id}`}>
+                          <button className="btn btn-success text-white">
+                            {translation[currentLanguage].borrow}
+                          </button>
+                        </Link>
+                      )}
+                    </div>
+                  </td>
+                </tr>
+              ))
+            ) : (
+              <tr>
+                <td colSpan="10" className="border border-gray-300 p-4">
+                  {translation[currentLanguage].noProducts}
                 </td>
               </tr>
-            ))
-          ) : (
-            <tr>
-              <td colSpan="10" className="border border-gray-300 p-4">
-                {translation[currentLanguage].noProducts}
-              </td>
-            </tr>
-          )}
-        </tbody>
-      </table>
+            )}
+          </tbody>
+        </table>
+      </div>
 
       {/* Pagination */}
       <div className="flex justify-between mt-4">
         <p
           onClick={() => handlePageChange(currentPage - 1)}
           disabled={currentPage <= 1}
-          className={`cursor-pointer ${currentPage === totalPages ? "text-gray-400" : "text-black"}`}
+          className={`cursor-pointer ${
+            currentPage === totalPages ? "text-gray-400" : "text-black"
+          }`}
         >
           {translation[currentLanguage].previous}
         </p>
         <span className="flex items-center justify-center">
-          {translation[currentLanguage].page} {currentPage} {translation[currentLanguage].of} {totalPages}
+          {translation[currentLanguage].page} {currentPage}{" "}
+          {translation[currentLanguage].of} {totalPages}
         </span>
         <p
           onClick={() => handlePageChange(currentPage + 1)}
           disabled={currentPage >= totalPages}
-          className={`cursor-pointer ${currentPage === totalPages ? "text-gray-400" : "text-black"}`}
+          className={`cursor-pointer ${
+            currentPage === totalPages ? "text-gray-400" : "text-black"
+          }`}
         >
           {translation[currentLanguage].next}
         </p>

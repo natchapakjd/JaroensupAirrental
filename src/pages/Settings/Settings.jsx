@@ -40,7 +40,7 @@ const Settings = () => {
   return (
     <div>
       <Navbar />
-      <div className="container mx-auto p-6 font-prompt">
+      <div className=" mx-auto  font-prompt">
         <div className="bg-white shadow-md rounded-lg p-6 text-center">
           <h2 className="text-lg font-bold">
             {translations[language].allowNotification}

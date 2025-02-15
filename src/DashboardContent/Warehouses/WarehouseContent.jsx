@@ -165,40 +165,46 @@ const WarehouseContent = () => {
       {filteredWarehouses.length === 0 ? (
         <p>{translations[language].noWarehouses}</p>
       ) : (
-        <table className="table w-full border-collapse border border-gray-300 text-center font-prompt">
-          <thead className="sticky-top bg-gray-200">
-            <tr>
-              <th>{translations[language].id}</th>
-              <th>{translations[language].location}</th>
-              <th>{translations[language].capacity}</th>
-              <th>{translations[language].actions}</th>
-            </tr>
-          </thead>
-          <tbody>
-            {filteredWarehouses.map((warehouse, index) => (
-              <tr key={index + 1}>
-                <td className="border p-2 text-center">{index + 1}</td>
-                <td className="border p-2 text-center">{warehouse.location}</td>
-                <td className="border p-2 text-center">{warehouse.capacity}</td>
-                <td className="border p-2 text-center">
-                  <Link
-                    to={`/dashboard/warehouses/edit/${warehouse.warehouse_id}`}
-                  >
-                    <button className="btn btn-success text-white mr-2">
-                      {translations[language].edit}
-                    </button>
-                  </Link>
-                  <button
-                    onClick={() => handleDelete(warehouse.warehouse_id)}
-                    className="btn btn-error text-white"
-                  >
-                    {translations[language].delete}
-                  </button>
-                </td>
+        <div className="overflow-x-auto">
+          <table className="table w-full border-collapse border border-gray-300 text-center font-prompt">
+            <thead className="sticky-top bg-gray-200">
+              <tr>
+                <th>{translations[language].id}</th>
+                <th>{translations[language].location}</th>
+                <th>{translations[language].capacity}</th>
+                <th>{translations[language].actions}</th>
               </tr>
-            ))}
-          </tbody>
-        </table>
+            </thead>
+            <tbody>
+              {filteredWarehouses.map((warehouse, index) => (
+                <tr key={index + 1}>
+                  <td className="border p-2 text-center">{index + 1}</td>
+                  <td className="border p-2 text-center">
+                    {warehouse.location}
+                  </td>
+                  <td className="border p-2 text-center">
+                    {warehouse.capacity}
+                  </td>
+                  <td className="border p-2 text-center">
+                    <Link
+                      to={`/dashboard/warehouses/edit/${warehouse.warehouse_id}`}
+                    >
+                      <button className="btn btn-success text-white mr-2">
+                        {translations[language].edit}
+                      </button>
+                    </Link>
+                    <button
+                      onClick={() => handleDelete(warehouse.warehouse_id)}
+                      className="btn btn-error text-white"
+                    >
+                      {translations[language].delete}
+                    </button>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
       )}
 
       {/* Pagination Controls */}
@@ -213,7 +219,8 @@ const WarehouseContent = () => {
           {translations[language].previous}
         </p>
         <span className="flex items-center justify-center">
-          {translations[language].page} {currentPage} {translations[language].of} {totalPages}
+          {translations[language].page} {currentPage}{" "}
+          {translations[language].of} {totalPages}
         </span>
         <p
           onClick={() => setCurrentPage(currentPage + 1)}

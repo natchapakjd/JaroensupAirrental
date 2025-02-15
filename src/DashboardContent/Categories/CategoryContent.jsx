@@ -156,42 +156,44 @@ const CategoryContent = () => {
         <p>{t.noCategories}</p>
       ) : (
         <>
-          <table className="table w-full border-collapse border border-gray-300 text-center">
-            <thead className="sticky-top bg-gray-200">
-              <tr>
-                <th className="border p-2 text-center">{t.id}</th>
-                <th className="border p-2 text-center">{t.name}</th>
-                <th className="border p-2 text-center">{t.description}</th>
-                <th className="border p-2 text-center">{t.actions}</th>
-              </tr>
-            </thead>
-            <tbody>
-              {filteredCategories.map((category, index) => (
-                <tr key={index + 1}>
-                  <td className="border p-2 text-center">{index + 1}</td>
-                  <td className="border p-2 text-center">{category.name}</td>
-                  <td className="border p-2 text-center">
-                    {category.description}
-                  </td>
-                  <td className="border p-2 text-center">
-                    <Link
-                      to={`/dashboard/categories/edit/${category.category_id}`}
-                    >
-                      <button className="btn btn-success text-white mr-2">
-                        {t.editButton}
-                      </button>
-                    </Link>
-                    <button
-                      onClick={() => handleDelete(category.category_id)}
-                      className="btn btn-error text-white"
-                    >
-                      {t.deleteButton}
-                    </button>
-                  </td>
+          <div className="overflow-x-auto">
+            <table className="table w-full border-collapse border border-gray-300 text-center">
+              <thead className="sticky-top bg-gray-200">
+                <tr>
+                  <th className="border p-2 text-center">{t.id}</th>
+                  <th className="border p-2 text-center">{t.name}</th>
+                  <th className="border p-2 text-center">{t.description}</th>
+                  <th className="border p-2 text-center">{t.actions}</th>
                 </tr>
-              ))}
-            </tbody>
-          </table>
+              </thead>
+              <tbody>
+                {filteredCategories.map((category, index) => (
+                  <tr key={index + 1}>
+                    <td className="border p-2 text-center">{index + 1}</td>
+                    <td className="border p-2 text-center">{category.name}</td>
+                    <td className="border p-2 text-center">
+                      {category.description}
+                    </td>
+                    <td className="border p-2 text-center">
+                      <Link
+                        to={`/dashboard/categories/edit/${category.category_id}`}
+                      >
+                        <button className="btn btn-success text-white mr-2">
+                          {t.editButton}
+                        </button>
+                      </Link>
+                      <button
+                        onClick={() => handleDelete(category.category_id)}
+                        className="btn btn-error text-white"
+                      >
+                        {t.deleteButton}
+                      </button>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
 
           {/* Pagination Controls */}
           <div className="flex justify-between mt-4">

@@ -13,7 +13,7 @@ const PaymentContent = () => {
   const [currentPage, setCurrentPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
   const apiUrl = import.meta.env.VITE_SERVER_URL;
-  
+
   // Load translations from localStorage or default to English
   const language = localStorage.getItem("language") || "en";
   const translations = {
@@ -50,9 +50,6 @@ const PaymentContent = () => {
       next: "next",
       of: "of",
       page: "page",
-
-
-
     },
     th: {
       paymentList: "รายการการชำระเงิน",
@@ -246,83 +243,89 @@ const PaymentContent = () => {
       </div>
 
       {/* Task Payments Table */}
-      <table className="table w-full border-collapse border border-gray-300">
-        <thead className="sticky-top bg-gray-200">
-          <tr>
-            <th className="border p-2 text-center">{t.paymentId}</th>
-            <th className="border p-2 text-center">{t.user}</th>
-            <th className="border p-2 text-center">{t.task}</th>
-            <th className="border p-2 text-center">{t.amount}</th>
-            <th className="border p-2 text-center">{t.paymentMethod}</th>
-            <th className="border p-2 text-center">{t.paymentDate}</th>
-            <th className="border p-2 text-center">{t.slipImages}</th>
-            <th className="border p-2 text-center">{t.status}</th>
-            <th className="border p-2 text-center">{t.actions}</th>
-          </tr>
-        </thead>
-        <tbody className="text-center">
-          {filteredPayments.length > 0 ? (
-            filteredPayments.map((payment, index) => (
-              <tr key={index + 1}>
-                <td className="border p-2 text-center">{index + 1}</td>
-                <td className="border p-2 text-center">
-                  {payment.firstname} {payment.lastname}
-                </td>
-                <td className="border p-2 text-center">{payment.task_desc}</td>
-                <td className="border p-2 text-center">{payment.amount}</td>
-                <td className="border p-2 text-center">
-                  {payment.method_name}
-                </td>
-                <td className="border p-2 text-center">
-                  {new Date(payment.created_at).toLocaleString()}
-                </td>
-                <td className="border p-2 text-center">
-                  {payment.image_url ? (
-                    <img
-                      src={`${payment.image_url}`}
-                      alt="Slip"
-                      className="w-16 h-16 object-cover mx-auto cursor-pointer"
-                      onClick={() => openSlipImagePopup(payment.image_url)}
-                    />
-                  ) : (
-                    <p>No Image</p>
-                  )}
-                </td>
-                <td className="border p-2 text-center">
-                  {payment.status_name}
-                </td>
-                <td className="border p-2 text-center">
-                  <div className="flex justify-center gap-2">
-                    <button
-                      onClick={() => handleApprove(payment.payment_id)}
-                      className="btn bg-blue hover:bg-blue text-white"
-                    >
-                      {t.approve}
-                    </button>
-                    <Link to={`/dashboard/payments/edit/${payment.payment_id}`}>
-                      <button className="btn btn-success text-white">
-                        {t.edit}
+      <div className="overflow-x-auto">
+        <table className="table w-full border-collapse border border-gray-300">
+          <thead className="sticky-top bg-gray-200">
+            <tr>
+              <th className="border p-2 text-center">{t.paymentId}</th>
+              <th className="border p-2 text-center">{t.user}</th>
+              <th className="border p-2 text-center">{t.task}</th>
+              <th className="border p-2 text-center">{t.amount}</th>
+              <th className="border p-2 text-center">{t.paymentMethod}</th>
+              <th className="border p-2 text-center">{t.paymentDate}</th>
+              <th className="border p-2 text-center">{t.slipImages}</th>
+              <th className="border p-2 text-center">{t.status}</th>
+              <th className="border p-2 text-center">{t.actions}</th>
+            </tr>
+          </thead>
+          <tbody className="text-center">
+            {filteredPayments.length > 0 ? (
+              filteredPayments.map((payment, index) => (
+                <tr key={index + 1}>
+                  <td className="border p-2 text-center">{index + 1}</td>
+                  <td className="border p-2 text-center">
+                    {payment.firstname} {payment.lastname}
+                  </td>
+                  <td className="border p-2 text-center">
+                    {payment.task_desc}
+                  </td>
+                  <td className="border p-2 text-center">{payment.amount}</td>
+                  <td className="border p-2 text-center">
+                    {payment.method_name}
+                  </td>
+                  <td className="border p-2 text-center">
+                    {new Date(payment.created_at).toLocaleString()}
+                  </td>
+                  <td className="border p-2 text-center">
+                    {payment.image_url ? (
+                      <img
+                        src={`${payment.image_url}`}
+                        alt="Slip"
+                        className="w-16 h-16 object-cover mx-auto cursor-pointer"
+                        onClick={() => openSlipImagePopup(payment.image_url)}
+                      />
+                    ) : (
+                      <p>No Image</p>
+                    )}
+                  </td>
+                  <td className="border p-2 text-center">
+                    {payment.status_name}
+                  </td>
+                  <td className="border p-2 text-center">
+                    <div className="flex justify-center gap-2">
+                      <button
+                        onClick={() => handleApprove(payment.payment_id)}
+                        className="btn bg-blue hover:bg-blue text-white"
+                      >
+                        {t.approve}
                       </button>
-                    </Link>
-                    <button
-                      onClick={() => handleDelete(payment.payment_id, "task")}
-                      className="btn btn-error text-white"
-                    >
-                      {t.delete}
-                    </button>
-                  </div>
+                      <Link
+                        to={`/dashboard/payments/edit/${payment.payment_id}`}
+                      >
+                        <button className="btn btn-success text-white">
+                          {t.edit}
+                        </button>
+                      </Link>
+                      <button
+                        onClick={() => handleDelete(payment.payment_id, "task")}
+                        className="btn btn-error text-white"
+                      >
+                        {t.delete}
+                      </button>
+                    </div>
+                  </td>
+                </tr>
+              ))
+            ) : (
+              <tr>
+                <td colSpan="9" className="text-center py-4">
+                  {t.noPayments}
                 </td>
               </tr>
-            ))
-          ) : (
-            <tr>
-              <td colSpan="9" className="text-center py-4">
-                {t.noPayments}
-              </td>
-            </tr>
-          )}
-        </tbody>
-      </table>
+            )}
+          </tbody>
+        </table>
+      </div>
 
       {/* Pagination */}
       <div className="flex justify-between items-center mt-4">
@@ -330,11 +333,10 @@ const PaymentContent = () => {
           onClick={() => handlePageChange(currentPage - 1)}
           disabled={currentPage === 1}
         >
-                          {t.prev}
-
+          {t.prev}
         </p>
         <span>
-        {t.page} {currentPage} {t.of} {totalPages}
+          {t.page} {currentPage} {t.of} {totalPages}
         </span>
         <p
           onClick={() => handlePageChange(currentPage + 1)}

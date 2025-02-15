@@ -123,14 +123,16 @@ const BrandContent = () => {
   return (
     <div className="p-8 rounded-lg shadow-lg w-full mx-auto h-screen font-prompt">
       <div className="flex justify-between items-center mb-6">
-        <h1 className="text-2xl font-semibold">{translations[language].brands}</h1>
+        <h1 className="text-2xl font-semibold">
+          {translations[language].brands}
+        </h1>
         <Link to="/dashboard/brands/add">
           <button className="btn bg-blue text-white hover:bg-blue">
             {translations[language].addBrand}
           </button>
         </Link>
       </div>
-      
+
       {/* Search Box */}
       <div className="mb-4">
         <input
@@ -146,56 +148,66 @@ const BrandContent = () => {
         <p>{translations[language].noBrands}</p>
       ) : (
         <>
-          <table className="table w-full border-collapse border border-gray-300 text-center font-prompt">
-            <thead className="sticky-top bg-gray-200">
-              <tr>
-                <th className="border p-2 text-center">ID</th>
-                <th className="border p-2 text-center">Name</th>
-                <th className="border p-2 text-center">Description</th>
-                <th className="border p-2 text-center">{translations[language].actions}</th>
-              </tr>
-            </thead>
-            <tbody>
-              {filteredBrands.map((brand, index) => (
-                <tr key={index + 1}>
-                  <td className="border p-2 text-center">{index + 1}</td>
-                  <td className="border p-2 text-center">{brand.name}</td>
-                  <td className="border p-2 text-center">{brand.description}</td>
-                  <td className="border p-2 text-center">
-                    <Link
-                      to={`/dashboard/brands/edit/${brand.brand_id}`}
-                      className="btn btn-success text-white mr-2"
-                    >
-                      {translations[language].edit}
-                    </Link>
-                    <button
-                      onClick={() => handleDelete(brand.brand_id)}
-                      className="btn btn-error text-white"
-                    >
-                      {translations[language].delete}
-                    </button>
-                  </td>
+          <div className="overflow-x-auto">
+            <table className="table w-full border-collapse border border-gray-300 text-center font-prompt">
+              <thead className="sticky-top bg-gray-200">
+                <tr>
+                  <th className="border p-2 text-center">ID</th>
+                  <th className="border p-2 text-center">Name</th>
+                  <th className="border p-2 text-center">Description</th>
+                  <th className="border p-2 text-center">
+                    {translations[language].actions}
+                  </th>
                 </tr>
-              ))}
-            </tbody>
-          </table>
-
+              </thead>
+              <tbody>
+                {filteredBrands.map((brand, index) => (
+                  <tr key={index + 1}>
+                    <td className="border p-2 text-center">{index + 1}</td>
+                    <td className="border p-2 text-center">{brand.name}</td>
+                    <td className="border p-2 text-center">
+                      {brand.description}
+                    </td>
+                    <td className="border p-2 text-center">
+                      <Link
+                        to={`/dashboard/brands/edit/${brand.brand_id}`}
+                        className="btn btn-success text-white mr-2"
+                      >
+                        {translations[language].edit}
+                      </Link>
+                      <button
+                        onClick={() => handleDelete(brand.brand_id)}
+                        className="btn btn-error text-white"
+                      >
+                        {translations[language].delete}
+                      </button>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
           {/* Pagination Controls */}
           <div className="flex justify-between mt-4">
             <p
               onClick={() => handlePageChange(currentPage - 1)}
               disabled={currentPage <= 1}
-              className={`cursor-pointer ${currentPage === totalPages ? "text-gray-400" : "text-black"}`}
+              className={`cursor-pointer ${
+                currentPage === totalPages ? "text-gray-400" : "text-black"
+              }`}
             >
               {translations[language].paginationPrev}
             </p>
             <span className="flex items-center justify-center">
-              {translations[language].page} {currentPage} {translations[language].of} {totalPages}
+              {translations[language].page} {currentPage}{" "}
+              {translations[language].of} {totalPages}
             </span>
             <p
               onClick={() => handlePageChange(currentPage + 1)}
               disabled={currentPage >= totalPages}
-              className={`cursor-pointer ${currentPage === totalPages ? "text-gray-400" : "text-black"}`}
+              className={`cursor-pointer ${
+                currentPage === totalPages ? "text-gray-400" : "text-black"
+              }`}
             >
               {translations[language].paginationNext}
             </p>

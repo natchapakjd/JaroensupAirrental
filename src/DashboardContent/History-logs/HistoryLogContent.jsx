@@ -1,7 +1,7 @@
-import React, { useEffect, useState } from 'react';
-import axios from 'axios';
-import Swal from 'sweetalert2';
-import Loading from '../../components/Loading';
+import React, { useEffect, useState } from "react";
+import axios from "axios";
+import Swal from "sweetalert2";
+import Loading from "../../components/Loading";
 
 const translations = {
   th: {
@@ -19,7 +19,6 @@ const translations = {
     next: "ถัดไป",
     errorFetch: "ไม่สามารถโหลดข้อมูลบันทึกได้",
     of: "จาก",
-
   },
   en: {
     adminLogs: "Admin Logs",
@@ -36,7 +35,6 @@ const translations = {
     next: "Next",
     errorFetch: "Failed to load logs.",
     of: "of",
-
   },
 };
 
@@ -49,7 +47,9 @@ const HistoryLogContent = () => {
   const [taskCurrentPage, setTaskCurrentPage] = useState(1);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-  const [language, setLanguage] = useState(localStorage.getItem("language") || "en");
+  const [language, setLanguage] = useState(
+    localStorage.getItem("language") || "en"
+  );
   const apiUrl = import.meta.env.VITE_SERVER_URL;
   const logsPerPage = 10;
 
@@ -74,9 +74,9 @@ const HistoryLogContent = () => {
     } catch (err) {
       setError(err.message);
       Swal.fire({
-        title: 'Error',
+        title: "Error",
         text: translations[language].errorFetch,
-        icon: 'error',
+        icon: "error",
       });
     }
   };
@@ -91,18 +91,19 @@ const HistoryLogContent = () => {
     } catch (err) {
       setError(err.message);
       Swal.fire({
-        title: 'Error',
+        title: "Error",
         text: translations[language].errorFetch,
-        icon: 'error',
+        icon: "error",
       });
     }
   };
 
   useEffect(() => {
     setLoading(true);
-    Promise.all([fetchAdminLogs(adminCurrentPage), fetchTaskLogs(taskCurrentPage)]).finally(() =>
-      setLoading(false)
-    );
+    Promise.all([
+      fetchAdminLogs(adminCurrentPage),
+      fetchTaskLogs(taskCurrentPage),
+    ]).finally(() => setLoading(false));
   }, [adminCurrentPage, taskCurrentPage]);
 
   const handlePageChange = (setPage, currentPage, isNext, totalPages) => {
@@ -115,101 +116,170 @@ const HistoryLogContent = () => {
 
   return (
     <div className="p-8 rounded-lg shadow-lg w-full mx-auto h-screen">
-      <h2 className="text-xl font-semibold mb-4">{translations[language].adminLogs}</h2>
-      <table className="table w-full border-collapse border border-gray-300 mb-4">
-        <thead className="bg-gray-200">
-          <tr>
-            <th className="border p-2 text-center">{translations[language].logId}</th>
-            <th className="border p-2 text-center">{translations[language].adminId}</th>
-            <th className="border p-2 text-center">{translations[language].action}</th>
-            <th className="border p-2 text-center">{translations[language].date}</th>
-          </tr>
-        </thead>
-        <tbody className="text-center">
-          {adminLogs.length > 0 ? (
-            adminLogs.map((log, index) => (
-              <tr key={index + 1}>
-                <td className="border p-2">{index + 1}</td>
-                <td className="border p-2">{log.admin_id}</td>
-                <td className="border p-2">{log.action}</td>
-                <td className="border p-2">{new Date(log.timestamp).toLocaleString()}</td>
-              </tr>
-            ))
-          ) : (
+      <h2 className="text-xl font-semibold mb-4">
+        {translations[language].adminLogs}
+      </h2>
+      <div className="overflow-x-auto">
+        {" "}
+        <table className="table w-full border-collapse border border-gray-300 mb-4">
+          <thead className="bg-gray-200">
             <tr>
-              <td colSpan="4" className="border p-4">{translations[language].noLogs}</td>
+              <th className="border p-2 text-center">
+                {translations[language].logId}
+              </th>
+              <th className="border p-2 text-center">
+                {translations[language].adminId}
+              </th>
+              <th className="border p-2 text-center">
+                {translations[language].action}
+              </th>
+              <th className="border p-2 text-center">
+                {translations[language].date}
+              </th>
             </tr>
-          )}
-        </tbody>
-      </table>
+          </thead>
+          <tbody className="text-center">
+            {adminLogs.length > 0 ? (
+              adminLogs.map((log, index) => (
+                <tr key={index + 1}>
+                  <td className="border p-2">{index + 1}</td>
+                  <td className="border p-2">{log.admin_id}</td>
+                  <td className="border p-2">{log.action}</td>
+                  <td className="border p-2">
+                    {new Date(log.timestamp).toLocaleString()}
+                  </td>
+                </tr>
+              ))
+            ) : (
+              <tr>
+                <td colSpan="4" className="border p-4">
+                  {translations[language].noLogs}
+                </td>
+              </tr>
+            )}
+          </tbody>
+        </table>
+      </div>
+
       <div className="flex justify-between mt-4">
         <p
           onClick={() =>
-            handlePageChange(setAdminCurrentPage, adminCurrentPage, false, adminTotalPages)
+            handlePageChange(
+              setAdminCurrentPage,
+              adminCurrentPage,
+              false,
+              adminTotalPages
+            )
           }
-          className={`cursor-pointer ${adminCurrentPage === 1 ? 'text-gray-400' : 'text-black'}`}
+          className={`cursor-pointer ${
+            adminCurrentPage === 1 ? "text-gray-400" : "text-black"
+          }`}
         >
           {translations[language].previous}
         </p>
         <span>
-          {translations[language].page} {adminCurrentPage} {translations[language].of} {adminTotalPages}
+          {translations[language].page} {adminCurrentPage}{" "}
+          {translations[language].of} {adminTotalPages}
         </span>
         <p
           onClick={() =>
-            handlePageChange(setAdminCurrentPage, adminCurrentPage, true, adminTotalPages)
+            handlePageChange(
+              setAdminCurrentPage,
+              adminCurrentPage,
+              true,
+              adminTotalPages
+            )
           }
-          className={`cursor-pointer ${adminCurrentPage === adminTotalPages ? 'text-gray-400' : 'text-black'}`}
+          className={`cursor-pointer ${
+            adminCurrentPage === adminTotalPages
+              ? "text-gray-400"
+              : "text-black"
+          }`}
         >
           {translations[language].next}
         </p>
       </div>
 
-      <h2 className="text-xl font-semibold mt-8 mb-4">{translations[language].taskLogs}</h2>
-      <table className="table w-full border-collapse border border-gray-300">
-        <thead className="bg-gray-200">
-          <tr>
-            <th className="border p-2 text-center">{translations[language].logId}</th>
-            <th className="border p-2 text-center">{translations[language].taskId}</th>
-            <th className="border p-2 text-center">{translations[language].userId}</th>
-            <th className="border p-2 text-center">{translations[language].action}</th>
-            <th className="border p-2 text-center">{translations[language].date}</th>
-          </tr>
-        </thead>
-        <tbody className="text-center">
-          {taskLogs.length > 0 ? (
-            taskLogs.map((log, index) => (
-              <tr key={index + 1}>
-                <td className="border p-2">{index + 1}</td>
-                <td className="border p-2">{log.task_id}</td>
-                <td className="border p-2">{log.user_id}</td>
-                <td className="border p-2">{log.action}</td>
-                <td className="border p-2">{new Date(log.created_at).toLocaleString()}</td>
-              </tr>
-            ))
-          ) : (
+      <h2 className="text-xl font-semibold mt-8 mb-4">
+        {translations[language].taskLogs}
+      </h2>
+      <div className="overflow-x-auto">
+        {" "}
+        <table className="table w-full border-collapse border border-gray-300">
+          <thead className="bg-gray-200">
             <tr>
-              <td colSpan="5" className="border p-4">{translations[language].noLogs}</td>
+              <th className="border p-2 text-center">
+                {translations[language].logId}
+              </th>
+              <th className="border p-2 text-center">
+                {translations[language].taskId}
+              </th>
+              <th className="border p-2 text-center">
+                {translations[language].userId}
+              </th>
+              <th className="border p-2 text-center">
+                {translations[language].action}
+              </th>
+              <th className="border p-2 text-center">
+                {translations[language].date}
+              </th>
             </tr>
-          )}
-        </tbody>
-      </table>
+          </thead>
+          <tbody className="text-center">
+            {taskLogs.length > 0 ? (
+              taskLogs.map((log, index) => (
+                <tr key={index + 1}>
+                  <td className="border p-2">{index + 1}</td>
+                  <td className="border p-2">{log.task_id}</td>
+                  <td className="border p-2">{log.user_id}</td>
+                  <td className="border p-2">{log.action}</td>
+                  <td className="border p-2">
+                    {new Date(log.created_at).toLocaleString()}
+                  </td>
+                </tr>
+              ))
+            ) : (
+              <tr>
+                <td colSpan="5" className="border p-4">
+                  {translations[language].noLogs}
+                </td>
+              </tr>
+            )}
+          </tbody>
+        </table>
+      </div>
       <div className="flex justify-between mt-4">
         <p
           onClick={() =>
-            handlePageChange(setTaskCurrentPage, taskCurrentPage, false, taskTotalPages)
+            handlePageChange(
+              setTaskCurrentPage,
+              taskCurrentPage,
+              false,
+              taskTotalPages
+            )
           }
-          className={`cursor-pointer ${taskCurrentPage === 1 ? 'text-gray-400' : 'text-black'}`}
+          className={`cursor-pointer ${
+            taskCurrentPage === 1 ? "text-gray-400" : "text-black"
+          }`}
         >
           {translations[language].previous}
         </p>
         <span>
-          {translations[language].page} {taskCurrentPage} {translations[language].of} {taskTotalPages}
+          {translations[language].page} {taskCurrentPage}{" "}
+          {translations[language].of} {taskTotalPages}
         </span>
         <p
           onClick={() =>
-            handlePageChange(setTaskCurrentPage, taskCurrentPage, true, taskTotalPages)
+            handlePageChange(
+              setTaskCurrentPage,
+              taskCurrentPage,
+              true,
+              taskTotalPages
+            )
           }
-          className={`cursor-pointer ${taskCurrentPage === taskTotalPages ? 'text-gray-400' : 'text-black'}`}
+          className={`cursor-pointer ${
+            taskCurrentPage === taskTotalPages ? "text-gray-400" : "text-black"
+          }`}
         >
           {translations[language].next}
         </p>
