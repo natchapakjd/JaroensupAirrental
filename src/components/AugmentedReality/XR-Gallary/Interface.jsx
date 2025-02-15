@@ -2,11 +2,60 @@ import React, { forwardRef, useState, useEffect } from "react";
 import { useCharacterAnimations } from "../contexts/CharacterAnimations";
 import "./Interface.css";
 import useModelsStore from "../stores/modelStore";
-import axios from "axios"
+import axios from "axios";
 import ImageUpload from "../ImageUpload";
 import Swal from "sweetalert2";
 import withReactContent from "sweetalert2-react-content";
 import { Navigate, useNavigate } from "react-router-dom";
+
+const translations = {
+  en: {
+    menuOpen: "☰ Menu",
+    menuClose: "✖ Close",
+    selectModel: "Select Model:",
+    totalModels: "Total Models:",
+    air5Ton: "Air 5 Ton",
+    air10Ton: "Air 10 Ton",
+    air20Ton: "Air 20 Ton",
+    selectAppointment: "Select Appointment:",
+    locationName: "Location Name:",
+    selectRoomType: "Select Room Type:",
+    widthOptional: "Width (Optional):",
+    heightOptional: "Height (Optional):",
+    saveCalculation: "Save Calculation",
+    uploadImage: "Upload Image",
+    backToDashboard: "Back to Dashboard",
+    rotateLeft: "Rotate Left",
+    rotateRight: "Rotate Right",
+    removeSelected: "Remove Selected",
+    clearAllModels: "Clear All Models",
+    startAnimation: "Start Animation",
+    stopAnimation: "Stop Animation",
+  },
+  th: {
+    menuOpen: "☰ เมนู",
+    menuClose: "✖ ปิด",
+    selectModel: "เลือกโมเดล:",
+    totalModels: "จำนวนโมเดลทั้งหมด:",
+    air5Ton: "แอร์ 5 ตัน",
+    air10Ton: "แอร์ 10 ตัน",
+    air20Ton: "แอร์ 20 ตัน",
+    selectAppointment: "เลือกการนัดหมาย:",
+    locationName: "ชื่อสถานที่:",
+    selectRoomType: "เลือกประเภทห้อง:",
+    widthOptional: "ความกว้าง (ตัวเลือก):",
+    heightOptional: "ความสูง (ตัวเลือก):",
+    saveCalculation: "บันทึกการคำนวณ",
+    uploadImage: "อัปโหลดรูปภาพ",
+    backToDashboard: "กลับไปยังแดชบอร์ด",
+    rotateLeft: "หมุนซ้าย",
+    rotateRight: "หมุนขวา",
+    removeSelected: "ลบโมเดลที่เลือกไว้",
+    clearAllModels: "ลบโมเดลทั้งหมด",
+    startAnimation: "เริ่มการแสดงผลความเย็น",
+    stopAnimation: "หยุดการแสดงผลความเย็น",
+  },
+};
 
 const MySwal = withReactContent(Swal);
 
@@ -37,7 +86,10 @@ const Interface = forwardRef(({ props }, ref) => {
   const [roomTypes, setRoomTypes] = useState([]); // 📌 เก็บค่าห้องจาก API
   const [width, setWidth] = useState(""); // Optional Width
   const [height, setHeight] = useState(""); // Optional Height
-  const navigate  = useNavigate();
+  const navigate = useNavigate();
+  const [language, setLanguage] = useState(
+    localStorage.getItem("language") || "th"
+  ); // Default to Thai
 
   useEffect(() => {
     axios
@@ -53,6 +105,8 @@ const Interface = forwardRef(({ props }, ref) => {
         console.error("Error fetching appointments:", error);
       });
   }, []);
+
+  
 
   useEffect(() => {
     axios
@@ -91,7 +145,7 @@ const Interface = forwardRef(({ props }, ref) => {
       air_20ton_used: modelCounts["air20tonCC"] || 0,
       grid_pattern: models,
     };
-    console.log(roomType)
+    console.log(roomType);
     axios
       .post(`${import.meta.env.VITE_SERVER_URL}/area_cal`, payload)
       .then((response) => {
@@ -102,7 +156,7 @@ const Interface = forwardRef(({ props }, ref) => {
         alert("Failed to save data");
       });
   };
-  
+
   const clearModels = () => {
     setModels([]); // ล้างโมเดลทั้งหมด
   };
@@ -112,10 +166,10 @@ const Interface = forwardRef(({ props }, ref) => {
       alert("กรุณาเลือก Appointment ก่อนอัปโหลดภาพ!");
       return;
     }
-  
+
     MySwal.fire({
       title: "อัปโหลดรูปภาพ",
-      html: <ImageUpload areaCalculationId={selectedAppointment} />, 
+      html: <ImageUpload areaCalculationId={selectedAppointment} />,
       showConfirmButton: false, // ซ่อนปุ่ม OK เพราะอัปโหลดเสร็จเอง
       width: "50%",
     });
@@ -128,31 +182,50 @@ const Interface = forwardRef(({ props }, ref) => {
           className="menu-button"
           onClick={() => setIsMenuOpen(!isMenuOpen)}
         >
-          {isMenuOpen ? "✖ Close" : "☰ Menu"}
+          {isMenuOpen
+            ? translations[language].menuClose
+            : translations[language].menuOpen}
         </button>
 
         {isMenuOpen && (
           <div className="popup-menu">
             {/* 🔥 ส่วนเลือกโมเดล */}
-            <div className="dropdown-ar-container">
-              <label className="dropdown-ar-label">Select Model:</label>
+            <div className="dropdown-ar-container text-white">
+              {translations[language].selectModel}
               <select
                 className="dropdown-ar"
                 value={currentModelName}
                 onChange={(e) => setCurrentModelName(e.target.value)}
               >
-                <option value="air5tonCC">Air 5 Ton</option>
-                <option value="air10tonCC">Air 10 Ton</option>
-                <option value="air20tonCC">Air 20 Ton</option>
+                <option value="air5tonCC">
+                  {translations[language].air5Ton}
+                </option>
+                <option value="air10tonCC">
+                  {translations[language].air10Ton}
+                </option>
+                <option value="air20tonCC">
+                  {translations[language].air20Ton}
+                </option>
               </select>
             </div>
 
             {/* 📌 ส่วนแสดงจำนวนโมเดล */}
             <div className="model-count-container">
-              <h3>Total Models: {totalModels}</h3>
-              <p>Air 5 Ton: {modelCounts["air5tonCC"] || 0}</p>
-              <p>Air 10 Ton: {modelCounts["air10tonCC"] || 0}</p>
-              <p>Air 20 Ton: {modelCounts["air20tonCC"] || 0}</p>
+              <h3>
+                {translations[language].totalModels} {totalModels}
+              </h3>
+              <p>
+                {translations[language].air5Ton}:{" "}
+                {modelCounts["air5tonCC"] || 0}
+              </p>
+              <p>
+                {translations[language].air10Ton}:{" "}
+                {modelCounts["air10tonCC"] || 0}
+              </p>
+              <p>
+                {translations[language].air20Ton}:{" "}
+                {modelCounts["air20tonCC"] || 0}
+              </p>
             </div>
 
             <div className="button-container">
@@ -179,35 +252,39 @@ const Interface = forwardRef(({ props }, ref) => {
                 onClick={() => rotateSelectedModel(-Math.PI / 8)}
                 disabled={!selectedModel}
               >
-                Rotate Left
+                {translations[language].rotateLeft}
               </button>
               <button
                 className="button"
                 onClick={() => rotateSelectedModel(Math.PI / 8)}
                 disabled={!selectedModel}
               >
-                Rotate Right
+                {translations[language].rotateRight}
               </button>
               <button
                 className="button"
                 onClick={() => removeModelById(selectedModel)}
                 disabled={!selectedModel}
               >
-                Remove Selected
+                {translations[language].removeSelected}
               </button>
               <button className="button" onClick={clearModels}>
-                Clear All Models
+                {translations[language].clearAllModels}
               </button>
 
               <button className="button" onClick={toggleAnimation}>
-                {isAnimating ? "Stop Animation" : "Start Animation"}
+                {isAnimating
+                  ? translations[language].stopAnimation
+                  : translations[language].startAnimation}
               </button>
             </div>
             {/* 📌 Grid Container */}
             <div className="grid-container">
               {/* 🔥 Dropdown เลือก Appointment */}
               <div className="dropdown-ar-container">
-                <label className="dropdown-ar-label">Select Appointment:</label>
+                <label className="dropdown-ar-label">
+                  {translations[language].selectAppointment}
+                </label>
                 <select
                   className="dropdown-ar"
                   value={selectedAppointment}
@@ -226,7 +303,9 @@ const Interface = forwardRef(({ props }, ref) => {
 
               {/* 🔥 Input location_name */}
               <div className="input-container">
-                <label className="input-label">Location Name:</label>
+                <label className="input-label">
+                  {translations[language].locationName}
+                </label>
                 <input
                   type="text"
                   className="input-field"
@@ -238,7 +317,9 @@ const Interface = forwardRef(({ props }, ref) => {
 
               {/* 🔥 Dropdown เลือก Room Type */}
               <div className="dropdown-container-ar">
-                <label className="dropdown-ar-label">Select Room Type:</label>
+                <label className="dropdown-ar-label">
+                  {translations[language].selectRoomType}
+                </label>
                 <select
                   className="dropdown-ar"
                   value={roomType}
@@ -254,7 +335,9 @@ const Interface = forwardRef(({ props }, ref) => {
 
               {/* 📌 Input Optional Width */}
               <div className="input-container">
-                <label className="input-label">Width (Optional):</label>
+                <label className="input-label">
+                  {translations[language].widthOptional}
+                </label>
                 <input
                   type="number"
                   className="input-field"
@@ -266,7 +349,9 @@ const Interface = forwardRef(({ props }, ref) => {
 
               {/* 📌 Input Optional Height */}
               <div className="input-container">
-                <label className="input-label">Height (Optional):</label>
+                <label className="input-label">
+                  {translations[language].heightOptional}
+                </label>
                 <input
                   type="number"
                   className="input-field"
@@ -283,7 +368,7 @@ const Interface = forwardRef(({ props }, ref) => {
                   onClick={() => navigate("/dashboard/area-cal")}
                   className="btn bg-gray-500 text-white hover:bg-gray-500"
                 >
-                  กลับไปยัง Dashboard
+                  {translations[language].backToDashboard}
                 </button>
               </div>
               <div className="flex justify-between gap-2">
@@ -291,13 +376,13 @@ const Interface = forwardRef(({ props }, ref) => {
                   className="button save-button"
                   onClick={() => openImageUploadPopup(selectedAppointment)}
                 >
-                  Upload Image
+                  {translations[language].uploadImage}
                 </button>
                 <button
                   className="button save-button"
                   onClick={saveCalculation}
                 >
-                  Save Calculation
+                  {translations[language].saveCalculation}
                 </button>
               </div>
             </div>

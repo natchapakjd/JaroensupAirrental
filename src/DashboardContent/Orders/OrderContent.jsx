@@ -162,7 +162,7 @@ const OrderContent = () => {
           className="input input-bordered w-full"
         />
       </div>
-
+      <div className="overflow-x-auto">
       <table className="w-full border-collapse border border-gray-300">
         <thead className="sticky-top bg-gray-200">
           <tr>
@@ -211,6 +211,9 @@ const OrderContent = () => {
           )}
         </tbody>
       </table>
+
+      </div>
+     
 
       <div className="flex justify-between mt-4">
         <p

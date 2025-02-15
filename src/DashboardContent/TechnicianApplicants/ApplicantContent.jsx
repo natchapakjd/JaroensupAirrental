@@ -197,7 +197,7 @@ const ApplicantContent = () => {
   if (error) return <p>{error}</p>;
 
   return (
-    <div className="table p-8 rounded-lg shadow-lg w-full mx-auto h-full font-prompt">
+    <div className="p-8 rounded-lg shadow-lg w-full mx-auto font-prompt h-full">
       <div className="flex justify-between items-center mb-4">
         <h2 className="text-xl font-semibold mt-8 mb-5">{t.title}</h2>
         <Link to="/dashboard/applicants/add">
@@ -225,97 +225,104 @@ const ApplicantContent = () => {
           <option value="7">{t.filterHiring}</option>
         </select>
       </div>
-
-      <table className="w-full border-collapse border border-gray-300 font-prompt">
-        <thead className="sticky-top bg-gray-200">
-          <tr>
-            <th className="border p-2 text-center">Applicant ID</th>
-            <th className="border p-2 text-center">Firstname</th>
-            <th className="border p-2 text-center">Lastname</th>
-            <th className="border p-2 text-center">Date of birth</th>
-            <th className="border p-2 text-center">Email</th>
-            <th className="border p-2 text-center">Position Applied</th>
-            <th className="border p-2 text-center">Status</th>
-            <th className="border p-2 text-center">Applicant date</th>
-            <th className="border p-2 text-center">Note</th>
-            <th className="border p-2 text-center">Action</th>
-          </tr>
-        </thead>
-        <tbody className="text-center">
-          {filteredApplicants.length > 0 ? (
-            filteredApplicants
-              .slice((currentPage - 1) * pageSize, currentPage * pageSize)
-              .map((applicant, index) => (
-                <tr key={index + 1}>
-                  <td className="border p-2 text-center">{index + 1}</td>
-                  <td className="border p-2 text-center">
-                    {applicant.first_name}
-                  </td>
-                  <td className="border p-2 text-center">
-                    {applicant.last_name}
-                  </td>
-                  <td className="border p-2 text-center">
-                    {new Date(applicant.date_of_birth).toLocaleDateString(
-                      "en-GB"
-                    )}
-                  </td>
-                  <td className="border p-2 text-center">{applicant.email}</td>
-                  <td className="border p-2 text-center">
-                    {applicant.position_applied}
-                  </td>
-                  <td className="border p-2 text-center">
-                    {applicant.status_name}
-                  </td>
-                  <td className="border p-2 text-center">
-                    {new Date(applicant.application_date).toLocaleDateString(
-                      "en-GB"
-                    )}
-                  </td>
-                  <td className="border p-2 text-center">
-                    {applicant.notes || "No notes"}
-                  </td>
-                  <td className="border p-2 text-center">
-                    {applicant.status_id === 1 && (
-                      <button
-                        className="btn btn-success text-white mr-2"
-                        onClick={() => handleAccept(applicant.applicant_id)}
-                      >
-                        {t.accept}
-                      </button>
-                    )}
-                    {applicant.status_id === 7 && (
-                      <button
-                        className="btn btn-success text-white mr-2"
-                        onClick={() => handleSendEmail(applicant.applicant_id)}
-                      >
-                        {t.sendEmail}
-                      </button>
-                    )}
-                    <button
-                      className="btn bg-blue hover:bg-blue text-white"
-                      onClick={() => handleViewDetails(applicant.applicant_id)}
-                    >
-                      {t.viewDetails}
-                    </button>
-
-                    <button
-                      className="btn btn-error text-white ml-2"
-                      onClick={() => handleDelete(applicant.applicant_id)}
-                    >
-                      {t.reject}
-                    </button>
-                  </td>
-                </tr>
-              ))
-          ) : (
+      <div className="overflow-x-auto">
+        <table className="w-full border-collapse border border-gray-300 font-prompt">
+          <thead className="sticky-top bg-gray-200">
             <tr>
-              <td colSpan="9" className="border border-gray-300 p-4">
-                {t.noApplicantsFound}
-              </td>
+              <th className="border p-2 text-center">Applicant ID</th>
+              <th className="border p-2 text-center">Firstname</th>
+              <th className="border p-2 text-center">Lastname</th>
+              <th className="border p-2 text-center">Date of birth</th>
+              <th className="border p-2 text-center">Email</th>
+              <th className="border p-2 text-center">Position Applied</th>
+              <th className="border p-2 text-center">Status</th>
+              <th className="border p-2 text-center">Applicant date</th>
+              <th className="border p-2 text-center">Note</th>
+              <th className="border p-2 text-center">Action</th>
             </tr>
-          )}
-        </tbody>
-      </table>
+          </thead>
+          <tbody className="text-center">
+            {filteredApplicants.length > 0 ? (
+              filteredApplicants
+                .slice((currentPage - 1) * pageSize, currentPage * pageSize)
+                .map((applicant, index) => (
+                  <tr key={index + 1}>
+                    <td className="border p-2 text-center">{index + 1}</td>
+                    <td className="border p-2 text-center">
+                      {applicant.first_name}
+                    </td>
+                    <td className="border p-2 text-center">
+                      {applicant.last_name}
+                    </td>
+                    <td className="border p-2 text-center">
+                      {new Date(applicant.date_of_birth).toLocaleDateString(
+                        "en-GB"
+                      )}
+                    </td>
+                    <td className="border p-2 text-center">
+                      {applicant.email}
+                    </td>
+                    <td className="border p-2 text-center">
+                      {applicant.position_applied}
+                    </td>
+                    <td className="border p-2 text-center">
+                      {applicant.status_name}
+                    </td>
+                    <td className="border p-2 text-center">
+                      {new Date(applicant.application_date).toLocaleDateString(
+                        "en-GB"
+                      )}
+                    </td>
+                    <td className="border p-2 text-center">
+                      {applicant.notes || "No notes"}
+                    </td>
+                    <td className="border p-2 text-center">
+                      {applicant.status_id === 1 && (
+                        <button
+                          className="btn btn-success text-white mr-2"
+                          onClick={() => handleAccept(applicant.applicant_id)}
+                        >
+                          {t.accept}
+                        </button>
+                      )}
+                      {applicant.status_id === 7 && (
+                        <button
+                          className="btn btn-success text-white mr-2"
+                          onClick={() =>
+                            handleSendEmail(applicant.applicant_id)
+                          }
+                        >
+                          {t.sendEmail}
+                        </button>
+                      )}
+                      <button
+                        className="btn bg-blue hover:bg-blue text-white"
+                        onClick={() =>
+                          handleViewDetails(applicant.applicant_id)
+                        }
+                      >
+                        {t.viewDetails}
+                      </button>
+
+                      <button
+                        className="btn btn-error text-white ml-2"
+                        onClick={() => handleDelete(applicant.applicant_id)}
+                      >
+                        {t.reject}
+                      </button>
+                    </td>
+                  </tr>
+                ))
+            ) : (
+              <tr>
+                <td colSpan="9" className="border border-gray-300 p-4">
+                  {t.noApplicantsFound}
+                </td>
+              </tr>
+            )}
+          </tbody>
+        </table>
+      </div>
 
       <div className="flex justify-between items-center mt-4">
         <p

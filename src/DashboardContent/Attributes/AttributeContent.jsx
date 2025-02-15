@@ -149,7 +149,7 @@ const AttributeContent = () => {
         <p>{translations[language].noAttributes}</p>
       ) : (
         <>
-          <table className="table w-full border-collapse border border-gray-300 text-center">
+        <div className="overflow-x-auto"><table className="table w-full border-collapse border border-gray-300 text-center">
             <thead className="sticky-top bg-gray-200">
               <tr>
                 <th className="border p-2 text-center">{translations[language].attributeID}</th>
@@ -179,7 +179,8 @@ const AttributeContent = () => {
                 </tr>
               ))}
             </tbody>
-          </table>
+          </table></div>
+          
 
           {/* Pagination Controls */}
           <div className="flex justify-between items-center mt-4">

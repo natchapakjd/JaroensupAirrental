@@ -180,7 +180,9 @@ const ReviewContent = () => {
           className="input input-bordered w-full"
         />
       </div>
+        <div className="overflow-x-auto">
 
+          
       <table className="table w-full border-collapse border border-gray-300">
         <thead className="sticky-top bg-gray-200">
           <tr>
@@ -235,6 +237,7 @@ const ReviewContent = () => {
         </tbody>
       </table>
 
+        </div>
       <div className="flex justify-between mt-4">
         <p
           onClick={() => handlePageChange(currentPage - 1)}

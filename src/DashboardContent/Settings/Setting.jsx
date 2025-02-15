@@ -27,8 +27,8 @@ const Setting = () => {
   }, [language]);
 
   return (
-    <div className="min-h-screen bg-white flex flex-col items-center justify-center p-10 font-prompt transition-all duration-300">
-      <h1 className="text-4xl font-extrabold text-gray-800 mb-8 ">
+    <div className="h-screen bg-white flex flex-col items-center p-10 font-prompt transition-all duration-300">
+      <h1 className="text-3xl font-bold text-gray-800 mb-8 ">
         ⚙️ {language === "th" ? "ตั้งค่า (Settings)" : "Settings"}
       </h1>
   
