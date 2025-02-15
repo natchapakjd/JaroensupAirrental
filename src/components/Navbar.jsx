@@ -144,13 +144,13 @@ const Navbar = () => {
                   <Link to="/experience">{translations[language].experience}</Link>
                 </li>
                 <li>
-                    <Link to="/register-tech">{translations[language].registerTech}</Link>
+                  <Link to="/register-tech">{translations[language].registerTech}</Link>
                 </li>
                 <li>
                   <Link to="/contact">{translations[language].contact}</Link>
                 </li>
                 <li>
-                  <Link to="/text-xr-gallary">{translations[language].arFeature}</Link>
+                 <Link to="/test-xr-gallary">{translations[language].arFeature}</Link>
                 </li>
               </ul>
             )}
@@ -178,7 +178,7 @@ const Navbar = () => {
                   <Link to="/contact">{translations[language].contact}</Link>
                 </li>
                 <li>
-                  <Link to="/text-xr-gallery">{translations[language].arFeature}</Link>
+                  <Link to="/test-xr-gallary">{translations[language].arFeature}</Link>
                 </li>
           </ul>
         </div>
