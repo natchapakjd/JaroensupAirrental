@@ -4,16 +4,16 @@ import { useState,useEffect } from "react";
 const Footer = () => {
   const [lang,setLang] =useState(localStorage.getItem('language'||'th'))
 
-   useEffect(() => {
-      const interval = setInterval(() => {
-        const storedLanguage = localStorage.getItem("language") || "en";
-        if (storedLanguage !== lang) {
-          setLang(storedLanguage); 
-        }
-      }, 500);
+  useEffect(() => {
+      const handleStorageChange = () => {
+        const storedLanguage = localStorage.getItem("language") || "th";
+        setLang(storedLanguage);
+      };
     
-      return () => clearInterval(interval); 
-    }, [lang]); // This
+      window.addEventListener("storage", handleStorageChange);
+      return () => window.removeEventListener("storage", handleStorageChange);
+  }, []);
+  
 
   const translations = {
     en: {
