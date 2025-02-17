@@ -1,6 +1,45 @@
 import React from "react";
 import { useState,useEffect } from "react";
 
+const translations = {
+  en: {
+    services: "Services",
+    branding: "Branding",
+    design: "Design",
+    marketing: "Marketing",
+    advertisement: "Advertisement",
+    company: "Company",
+    aboutUs: "About us",
+    contact: "Contact",
+    jobs: "Jobs",
+    pressKit: "Press kit",
+    legal: "Legal",
+    termsOfUse: "Terms of use",
+    privacyPolicy: "Privacy policy",
+    cookiePolicy: "Cookie policy",
+    companyName: "Jaroensup Ltd.",
+    tagline: "Providing reliable tech since 2024",
+  },
+  th: {
+    services: "บริการ",
+    branding: "การสร้างแบรนด์",
+    design: "การออกแบบ",
+    marketing: "การตลาด",
+    advertisement: "การโฆษณา",
+    company: "บริษัท",
+    aboutUs: "เกี่ยวกับเรา",
+    contact: "ติดต่อ",
+    jobs: "งาน",
+    pressKit: "ชุดข้อมูลสื่อ",
+    legal: "กฎหมาย",
+    termsOfUse: "เงื่อนไขการใช้งาน",
+    privacyPolicy: "นโยบายความเป็นส่วนตัว",
+    cookiePolicy: "นโยบายคุกกี้",
+    companyName: "เจริญทรัพย์ จำกัด",
+    tagline: "มอบเทคโนโลยีที่เชื่อถือได้ตั้งแต่ปี 2567",
+  },
+};
+
 const Footer = () => {
   const [lang,setLang] =useState(localStorage.getItem('language'||'th'))
 
@@ -14,46 +53,6 @@ const Footer = () => {
     
       return () => clearInterval(interval); 
     }, [lang]); // This
-
-  const translations = {
-    en: {
-      services: "Services",
-      branding: "Branding",
-      design: "Design",
-      marketing: "Marketing",
-      advertisement: "Advertisement",
-      company: "Company",
-      aboutUs: "About us",
-      contact: "Contact",
-      jobs: "Jobs",
-      pressKit: "Press kit",
-      legal: "Legal",
-      termsOfUse: "Terms of use",
-      privacyPolicy: "Privacy policy",
-      cookiePolicy: "Cookie policy",
-      companyName: "Jaroensup Ltd.",
-      tagline: "Providing reliable tech since 2024",
-    },
-    th: {
-      services: "บริการ",
-      branding: "การสร้างแบรนด์",
-      design: "การออกแบบ",
-      marketing: "การตลาด",
-      advertisement: "การโฆษณา",
-      company: "บริษัท",
-      aboutUs: "เกี่ยวกับเรา",
-      contact: "ติดต่อ",
-      jobs: "งาน",
-      pressKit: "ชุดข้อมูลสื่อ",
-      legal: "กฎหมาย",
-      termsOfUse: "เงื่อนไขการใช้งาน",
-      privacyPolicy: "นโยบายความเป็นส่วนตัว",
-      cookiePolicy: "นโยบายคุกกี้",
-      companyName: "เจริญทรัพย์ จำกัด",
-      tagline: "มอบเทคโนโลยีที่เชื่อถือได้ตั้งแต่ปี 2567",
-    },
-  };
-
 
   return (
     <>
