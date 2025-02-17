@@ -185,7 +185,7 @@ const Navbar = () => {
         <div className="navbar-end ">
         <button
             onClick={toggleLanguage}
-            className="badge badge-outline cursor-pointer p-2 text-sm mx-2"
+            className="badge badge-outline cursor-pointer p-4 text-sm mx-2"
           >
             {language === "th" ? "🇹🇭 ไทย" : "🇬🇧 English"}
           </button>
