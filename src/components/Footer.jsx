@@ -41,8 +41,7 @@ const translations = {
 };
 
 const Footer = () => {
-  const [lang,setLang] =useState(localStorage.getItem('language'||'th'))
-
+  const [lang,setLang] =useState(localStorage.getItem('language')||'th')
   useEffect(() => {
       const handleStorageChange = () => {
         const storedLanguage = localStorage.getItem("language") || "th";
