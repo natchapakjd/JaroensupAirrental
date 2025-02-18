@@ -179,9 +179,9 @@ const AreacalContent = () => {
           </tr>
         </thead>
         <tbody className="text-center">
-          {areaCalculations.map((calculation) => (
-            <tr key={calculation.calculation_id}>
-              <td className="border p-2 text-center">{calculation.calculation_id}</td>
+          {areaCalculations.map((calculation,index) => (
+            <tr key={index+1}>
+              <td className="border p-2 text-center">{index+1}</td>
               <td className="border p-2 text-center">{calculation.assignment_id}</td>
               <td className="border p-2 text-center">{calculation.location_name}</td>
               <td className="border p-2 text-center">{calculation.width}</td>

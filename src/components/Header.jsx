@@ -2,7 +2,7 @@ import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
 import Cookies from "universal-cookie";
-import { jwtDecode } from "jwt-decode";
+import {jwtDecode} from "jwt-decode";
 import Loading from "./Loading";
 
 const translations = {
@@ -12,6 +12,7 @@ const translations = {
     profile: "โปรไฟล์",
     changePassword: "เปลี่ยนรหัสผ่าน",
     notification: "การแจ้งเตือน",
+    setting: "การตั้งค่า",
     logout: "ออกจากระบบ",
   },
   en: {
@@ -20,6 +21,7 @@ const translations = {
     profile: "Profile",
     changePassword: "Change password",
     notification: "Notification",
+    setting: "Settings",
     logout: "Logout",
   },
 };
@@ -32,8 +34,7 @@ const Header = () => {
   const [language, setLanguage] = useState(
     localStorage.getItem("language") || "th"
   );
-  const width = window.innerWidth;
-  const height = window.innerHeight;
+  const [windowWidth, setWindowWidth] = useState(window.innerWidth);
   const token = cookies.get("authToken");
   let id = null;
 
@@ -58,6 +59,12 @@ const Header = () => {
 
     return () => clearInterval(interval);
   }, [language]);
+
+  useEffect(() => {
+    const handleResize = () => setWindowWidth(window.innerWidth);
+    window.addEventListener("resize", handleResize);
+    return () => window.removeEventListener("resize", handleResize);
+  }, []);
 
   const fetchUserByID = async (userId) => {
     try {
@@ -87,7 +94,7 @@ const Header = () => {
       }`}
     >
       <div>
-        <p className=" text-sm  md:text-xl ml-11 font-semibold text-white ">
+        <p className=" text-sm md:text-xl ml-11 font-semibold text-white ">
           {translations[language].hello}, {user ? user.firstname : "Admin"}
         </p>
         <p className="text-sm text-white ml-11 font-normal">
@@ -96,12 +103,12 @@ const Header = () => {
       </div>
 
       <div className="flex justify-end items-center px-2">
-        {width > 968 && (
+        {windowWidth > 968 && (
           <p className="badge badge-outline  p-3 text-sm mx-2 text-white">
             {language === "th" ? "🇹🇭 ไทย" : "🇬🇧 English"}
           </p>
         )}
-        {width > 968 && (
+        {windowWidth > 968 && (
           <div className="border border-l-6 h-full bg-gray-600 mr-6"></div>
         )}
         <img
@@ -125,7 +132,7 @@ const Header = () => {
                 viewBox="0 0 20 20"
                 fill="currentColor"
               >
-                {width > 968 && (
+                {windowWidth > 968 && (
                   <path
                     fillRule="evenodd"
                     d="M5.293 7.293a1 1 0 011.414 0L10 9.586l3.293-2.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z"
@@ -157,6 +164,14 @@ const Header = () => {
               <li>
                 <a href="/settings" className="hover:bg-gray-100 p-2 rounded">
                   {translations[language].notification}
+                </a>
+              </li>
+              <li>
+                <a
+                  href="/dashboard/settings"
+                  className="hover:bg-gray-100 p-2 rounded"
+                >
+                  {translations[language].setting}
                 </a>
               </li>
               <li>

@@ -398,7 +398,7 @@ const BorrowProductTable = () => {
                 </th>
               )}
               <th className="border p-2 text-center">{currentLang.actions}</th>
-              <th className="border p-2 text-center">{currentLang.warnings}</th>
+              <th className="border p-2 text-center">{currentLang.warningTH}</th>
             </tr>
           </thead>
           <tbody className="text-center">

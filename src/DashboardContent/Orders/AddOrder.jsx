@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import axios from "axios";
 import Swal from "sweetalert2";
-import { Navigate } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 const AddOrder = () => {
   const [userId, setUserId] = useState("");
   const [items, setItems] = useState([
@@ -11,6 +11,7 @@ const AddOrder = () => {
   const [users, setUsers] = useState([]);
   const [products, setProducts] = useState([]);
   const apiUrl = import.meta.env.VITE_SERVER_URL;
+  
   const navigate = useNavigate();
   // Add translation object for localization
   const translation = {

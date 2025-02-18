@@ -427,10 +427,24 @@ router.get("/v2/orders/count", (req, res) => {
     }
   
     const query = `
-      SELECT o.id AS order_id, o.created_at, oi.product_id, oi.product_name, oi.quantity, oi.total_price, oi.price, o.user_id
-      FROM orders o
-      JOIN order_items oi ON o.id = oi.order_id
-      WHERE o.id = ?
+      SELECT 
+        o.id AS order_id, 
+        o.created_at, 
+        oi.product_id, 
+        oi.product_name, 
+        oi.quantity, 
+        oi.total_price, 
+        oi.price, 
+        o.user_id,
+        p.stock_quantity
+      FROM 
+        orders o
+      JOIN 
+        order_items oi ON o.id = oi.order_id
+      JOIN 
+        products p ON oi.product_id = p.product_id
+      WHERE 
+        o.id = ?
       LIMIT ? OFFSET ?
     `;
   
@@ -468,6 +482,7 @@ router.get("/v2/orders/count", (req, res) => {
               quantity: row.quantity,
               total_price: row.total_price,
               price: row.price,
+              stock_quantity: row.stock_quantity, // Include stock_quantity
             });
   
             return acc;
@@ -480,7 +495,8 @@ router.get("/v2/orders/count", (req, res) => {
         }
       );
     });
-});
+  });
+  
 
   
   

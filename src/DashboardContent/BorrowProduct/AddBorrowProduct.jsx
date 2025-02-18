@@ -56,7 +56,7 @@ const AddBorrowProduct = () => {
     },
   };
 
-  const currentLang = 'th'; // You can dynamically set this based on user preference
+  const currentLang = localStorage.getItem('language') ||'th'; // You can dynamically set this based on user preference
 
   useEffect(() => {
     const fetchProducts = async () => {

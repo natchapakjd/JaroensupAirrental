@@ -37,7 +37,7 @@ const Setting = () => {
           🔧 {language === "th" ? "การตั้งค่าทั่วไป" : "General Settings"}
         </h2>
         <div className="space-y-6 text-lg">
-          <div className="flex justify-between items-center">
+          {/* <div className="flex justify-between items-center">
             <span>🌙 {language === "th" ? "โหมดมืด (Dark Mode)" : "Dark Mode"}</span>
             <input
               type="checkbox"
@@ -45,11 +45,11 @@ const Setting = () => {
               checked={isDarkMode}
               onChange={() => setIsDarkMode(!isDarkMode)}
             />
-          </div>
-          <div className="flex justify-between items-center">
+          </div> */}
+          {/* <div className="flex justify-between items-center">
             <span>🔔 {language === "th" ? "แจ้งเตือนผ่านไลน์ (Notifications)" : "LINE Notifications"}</span>
             <input type="checkbox" className="toggle toggle-lg toggle-primary" />
-          </div>
+          </div> */}
           <div className="flex justify-between items-center">
             <span>🌍 {language === "th" ? "เปลี่ยนภาษา (Language)" : "Language"}</span>
             <select

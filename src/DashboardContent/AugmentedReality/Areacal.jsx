@@ -4,6 +4,7 @@ import "./Areacal.css";
 import Swal from "sweetalert2";
 import { useNavigate } from "react-router-dom";
 import { Link } from "react-router-dom";
+import { useRef } from "react";
 import axios from "axios";
 const Areacal = () => {
   const [width, setWidth] = useState(0);
@@ -30,6 +31,8 @@ const Areacal = () => {
   const [currentLanguage, setCurrentLanguage] = useState(
     localStorage.getItem("language") || "en"
   );
+  const [scale, setScale] = useState(1); // ค่าเริ่มต้นของการซูม
+  const containerRef = useRef(null);
 
   const translations = {
     en: {
@@ -53,11 +56,13 @@ const Areacal = () => {
       eraser: "Eraser",
       drag: "Open Drag function",
       largeRoomWarning: "The room is too large!",
-      roomSizeWarning: "Please specify a room size smaller than 10000 square meters.",
+      roomSizeWarning:
+        "Please specify a room size smaller than 10000 square meters.",
       successMessage: "Success!",
       acInventorySuccess: "AC inventory loaded successfully.",
       acInventoryError: "Unable to load AC inventory.",
-      selectAssignmentTitle: "Please select the assignment you want to save data for.",
+      selectAssignmentTitle:
+        "Please select the assignment you want to save data for.",
       locationPlaceholder: "Enter location name",
       saveButtonText: "Save",
       errorMessage: "Error!",
@@ -111,6 +116,23 @@ const Areacal = () => {
   let isDragging = false; // สถานะการลาก
   let isDraggingMode = false;
   let assignmentId = null;
+
+  // useEffect(() => {
+  //   const container = containerRef.current;
+
+  //   const handleZoom = (e) => {
+  //     e.preventDefault(); // ป้องกันการเลื่อนเพจ
+  //     let newScale = scale + e.deltaY * -0.001;
+  //     newScale = Math.min(Math.max(newScale, 0.5), 3);
+  //     setScale(newScale);
+  //   };
+
+  //   container.addEventListener("wheel", handleZoom, { passive: false }); // ปิด passive mode
+
+  //   return () => {
+  //     container.removeEventListener("wheel", handleZoom);
+  //   };
+  // }, [scale]);
 
   useEffect(() => {
     const storedLanguage = localStorage.getItem("language") || "en";
@@ -266,6 +288,13 @@ const Areacal = () => {
     }
   };
 
+  const handleZoom = (e) => {
+    e.preventDefault(); // ป้องกันการเลื่อนเพจ
+    let newScale = scale + e.deltaY * -0.001; // ควบคุมระดับการซูม
+    newScale = Math.min(Math.max(newScale, 0.5), 3); // จำกัดการซูมระหว่าง 0.5x ถึง 3x
+    setScale(newScale);
+  };
+
   const fetchACInventory = async () => {
     try {
       const response = await axios.get(
@@ -279,10 +308,18 @@ const Areacal = () => {
         air20ton: air_240000_btu || 0,
       });
 
-      Swal.fire(translations[currentLanguage].successMessage, translations[currentLanguage].acInventorySuccess, "success");
+      Swal.fire(
+        translations[currentLanguage].successMessage,
+        translations[currentLanguage].acInventorySuccess,
+        "success"
+      );
     } catch (error) {
       console.error("Error fetching AC inventory:", error);
-      Swal.fire(translations[currentLanguage].errorMessage, translations[currentLanguage].acInventoryError, "error");
+      Swal.fire(
+        translations[currentLanguage].errorMessage,
+        translations[currentLanguage].acInventoryError,
+        "error"
+      );
     }
   };
 
@@ -334,7 +371,11 @@ const Areacal = () => {
 
   const handleSaveData = async (id, location) => {
     if (!id) {
-      Swal.fire(translation[currentLanguage].errorMessage, "กรุณาเลือก Assignment ก่อนบันทึกข้อมูล", "error");
+      Swal.fire(
+        translation[currentLanguage].errorMessage,
+        "กรุณาเลือก Assignment ก่อนบันทึกข้อมูล",
+        "error"
+      );
 
       return;
     }
@@ -359,10 +400,18 @@ const Areacal = () => {
         `${import.meta.env.VITE_SERVER_URL}/area_cal`,
         data
       );
-      Swal.fire(translation[currentLanguage].successMessage, "บันทึกข้อมูลเรียบร้อย", "success");
+      Swal.fire(
+        translations[currentLanguage].successMessage,
+        "บันทึกข้อมูลเรียบร้อย",
+        "success"
+      );
     } catch (error) {
       console.error("Error saving data:", error);
-      Swal.fire(translation[currentLanguage].errorMessage, "ไม่สามารถบันทึกข้อมูลได้", "error");
+      Swal.fire(
+        translations[currentLanguage].errorMessage,
+        "ไม่สามารถบันทึกข้อมูลได้",
+        "error"
+      );
     }
   };
 
@@ -495,7 +544,11 @@ const Areacal = () => {
     const buttonContainer = document.createElement("div");
     const applyButton = document.createElement("button");
     applyButton.id = "applyButton";
-    applyButton.textContent = "ต้องการใช้ค่านี้";
+    if(currentLanguage === 'en'){
+      applyButton.textContent = "Use this values";
+    }else{
+      applyButton.textContent = "ต้องการใช้ค่านี้";
+    }
     applyButton.classList.add("b-air");
     applyButton.addEventListener("click", () => applyResultToDropdown(result));
 
@@ -1780,32 +1833,31 @@ const Areacal = () => {
   return (
     <>
       <div className="mx-5 my-5 font-prompt">
-        <div className="flex  items-center mb-4 justify-between ">
+        <div className="flex flex-wrap items-center mb-4 justify-between">
           <h2 className="text-2xl font-bold mb-4">
             {translations[currentLanguage].title}
           </h2>
-
-          <div className="flex justify-between">
+          <div className="flex flex-wrap gap-2">
             <button
               onClick={handleNavigateToAR}
-              className="btn bg-yellow-500 text-white hover:bg-yellow-500"
+              className="btn bg-yellow-500 text-white hover:bg-yellow-600 w-full md:w-auto"
             >
               {translations[currentLanguage].arFeature}
             </button>
             <button
               onClick={selectAssignmentAndLoadGrid}
-              className="btn bg-error text-white hover:bg-error"
+              className="btn bg-error text-white hover:bg-error w-full md:w-auto"
             >
               {translations[currentLanguage].selectPlace}
             </button>
             <button
-              className="btn bg-success text-white hover:bg-success"
+              className="btn bg-success text-white hover:bg-success w-full md:w-auto"
               onClick={fetchACInventory}
             >
               {translations[currentLanguage].fetchACData}
             </button>
-            <Link to="/dashboard/area-cal/content">
-              <button className="btn bg-blue text-white hover:bg-blue">
+            <Link to="/dashboard/area-cal/content" className="w-full md:w-auto">
+              <button className="btn bg-blue text-white hover:bg-blue w-full md:w-auto">
                 {translations[currentLanguage].viewAreaList}
               </button>
             </Link>
@@ -1962,28 +2014,37 @@ const Areacal = () => {
         <div id="btu-result">{btuResult}</div>
         <div id="ac-count-result">{acCountResult}</div>
         <div id="ac-usage-result">{acUsageResult}</div>
-        <div id="grid" className="x" onClick={handleEraserGrid}></div>
+        <div
+          id="grid"
+          className="x"
+          onClick={handleEraserGrid}
+          style={{ transform: `scale(${scale})` }}
+          ref={containerRef}
+
+        ></div>
         <div className="toolbox">
           {/* <div id="acBox" className="box ac" draggable="true">
             AC
           </div> */}
-          <div id="obsBox" className="box obstacle" draggable="true">
-            OBS
-          </div>
-          <div id="obs2Box" className="box obstacle2" draggable="true">
-            OBS2
-          </div>
-          {/* <div id="onetonBox" className="box oneton" draggable="true">
+          <div className="grid grid-cols-2 gap-2 md:flex">
+            <div id="obsBox" className="box obstacle" draggable="true">
+              OBS
+            </div>
+            <div id="obs2Box" className="box obstacle2" draggable="true">
+              OBS2
+            </div>
+            {/* <div id="onetonBox" className="box oneton" draggable="true">
             1 Ton
           </div> */}
-          <div id="fivetonBox" className="box fiveton" draggable="true">
-            5 Ton
-          </div>
-          <div id="tentonBox" className="box tenton" draggable="true">
-            10 Ton
-          </div>
-          <div id="twentytonBox" className="box twentyton" draggable="true">
-            20 Ton
+            <div id="fivetonBox" className="box fiveton" draggable="true">
+              5 Ton
+            </div>
+            <div id="tentonBox" className="box tenton" draggable="true">
+              10 Ton
+            </div>
+            <div id="twentytonBox" className="box twentyton" draggable="true">
+              20 Ton
+            </div>
           </div>
 
           <div className="drag-mode-container">

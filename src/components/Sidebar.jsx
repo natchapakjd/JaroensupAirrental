@@ -145,7 +145,7 @@ const Sidebar = () => {
       {!isSidebarOpen && (
         <button
           onClick={toggleSidebar}
-          className="fixed top-16 left-5 z-10 bg-blue text-white p-3 rounded-full md:hidden"
+          className="fixed top-16 left-5 z-10 bg-blue text-white p-3 rounded-full lg:hidden"
         >
           <MdOutlineMenu className="text-xl" />
         </button>
@@ -164,7 +164,7 @@ const Sidebar = () => {
             <div className="flex items-center mx-2">
               <FaArrowRight
                 onClick={toggleSidebarArrow}
-                className="cursor-pointer md:hidden"
+                className="cursor-pointer lg:hidden"
               />
             </div>
           </div>
@@ -418,7 +418,7 @@ const Sidebar = () => {
                       {translations[currentLanguage].historyLog}
                     </a>
                   </li>
-                  <li
+                  {/* <li
                     className={`mb-5 hover:rounded-lg hover:py-3 hover:px-4 transition-all duration-300 hover:mx-5 ${
                       isActive("/dashboard/settings")
                         ? "bg-blue text-white mx-5 px-4 py-3 rounded-lg"
@@ -432,7 +432,7 @@ const Sidebar = () => {
                       <MdOutlineSettings className="mt-1" />{" "}
                       {translations[currentLanguage].settings}
                     </a>
-                  </li>
+                  </li> */}
                 </>
               )}
             </ul>

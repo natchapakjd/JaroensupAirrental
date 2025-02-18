@@ -11,27 +11,46 @@ const EditOrder = () => {
   const [users, setUsers] = useState([]);
   const [products, setProducts] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [language, setLanguage] = useState(localStorage.getItem("language") || "th");
   const navigate = useNavigate();
   const apiUrl = import.meta.env.VITE_SERVER_URL;
-
-  // Translation variables
   const translations = {
-    editOrderTitle: "แก้ไขคำสั่งซื้อ",
-    productLabel: "สินค้า",
-    quantityLabel: "จำนวน",
-    priceLabel: "ราคา",
-    totalPriceLabel: "ราคาทั้งหมด",
-    selectProduct: "เลือกสินค้าที่ต้องการ",
-    addItemButton: "เพิ่มสินค้า",
-    removeItemButton: "ลบสินค้า",
-    totalOrderPrice: "ราคาสั่งซื้อรวม",
-    updateOrderButton: "อัปเดตคำสั่งซื้อ",
-    selectProductOption: (product_id, name, stock_quantity) =>
-      `${product_id}. ${name} (คงเหลือ: ${stock_quantity})`,
-    errorFetchingData: "เกิดข้อผิดพลาดในการดึงข้อมูล",
-    errorUpdatingOrder: "ไม่สามารถอัปเดตคำสั่งซื้อได้",
-    successUpdatingOrder: "อัปเดตคำสั่งซื้อสำเร็จ",
+    th: {
+      editOrderTitle: "แก้ไขคำสั่งซื้อ",
+      productLabel: "สินค้า",
+      quantityLabel: "จำนวน",
+      priceLabel: "ราคา",
+      totalPriceLabel: "ราคาทั้งหมด",
+      selectProduct: "เลือกสินค้าที่ต้องการ",
+      addItemButton: "เพิ่มสินค้า",
+      removeItemButton: "ลบสินค้า",
+      totalOrderPrice: "ราคาสั่งซื้อรวม",
+      updateOrderButton: "อัปเดตคำสั่งซื้อ",
+      errorFetchingData: "เกิดข้อผิดพลาดในการดึงข้อมูล",
+      errorUpdatingOrder: "ไม่สามารถอัปเดตคำสั่งซื้อได้",
+      successUpdatingOrder: "อัปเดตคำสั่งซื้อสำเร็จ",
+      selectProductOption: (name, stock_quantity) =>
+        `${name} (คงเหลือ: ${stock_quantity})`,
+    },
+    en: {
+      editOrderTitle: "Edit Order",
+      productLabel: "Product",
+      quantityLabel: "Quantity",
+      priceLabel: "Price",
+      totalPriceLabel: "Total Price",
+      selectProduct: "Select a product",
+      addItemButton: "Add Product",
+      removeItemButton: "Remove Product",
+      totalOrderPrice: "Total Order Price",
+      updateOrderButton: "Update Order",
+      errorFetchingData: "Error fetching data",
+      errorUpdatingOrder: "Failed to update order",
+      successUpdatingOrder: "Order updated successfully",
+      selectProductOption: (name, stock_quantity) =>
+        `${name} (remain: ${stock_quantity})`,
+    },
   };
+  
 
   useEffect(() => {
     const fetchAllData = async () => {
@@ -48,6 +67,7 @@ const EditOrder = () => {
 
         const order = orderResponse.data.orders[0];
         setUserId(order.user_id);
+        console.log(order)
         setItems(
           order.items.map((item) => ({
             productId: item.product_id,
@@ -55,6 +75,7 @@ const EditOrder = () => {
             quantity: item.quantity,
             price: item.price,
             total_price: item.total_price,
+            maxQuantity: item.stock_quantity
           }))
         );
         setTotalOrderPrice(
@@ -92,6 +113,7 @@ const EditOrder = () => {
   const handleItemChange = async (index, field, value) => {
     const newItems = [...items];
     newItems[index][field] = value;
+    console.log(items)
 
     if (field === "productId") {
       const productDetails = await fetchProductDetails(value);
@@ -157,7 +179,7 @@ const EditOrder = () => {
       if (response.status === 200) {
         await Swal.fire({
           icon: "success",
-          title: translations.successUpdatingOrder,
+          title: translations[language].successUpdatingOrder,
           confirmButtonText: "OK",
         });
       }
@@ -166,7 +188,7 @@ const EditOrder = () => {
       console.error("Error:", error);
       await Swal.fire({
         icon: "error",
-        title: translations.errorUpdatingOrder,
+        title: translations[language].errorUpdatingOrder,
         text: "Please check the console for details.",
         confirmButtonText: "OK",
       });
@@ -179,13 +201,13 @@ const EditOrder = () => {
 
   return (
     <div className="p-8 rounded-lg shadow-lg w-full mx-auto font-prompt bg-base-100 h-full">
-      <h2 className="text-2xl mb-4 font-bold">{translations.editOrderTitle}</h2>
+      <h2 className="text-2xl mb-4 font-bold">{translations[language].editOrderTitle}</h2>
       <form onSubmit={handleSubmit} className="space-y-4 text-sm font-medium">
         {items.map((item, index) => (
           <div key={index} className="flex items-center space-x-4">
             <div className="flex-1">
               <label className="label">
-                <span className="label-text">{translations.productLabel}</span>
+                <span className="label-text">{translations[language].productLabel}</span>
               </label>
               <select
                 value={item.productId}
@@ -200,14 +222,14 @@ const EditOrder = () => {
                 </option>
                 {getFilteredProducts(index).map((product,index) => (
                   <option key={index+1} value={product.product_id}>
-                    {index+1}. {translations.selectProductOption(product.name, product.stock_quantity)}
+                    {product.product_id}. {translations[language].selectProductOption(product.name, product.stock_quantity)}
                   </option>
                 ))}
               </select>
             </div>
             <div className="flex-1">
               <label className="label">
-                <span className="label-text">{translations.quantityLabel}</span>
+                <span className="label-text">{translations[language].quantityLabel}</span>
               </label>
               <input
                 type="number"
@@ -217,12 +239,13 @@ const EditOrder = () => {
                 }
                 className="input input-bordered w-full"
                 max={item.maxQuantity || 0}
+                min="0" 
                 required
               />
             </div>
             <div className="flex-1">
               <label className="label">
-                <span className="label-text">{translations.priceLabel}</span>
+                <span className="label-text">{translations[language].priceLabel}</span>
               </label>
               <input
                 type="number"
@@ -233,7 +256,7 @@ const EditOrder = () => {
             </div>
             <div className="flex-1">
               <label className="label">
-                <span className="label-text">{translations.totalPriceLabel}</span>
+                <span className="label-text">{translations[language].totalPriceLabel}</span>
               </label>
               <input
                 type="number"
@@ -247,7 +270,7 @@ const EditOrder = () => {
               onClick={() => handleRemoveItem(index)}
               className="btn btn-error text-white mt-9"
             >
-              {translations.removeItemButton}
+              {translations[language].removeItemButton}
             </button>
           </div>
         ))}
@@ -257,15 +280,15 @@ const EditOrder = () => {
           onClick={handleAddItem}
           className="btn bg-blue hover:bg-blue text-white"
         >
-          {translations.addItemButton}
+          {translations[language].addItemButton}
         </button>
 
         <div className="mt-4">
-          <strong>{translations.totalOrderPrice}: </strong> {totalOrderPrice}
+          <strong>{translations[language].totalOrderPrice}: </strong> {totalOrderPrice}
         </div>
 
         <button type="submit" className="btn btn-success text-white">
-          {translations.updateOrderButton}
+          {translations[language].updateOrderButton}
         </button>
       </form>
     </div>
