@@ -4,7 +4,7 @@ import { useParams } from 'react-router-dom';
 import Navbar from '../../components/Navbar';
 import Footer from '../../components/Footer';
 import Swal from 'sweetalert2';  // Import SweetAlert2
-import QRCode from "../../assets/images/IMG_0896.png";
+import QRCode from "../../assets/images/Payment/QR.png";
 
 const translations = {
   en: {
@@ -138,12 +138,16 @@ const Payment = () => {
 
         <div className="mb-8 text-center">
           <h3 className="text-xl font-semibold mb-4">{t.qr_code_for_payment}</h3>
-          <div className="flex justify-center">
-            <img 
+          <div className="flex justify-center flex-col">
+            <div className='flex justify-center item-center'> <img 
               src={QRCode}
               alt="Payment QR Code" 
-              className="w-60 h-60"
-            />
+              className="w-60 h-60 my-2"
+            /></div>
+           
+            <h3 className='text-xl my-2'>Promptpay  นาย ชัชวาลย์ แตงเจริญ</h3>
+
+
           </div>
         </div>
 
