@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import axios from 'axios';
+import axios from "axios";
 import {
   BarChart,
   CartesianGrid,
@@ -8,146 +8,193 @@ import {
   Tooltip,
   Legend,
   Bar,
-  AreaChart,
-  ScatterChart,
-  Area,
-  ZAxis,
-  Scatter
+  LineChart,
+  Line,
+  ResponsiveContainer,
 } from "recharts";
 import { CSVLink } from "react-csv";
-
-const data = [
-  { name: "Page A", uv: 4000, pv: 2400, amt: 2400 },
-  { name: "Page B", uv: 3000, pv: 1398, amt: 2210 },
-  { name: "Page C", uv: 2000, pv: 9800, amt: 2290 },
-  { name: "Page D", uv: 2780, pv: 3908, amt: 2000 },
-  { name: "Page E", uv: 1890, pv: 4800, amt: 2181 },
-  { name: "Page F", uv: 2390, pv: 3800, amt: 2500 },
-  { name: "Page G", uv: 3490, pv: 4300, amt: 2100 },
-];
-
-const data01 = [
-  { x: 10, y: 2000, z: 100 },
-  { x: 20, y: 3000, z: 120 },
-  { x: 30, y: 4000, z: 130 },
-  { x: 40, y: 5000, z: 140 },
-  { x: 50, y: 6000, z: 150 },
-  { x: 60, y: 7000, z: 160 },
-  { x: 70, y: 8000, z: 170 },
-];
-
-const data02 = [
-  { x: 15, y: 2500, z: 110 },
-  { x: 25, y: 3500, z: 130 },
-  { x: 35, y: 4500, z: 140 },
-  { x: 45, y: 5500, z: 150 },
-  { x: 55, y: 6500, z: 160 },
-  { x: 65, y: 7500, z: 170 },
-  { x: 75, y: 8500, z: 180 },
-];
+import Loading from "../../components/Loading"; // ใช้คอมโพเนนต์ Loading ที่มีอยู่
 
 const ReportContent = () => {
   const [taskCounts, setTaskCounts] = useState([]);
+  const [incomeData, setIncomeData] = useState([]);
+  const [userCounts, setUserCounts] = useState({ technicians: 0, customers: 0 });
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
 
   const api_url = import.meta.env.VITE_SERVER_URL;
+  const [language, setLanguage] = useState(localStorage.getItem('language') || 'th');
+
+  // Translation variables for Thai and English
+  const translations = {
+    th: {
+      reportTitle: "แดชบอร์ดสรุปผล",
+      exportCsvButton: "ส่งออกเป็น CSV",
+      summaryTitle: "สรุปข้อมูล",
+      totalTasks: "จำนวนงานทั้งหมด",
+      totalOrders: "จำนวนคำสั่งซื้อทั้งหมด",
+      totalPayments: "จำนวนการชำระเงินทั้งหมด",
+      totalIncome: "รายได้รวม",
+      totalUsers: "จำนวนผู้ใช้งานทั้งหมด",
+      totalTechnicians: "จำนวนช่างทั้งหมด",
+      taskOrderPaymentCounts: "จำนวนงาน, คำสั่งซื้อ, และการชำระเงินตามเดือน",
+      monthlyIncome: "รายได้ประจำเดือน",
+      userCounts: "จำนวนผู้ใช้งาน",
+    },
+    en: {
+      reportTitle: "Report Dashboard",
+      exportCsvButton: "Export to CSV",
+      summaryTitle: "Summary",
+      totalTasks: "Total Tasks",
+      totalOrders: "Total Orders",
+      totalPayments: "Total Payments",
+      totalIncome: "Total Income",
+      totalUsers: "Total Users",
+      totalTechnicians: "Total Technicians",
+      taskOrderPaymentCounts: "Task, Order, and Payment Counts by Month",
+      monthlyIncome: "Monthly Income",
+      userCounts: "User Counts",
+    },
+  };
+
   useEffect(() => {
     const fetchCounts = async () => {
       try {
-        const tasksResponse = await axios.get(`${api_url}/api/counts`);
-    
-
-        setTaskCounts(tasksResponse.data);
-        console.log(tasksResponse.data)
+        const response = await axios.get(`${api_url}/api/counts`);
+        setTaskCounts(response.data.monthlyData);
+        setIncomeData(response.data.monthlyData);
+        setUserCounts(response.data.userCounts);
       } catch (error) {
+        setError("Failed to fetch data. Please try again later.");
         console.error("Error fetching counts:", error);
+      } finally {
+        setLoading(false);
       }
     };
 
     fetchCounts();
   }, [api_url]);
 
-    
-  const combinedData = [...data, ...data01.map((d, i) => ({ ...d, type: "A school" })), ...data02.map((d, i) => ({ ...d, type: "B school" }))];
+  if (loading) return <Loading />;
+  if (error) return <div className="text-red-500 text-center py-8">{error}</div>;
 
   return (
-    <div className="p-6 space-y-6 font-prompt">
-        <div className="flex justify-end">
+    <div className="p-6 space-y-6 font-prompt bg-gray-50 min-h-screen">
+      <div className="flex justify-between items-center">
+        <h1 className="text-2xl font-bold text-gray-800">{translations[language].reportTitle}</h1>
         <CSVLink
-          data={combinedData}
+          data={taskCounts}
           filename={"report-data.csv"}
-          className="btn btn-success hover:btn-success text-white hover:text-white"
+          className="bg-success hover:bg-success text-white px-4 py-2 rounded-lg shadow-md font-prompt"
           target="_blank"
         >
-          Export to CSV
+          {translations[language].exportCsvButton}
         </CSVLink>
       </div>
-      
-      <div className="bg-white p-4 rounded-lg shadow-md">
-        <h2 className="text-xl font-semibold mb-4">Bar Chart</h2>
-        <BarChart width={730} height={250} data={taskCounts} className="mx-auto">
-          <CartesianGrid strokeDasharray="3 3" />
-          <XAxis dataKey="month" />
-          <YAxis />
-          <Tooltip />
-          <Legend />
-          <Bar dataKey="task_count" fill="#8884d8" />
-          <Bar dataKey="order_count" fill="#82ca9d" />
-          <Bar dataKey="payment_count" fill="#82cacd" />
-          </BarChart>
+
+      <div className="bg-white p-6 rounded-lg shadow-md">
+        <h2 className="text-xl font-semibold mb-4 text-gray-700">{translations[language].summaryTitle}</h2>
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+          <div className="bg-gray-100 p-4 rounded-lg">
+            <p className="text-gray-700">
+              <strong>{translations[language].totalTasks}:</strong>{" "}
+              {taskCounts.reduce((sum, item) => sum + item.task_count, 0)}
+            </p>
+          </div>
+          <div className="bg-gray-100 p-4 rounded-lg">
+            <p className="text-gray-700">
+              <strong>{translations[language].totalOrders}:</strong>{" "}
+              {taskCounts.reduce((sum, item) => sum + item.order_count, 0)}
+            </p>
+          </div>
+          <div className="bg-gray-100 p-4 rounded-lg">
+            <p className="text-gray-700">
+              <strong>{translations[language].totalPayments}:</strong>{" "}
+              {taskCounts.reduce((sum, item) => sum + item.payment_count, 0)}
+            </p>
+          </div>
+          <div className="bg-gray-100 p-4 rounded-lg">
+            <p className="text-gray-700">
+              <strong>{translations[language].totalIncome}:</strong>{" "}
+              {taskCounts.reduce((sum, item) => sum + item.income, 0).toLocaleString()} บาท
+            </p>
+          </div>
+
+          {/* User and Technician Counts */}
+          <div className="bg-gray-100 p-4 rounded-lg">
+            <p className="text-gray-700">
+              <strong>{translations[language].totalUsers}:</strong> {userCounts.customers}
+            </p>
+          </div>
+
+          <div className="bg-gray-100 p-4 rounded-lg">
+            <p className="text-gray-700">
+              <strong>{translations[language].totalTechnicians}:</strong> {userCounts.technicians}
+            </p>
+          </div>
+        </div>
       </div>
 
-      <div className="bg-white p-4 rounded-lg shadow-md">
-        <h2 className="text-xl font-semibold mb-4">Area Chart</h2>
-        <AreaChart
-          width={730}
-          height={250}
-          data={taskCounts}
-          margin={{ top: 10, right: 30, left: 0, bottom: 0 }}
-          className="mx-auto"
-        >
-          <defs>
-            <linearGradient id="colorUv" x1="0" y1="0" x2="0" y2="1">
-              <stop offset="5%" stopColor="#8884d8" stopOpacity={0.8} />
-              <stop offset="95%" stopColor="#8884d8" stopOpacity={0} />
-            </linearGradient>
-            <linearGradient id="colorPv" x1="0" y1="0" x2="0" y2="1">
-              <stop offset="5%" stopColor="#82ca9d" stopOpacity={0.8} />
-              <stop offset="95%" stopColor="#82ca9d" stopOpacity={0} />
-            </linearGradient>
-            <linearGradient id="colorAv" x1="0" y1="0" x2="0" y2="1">
-              <stop offset="5%" stopColor="#82cacd" stopOpacity={0.8} />
-              <stop offset="95%" stopColor="#82cacd" stopOpacity={0} />
-            </linearGradient>
-          </defs>
-          <XAxis dataKey="month" />
-          <YAxis />
-          <CartesianGrid strokeDasharray="3 3" />
-          <Tooltip />
-          <Area
-            type="monotone"
-            dataKey="task_count"
-            stroke="#8884d8"
-            fillOpacity={1}
-            fill="url(#colorUv)"
-          />
-          <Area
-            type="monotone"
-            dataKey="order_count"
-            stroke="#82ca9d"
-            fillOpacity={1}
-            fill="url(#colorPv)"
-          />
-          <Area
-            type="monotone"
-            dataKey="payment_count"
-            stroke="#82ca9d"
-            fillOpacity={1}
-            fill="url(#colorAv)"
-          />
-          
-        </AreaChart>
+      <div className="bg-white p-6 rounded-lg shadow-md">
+        <h2 className="text-xl font-semibold mb-4 text-gray-700">
+          {translations[language].taskOrderPaymentCounts}
+        </h2>
+        <div className="h-96">
+          <ResponsiveContainer width="100%" height="100%">
+            <BarChart data={taskCounts}>
+              <CartesianGrid strokeDasharray="3 3" />
+              <XAxis dataKey="month" />
+              <YAxis />
+              <Tooltip />
+              <Legend />
+              <Bar dataKey="task_count" fill="#8884d8" name="Task Count" />
+              <Bar dataKey="order_count" fill="#82ca9d" name="Order Count" />
+              <Bar dataKey="payment_count" fill="#82cacd" name="Payment Count" />
+            </BarChart>
+          </ResponsiveContainer>
+        </div>
       </div>
-      
+
+      <div className="bg-white p-6 rounded-lg shadow-md">
+        <h2 className="text-xl font-semibold mb-4 text-gray-700">
+          {translations[language].monthlyIncome}
+        </h2>
+        <div className="h-96">
+          <ResponsiveContainer width="100%" height="100%">
+            <LineChart data={incomeData} margin={{ top: 5, right: 30, left: 20, bottom: 5 }}>
+              <CartesianGrid strokeDasharray="3 3" />
+              <XAxis dataKey="month" />
+              <YAxis />
+              <Tooltip />
+              <Legend />
+              <Line type="monotone" dataKey="income" stroke="#8884d8" name="Income" />
+            </LineChart>
+          </ResponsiveContainer>
+        </div>
+      </div>
+
+      <div className="bg-white p-6 rounded-lg shadow-md">
+        <h2 className="text-xl font-semibold mb-4 text-gray-700">
+          {translations[language].userCounts}
+        </h2>
+        <div className="h-96">
+          <ResponsiveContainer width="100%" height="100%">
+            <BarChart
+              data={[
+                { name: "Technicians", count: userCounts.technicians },
+                { name: "Customers", count: userCounts.customers },
+              ]}
+            >
+              <CartesianGrid strokeDasharray="3 3" />
+              <XAxis dataKey="name" />
+              <YAxis />
+              <Tooltip />
+              <Legend />
+              <Bar dataKey="count" fill="#82ca9d" name="User Counts" barSize={30} />
+            </BarChart>
+          </ResponsiveContainer>
+        </div>
+      </div>
     </div>
   );
 };

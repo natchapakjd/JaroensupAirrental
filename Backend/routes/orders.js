@@ -51,44 +51,49 @@ router.get("/v3/orders", (req, res) => {
 });
 
 router.get("/v1/orders/:id", (req, res) => {
-    const limit = parseInt(req.query.limit) || 10; // จำนวนรายการต่อหน้า
-    const page = parseInt(req.query.page) || 1; // หน้าเริ่มต้น
-    const offset = (page - 1) * limit; // การคำนวณ offset
-    const userId = req.params.id; // รับ user_id จาก URL parameters
+  const limit = parseInt(req.query.limit) || 10; // จำนวนรายการต่อหน้า
+  const page = parseInt(req.query.page) || 1; // หน้าเริ่มต้น
+  const offset = (page - 1) * limit; // การคำนวณ offset
+  const userId = req.params.id; // รับ user_id จาก URL parameters
 
-    // สร้างเงื่อนไขสำหรับการค้นหาตาม user_id
-    let query = "SELECT * FROM orders WHERE user_id = ?";
-    const queryParams = [userId];
+  // แก้ไขชื่อ alias และ WHERE
+  let query = `
+      SELECT * 
+      FROM orders o 
+      JOIN tasks t ON t.task_id = o.task_id 
+      JOIN status st ON st.status_id = t.status_id
+      WHERE o.user_id = ?
+      LIMIT ? OFFSET ?
+  `;
+  
+  const queryParams = [userId, limit, offset];
 
-    query += " LIMIT ? OFFSET ?";
-    queryParams.push(limit, offset);
+  db.query(query, queryParams, (err, result) => {
+      if (err) {
+          console.error("Error fetching orders: ", err);
+          return res.status(500).json({ error: "Failed to fetch orders" });
+      }
 
-    db.query(query, queryParams, (err, result) => {
-        if (err) {
-            console.error("Error fetching orders: ", err);
-            return res.status(500).json({ error: "Failed to fetching orders" });
-        }
+      // นับจำนวนรายการทั้งหมด
+      const countQuery = "SELECT COUNT(*) AS total FROM orders WHERE user_id = ?";
+      
+      db.query(countQuery, [userId], (err, countResult) => {
+          if (err) {
+              console.error("Error fetching order count: ", err);
+              return res.status(500).json({ error: "Failed to fetch order count" });
+          }
 
-        // นับจำนวนคำสั่งซื้อที่ตรงกับ user_id
-        const countQuery = "SELECT COUNT(*) AS total FROM orders WHERE user_id = ?";
-        
-        db.query(countQuery, [userId], (err, countResult) => {
-            if (err) {
-                console.error("Error fetching order count: ", err);
-                return res.status(500).json({ error: "Failed to fetching order count" });
-            }
+          const totalCount = countResult[0].total;
+          const totalPages = Math.ceil(totalCount / limit);
 
-            const totalCount = countResult[0].total;
-            const totalPages = Math.ceil(totalCount / limit);
-
-            res.status(200).json({
-                totalCount,
-                totalPages,
-                currentPage: page,
-                orders: result,
-            });
-        });
-    });
+          res.status(200).json({
+              totalCount,
+              totalPages,
+              currentPage: page,
+              orders: result,
+          });
+      });
+  });
 });
 
 
@@ -498,6 +503,96 @@ router.get("/v2/orders/count", (req, res) => {
   });
   
 
+  router.get("/v4/orders", (req, res) => {
+    const taskId = req.query.taskId; // Receive taskId as query parameter
+    const page = parseInt(req.query.page) || 1; // Pagination - Default page 1
+    const limit = parseInt(req.query.limit) || 10; // Pagination - Default limit 10
+    const offset = (page - 1) * limit;
+  
+    if (taskId) {
+      // Query to fetch order details by taskId
+      const query = `
+        SELECT o.id AS order_id, o.user_id, o.created_at, oi.product_id, oi.product_name, oi.quantity, oi.total_price, u.firstname, u.lastname
+        FROM orders o
+        JOIN order_items oi ON o.id = oi.order_id
+        JOIN users u ON o.user_id = u.user_id
+        WHERE o.task_id = ?  -- Search by task_id
+      `;
+    
+      db.query(query, [taskId], (err, result) => {
+        if (err) return res.status(500).send(err);
+  
+        if (result.length === 0) {
+          return res.status(404).json({ message: "Order not found." });
+        }
+  
+        // Structure the order response
+        const order = {
+          order_id: result[0].order_id,
+          user_id: result[0].user_id,
+          firstname: result[0].firstname,
+          lastname: result[0].lastname,
+          created_at: result[0].created_at,
+          items: result.map(row => ({
+            product_id: row.product_id,
+            product_name: row.product_name,
+            quantity: row.quantity,
+            total_price: row.total_price,
+          })),
+        };
+  
+        return res.status(200).json(order);
+      });
+    } else {
+      // If no taskId, return paginated orders
+      const query = `
+        SELECT o.id AS order_id, o.user_id, o.created_at, oi.product_id, oi.product_name, oi.quantity, oi.total_price, o.task_id
+        FROM orders o
+        JOIN order_items oi ON o.id = oi.order_id
+        LIMIT ? OFFSET ?  -- Paginate the orders
+      `;
+  
+      db.query(query, [limit, offset], (err, result) => {
+        if (err) return res.status(500).send(err);
+  
+        db.query(`SELECT COUNT(*) AS total_items FROM orders`, (err, countResult) => {
+          if (err) return res.status(500).send(err);
+  
+          const totalItems = countResult[0].total_items || 0;
+  
+          const orders = result.reduce((acc, row) => {
+            const orderId = row.order_id;
+  
+            if (!acc[orderId]) {
+              acc[orderId] = {
+                order_id: orderId,
+                user_id: row.user_id,
+                created_at: row.created_at,
+                task_id: row.task_id,
+                items: [],
+              };
+            }
+  
+            acc[orderId].items.push({
+              product_id: row.product_id,
+              product_name: row.product_name,
+              quantity: row.quantity,
+              total_price: row.total_price,
+            });
+  
+            return acc;
+          }, {});
+  
+          res.status(200).json({
+            orders: Object.values(orders),
+            totalItems,
+            currentPage: page,
+            totalPages: Math.ceil(totalItems / limit),
+          });
+        });
+      });
+    }
+  });
   
   
 

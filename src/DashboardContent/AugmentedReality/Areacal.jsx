@@ -28,6 +28,8 @@ const Areacal = () => {
   const [acPlacements, setAcPlacements] = useState([]);
   const [isReadyToDrag, setIsReadyToDrag] = useState(false);
   const [roomTypes, setRoomTypes] = useState([]);
+  const [areaCalList, setAreaCalList] = useState([]);
+  const [selectedAreaCal, setSelectedAreaCal] = useState(null);
   const [currentLanguage, setCurrentLanguage] = useState(
     localStorage.getItem("language") || "en"
   );
@@ -51,7 +53,7 @@ const Areacal = () => {
       addAC: "Add AC",
       clearGrid: "Clear Grid",
       quickPlaceAC: "Quickly Place AC",
-      save: "Save",
+      save: "Save new area",
       ACDataLabel: "Existing AC Data",
       eraser: "Eraser",
       drag: "Open Drag function",
@@ -71,6 +73,7 @@ const Areacal = () => {
       acCountMessage: "Total BTU from AC:",
       btuDifferenceMessage: "BTU is enough now",
       applyButtonMessage: "Apply",
+      saveRepeat : "Save exist area"
     },
     th: {
       title: "การคำนวณพื้นที่",
@@ -88,7 +91,7 @@ const Areacal = () => {
       addAC: "เพิ่มแอร์",
       clearGrid: "ล้างกริด",
       quickPlaceAC: "วางแอร์อย่างรวดเร็ว",
-      save: "บันทึก",
+      save: "สร้างพื้นที่ใหม่",
       ACDataLabel: "จำนวนแอร์ที่มีอยู่",
       eraser: "ยางลบ",
       drag: "เปิดใช้งานการคลิกค้าง",
@@ -106,6 +109,8 @@ const Areacal = () => {
       acCountMessage: "BTU รวมจากแอร์:",
       btuDifferenceMessage: "BTU เพียงพอแล้ว",
       applyButtonMessage: "ต้องการใช้ค่านี้",
+      saveRepeat : "บันทึกจากพื้นที่เดิม"
+
     },
   };
 
@@ -133,7 +138,23 @@ const Areacal = () => {
   //     container.removeEventListener("wheel", handleZoom);
   //   };
   // }, [scale]);
+  useEffect(() => {
 
+    const fetchAreaCalData = async () => {
+      try {
+        const response = await axios.get(
+          `${import.meta.env.VITE_SERVER_URL}/area_cals`);
+        setAreaCalList(response.data); // สมมติ API ส่งข้อมูลเป็น array
+      } catch (error) {
+        console.error("Error fetching area calculation data:", error);
+        Swal.fire("Error", "Failed to fetch area calculation data", "error");
+      }
+    };
+
+    fetchAreaCalData();
+  }, []);
+
+  
   useEffect(() => {
     const storedLanguage = localStorage.getItem("language") || "en";
     setCurrentLanguage(storedLanguage);
@@ -1826,6 +1847,73 @@ const Areacal = () => {
       Swal.fire("สำเร็จ!", `เลือก Assignment ID: ${selectedId}`, "success");
     }
   };
+const handleSelectAreaCal = async () => {
+    const { value: formValues } = await Swal.fire({
+      title: "เลือกข้อมูลคำนวณพื้นที่",
+      html: `
+        <select id="area-cal-select" class="input-air">
+          ${areaCalList
+            .map(
+              (area,index) => `
+                <option value="${area.calculation_id}">
+                  ${index+1} - ${area.location_name} (${area.width}x${area.height})
+                </option>`
+            )
+            .join("")}
+        </select>
+        <br/>
+        <input type="text" id="location-name" class="input-air" placeholder="ใส่ชื่อสถานที่ใหม่" />
+      `,
+      showCancelButton: true,
+      confirmButtonText: "ตกลง",
+      preConfirm: () => {
+        const selectedId = document.getElementById("area-cal-select").value;
+        const newLocationName = document.getElementById("location-name").value.trim();
+
+        if (!newLocationName) {
+          Swal.showValidationMessage("กรุณากรอกชื่อสถานที่ใหม่!");
+          return false;
+        }
+
+        const selected = areaCalList.find((a) => a.calculation_id.toString() === selectedId);
+        return { ...selected, newLocationName };
+      },
+    });
+
+    if (formValues) {
+      setSelectedAreaCal(formValues);
+      setLocationName(formValues.newLocationName);
+      handleSaveRepeat(formValues);
+    }
+  };
+
+  const handleSaveRepeat = async (data) => {
+    
+    const acUsage = updateACUsageInGrid();
+    const newData = {
+      calculation_id : data.calculation_id,
+      assignment_id :data.assignment_id,
+      width: parseFloat(width),
+      height: parseFloat(length),
+      air_conditioners_needed: parseInt(AirConditionerNeeded) || 0,
+      room_type_id: roomType,
+      air_5ton_used: acUsage.air_5ton_used,
+      air_10ton_used: acUsage.air_10ton_used,
+      air_20ton_used: acUsage.air_20ton_used,
+      grid_pattern: acPlacements, // ส่งข้อมูลตำแหน่ง AC
+    };
+    try {
+      await axios.put(
+          `${import.meta.env.VITE_SERVER_URL}/v2/area_cal/${data.calculation_id}`, {
+        ...newData,
+        location_name: data.newLocationName, // ใช้ชื่อใหม่
+      });
+      Swal.fire("Success", "บันทึกข้อมูลซ้ำเรียบร้อย!", "success");
+    } catch (error) {
+      console.error("Error updating area calculation:", error);
+      Swal.fire("Error", "ไม่สามารถบันทึกข้อมูลได้", "error");
+    }
+  };
 
   const handleNavigateToAR = () => {
     navigate("/test-xr-gallary");
@@ -2068,6 +2156,9 @@ const Areacal = () => {
           </div>
         </div>
         <div className="flex justify-end gap-5">
+        <button onClick={handleSelectAreaCal} className="btn btn-success text-white">
+            {translations[currentLanguage].saveRepeat}
+          </button>
           <button onClick={handleSelectAssignment} className="b-air">
             {translations[currentLanguage].save}
           </button>

@@ -6,39 +6,72 @@ const months = Array.from({ length: 12 }, (_, i) => i + 1);
 
 router.get("/api/counts", (req, res) => {
     const query = `
-        SELECT months.month,
+        SELECT 
+            months.month,
             IFNULL(task_count.count, 0) AS task_count,
             IFNULL(order_count.count, 0) AS order_count,
-            IFNULL(payment_count.count, 0) AS payment_count
+            IFNULL(payment_count.count, 0) AS payment_count,
+            IFNULL(income.amount, 0) AS income
         FROM (SELECT ${months.join(' AS month UNION SELECT ')} AS month) AS months
         LEFT JOIN (
             SELECT MONTH(created_at) AS month, COUNT(*) AS count 
             FROM tasks 
-            WHERE YEAR(created_at) = 2024 
+            WHERE YEAR(created_at) = YEAR(CURDATE()) 
             GROUP BY MONTH(created_at)
         ) AS task_count ON months.month = task_count.month
         LEFT JOIN (
             SELECT MONTH(created_at) AS month, COUNT(*) AS count 
             FROM orders 
-            WHERE YEAR(created_at) = 2024 
+            WHERE YEAR(created_at) = YEAR(CURDATE()) 
             GROUP BY MONTH(created_at)
         ) AS order_count ON months.month = order_count.month
         LEFT JOIN (
             SELECT MONTH(created_at) AS month, COUNT(*) AS count 
             FROM payments 
-            WHERE YEAR(created_at) = 2024 
+            WHERE YEAR(created_at) = YEAR(CURDATE()) 
             GROUP BY MONTH(created_at)
         ) AS payment_count ON months.month = payment_count.month
+        LEFT JOIN (
+            SELECT MONTH(created_at) AS month, SUM(amount) AS amount 
+            FROM payments 
+            WHERE YEAR(created_at) = YEAR(CURDATE()) 
+            GROUP BY MONTH(created_at)
+        ) AS income ON months.month = income.month
         ORDER BY months.month
+    `;
+
+    const userCountQuery = `
+        SELECT 
+            r.role_name,
+            COUNT(u.user_id) AS count
+        FROM users u
+        JOIN roles r ON u.role_id = r.role_id
+        WHERE r.role_name IN ('technician', 'customer')
+        GROUP BY r.role_name
     `;
 
     db.query(query, (err, result) => {
         if (err) {
             console.error("Error fetching counts: " + err);
-            res.status(500).json({ error: "Failed to fetch counts" });
-        } else {
-            res.json(result);
+            return res.status(500).json({ error: "Failed to fetch counts" });
         }
+
+        db.query(userCountQuery, (err, userCounts) => {
+            if (err) {
+                console.error("Error fetching user counts: " + err);
+                return res.status(500).json({ error: "Failed to fetch user counts" });
+            }
+
+            const summary = {
+                monthlyData: result,
+                userCounts: {
+                    technicians: userCounts.find((u) => u.role_name === 'technician')?.count || 0,
+                    customers: userCounts.find((u) => u.role_name === 'customer')?.count || 0,
+                },
+            };
+
+            res.json(summary);
+        });
     });
 });
 

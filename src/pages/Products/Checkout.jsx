@@ -88,7 +88,7 @@ const Checkout = () => {
     const totalPrice = cartItems
       .reduce((acc, item) => acc + item.price * item.quantity, 0)
       .toFixed(2);
-
+  
     const { isConfirmed } = await Swal.fire({
       title: "ยืนยันการชำระเงิน",
       text: `คุณต้องการชำระเงินเป็นจำนวนเงิน ${totalPrice} บาทหรือไม่?`,
@@ -97,7 +97,7 @@ const Checkout = () => {
       confirmButtonText: "ใช่",
       cancelButtonText: "ยกเลิก",
     });
-
+  
     if (isConfirmed) {
       const orderDetails = {
         user_id: userId,
@@ -110,7 +110,7 @@ const Checkout = () => {
         })),
         total_price: totalPrice,
       };
-
+  
       try {
         const orderResponse = await fetch(
           `${import.meta.env.VITE_SERVER_URL}/v2/orders`,
@@ -122,21 +122,21 @@ const Checkout = () => {
             body: JSON.stringify(orderDetails),
           }
         );
-
+  
         if (!orderResponse.ok) throw new Error("Failed to create order");
-
+  
         const orderResult = await orderResponse.json();
-
+  
         const paymentDetails = {
           amount: totalPrice,
           user_id: userId,
           order_id: 'null',
           method_id: selectedPaymentMethod, // Use selected payment method
           payment_date: formatDateTimeForInput(new Date()),
-          status_id: 1, 
+          status_id: 1,
           task_id: orderResult.taskId || null,
         };
-
+  
         const paymentResponse = await fetch(
           `${import.meta.env.VITE_SERVER_URL}/payments`,
           {
@@ -147,9 +147,29 @@ const Checkout = () => {
             body: JSON.stringify(paymentDetails),
           }
         );
-
+  
         if (!paymentResponse.ok) throw new Error("Failed to create payment");
-
+  
+        // Task log creation after successful order and payment
+        const taskLogDetails = {
+          task_id: orderResult.taskId,
+          user_id: userId,
+          action: "สั่งออเดอร์",
+        };
+  
+        const taskLogResponse = await fetch(
+          `${import.meta.env.VITE_SERVER_URL}/task-log`,
+          {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify(taskLogDetails),
+          }
+        );
+  
+        if (!taskLogResponse.ok) throw new Error("Failed to create task log");
+  
         Swal.fire({
           title: "สำเร็จ!",
           text: "การชำระเงินของคุณได้รับการบันทึกแล้ว",
@@ -170,6 +190,7 @@ const Checkout = () => {
       }
     }
   };
+  
 
   const handleRemoveItem = (productId) => {
     setCartItems(cartItems.filter((item) => item.product_id !== productId));

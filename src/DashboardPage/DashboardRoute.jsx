@@ -64,6 +64,8 @@ import EditAreacal from '../DashboardContent/AugmentedReality/EditAreacal'
 import EditBorrowProduct from '../DashboardContent/BorrowProduct/EditBorrowProduct'
 import AreacalDetails from '../DashboardContent/AugmentedReality/AreacalDetails'
 import Setting from '../DashboardContent/Settings/Setting'
+import BorrowProductDetails from '../DashboardContent/BorrowProduct/BorrowProductDetails'
+import OrderDetailsLog from '../DashboardContent/Orders/OrderDetailsLog'
 
 const DashboardRoute = () => {
   return (
@@ -97,9 +99,11 @@ const DashboardRoute = () => {
             <Route path="payments/edit/:paymentId" element={<EditPayment />} />
             <Route path="borrows/:productId" element={<BorrowProductContent />} />
             <Route path="borrows" element={<BorrowProductTable />} />
+            <Route path="borrows/details/:task_id" element={<BorrowProductDetails />} />
             <Route path="borrows/add" element={<AddBorrowProduct />} />
             <Route path="orders" element={<OrderContent />} />
             <Route path="orders/details/:orderId" element={<OrderDetails/>} />
+            <Route path="orders/detail-log/:taskId" element={<OrderDetailsLog/>} />
             <Route path="orders/add" element={<AddOrder />} />
             <Route path="orders/edit/:orderId" element={<EditOrder />} />
             <Route path="tasks/add" element={<AddTask />} />

@@ -62,7 +62,6 @@ router.get("/area_cal-paging", (req, res) => {
   });
 });
 
-// 📌 ดึงข้อมูลจาก ID
 router.get("/area_cal/:id", (req, res) => {
     const id = req.params.id;
     const query = `
@@ -82,7 +81,6 @@ router.get("/area_cal/:id", (req, res) => {
     });
 });
 
-// 📌 บันทึกข้อมูลใหม่
 router.post("/area_cal", (req, res) => {
   const { 
     assignment_id, 
@@ -90,7 +88,7 @@ router.post("/area_cal", (req, res) => {
     width, 
     height, 
     air_conditioners_needed, 
-    room_type_id,  // ✅ เปลี่ยนจาก area_type เป็น room_type_id
+    room_type_id,  
     air_5ton_used, 
     air_10ton_used, 
     air_20ton_used,
@@ -122,6 +120,54 @@ router.post("/area_cal", (req, res) => {
       res.status(201).json({ message: "Area calculation created successfully", id: result.insertId });
     }
   });
+});
+
+router.put("/v2/area_cal/:id", (req, res) => {
+  const id = req.params.id;
+  const {
+    assignment_id,
+    location_name,
+    width,
+    height,
+    air_conditioners_needed,
+    room_type_id,
+    air_5ton_used,
+    air_10ton_used,
+    air_20ton_used,
+    grid_pattern,
+  } = req.body;
+
+  const query = `
+    UPDATE area_calculation_history 
+    SET assignment_id = ?, location_name = ?, width = ?, height = ?, air_conditioners_needed = ?, room_type_id = ?, 
+        air_5ton_used = ?, air_10ton_used = ?, air_20ton_used = ?, grid_pattern = ? 
+    WHERE calculation_id = ?
+  `;
+
+  db.query(
+    query,
+    [
+      assignment_id,
+      location_name,
+      width,
+      height,
+      air_conditioners_needed,
+      room_type_id,
+      air_5ton_used,
+      air_10ton_used,
+      air_20ton_used,
+      JSON.stringify(grid_pattern),
+      id,
+    ],
+    (err, result) => {
+      if (err) {
+        console.error("Error updating area_calculation_history: " + err);
+        res.status(500).json({ error: "Failed to update area_calculation_history" });
+      } else {
+        res.json({ message: "Area calculation updated successfully" });
+      }
+    }
+  );
 });
 
 // 📌 อัปเดตข้อมูล

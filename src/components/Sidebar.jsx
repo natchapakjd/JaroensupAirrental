@@ -418,6 +418,119 @@ const Sidebar = () => {
                       {translations[currentLanguage].historyLog}
                     </a>
                   </li>
+                  
+                  {/* <li
+                    className={`mb-5 hover:rounded-lg hover:py-3 hover:px-4 transition-all duration-300 hover:mx-5 ${
+                      isActive("/dashboard/settings")
+                        ? "bg-blue text-white mx-5 px-4 py-3 rounded-lg"
+                        : null
+                    }`}
+                  >
+                    <a
+                      className="text-base pl-10 flex gap-1"
+                      href="/dashboard/settings"
+                    >
+                      <MdOutlineSettings className="mt-1" />{" "}
+                      {translations[currentLanguage].settings}
+                    </a>
+                  </li> */}
+                </>
+              )}
+
+              {role === 2 && (
+                <>
+                  <li
+                    className={`mb-5 hover:rounded-lg hover:py-3 hover:px-4 transition-all duration-300 hover:mx-5 ${
+                      isActive("/dashboard/tasks")
+                        ? "bg-blue text-white mx-5 px-4 py-3 rounded-lg"
+                        : null
+                    }`}
+                  >
+                    <a
+                      className="text-base pl-10 flex gap-1"
+                      href="/dashboard/tasks"
+                    >
+                      <MdTask className="mt-1" />{" "}
+                      {translations[currentLanguage].tasks}
+                    </a>
+                  </li>
+
+                  <li
+                    className={`mb-5 hover:rounded-lg hover:py-3 hover:px-4 transition-all duration-300 hover:mx-5 ${
+                      isActive("/dashboard/borrows")
+                        ? "bg-blue text-white mx-5 px-4 py-3 rounded-lg"
+                        : null
+                    }`}
+                  >
+                    <a
+                      className="text-base pl-10 flex gap-1"
+                      href="/dashboard/borrows"
+                    >
+                      <MdTask className="mt-1" />{" "}
+                      {translations[currentLanguage].borrowing}
+                    </a>
+                  </li>
+                  <li
+                    className={`mb-5 hover:rounded-lg hover:py-3 hover:px-4 transition-all duration-300 hover:mx-5 ${
+                      isActive("/dashboard/products")
+                        ? "bg-blue text-white mx-5 px-4 py-3 rounded-lg"
+                        : null
+                    }`}
+                  >
+                    <a
+                      className="text-base pl-10 flex gap-1"
+                      href="/dashboard/products"
+                    >
+                      <MdAddShoppingCart className="mt-1" />{" "}
+                      {translations[currentLanguage].products}
+                    </a>
+                  </li>
+                  <li
+                    className={`mb-5 hover:rounded-lg hover:py-3 hover:px-4 transition-all duration-300 hover:mx-5 ${
+                      isActive("/dashboard/reviews")
+                        ? "bg-blue text-white mx-5 px-4 py-3 rounded-lg"
+                        : null
+                    }`}
+                  >
+                    <a
+                      className="text-base pl-10 flex gap-1"
+                      href="/dashboard/reviews"
+                    >
+                      <MdRateReview className="mt-1" />{" "}
+                      {translations[currentLanguage].reviews}
+                    </a>
+                  </li>
+                  <li
+                    className={`mb-5 hover:rounded-lg hover:py-3 hover:px-4 transition-all duration-300 hover:mx-5 ${
+                      isActive("/dashboard/area-cal")
+                        ? "bg-blue text-white mx-5 px-4 py-3 rounded-lg"
+                        : null
+                    }`}
+                  >
+                    <a
+                      className="text-base pl-10 flex gap-1"
+                      href="/dashboard/area-cal"
+                    >
+                      <MdCalculate className="mt-1" />{" "}
+                      {translations[currentLanguage].areaCalculation}
+                    </a>
+                  </li>
+                  <li
+                    className={`mb-5 hover:rounded-lg hover:py-3 hover:px-4 transition-all duration-300 hover:mx-5 ${
+                      isActive("/dashboard/history-log")
+                        ? "bg-blue text-white mx-5 px-4 py-3 rounded-lg"
+                        : null
+                    }`}
+                  >
+                    <a
+                      className="text-base pl-10 flex gap-1"
+                      href="/dashboard/history-log"
+                    >
+                      <MdHistory className="mt-1" />{" "}
+                      {translations[currentLanguage].historyLog}
+                    </a>
+                  </li>
+                  
                   {/* <li
                     className={`mb-5 hover:rounded-lg hover:py-3 hover:px-4 transition-all duration-300 hover:mx-5 ${
                       isActive("/dashboard/settings")

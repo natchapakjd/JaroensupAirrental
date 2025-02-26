@@ -54,7 +54,7 @@ const OrderContent = () => {
   const [totalPages, setTotalPages] = useState(1); // Total pages state
   const [searchQuery, setSearchQuery] = useState(""); // State for search query
   const apiUrl = import.meta.env.VITE_SERVER_URL;
-  const [language,setLanguage] =useState(localStorage.getItem('language')||'th')
+  const [language,setLanguage] = useState(localStorage.getItem('language')||'th')
 
   useEffect(() => {
     fetchOrders();

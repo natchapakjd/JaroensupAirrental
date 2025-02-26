@@ -3,16 +3,18 @@ import { useRef, useState } from "react";
 import { useThree } from "@react-three/fiber";
 import { Interactive, useHitTest, useXR } from "@react-three/xr";
 import { useCharacterAnimations } from "../contexts/CharacterAnimations";
-
+import useXRStore from "../stores/useXRStore"; 
 import useModelsStore from "../stores/modelStore";
 import Air5tonCC from "../../../../public/models/5ton_AC_CC";
 import Air10tonCC from "../../../../public/models/10ton_AC_CC";
 import Air20tonCC from "../../../../public/models/20ton_AC_CC";
+import { useEffect } from "react";
 
 const XrGallary = () => {
   const reticleRef = useRef();
   const { currentModelName, count, setCount } = useCharacterAnimations();
-  const { isPresenting } = useXR();
+  const { isPresenting, setIsPresenting } = useXRStore();
+  const { isPresenting: xrPresenting } = useXR();
   const { models, setModels, selectedModel, setSelectedModel } =
     useModelsStore();
 
@@ -21,6 +23,10 @@ const XrGallary = () => {
       camera.position.z = 3;
     }
   });
+
+  useEffect(() => {
+    setIsPresenting(xrPresenting);
+  }, [xrPresenting, setIsPresenting]);
 
   useHitTest((hitMatrix, hit) => {
     hitMatrix.decompose(
@@ -53,7 +59,7 @@ const XrGallary = () => {
     <>
       <OrbitControls />
       <ambientLight />
-      {isPresenting &&
+      {xrPresenting &&
         models.map(({ position, id, modelName, rotation }) => (
           <Interactive key={id} onSelect={() => setSelectedModel(id)}>
             {modelName === "air5ton" && (
@@ -77,7 +83,7 @@ const XrGallary = () => {
           </Interactive>
         ))}
 
-      {isPresenting && (
+      {xrPresenting && (
         <Interactive onSelect={placeModel}>
           <mesh ref={reticleRef} rotation-x={-Math.PI / 2}>
             <ringGeometry args={[0.1, 0.2, 32]} />
@@ -86,13 +92,13 @@ const XrGallary = () => {
         </Interactive>
       )}
 
-      {!isPresenting && currentModelName === "air5tonCC" && (
+      {!xrPresenting && currentModelName === "air5tonCC" && (
         <Air5tonCC scale={0.1} />
       )}
-      {!isPresenting && currentModelName === "air10tonCC" && (
+      {!xrPresenting && currentModelName === "air10tonCC" && (
         <Air10tonCC scale={0.1} />
       )}
-      {!isPresenting && currentModelName === "air20tonCC" && (
+      {!xrPresenting && currentModelName === "air20tonCC" && (
         <Air20tonCC scale={0.1} />
       )}
     </>

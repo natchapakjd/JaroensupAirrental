@@ -44,6 +44,37 @@ router.get("/appointment/:id", (req, res) => {
   });
 });
 
+
+router.get("v2/appointment/:id", (req, res) => {
+  const id = req.params.id;
+  const query = `
+    SELECT 
+      taskassignments.*,
+      technicians.*,
+      tasks.*,
+      users.* 
+    FROM 
+      taskassignments
+    INNER JOIN 
+      technicians ON taskassignments.tech_id = technicians.tech_id
+    INNER JOIN 
+      tasks ON taskassignments.task_id = tasks.task_id
+    INNER JOIN 
+      users ON technicians.user_id = users.user_id
+    WHERE tasks.task_id = ?
+  `;
+
+  db.query(query, [id], (err, result) => {
+    if (err) {
+      console.error("Error fetching appointment: " + err);
+      res.status(500).json({ error: "Failed to fetch appointment" });
+    } else {
+      const isAssigned = result.length > 0;
+      res.json({ appointment: result, isAssigned });
+    }
+  });
+});
+
 router.get("/appointment-assign/:id", (req, res) => {
   const id = req.params.id;
   const query = "SELECT * FROM taskassignments WHERE assignment_id = ?";

@@ -12,13 +12,13 @@ const BorrowProductTable = () => {
   const [currentPage, setCurrentPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
   const [rowsPerPage] = useState(10); // Items per page
-
   const cookies = new Cookies();
   const token = cookies.get("authToken");
   const decodedToken = jwtDecode(token);
   const techId = decodedToken.id;
   const role = decodedToken.role;
   const language = localStorage.getItem("language") || "en"; // Default to "en" if no language is set
+  
 
   const translation = {
     en: {
@@ -60,6 +60,7 @@ const BorrowProductTable = () => {
       idCardImage: "id card image",
       actions: "action",
       warningTH: "warning",
+      details: "details",
     },
     th: {
       borrowedEquipmentList: "รายการอุปกรณ์ที่ยืม",
@@ -100,6 +101,8 @@ const BorrowProductTable = () => {
       idCardImage: "รูปบัตรประชาชน",
       actions: "การดำเนินการ",
       warningTH: "คำเตือน",
+      details: "รายละเอียด",
+
     },
   };
   const currentLang = translation[language] || translation.en;
@@ -135,7 +138,7 @@ const BorrowProductTable = () => {
       const today = new Date();
       const updatedData = data.map((item) => {
         if (
-          item.status_id === 4 &&
+          item.status_id === 4 || item.status_id === 1 &&
           item.return_date &&
           new Date(item.return_date) < today
         ) {
@@ -371,7 +374,6 @@ const BorrowProductTable = () => {
         </select>
       </div>
       <div className="overflow-x-auto">
-        {" "}
         <table className="table w-full border-collapse border border-gray-300 ">
           <thead className="sticky-top bg-gray-200">
             <tr>
@@ -445,7 +447,7 @@ const BorrowProductTable = () => {
                           onClick={() => handleReturn(item.task_id)}
                           className="btn btn-error text-white"
                         >
-                          Return
+                          {currentLang.return}
                         </button>
                       ) : null}
                       {role === 3 && item.status_id !== 2 ? (
@@ -456,7 +458,13 @@ const BorrowProductTable = () => {
                           {currentLang.return}
                         </button>
                       ) : null}
-
+                         <Link
+                          to={`/dashboard/borrows/details/${item.task_id}`}
+                        >
+                          <button className="btn bg-success text-white hover:bg-success">
+                            {currentLang.details}
+                          </button>
+                        </Link>
                       {role === 3 &&
                       item.status_id !== 4 &&
                       item.status_id !== 2 ? (
@@ -485,6 +493,8 @@ const BorrowProductTable = () => {
                           {currentLang.cancel}
                         </button>
                       ) : null}
+
+                       
                     </div>
                   </td>
                   <td className="border p-2 text-center">

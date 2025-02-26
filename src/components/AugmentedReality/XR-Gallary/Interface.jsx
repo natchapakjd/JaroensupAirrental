@@ -7,6 +7,7 @@ import ImageUpload from "../ImageUpload";
 import Swal from "sweetalert2";
 import withReactContent from "sweetalert2-react-content";
 import { Navigate, useNavigate } from "react-router-dom";
+import useXRStore from "../stores/useXRStore";
 
 const translations = {
   en: {
@@ -91,6 +92,8 @@ const Interface = forwardRef(({ props }, ref) => {
     localStorage.getItem("language") || "th"
   ); // Default to Thai
 
+  const { isPresenting } = useXRStore();
+
   useEffect(() => {
     axios
       .get(`${import.meta.env.VITE_SERVER_URL}/appointments`)
@@ -145,7 +148,6 @@ const Interface = forwardRef(({ props }, ref) => {
       air_20ton_used: modelCounts["air20tonCC"] || 0,
       grid_pattern: models,
     };
-    console.log(roomType);
     axios
       .post(`${import.meta.env.VITE_SERVER_URL}/area_cal`, payload)
       .then((response) => {
@@ -162,17 +164,22 @@ const Interface = forwardRef(({ props }, ref) => {
   };
 
   const openImageUploadPopup = (selectedAppointment) => {
-    if (!selectedAppointment) {
-      alert("กรุณาเลือก Appointment ก่อนอัปโหลดภาพ!");
-      return;
+    if(!isPresenting){
+      if (!selectedAppointment) {
+        alert("กรุณาเลือก Appointment ก่อนอัปโหลดภาพ!");
+        return;
+      }
+  
+      MySwal.fire({
+        title: "อัปโหลดรูปภาพ",
+        html: <ImageUpload areaCalculationId={selectedAppointment} />,
+        showConfirmButton: false, // ซ่อนปุ่ม OK เพราะอัปโหลดเสร็จเอง
+        width: "50%",
+      });
+    }else{
+      alert('โปรดกลับไปหน้าหลัก AR ก่อนอัพโหลดรูปภาพ')
     }
-
-    MySwal.fire({
-      title: "อัปโหลดรูปภาพ",
-      html: <ImageUpload areaCalculationId={selectedAppointment} />,
-      showConfirmButton: false, // ซ่อนปุ่ม OK เพราะอัปโหลดเสร็จเอง
-      width: "50%",
-    });
+    
   };
 
   return (
@@ -363,14 +370,17 @@ const Interface = forwardRef(({ props }, ref) => {
               {/* 📌 ปุ่มเซฟ */}
             </div>
             <div className="button-container-right gap-5">
-              <div className="flex justify-center mt-5">
-                <button
-                  onClick={() => navigate("/dashboard/area-cal")}
-                  className="btn bg-gray-500 text-white hover:bg-gray-500"
-                >
-                  {translations[language].backToDashboard}
-                </button>
-              </div>
+              {!isPresenting && (
+                <div className="flex justify-center mt-5">
+                  <button
+                    onClick={() => navigate("/dashboard/area-cal")}
+                    className="btn bg-gray-500 text-white hover:bg-gray-500"
+                  >
+                    {translations[language].backToDashboard}
+                  </button>
+                </div>
+              )}
+
               <div className="flex justify-between gap-2">
                 <button
                   className="button save-button"

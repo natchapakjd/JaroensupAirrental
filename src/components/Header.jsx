@@ -95,7 +95,7 @@ const Header = () => {
     >
       <div>
         <p className=" text-sm md:text-xl ml-11 font-semibold text-white ">
-          {translations[language].hello}, {user ? user.firstname : "Admin"}
+        {translations[language].hello}, {user ? `${user.firstname} ${user.lastname}` : "Admin"}
         </p>
         <p className="text-sm text-white ml-11 font-normal">
           {translations[language].haveNiceDay}

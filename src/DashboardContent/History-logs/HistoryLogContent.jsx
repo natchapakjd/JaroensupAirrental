@@ -2,13 +2,13 @@ import React, { useEffect, useState } from "react";
 import axios from "axios";
 import Swal from "sweetalert2";
 import Loading from "../../components/Loading";
-
+import { useNavigate } from "react-router-dom";
 const translations = {
   th: {
     adminLogs: "บันทึกการทำงานของแอดมิน",
     taskLogs: "บันทึกการทำงานของงาน",
     logId: "รหัสบันทึก",
-    adminId: "รหัสผู้ดูแล",
+    adminId: "ชื่อแอดมิน",
     taskId: "รหัสงาน",
     userId: "รหัสผู้ใช้",
     action: "การกระทำ",
@@ -19,12 +19,14 @@ const translations = {
     next: "ถัดไป",
     errorFetch: "ไม่สามารถโหลดข้อมูลบันทึกได้",
     of: "จาก",
+    details: "รายละเอียดงาน",
+    task_type : "ประเภทงาน"
   },
   en: {
     adminLogs: "Admin Logs",
     taskLogs: "Task Logs",
     logId: "Log ID",
-    adminId: "Admin ID",
+    adminId: "Admin Name",
     taskId: "Task ID",
     userId: "User ID",
     action: "Action",
@@ -35,6 +37,8 @@ const translations = {
     next: "Next",
     errorFetch: "Failed to load logs.",
     of: "of",
+    details: "details",
+    task_type : "task type"
   },
 };
 
@@ -46,12 +50,15 @@ const HistoryLogContent = () => {
   const [adminCurrentPage, setAdminCurrentPage] = useState(1);
   const [taskCurrentPage, setTaskCurrentPage] = useState(1);
   const [loading, setLoading] = useState(true);
+  const [searchTerm, setSearchTerm] = useState("");
+  const [statusFilter, setStatusFilter] = useState("");
   const [error, setError] = useState(null);
   const [language, setLanguage] = useState(
     localStorage.getItem("language") || "en"
   );
   const apiUrl = import.meta.env.VITE_SERVER_URL;
   const logsPerPage = 10;
+  const navigate = useNavigate();
 
   useEffect(() => {
     const interval = setInterval(() => {
@@ -63,6 +70,8 @@ const HistoryLogContent = () => {
 
     return () => clearInterval(interval);
   }, [language]);
+
+ 
 
   const fetchAdminLogs = async (page) => {
     try {
@@ -80,6 +89,15 @@ const HistoryLogContent = () => {
       });
     }
   };
+
+  const filteredAdminLogs = taskLogs.filter((tl) => {
+    const searchTermLower = searchTerm.toLowerCase();
+    return (
+      (tl.firstname.toLowerCase().includes(searchTermLower) ||
+       tl.lastname.toLowerCase().includes(searchTermLower) ||
+       tl.type_name.toLowerCase().includes(searchTermLower))
+    ) && (statusFilter ? tl.type_name === statusFilter : true);
+  });
 
   const fetchTaskLogs = async (page) => {
     try {
@@ -111,6 +129,16 @@ const HistoryLogContent = () => {
     if (newPage > 0 && newPage <= totalPages) setPage(newPage);
   };
 
+  const handleTaskDetails = (task_id, task_type_id) => {
+    if (task_type_id === 11) {
+      navigate(`/dashboard/borrows/details/${task_id}`);
+    } else if (task_type_id === 9) {
+      navigate(`/dashboard/orders/detail-log/${task_id}`);
+    } else {
+      navigate(`/dashboard/tasks/${task_id}`);
+    }
+  };
+  
   if (loading) return <Loading />;
   if (error) return <div className="text-red-500 text-center">{error}</div>;
 
@@ -120,7 +148,6 @@ const HistoryLogContent = () => {
         {translations[language].adminLogs}
       </h2>
       <div className="overflow-x-auto">
-        {" "}
         <table className="table w-full border-collapse border border-gray-300 mb-4">
           <thead className="bg-gray-200">
             <tr>
@@ -143,7 +170,7 @@ const HistoryLogContent = () => {
               adminLogs.map((log, index) => (
                 <tr key={index + 1}>
                   <td className="border p-2">{index + 1}</td>
-                  <td className="border p-2">{log.admin_id}</td>
+                  <td className="border p-2">{log.firstname} {log.lastname}</td>
                   <td className="border p-2">{log.action}</td>
                   <td className="border p-2">
                     {new Date(log.timestamp).toLocaleString()}
@@ -203,8 +230,26 @@ const HistoryLogContent = () => {
       <h2 className="text-xl font-semibold mt-8 mb-4">
         {translations[language].taskLogs}
       </h2>
+      <div className="flex space-x-4 mb-4">
+            <input
+              type="text"
+              placeholder="Search by name or type_name"
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+              className="border p-2 rounded w-full"
+            />
+            <select
+              value={statusFilter}
+              onChange={(e) => setStatusFilter(e.target.value)}
+              className="border p-2 rounded"
+            >
+              <option value="">ประเภทงานทั้งหมด</option>
+              <option value="งานเช่าเครื่องปรับอากาศ">งานเช่า</option>
+              <option value="ขายสินค้า">งานขาย</option>
+              <option value="ยืมอุปกรณ์">งานยืมอุปกรณ์</option>
+            </select>
+          </div>
       <div className="overflow-x-auto">
-        {" "}
         <table className="table w-full border-collapse border border-gray-300">
           <thead className="bg-gray-200">
             <tr>
@@ -212,10 +257,10 @@ const HistoryLogContent = () => {
                 {translations[language].logId}
               </th>
               <th className="border p-2 text-center">
-                {translations[language].taskId}
+                {translations[language].userId}
               </th>
               <th className="border p-2 text-center">
-                {translations[language].userId}
+                {translations[language].task_type}
               </th>
               <th className="border p-2 text-center">
                 {translations[language].action}
@@ -223,24 +268,32 @@ const HistoryLogContent = () => {
               <th className="border p-2 text-center">
                 {translations[language].date}
               </th>
+              <th className="border p-2 text-center">
+                {translations[language].details}
+              </th>
             </tr>
           </thead>
           <tbody className="text-center">
-            {taskLogs.length > 0 ? (
-              taskLogs.map((log, index) => (
+            {filteredAdminLogs.length > 0 ? (
+              filteredAdminLogs.map((log, index) => (
                 <tr key={index + 1}>
                   <td className="border p-2">{index + 1}</td>
-                  <td className="border p-2">{log.task_id}</td>
-                  <td className="border p-2">{log.user_id}</td>
+                  <td className="border p-2">{log.firstname} {log.lastname}</td>
+                  <td className="border p-2">{log.type_name}</td>
                   <td className="border p-2">{log.action}</td>
                   <td className="border p-2">
                     {new Date(log.created_at).toLocaleString()}
                   </td>
-                </tr>
+                  <td className="border p-2">
+                    <button onClick={() => handleTaskDetails(log.task_id, log.task_type_id)} className="underline">
+                        {translations[language].details}
+                    </button>
+                  </td>               
+                  </tr>
               ))
             ) : (
               <tr>
-                <td colSpan="5" className="border p-4">
+                <td colSpan="6" className="border p-4">
                   {translations[language].noLogs}
                 </td>
               </tr>
