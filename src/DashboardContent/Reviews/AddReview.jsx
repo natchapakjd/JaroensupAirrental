@@ -3,6 +3,7 @@ import axios from 'axios';
 import Swal from 'sweetalert2';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext'; // Adjust the import based on your Auth context path
+import BackButtonEdit from '../../components/BackButtonEdit';
 
 const AddReview = () => {
   const navigate = useNavigate();
@@ -108,10 +109,12 @@ const AddReview = () => {
 
   return (
     <div className="container mx-auto p-8">
-      <div className="flex justify-between items-center mb-4">
-        <h2 className="text-2xl font-bold">{translations[language].pageTitle}</h2>
-      </div>
+     
       <form onSubmit={handleSubmit} className="bg-white p-6 rounded-lg shadow-md">
+      <div className="flex  w-full my-2">
+          <BackButtonEdit />
+          <h1 className="text-2xl font-semibold mx-2">{translations[language].pageTitle}</h1>
+        </div>
         <div className="mb-4">
           <label className="block mb-2" htmlFor="task_id">
             {translations[language].taskLabel}

@@ -381,7 +381,7 @@ const UserHistory = () => {
                           </div>
                         </button>
                       )}
-                      {task.status_id !== 2 && ( // If task is in progress
+                      {task.status_id !== 2 && task.status_id !== 4 && task.status_id !== 5 &&( // If task is in progress
                         <button
                           onClick={() => handleDeleteTask(task.task_id)} // Add delete button
                           className="ml-5 text-red-600"

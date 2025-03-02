@@ -70,75 +70,78 @@ const OrderDetailsLog = () => {
   if (error) return <div className="text-red-500 text-center">{error}</div>;
 
   return (
-    <div className="p-8 rounded-lg shadow-lg w-full mx-auto font-prompt h-full">
-      <div className="flex justify-between items-center mb-4">
-        <h2 className="text-xl font-semibold mb-4">
-          {translations[language].orderDetailsTitle}
-        </h2>
-        <Link to={`/dashboard/orders/edit/${order.order_id}`}>
-          <button className="btn bg-blue text-white hover:bg-blue px-6 py-2 rounded-md">
-            {translations[language].editOrderButton}
-          </button>
-        </Link>
-      </div>
-
-      {order ? (
-        <div>
-          <div className="mb-4">
-            <h3 className="font-bold">
-              {translations[language].orderId} {order.order_id}
-            </h3>
-            <p>
-              {translations[language].user} {order.firstname} {order.lastname}
-            </p>
-            <p>
-              {translations[language].orderDate}{" "}
-              {new Date(order.created_at).toLocaleString()}
-            </p>
-          </div>
-          <h4 className="font-semibold mb-2">
-            {translations[language].itemsTitle}
-          </h4>
-          <table className="w-full border-collapse border border-gray-300 text-center">
-            <thead>
-              <tr>
-                <th className="border border-gray-300 p-2">
-                  {translations[language].productId}
-                </th>
-                <th className="border border-gray-300 p-2">
-                  {translations[language].productName}
-                </th>
-                <th className="border border-gray-300 p-2">
-                  {translations[language].quantity}
-                </th>
-                <th className="border border-gray-300 p-2">
-                  {translations[language].totalPrice}
-                </th>
-              </tr>
-            </thead>
-            <tbody>
-              {order.items.map((item) => (
-                <tr key={item.product_id}>
-                  <td className="border border-gray-300 p-2">
-                    {item.product_id}
-                  </td>
-                  <td className="border border-gray-300 p-2">
-                    {item.product_name}
-                  </td>
-                  <td className="border border-gray-300 p-2">
-                    {item.quantity}
-                  </td>
-                  <td className="border border-gray-300 p-2">
-                    {item.total_price}
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
+    <div className="container mx-auto p-8">
+      {" "}
+      <div className="p-8 rounded-lg shadow-lg w-full mx-auto font-prompt h-full">
+        <div className="flex justify-between items-center mb-4">
+          <h2 className="text-xl font-semibold mb-4">
+            {translations[language].orderDetailsTitle}
+          </h2>
+          <Link to={`/dashboard/orders/edit/${order.order_id}`}>
+            <button className="btn bg-blue text-white hover:bg-blue px-6 py-2 rounded-md">
+              {translations[language].editOrderButton}
+            </button>
+          </Link>
         </div>
-      ) : (
-        <div>{translations[language].noDetailsAvailable}</div>
-      )}
+
+        {order ? (
+          <div>
+            <div className="mb-4">
+              <h3 className="font-bold">
+                {translations[language].orderId} {order.order_id}
+              </h3>
+              <p>
+                {translations[language].user} {order.firstname} {order.lastname}
+              </p>
+              <p>
+                {translations[language].orderDate}{" "}
+                {new Date(order.created_at).toLocaleString()}
+              </p>
+            </div>
+            <h4 className="font-semibold mb-2">
+              {translations[language].itemsTitle}
+            </h4>
+            <table className="w-full border-collapse border border-gray-300 text-center">
+              <thead>
+                <tr>
+                  <th className="border border-gray-300 p-2">
+                    {translations[language].productId}
+                  </th>
+                  <th className="border border-gray-300 p-2">
+                    {translations[language].productName}
+                  </th>
+                  <th className="border border-gray-300 p-2">
+                    {translations[language].quantity}
+                  </th>
+                  <th className="border border-gray-300 p-2">
+                    {translations[language].totalPrice}
+                  </th>
+                </tr>
+              </thead>
+              <tbody>
+                {order.items.map((item) => (
+                  <tr key={item.product_id}>
+                    <td className="border border-gray-300 p-2">
+                      {item.product_id}
+                    </td>
+                    <td className="border border-gray-300 p-2">
+                      {item.product_name}
+                    </td>
+                    <td className="border border-gray-300 p-2">
+                      {item.quantity}
+                    </td>
+                    <td className="border border-gray-300 p-2">
+                      {item.total_price}
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        ) : (
+          <div>{translations[language].noDetailsAvailable}</div>
+        )}
+      </div>
     </div>
   );
 };

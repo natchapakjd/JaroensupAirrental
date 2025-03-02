@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
 import axios from "axios";
-
+import BackButton from "../../components/BackButton";
 const BorrowProductDetails = () => {
   const { task_id } = useParams(); // ดึง task_id จาก URL
   const [borrowingData, setBorrowingData] = useState(null);
@@ -32,11 +32,11 @@ const BorrowProductDetails = () => {
 
   return (
     <div className="p-8 bg-gray-50 min-h-screen">
+      <BackButton/>
       <div className="max-w-4xl mx-auto bg-white shadow-lg rounded-lg p-6">
         <h1 className="text-3xl font-bold text-center mb-6 text-blue-600">
           Borrowing Details
         </h1>
-
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           {/* ข้อมูลผู้ใช้ */}
           <div className="bg-gray-100 p-4 rounded-lg">

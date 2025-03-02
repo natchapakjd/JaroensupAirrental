@@ -4,6 +4,7 @@ import axios from "axios";
 import { MapContainer, TileLayer, Marker, Popup } from "react-leaflet";
 import "leaflet/dist/leaflet.css";
 import Loading from "../../components/Loading";
+import BackButtonEdit from "../../components/BackButtonEdit";
 
 const TaskDetails = () => {
   const { taskId } = useParams();
@@ -75,9 +76,13 @@ const TaskDetails = () => {
 
   return (
     <div className="p-8 rounded-lg shadow-lg w-full mx-auto font-prompt h-screen">
-      <h2 className="text-2xl mb-4">
+      <div className="flex  w-full my-2">
+        <BackButtonEdit />
+        <h1 className="text-2xl font-semibold mx-2">
         {t.taskDetails}: {task.title}
-      </h2>
+        </h1>
+      </div>
+      
       <div className="mb-4">
         {task.task_id && <p><strong>{t.id}:</strong> {task.task_id}</p>}
         {task.description && <p><strong>{t.description}:</strong> {task.description}</p>}

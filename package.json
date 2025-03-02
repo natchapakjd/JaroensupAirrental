@@ -17,6 +17,7 @@
     "axios": "^1.7.3",
     "ccapture.js": "^1.1.0",
     "date-fns": "^4.1.0",
+    "font-awesome": "^4.7.0",
     "gltfjsx": "^6.5.3",
     "html2canvas": "^1.4.1",
     "jwt-decode": "^4.0.0",

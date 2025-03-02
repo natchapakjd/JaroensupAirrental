@@ -4,6 +4,7 @@ import { useParams, useNavigate } from "react-router-dom";
 import { MapContainer, TileLayer, Marker, useMapEvents } from "react-leaflet";
 import "leaflet/dist/leaflet.css";
 import Searchbox from "../../components/Searchbox";
+import BackButtonEdit from "../../components/BackButtonEdit";
 
 const translations = {
   en: {
@@ -89,7 +90,7 @@ const EditTask = () => {
     //     console.error("Error fetching products:", error);
     //   }
     // };
-    
+
     // Fetch users
     const fetchUsers = async () => {
       try {
@@ -160,11 +161,11 @@ const EditTask = () => {
         task_type_id: taskTypeId,
         description,
         appointment_date: appointmentDate,
-        address : address,
+        address: address,
         quantity_used: quantityUsed,
         // product_id: productId,
         user_id: userId,
-        latitude: latitude ,
+        latitude: latitude,
         longitude: longitude,
         status_id: statusId, // Use statusId in the request
         rental_start_date: startDate,
@@ -186,151 +187,180 @@ const EditTask = () => {
   };
 
   return (
-    <div className="p-8 rounded-lg shadow-lg w-full mx-auto font-prompt">
-    <h2 className="text-2xl mb-4">{translations[language].taskType}</h2>
-    <form onSubmit={handleSubmit} className="space-y-4">
-      <div>
-        <label className="block mb-2">{translations[language].taskType}</label>
-        <select
-          value={taskTypeId}
-          onChange={(e) => setTaskTypeId(e.target.value)}
-          className="border p-2 w-full"
-          required
-        >
-          <option value="">Select Task Type</option>
-          {taskTypes.map((taskType) => (
-            <option key={taskType.task_type_id} value={taskType.task_type_id}>
-              {taskType.type_name}
-            </option>
-          ))}
-        </select>
-      </div>
-      <div>
-        <label className="block mb-2">{translations[language].description}</label>
-        <textarea
-          value={description}
-          onChange={(e) => setDescription(e.target.value)}
-          className="border p-2 w-full"
-          required
-        />
-      </div>
-
-      <div>
-        <label className="block mb-2">{translations[language].status}</label>
-        <select
-          value={statusId}
-          onChange={(e) => setStatusId(e.target.value)}
-          className="border p-2 w-full"
-          required
-        >
-          <option value="">Select Status</option>
-          {statuses.map((status,index) => (
-            <option key={index+1} value={status.status_id}>
-           {index+1}. {status.status_name}
-            </option>
-          ))}
-        </select>
-      </div>
-      <div>
-        <label className="block text-gray-700">{translations[language].rentalStartDate}</label>
-        <input
-          type="datetime-local"
-          name="appointment_date"
-          value={appointmentDate}
-          onChange={(e) => {
-            const fullDate = e.target.value;
-            setAppointmentDate(fullDate);
-            setStartDate(fullDate.split("T")[0]); // Extract date part only
-          }}
-          min={new Date().toISOString().slice(0, 16)} // Prevent past dates
-          required
-          className="input input-bordered w-full"
-        />
-      </div>
-      <div>
-        <label className="block mb-2">{translations[language].rentalEndDate}</label>
-        <input
-          type="date"
-          value={finishDate}
-          onChange={(e) => setFinishDate(e.target.value)}
-          className="border p-2 w-full"
-          min={new Date().toISOString().split("T")[0]} // Ensure correct format for "date"
-        />
-      </div>
-      <div>
-        <label className="block mb-2">{translations[language].address}</label>
-        <input
-          type="text"
-          value={address}
-          onChange={(e) => setAddress(e.target.value)}
-          className="border p-2 w-full"
-        />
-      </div>
-      <div>
-          <label className="block mb-2">{translations[language].quantityUsed}</label>
-          <input
-            type="number"
-            value={quantityUsed}
-            onChange={(e) => setQuantityUsed(e.target.value)}
-            className="border p-2 w-full"
-          />
+    <div className="container mx-auto p-8">
+      <div className="p-8 rounded-lg shadow-lg w-full mx-auto font-prompt">
+        <div className="flex  w-full my-2">
+          <BackButtonEdit />
+          <h1 className="text-2xl font-semibold mx-2">
+            {translations[language].taskType}
+          </h1>
         </div>
-
-        <div>
-          <label className="block mb-2">{translations[language].user}</label>
-          <select
-            value={userId}
-            onChange={(e) => setUserId(e.target.value)}
-            className="border p-2 w-full"
-          >
-            <option value="">Select User</option>
-            {users.map((user,index) => (
-              <option key={index+1} value={user.user_id}>
-               {index+1}. {user.firstname} - {user.lastname}
-              </option>
-            ))}
-          </select>
-        </div>
-
-        <div className="mb-4">
-          <p
-            type="button"
-            onClick={toggleMap}
-            className="cursor-pointer underline text-right text-xl mt-2"
-          >
-            {showMap ? translations[language].hideMap : translations[language].selectLocation}
-          </p>
-        </div>
-
-        {showMap && (
-          <div className="my-4">
-            <MapContainer
-              center={[13.7563, 100.5018]} // Default center (Bangkok)
-              zoom={13}
-              style={{ height: "400px", width: "100%" }}
+        <form onSubmit={handleSubmit} className="space-y-4">
+          <div>
+            <label className="block mb-2">
+              {translations[language].taskType}
+            </label>
+            <select
+              value={taskTypeId}
+              onChange={(e) => setTaskTypeId(e.target.value)}
+              className="border p-2 w-full"
+              required
             >
-              <TileLayer
-                url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
-                attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
-              />
-              <MapClickHandler
-                setLatitude={setLatitude}
-                setLongitude={setLongitude}
-              />
-              {latitude && longitude && (
-                <Marker position={[latitude, longitude]} />
-              )}
-              <div className="absolute top-0 left-12 z-[1000]">
-                <Searchbox onSelectLocation={handleLocationSelect} />
-              </div>
-            </MapContainer>
+              <option value="">Select Task Type</option>
+              {taskTypes.map((taskType) => (
+                <option
+                  key={taskType.task_type_id}
+                  value={taskType.task_type_id}
+                >
+                  {taskType.type_name}
+                </option>
+              ))}
+            </select>
           </div>
-        )}
+          <div>
+            <label className="block mb-2">
+              {translations[language].description}
+            </label>
+            <textarea
+              value={description}
+              onChange={(e) => setDescription(e.target.value)}
+              className="border p-2 w-full"
+              required
+            />
+          </div>
 
-        <button type="submit" className="bg-blue text-white py-2 px-4 rounded">
-        {translations[language].saveTask}
-        </button>
-      </form>
+          <div>
+            <label className="block mb-2">
+              {translations[language].status}
+            </label>
+            <select
+              value={statusId}
+              onChange={(e) => setStatusId(e.target.value)}
+              className="border p-2 w-full"
+              required
+            >
+              <option value="">Select Status</option>
+              {statuses.map((status, index) => (
+                <option key={index + 1} value={status.status_id}>
+                  {index + 1}. {status.status_name}
+                </option>
+              ))}
+            </select>
+          </div>
+          <div>
+            <label className="block text-gray-700">
+              {translations[language].rentalStartDate}
+            </label>
+            <input
+              type="datetime-local"
+              name="appointment_date"
+              value={appointmentDate}
+              onChange={(e) => {
+                const fullDate = e.target.value;
+                setAppointmentDate(fullDate);
+                setStartDate(fullDate.split("T")[0]); // Extract date part only
+              }}
+              min={new Date().toISOString().slice(0, 16)} // Prevent past dates
+              required
+              className="input input-bordered w-full"
+            />
+          </div>
+          <div>
+            <label className="block mb-2">
+              {translations[language].rentalEndDate}
+            </label>
+            <input
+              type="date"
+              value={finishDate}
+              onChange={(e) => setFinishDate(e.target.value)}
+              className="border p-2 w-full"
+              min={new Date().toISOString().split("T")[0]} // Ensure correct format for "date"
+            />
+          </div>
+          <div>
+            <label className="block mb-2">
+              {translations[language].address}
+            </label>
+            <input
+              type="text"
+              value={address}
+              onChange={(e) => setAddress(e.target.value)}
+              className="border p-2 w-full"
+            />
+          </div>
+          <div>
+            <label className="block mb-2">
+              {translations[language].quantityUsed}
+            </label>
+            <input
+              type="number"
+              value={quantityUsed}
+              onChange={(e) => setQuantityUsed(e.target.value)}
+              className="border p-2 w-full"
+            />
+          </div>
+
+          <div>
+            <label className="block mb-2">{translations[language].user}</label>
+            <select
+              value={userId}
+              onChange={(e) => setUserId(e.target.value)}
+              className="border p-2 w-full"
+            >
+              <option value="">Select User</option>
+              {users.map((user, index) => (
+                <option key={index + 1} value={user.user_id}>
+                  {index + 1}. {user.firstname} - {user.lastname}
+                </option>
+              ))}
+            </select>
+          </div>
+
+          <div className="mb-4">
+            <p
+              type="button"
+              onClick={toggleMap}
+              className="cursor-pointer underline text-right text-xl mt-2"
+            >
+              {showMap
+                ? translations[language].hideMap
+                : translations[language].selectLocation}
+            </p>
+          </div>
+
+          {showMap && (
+            <div className="my-4">
+              <MapContainer
+                center={[13.7563, 100.5018]} // Default center (Bangkok)
+                zoom={13}
+                style={{ height: "400px", width: "100%" }}
+              >
+                <TileLayer
+                  url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+                  attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+                />
+                <MapClickHandler
+                  setLatitude={setLatitude}
+                  setLongitude={setLongitude}
+                />
+                {latitude && longitude && (
+                  <Marker position={[latitude, longitude]} />
+                )}
+                <div className="absolute top-0 left-12 z-[1000]">
+                  <Searchbox onSelectLocation={handleLocationSelect} />
+                </div>
+              </MapContainer>
+            </div>
+          )}
+
+          <button
+            type="submit"
+            className="bg-blue text-white py-2 px-4 rounded"
+          >
+            {translations[language].saveTask}
+          </button>
+        </form>
+      </div>
     </div>
   );
 };

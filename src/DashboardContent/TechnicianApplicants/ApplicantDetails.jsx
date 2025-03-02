@@ -4,6 +4,7 @@ import axios from "axios";
 import { useParams, useNavigate } from "react-router-dom";
 import Loading from "../../components/Loading";
 import { Link } from "react-router-dom";
+import BackButtonEdit from "../../components/BackButtonEdit";
 
 const ApplicantDetails = () => {
   const { id } = useParams();
@@ -50,8 +51,10 @@ const ApplicantDetails = () => {
   return (
     <div className="p-8 rounded-lg shadow-lg w-full mx-auto font-prompt h-full bg-base-200">
       <div className="flex justify-between items-center mb-4">
-        <h1 className="text-3xl font-bold mb-6 text-center">{text.title}</h1>
-
+        <div className="flex  w-full my-2">
+          {/* <BackButtonEdit /> */}
+          <h1 className="text-2xl font-semibold mx-2">{text.title} </h1>
+        </div>
         <Link to={`/dashboard/applicants/edit/${id}`}>
           <button className="btn bg-blue text-white hover:bg-blue">
             {text.editApplicant}
@@ -63,25 +66,41 @@ const ApplicantDetails = () => {
         <h2 className="text-2xl font-semibold mb-4">{text.personalInfo}</h2>
         <ul className="list-disc list-inside">
           <li>
-            <strong>{language === "en" ? "Name:" : "ชื่อ:"}</strong> {applicant.first_name} {applicant.last_name}
+            <strong>{language === "en" ? "Name:" : "ชื่อ:"}</strong>{" "}
+            {applicant.first_name} {applicant.last_name}
           </li>
           <li>
-            <strong>{language === "en" ? "Date of Birth:" : "วันเกิด:"}</strong> {new Date(applicant.date_of_birth).toLocaleDateString(language === "en" ? "en-GB" : "th-TH")}
+            <strong>{language === "en" ? "Date of Birth:" : "วันเกิด:"}</strong>{" "}
+            {new Date(applicant.date_of_birth).toLocaleDateString(
+              language === "en" ? "en-GB" : "th-TH"
+            )}
           </li>
           <li>
-            <strong>{language === "en" ? "Email:" : "อีเมล:"}</strong> {applicant.email}
+            <strong>{language === "en" ? "Email:" : "อีเมล:"}</strong>{" "}
+            {applicant.email}
           </li>
           <li>
-            <strong>{language === "en" ? "Position Applied:" : "ตำแหน่งที่สมัคร:"}</strong> {applicant.position_applied}
+            <strong>
+              {language === "en" ? "Position Applied:" : "ตำแหน่งที่สมัคร:"}
+            </strong>{" "}
+            {applicant.position_applied}
           </li>
           <li>
-            <strong>{language === "en" ? "Status:" : "สถานะ:"}</strong> {applicant.status_name}
+            <strong>{language === "en" ? "Status:" : "สถานะ:"}</strong>{" "}
+            {applicant.status_name}
           </li>
           <li>
-            <strong>{language === "en" ? "Application Date:" : "วันที่สมัคร:"}</strong> {new Date(applicant.application_date).toLocaleDateString(language === "en" ? "en-GB" : "th-TH")}
+            <strong>
+              {language === "en" ? "Application Date:" : "วันที่สมัคร:"}
+            </strong>{" "}
+            {new Date(applicant.application_date).toLocaleDateString(
+              language === "en" ? "en-GB" : "th-TH"
+            )}
           </li>
           <li>
-            <strong>{language === "en" ? "Notes:" : "หมายเหตุ:"}</strong> {applicant.notes || (language === "en" ? "No notes" : "ไม่มีหมายเหตุ")}
+            <strong>{language === "en" ? "Notes:" : "หมายเหตุ:"}</strong>{" "}
+            {applicant.notes ||
+              (language === "en" ? "No notes" : "ไม่มีหมายเหตุ")}
           </li>
         </ul>
       </div>

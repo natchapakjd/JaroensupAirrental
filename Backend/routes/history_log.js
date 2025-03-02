@@ -42,6 +42,60 @@ router.get('/task-log-paging', (req, res) => {
   });
 });
 
+router.get('/v2/task-log-paging/:id', async (req, res) => {
+  const id = req.params.id;
+  const page = parseInt(req.query.page) || 1;
+  const limit = parseInt(req.query.limit) || 10;
+  const offset = (page - 1) * limit;
+
+  try {
+    // นับเฉพาะ task_log ที่เกี่ยวข้องกับ user_id
+    const countQuery = `
+      SELECT COUNT(*) as total 
+      FROM task_log tl
+      JOIN tasks t ON tl.task_id = t.task_id
+      WHERE t.user_id = ?
+    `;
+    
+    const countResult = await new Promise((resolve, reject) => {
+      db.query(countQuery, [id], (err, results) => {
+        if (err) reject(err);
+        else resolve(results);
+      });
+    });
+
+    const totalLogs = countResult[0].total;
+
+    const dataQuery = `
+      SELECT tl.*, t.*, tt.*, u.firstname, u.lastname 
+      FROM task_log tl
+      JOIN tasks t ON tl.task_id = t.task_id
+      JOIN tasktypes tt ON t.task_type_id = tt.task_type_id
+      JOIN users u ON t.user_id = u.user_id
+      WHERE t.user_id = ?
+      LIMIT ? OFFSET ?
+    `;
+
+    const dataResult = await new Promise((resolve, reject) => {
+      db.query(dataQuery, [id, limit, offset], (err, results) => {
+        if (err) reject(err);
+        else resolve(results);
+      });
+    });
+
+    res.json({
+      total: totalLogs,
+      page,
+      limit,
+      taskLogs: dataResult,
+    });
+
+  } catch (err) {
+    console.error('Error fetching task logs:', err);
+    res.status(500).json({ error: 'Failed to fetch task logs' });
+  }
+});
+
 router.get('/adminLogs-paging', (req, res) => {
   const { page = 1, limit = 10 } = req.query; // Default to page 1 and limit 10 if not provided
   const offset = (page - 1) * limit;
@@ -118,6 +172,19 @@ router.post('/task-log', (req, res) => {
       return res.status(500).json({ error: 'Failed to create task log' });
     }
     res.status(201).json({ log_id: result.insertId, message: 'Task log created successfully' });
+  });
+});
+
+router.post('/adminLog', (req, res) => {
+  const { admin_id, action } = req.body;
+  const query = 'INSERT INTO adminlogs (admin_id, action) VALUES (?, ?)';
+  
+  db.query(query, [admin_id, action], (err, result) => {
+    if (err) {
+      console.error('Error creating admin log:', err);
+      return res.status(500).json({ error: 'Failed to create admin log' });
+    }
+    res.status(201).json({ log_id: result.insertId, message: 'admin log created successfully' });
   });
 });
 

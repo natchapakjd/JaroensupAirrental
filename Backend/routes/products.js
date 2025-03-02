@@ -256,7 +256,7 @@ router.post(
 
 router.put("/product/:id", upload.single("product_image"), async (req, res) => {
   const id = req.params.id;
-
+  console.log(req.body)
   const {
     name,
     description,

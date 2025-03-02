@@ -181,4 +181,60 @@ router.get("/review/:taskId/:userId", (req, res) => {
   });
 });
 
+router.get("/reviews-paging/:tech_id", (req, res) => {
+  const techId = req.params.tech_id;
+  const page = parseInt(req.query.page) || 1;
+  const pageSize = parseInt(req.query.pageSize) || 10;
+  const offset = (page - 1) * pageSize;
+
+  // Query to fetch reviews with pagination for a specific tech_id
+  const query = `
+    SELECT 
+      rv.*, 
+      u.firstname AS member_firstname, 
+      u.lastname AS member_lastname, 
+      t.tech_id, 
+      u2.firstname AS tech_firstname, 
+      u2.lastname AS tech_lastname
+    FROM 
+      reviews rv
+    JOIN 
+      users u ON rv.user_id = u.user_id  -- Join to get the reviewer's name
+    JOIN 
+      technicians t ON rv.tech_id = t.tech_id  -- Join to get the technician's tech_id
+    JOIN 
+      users u2 ON t.user_id = u2.user_id
+    WHERE rv.tech_id = ?
+    LIMIT ? OFFSET ?
+  `;
+
+  // Query to get the total count of reviews for the specific tech_id
+  const countQuery = "SELECT COUNT(*) AS totalCount FROM reviews WHERE tech_id = ?";
+
+  db.query(countQuery, [techId], (err, countResult) => {
+    if (err) {
+      console.error("Error fetching total count: " + err);
+      return res.status(500).json({ error: "Failed to fetch reviews count" });
+    }
+
+    const totalCount = countResult[0].totalCount;
+    const totalPages = Math.ceil(totalCount / pageSize);
+
+    // Now, fetch the reviews with pagination
+    db.query(query, [techId, pageSize, offset], (err, result) => {
+      if (err) {
+        console.error("Error fetching reviews: " + err);
+        return res.status(500).json({ error: "Failed to fetch reviews" });
+      }
+
+      res.json({
+        data: result,
+        totalPages: totalPages,
+        currentPage: page,
+        totalCount: totalCount,
+      });
+    });
+  });
+});
+
 module.exports = router;

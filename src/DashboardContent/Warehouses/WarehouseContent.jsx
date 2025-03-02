@@ -3,6 +3,9 @@ import axios from "axios";
 import Swal from "sweetalert2";
 import { Link } from "react-router-dom"; // Import Link for navigation
 import Loading from "../../components/Loading";
+import { jwtDecode } from "jwt-decode";
+import Cookies from "universal-cookie";
+
 const translations = {
   th: {
     warehouses: "คลังสินค้า",
@@ -57,6 +60,11 @@ const WarehouseContent = () => {
   const [language, setLanguage] = useState(
     localStorage.getItem("language") || "en"
   );
+  const cookies = new Cookies();
+  const token = cookies.get("authToken");
+  const decodedToken = jwtDecode(token);
+  const tech_id = decodedToken.technicianId;
+  const user_id = decodedToken.id;
 
   useEffect(() => {
     const interval = setInterval(() => {
@@ -139,98 +147,100 @@ const WarehouseContent = () => {
   if (error) return <p>{error}</p>;
 
   return (
-    <div className="p-8 rounded-lg shadow-lg w-full mx-auto h-screen">
-      <div className="flex justify-between items-center mb-6">
-        <h1 className="text-2xl font-semibold">
-          {translations[language].warehouses}
-        </h1>
-        <Link to="/dashboard/warehouses/add">
-          <button className="btn bg-blue text-white hover:bg-blue">
-            {translations[language].addWarehouse}
-          </button>
-        </Link>
-      </div>
-
-      {/* Search Box */}
-      <div className="mb-4">
-        <input
-          type="text"
-          value={searchTerm}
-          onChange={handleSearch}
-          placeholder={translations[language].searchPlaceholder}
-          className="input input-bordered w-full"
-        />
-      </div>
-
-      {filteredWarehouses.length === 0 ? (
-        <p>{translations[language].noWarehouses}</p>
-      ) : (
-        <div className="overflow-x-auto">
-          <table className="table w-full border-collapse border border-gray-300 text-center font-prompt">
-            <thead className="sticky-top bg-gray-200">
-              <tr>
-                <th>{translations[language].id}</th>
-                <th>{translations[language].location}</th>
-                <th>{translations[language].capacity}</th>
-                <th>{translations[language].actions}</th>
-              </tr>
-            </thead>
-            <tbody>
-              {filteredWarehouses.map((warehouse, index) => (
-                <tr key={index + 1}>
-                  <td className="border p-2 text-center">{index + 1}</td>
-                  <td className="border p-2 text-center">
-                    {warehouse.location}
-                  </td>
-                  <td className="border p-2 text-center">
-                    {warehouse.capacity}
-                  </td>
-                  <td className="border p-2 text-center">
-                    <Link
-                      to={`/dashboard/warehouses/edit/${warehouse.warehouse_id}`}
-                    >
-                      <button className="btn btn-success text-white mr-2">
-                        {translations[language].edit}
-                      </button>
-                    </Link>
-                    <button
-                      onClick={() => handleDelete(warehouse.warehouse_id)}
-                      className="btn btn-error text-white"
-                    >
-                      {translations[language].delete}
-                    </button>
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
+    <div className="container mx-auto p-8">
+      <div className="p-8 rounded-lg shadow-lg w-full mx-auto h-full">
+        <div className="flex justify-between items-center mb-6">
+          <h1 className="text-2xl font-semibold">
+            {translations[language].warehouses}
+          </h1>
+          <Link to="/dashboard/warehouses/add">
+            <button className="btn bg-blue text-white hover:bg-blue">
+              {translations[language].addWarehouse}
+            </button>
+          </Link>
         </div>
-      )}
 
-      {/* Pagination Controls */}
-      <div className="flex justify-between mt-4">
-        <p
-          onClick={() => setCurrentPage(currentPage - 1)}
-          disabled={currentPage <= 1}
-          className={`cursor-pointer ${
-            currentPage === 1 ? "text-gray-400" : "text-black"
-          }`}
-        >
-          {translations[language].previous}
-        </p>
-        <span className="flex items-center justify-center">
-          {translations[language].page} {currentPage}{" "}
-          {translations[language].of} {totalPages}
-        </span>
-        <p
-          onClick={() => setCurrentPage(currentPage + 1)}
-          disabled={currentPage >= totalPages}
-          className={`cursor-pointer ${
-            currentPage === totalPages ? "text-gray-400" : "text-black"
-          }`}
-        >
-          {translations[language].next}
-        </p>
+        {/* Search Box */}
+        <div className="mb-4">
+          <input
+            type="text"
+            value={searchTerm}
+            onChange={handleSearch}
+            placeholder={translations[language].searchPlaceholder}
+            className="input input-bordered w-full"
+          />
+        </div>
+
+        {filteredWarehouses.length === 0 ? (
+          <p>{translations[language].noWarehouses}</p>
+        ) : (
+          <div className="overflow-x-auto">
+            <table className="table w-full border-collapse border border-gray-300 text-center font-prompt">
+              <thead className="sticky-top bg-gray-200">
+                <tr>
+                  <th>{translations[language].id}</th>
+                  <th>{translations[language].location}</th>
+                  <th>{translations[language].capacity}</th>
+                  <th>{translations[language].actions}</th>
+                </tr>
+              </thead>
+              <tbody>
+                {filteredWarehouses.map((warehouse, index) => (
+                  <tr key={index + 1}>
+                    <td className="border p-2 text-center">{index + 1}</td>
+                    <td className="border p-2 text-center">
+                      {warehouse.location}
+                    </td>
+                    <td className="border p-2 text-center">
+                      {warehouse.capacity}
+                    </td>
+                    <td className="border p-2 text-center">
+                      <Link
+                        to={`/dashboard/warehouses/edit/${warehouse.warehouse_id}`}
+                      >
+                        <button className="btn btn-success text-white mr-2">
+                          {translations[language].edit}
+                        </button>
+                      </Link>
+                      <button
+                        onClick={() => handleDelete(warehouse.warehouse_id)}
+                        className="btn btn-error text-white"
+                      >
+                        {translations[language].delete}
+                      </button>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        )}
+
+        {/* Pagination Controls */}
+        <div className="flex justify-between mt-4">
+          <p
+            onClick={() => setCurrentPage(currentPage - 1)}
+            disabled={currentPage <= 1}
+            className={`cursor-pointer ${
+              currentPage === 1 ? "text-gray-400" : "text-black"
+            }`}
+          >
+            {translations[language].previous}
+          </p>
+          <span className="flex items-center justify-center">
+            {translations[language].page} {currentPage}{" "}
+            {translations[language].of} {totalPages}
+          </span>
+          <p
+            onClick={() => setCurrentPage(currentPage + 1)}
+            disabled={currentPage >= totalPages}
+            className={`cursor-pointer ${
+              currentPage === totalPages ? "text-gray-400" : "text-black"
+            }`}
+          >
+            {translations[language].next}
+          </p>
+        </div>
       </div>
     </div>
   );

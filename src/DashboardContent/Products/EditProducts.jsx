@@ -2,11 +2,13 @@ import React, { useState, useEffect } from "react";
 import axios from "axios";
 import Swal from "sweetalert2";
 import { useNavigate, useParams } from "react-router-dom";
-
+import Cookies from "universal-cookie";
+import { jwtDecode } from "jwt-decode";
+import BackButtonEdit from "../../components/BackButtonEdit";
 const EditProduct = () => {
   const navigate = useNavigate();
   const { productId } = useParams();
-  
+
   const [formData, setFormData] = useState({
     name: "",
     description: "",
@@ -23,8 +25,14 @@ const EditProduct = () => {
   const [categories, setCategories] = useState([]);
   const [warehouses, setWarehouses] = useState([]);
   const [productTypes, setProductTypes] = useState([]);
-
-  const [currentLanguage, setCurrentLanguage] = useState(localStorage.getItem("language")||'th');
+  const [originalProduct, setOriginalProduct] = useState([]);
+  const [currentLanguage, setCurrentLanguage] = useState(
+    localStorage.getItem("language") || "th"
+  );
+  const cookies = new Cookies();
+  const token = cookies.get("authToken");
+  const decodedToken = jwtDecode(token);
+  const user_id = decodedToken.id;
 
   // Translation object
   const translation = {
@@ -72,6 +80,7 @@ const EditProduct = () => {
           ...response.data[0],
           product_image: null, // Reset image input
         });
+        setOriginalProduct(response.data[0]);
       } catch (error) {
         console.error("Error fetching product data:", error);
       }
@@ -124,7 +133,21 @@ const EditProduct = () => {
           },
         }
       );
+      let changes = [];
+      Object.keys(formData).forEach((key) => {
+        if (originalProduct[key] !== formData[key]) {
+          changes.push(`${key}: ${originalProduct[key]} -> ${formData[key]}`);
+        }
+      });
 
+      // ถ้ามีการเปลี่ยนแปลง ให้เพิ่ม log
+      if (changes.length > 0) {
+        const action = `แก้ไขสินค้า${productId}: ${changes.join(", ")}`;
+        await axios.post(`${import.meta.env.VITE_SERVER_URL}/adminlog`, {
+          admin_id: user_id,
+          action: action,
+        });
+      }
       if (response.status === 200) {
         Swal.fire({
           title: translation[currentLanguage].successMessage,
@@ -144,195 +167,220 @@ const EditProduct = () => {
   };
 
   return (
-    <div className="bg-white p-8 rounded-lg shadow-lg w-full mx-auto h-full">
-      <h1 className="text-2xl font-semibold mb-6">{translation[currentLanguage].title}</h1>
-      <form onSubmit={handleSubmit} className="text-sm font-medium">
-        <div className="mb-4">
-          <label htmlFor="name" className="block text-gray-700 font-medium mb-2">
-            {translation[currentLanguage].name}:
-          </label>
-          <input
-            type="text"
-            id="name"
-            name="name"
-            value={formData.name}
-            onChange={handleChange}
-            className="w-full p-2 border border-gray-300 rounded-lg"
-            required
-          />
+    <div className="container mx-auto p-8">
+      <div className="bg-white p-8 rounded-lg shadow-lg w-full mx-auto h-full">
+        <div className="flex  w-full">
+          <BackButtonEdit />
+          <h1 className="text-2xl font-semibold mx-2">
+            {translation[currentLanguage].title}
+          </h1>
         </div>
 
-        <div className="mb-4">
-          <label
-            htmlFor="description"
-            className="block text-gray-700 font-medium mb-2"
-          >
-            {translation[currentLanguage].description}:
-          </label>
-          <textarea
-            id="description"
-            name="description"
-            value={formData.description}
-            onChange={handleChange}
-            rows="4"
-            className="w-full p-2 border border-gray-300 rounded-lg"
-            required
-          />
-        </div>
+        <form onSubmit={handleSubmit} className="text-sm font-medium">
+          <div className="mb-4">
+            <label
+              htmlFor="name"
+              className="block text-gray-700 font-medium mb-2"
+            >
+              {translation[currentLanguage].name}:
+            </label>
+            <input
+              type="text"
+              id="name"
+              name="name"
+              value={formData.name}
+              onChange={handleChange}
+              className="w-full p-2 border border-gray-300 rounded-lg"
+              required
+            />
+          </div>
 
-        <div className="mb-4">
-          <label htmlFor="price" className="block text-gray-700 font-medium mb-2">
-            {translation[currentLanguage].price}:
-          </label>
-          <input
-            type="number"
-            id="price"
-            name="price"
-            value={formData.price}
-            onChange={handleChange}
-            className="w-full p-2 border border-gray-300 rounded-lg"
-            required
-            step="0.01"
-          />
-        </div>
+          <div className="mb-4">
+            <label
+              htmlFor="description"
+              className="block text-gray-700 font-medium mb-2"
+            >
+              {translation[currentLanguage].description}:
+            </label>
+            <textarea
+              id="description"
+              name="description"
+              value={formData.description}
+              onChange={handleChange}
+              rows="4"
+              className="w-full p-2 border border-gray-300 rounded-lg"
+              required
+            />
+          </div>
 
-        <div className="mb-4">
-          <label
-            htmlFor="stock_quantity"
-            className="block text-gray-700 font-medium mb-2"
-          >
-            {translation[currentLanguage].stock_quantity}:
-          </label>
-          <input
-            type="number"
-            id="stock_quantity"
-            name="stock_quantity"
-            value={formData.stock_quantity}
-            onChange={handleChange}
-            className="w-full p-2 border border-gray-300 rounded-lg"
-            required
-          />
-        </div>
+          <div className="mb-4">
+            <label
+              htmlFor="price"
+              className="block text-gray-700 font-medium mb-2"
+            >
+              {translation[currentLanguage].price}:
+            </label>
+            <input
+              type="number"
+              id="price"
+              name="price"
+              value={formData.price}
+              onChange={handleChange}
+              className="w-full p-2 border border-gray-300 rounded-lg"
+              required
+              step="0.01"
+            />
+          </div>
 
-        <div className="mb-4">
-          <label
-            htmlFor="brand_id"
-            className="block text-gray-700 font-medium mb-2"
-          >
-            {translation[currentLanguage].brand}:
-          </label>
-          <select
-            id="brand_id"
-            name="brand_id"
-            value={formData.brand_id}
-            onChange={handleChange}
-            className="w-full p-2 border border-gray-300 rounded-lg"
-            required
-          >
-            <option value="">{translation[currentLanguage].selectOption}</option>
-            {brands.map((brand) => (
-              <option key={brand.brand_id} value={brand.brand_id}>
-                {brand.name}
+          <div className="mb-4">
+            <label
+              htmlFor="stock_quantity"
+              className="block text-gray-700 font-medium mb-2"
+            >
+              {translation[currentLanguage].stock_quantity}:
+            </label>
+            <input
+              type="number"
+              id="stock_quantity"
+              name="stock_quantity"
+              value={formData.stock_quantity}
+              onChange={handleChange}
+              className="w-full p-2 border border-gray-300 rounded-lg"
+              required
+            />
+          </div>
+
+          <div className="mb-4">
+            <label
+              htmlFor="brand_id"
+              className="block text-gray-700 font-medium mb-2"
+            >
+              {translation[currentLanguage].brand}:
+            </label>
+            <select
+              id="brand_id"
+              name="brand_id"
+              value={formData.brand_id}
+              onChange={handleChange}
+              className="w-full p-2 border border-gray-300 rounded-lg"
+              required
+            >
+              <option value="">
+                {translation[currentLanguage].selectOption}
               </option>
-            ))}
-          </select>
-        </div>
+              {brands.map((brand) => (
+                <option key={brand.brand_id} value={brand.brand_id}>
+                  {brand.name}
+                </option>
+              ))}
+            </select>
+          </div>
 
-        <div className="mb-4">
-          <label
-            htmlFor="category_id"
-            className="block text-gray-700 font-medium mb-2"
-          >
-            {translation[currentLanguage].category}:
-          </label>
-          <select
-            id="category_id"
-            name="category_id"
-            value={formData.category_id}
-            onChange={handleChange}
-            className="w-full p-2 border border-gray-300 rounded-lg"
-            required
-          >
-            <option value="">{translation[currentLanguage].selectOption}</option>
-            {categories.map((category) => (
-              <option key={category.category_id} value={category.category_id}>
-                {category.name}
+          <div className="mb-4">
+            <label
+              htmlFor="category_id"
+              className="block text-gray-700 font-medium mb-2"
+            >
+              {translation[currentLanguage].category}:
+            </label>
+            <select
+              id="category_id"
+              name="category_id"
+              value={formData.category_id}
+              onChange={handleChange}
+              className="w-full p-2 border border-gray-300 rounded-lg"
+              required
+            >
+              <option value="">
+                {translation[currentLanguage].selectOption}
               </option>
-            ))}
-          </select>
-        </div>
+              {categories.map((category) => (
+                <option key={category.category_id} value={category.category_id}>
+                  {category.name}
+                </option>
+              ))}
+            </select>
+          </div>
 
-        <div className="mb-4">
-          <label
-            htmlFor="warehouse_id"
-            className="block text-gray-700 font-medium mb-2"
-          >
-            {translation[currentLanguage].warehouse}:
-          </label>
-          <select
-            id="warehouse_id"
-            name="warehouse_id"
-            value={formData.warehouse_id}
-            onChange={handleChange}
-            className="w-full p-2 border border-gray-300 rounded-lg"
-            required
-          >
-            <option value="">{translation[currentLanguage].selectOption}</option>
-            {warehouses.map((warehouse) => (
-              <option key={warehouse.warehouse_id} value={warehouse.warehouse_id}>
-                {warehouse.location}
+          <div className="mb-4">
+            <label
+              htmlFor="warehouse_id"
+              className="block text-gray-700 font-medium mb-2"
+            >
+              {translation[currentLanguage].warehouse}:
+            </label>
+            <select
+              id="warehouse_id"
+              name="warehouse_id"
+              value={formData.warehouse_id}
+              onChange={handleChange}
+              className="w-full p-2 border border-gray-300 rounded-lg"
+              required
+            >
+              <option value="">
+                {translation[currentLanguage].selectOption}
               </option>
-            ))}
-          </select>
-        </div>
+              {warehouses.map((warehouse) => (
+                <option
+                  key={warehouse.warehouse_id}
+                  value={warehouse.warehouse_id}
+                >
+                  {warehouse.location}
+                </option>
+              ))}
+            </select>
+          </div>
 
-        <div className="mb-4">
-          <label
-            htmlFor="product_type_id"
-            className="block text-gray-700 font-medium mb-2"
-          >
-            {translation[currentLanguage].product_type}:
-          </label>
-          <select
-            id="product_type_id"
-            name="product_type_id"
-            value={formData.product_type_id}
-            onChange={handleChange}
-            className="w-full p-2 border border-gray-300 rounded-lg"
-            required
-          >
-            <option value="">{translation[currentLanguage].selectOption}</option>
-            {productTypes.map((type) => (
-              <option key={type.product_type_id} value={type.product_type_id}>
-                {type.product_type_name}
+          <div className="mb-4">
+            <label
+              htmlFor="product_type_id"
+              className="block text-gray-700 font-medium mb-2"
+            >
+              {translation[currentLanguage].product_type}:
+            </label>
+            <select
+              id="product_type_id"
+              name="product_type_id"
+              value={formData.product_type_id}
+              onChange={handleChange}
+              className="w-full p-2 border border-gray-300 rounded-lg"
+              required
+            >
+              <option value="">
+                {translation[currentLanguage].selectOption}
               </option>
-            ))}
-          </select>
-        </div>
+              {productTypes.map((type) => (
+                <option key={type.product_type_id} value={type.product_type_id}>
+                  {type.product_type_name}
+                </option>
+              ))}
+            </select>
+          </div>
 
-        <div className="mb-4">
-          <label
-            htmlFor="product_image"
-            className="block text-gray-700 font-medium mb-2"
+          <div className="mb-4">
+            <label
+              htmlFor="product_image"
+              className="block text-gray-700 font-medium mb-2"
+            >
+              {translation[currentLanguage].product_image}:
+            </label>
+            <input
+              type="file"
+              id="product_image"
+              name="product_image"
+              onChange={handleChange}
+              className="file-input file-input-bordered w-full h-10"
+            />
+          </div>
+
+          <button
+            type="submit"
+            className="text-white bg-blue hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm w-full sm:w-auto px-5 py-2.5 text-center"
           >
-            {translation[currentLanguage].product_image}:
-          </label>
-          <input
-            type="file"
-            id="product_image"
-            name="product_image"
-            onChange={handleChange}
-            className="file-input file-input-bordered w-full h-10"
-          />
-        </div>
-
-        <button
-          type="submit"
-          className="text-white bg-blue hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm w-full sm:w-auto px-5 py-2.5 text-center"
-        >
-          {translation[currentLanguage].submit}
-        </button>
-      </form>
+            {translation[currentLanguage].submit}
+          </button>
+        </form>
+      </div>
     </div>
   );
 };

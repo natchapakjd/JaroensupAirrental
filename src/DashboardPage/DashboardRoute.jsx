@@ -71,7 +71,7 @@ const DashboardRoute = () => {
   return (
       <div className='flex'>
         <Sidebar />
-        <div className='w-full bg-gray-50 font-prompt'>
+        <div className='w-full bg-gray-50 font-prompt '>
           <Header/>
           <Routes>
             <Route path="*" element={<PageNotFound />} />

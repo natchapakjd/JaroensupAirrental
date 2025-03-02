@@ -2,7 +2,10 @@ import React, { useState, useEffect } from "react";
 import axios from "axios";
 import Swal from "sweetalert2";
 import { useNavigate } from "react-router-dom";
-
+import { jwtDecode } from "jwt-decode";
+import Cookies from "universal-cookie";
+import BackButton from "../../components/BackButton";
+import BackButtonEdit from "../../components/BackButtonEdit";
 const translations = {
   en: {
     addAreacal: "Add Area Calculation",
@@ -40,7 +43,10 @@ const AddAreacal = () => {
   const [language, setLanguage] = useState(localStorage.getItem("language") || "en");
   const navigate = useNavigate();
   const apiUrl = import.meta.env.VITE_SERVER_URL;
-
+ const cookies = new Cookies();
+    const token = cookies.get("authToken");
+    const decodedToken = jwtDecode(token);
+    const user_id = decodedToken.id;
   useEffect(() => {
     const interval = setInterval(() => {
       const currentLanguage = localStorage.getItem("language") || "en";
@@ -95,6 +101,10 @@ const AddAreacal = () => {
         ...formData,
         room_type_id: selectedRoomType,
       });
+      await axios.post(`${import.meta.env.VITE_SERVER_URL}/adminLog`, {
+        admin_id: user_id,  // กำหนด admin_id ของผู้ดูแลระบบ
+        action: `เพิ่มพื้นที่ใหม่โดยไม่คำนวณพื้นที่(ชื่อสถานที่): ${formData.location_name}`,  // บันทึกชื่อสินค้า
+      });
       Swal.fire("Success", "Area calculation added successfully!", "success");
       navigate("/dashboard/area-cal/content");
     } catch (error) {
@@ -104,8 +114,12 @@ const AddAreacal = () => {
   };
 
   return (
-    <div className="p-6 max-w-lg mx-auto bg-white rounded-lg shadow-md my-5">
-      <h2 className="text-2xl font-semibold mb-4">{translations[language].addAreacal}</h2>
+    <div className="container mx-auto p-8">
+      <div className="p-6 mx-auto bg-white rounded-lg shadow-md my-5">
+      <div className="flex  w-full my-2">
+          <BackButtonEdit />
+          <h1 className="text-2xl font-semibold mx-2">{translations[language].addAreacal} </h1>
+        </div>
       <form onSubmit={handleSubmit}>
         <select
           name="assignment_id"
@@ -175,6 +189,8 @@ const AddAreacal = () => {
         </button>
       </form>
     </div>
+</div>
+    
   );
 };
 

@@ -3,6 +3,7 @@ import axios from "axios";
 import Swal from "sweetalert2";
 import { useNavigate, useParams } from "react-router-dom";
 import Loading from "../../components/Loading";
+import BackButtonEdit from "../../components/BackButtonEdit";
 
 // Translations object
 const translations = {
@@ -47,13 +48,17 @@ const EditAreacal = () => {
     air_20ton_used: "",
   });
   const [loading, setLoading] = useState(true);
-  const [language, setLanguage] = useState(localStorage.getItem("language") || "en");
+  const [language, setLanguage] = useState(
+    localStorage.getItem("language") || "en"
+  );
   const [areaTypes, setAreaTypes] = useState([]);
 
   useEffect(() => {
     const fetchAreaTypes = async () => {
       try {
-        const res = await axios.get(`${import.meta.env.VITE_SERVER_URL}/area-types`);
+        const res = await axios.get(
+          `${import.meta.env.VITE_SERVER_URL}/area-types`
+        );
         setAreaTypes(res.data);
       } catch (err) {
         console.error("Error fetching area types:", err);
@@ -127,118 +132,125 @@ const EditAreacal = () => {
   }
 
   return (
-    <div className="mx-auto p-6 bg-white shadow rounded-lg font-prompt">
-      <h2 className="text-2xl font-bold mb-4">{translations[language].editAreacal}</h2>
-      <form onSubmit={handleSubmit} className="space-y-4">
-        <label className="block">
-          {translations[language].locationName}
-          <input
-            type="text"
-            name="location_name"
-            value={formData.location_name}
-            onChange={handleChange}
-            className="w-full p-2 border rounded"
-            required
-          />
-        </label>
+    <div className="container mx-auto p-8">
+      <div className="mx-auto p-6 bg-white shadow rounded-lg font-prompt">
+        <div className="flex  w-full my-2">
+          <BackButtonEdit />
+          <h1 className="text-2xl font-semibold mx-2">
+            {translations[language].editAreacal}
+          </h1>
+        </div>
+        <form onSubmit={handleSubmit} className="space-y-4">
+          <label className="block">
+            {translations[language].locationName}
+            <input
+              type="text"
+              name="location_name"
+              value={formData.location_name}
+              onChange={handleChange}
+              className="w-full p-2 border rounded"
+              required
+            />
+          </label>
 
-        <label className="block">
-          {translations[language].width} (m)
-          <input
-            type="number"
-            name="width"
-            value={formData.width}
-            onChange={handleChange}
-            className="w-full p-2 border rounded"
-            required
-          />
-        </label>
+          <label className="block">
+            {translations[language].width} (m)
+            <input
+              type="number"
+              name="width"
+              value={formData.width}
+              onChange={handleChange}
+              className="w-full p-2 border rounded"
+              required
+            />
+          </label>
 
-        <label className="block">
-          {translations[language].height} (m)
-          <input
-            type="number"
-            name="height"
-            value={formData.height}
-            onChange={handleChange}
-            className="w-full p-2 border rounded"
-            required
-          />
-        </label>
+          <label className="block">
+            {translations[language].height} (m)
+            <input
+              type="number"
+              name="height"
+              value={formData.height}
+              onChange={handleChange}
+              className="w-full p-2 border rounded"
+              required
+            />
+          </label>
 
-        <label className="block">
-          {translations[language].airConditionersNeeded}
-          <input
-            type="number"
-            name="air_conditioners_needed"
-            value={formData.air_conditioners_needed}
-            onChange={handleChange}
-            className="w-full p-2 border rounded"
-            required
-          />
-        </label>
+          <label className="block">
+            {translations[language].airConditionersNeeded}
+            <input
+              type="number"
+              name="air_conditioners_needed"
+              value={formData.air_conditioners_needed}
+              onChange={handleChange}
+              className="w-full p-2 border rounded"
+              required
+            />
+          </label>
 
-        <label className="block">
-          {translations[language].fiveTonUsed}
-          <input
-            type="number"
-            name="air_5ton_used"
-            value={formData.air_5ton_used}
-            onChange={handleChange}
-            className="w-full p-2 border rounded"
-            required
-          />
-        </label>
+          <label className="block">
+            {translations[language].fiveTonUsed}
+            <input
+              type="number"
+              name="air_5ton_used"
+              value={formData.air_5ton_used}
+              onChange={handleChange}
+              className="w-full p-2 border rounded"
+              required
+            />
+          </label>
 
-        <label className="block">
-          {translations[language].tenTonUsed}
-          <input
-            type="number"
-            name="air_10ton_used"
-            value={formData.air_10ton_used}
-            onChange={handleChange}
-            className="w-full p-2 border rounded"
-            required
-          />
-        </label>
+          <label className="block">
+            {translations[language].tenTonUsed}
+            <input
+              type="number"
+              name="air_10ton_used"
+              value={formData.air_10ton_used}
+              onChange={handleChange}
+              className="w-full p-2 border rounded"
+              required
+            />
+          </label>
 
-        <label className="block">
-          {translations[language].twentyTonUsed}
-          <input
-            type="number"
-            name="air_20ton_used"
-            value={formData.air_20ton_used}
-            onChange={handleChange}
-            className="w-full p-2 border rounded"
-            required
-          />
-        </label>
+          <label className="block">
+            {translations[language].twentyTonUsed}
+            <input
+              type="number"
+              name="air_20ton_used"
+              value={formData.air_20ton_used}
+              onChange={handleChange}
+              className="w-full p-2 border rounded"
+              required
+            />
+          </label>
 
-        <label className="block">
-          {translations[language].areaType}
-          <select
-            name="area_type"
-            value={formData.area_type}
-            onChange={handleChange}
-            className="w-full p-2 border rounded"
-            required
+          <label className="block">
+            {translations[language].areaType}
+            <select
+              name="area_type"
+              value={formData.area_type}
+              onChange={handleChange}
+              className="w-full p-2 border rounded"
+              required
+            >
+              <option value="">Select an area type</option>
+              {areaTypes.map((type, index) => (
+                <option key={index + 1} value={type.id}>
+                  {index + 1} {type.room_name}
+                </option>
+              ))}
+            </select>
+          </label>
+
+          <button
+            type="submit"
+            className="w-full bg-blue text-white py-2 rounded hover:bg-blue"
           >
-            <option value="">Select an area type</option>
-            {areaTypes.map((type,index) => (
-              <option key={index+1} value={type.id}>
-                {index+1} {type.room_name}
-              </option>
-            ))}
-          </select>
-        </label>
-
-        <button
-          type="submit"
-          className="w-full bg-blue text-white py-2 rounded hover:bg-blue"
-        >
-          {translations[language].submit}
-        </button>
-      </form>
+            {translations[language].submit}
+          </button>
+        </form>
+      </div>
     </div>
   );
 };

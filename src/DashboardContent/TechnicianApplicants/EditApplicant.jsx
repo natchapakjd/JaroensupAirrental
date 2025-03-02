@@ -4,6 +4,7 @@ import Swal from "sweetalert2";
 import { useParams } from "react-router-dom";
 import Loading from "../../components/Loading";
 import { useNavigate } from "react-router-dom";
+import BackButtonEdit from "../../components/BackButtonEdit";
 
 const translations = {
   en: {
@@ -26,8 +27,8 @@ const translations = {
     additional_image: "Additional Documents",
     editApplicantLabel: "Edit Applicant",
     statusLabel: "Status",
-    interviewDateLabel: "interview date"
-    
+    interviewDateLabel: "interview date",
+
     // Add other translations here
   },
   th: {
@@ -50,7 +51,7 @@ const translations = {
     additional_image: "เอกสารเพิ่มเติม",
     editApplicantLabel: "แก้ไขผู้สมัคร",
     statusLabel: "สถานะ",
-    interviewDateLabel: "วันสัมภาษณ์"
+    interviewDateLabel: "วันสัมภาษณ์",
 
     // Add other translations here
   },
@@ -79,7 +80,9 @@ const EditApplicant = () => {
   const navigate = useNavigate(); // for navigation
   const [loading, setLoading] = useState(true); // เพิ่มสถานะการโหลด
   const [statuses, setStatuses] = useState([]);
-  const [language,setLanguage] = useState(localStorage.getItem('language')||'th')
+  const [language, setLanguage] = useState(
+    localStorage.getItem("language") || "th"
+  );
 
   useEffect(() => {
     const fetchApplicantData = async () => {
@@ -177,11 +180,10 @@ const EditApplicant = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     if (!validateForm()) {
-        return;
+      return;
     }
     const formData = new FormData();
 
-   
     // Append form data
     for (const key in applicant) {
       formData.append(key, applicant[key]);
@@ -218,139 +220,163 @@ const EditApplicant = () => {
     return <Loading />;
   }
   return (
-    <div className="mx-auto p-8 bg-white rounded-lg shadow-md font-prompt">
-      <h2 className="text-2xl font-semibold  mb-6 text-left">
-        {translations[language].editApplicantLabel}
-      </h2>
-      <form onSubmit={handleSubmit}>
-        <div className="grid grid-cols-1 gap-4">
-          {/* First Name and Last Name */}
-          <div className="grid grid-cols-2 gap-4">
+    <div className="container mx-auto p-8">
+      {" "}
+      <div className="mx-auto p-8 bg-white rounded-lg shadow-md font-prompt">
+        <div className="flex  w-full my-2">
+          <BackButtonEdit />
+          <h1 className="text-2xl font-semibold mx-2">
+            {translations[language].editApplicantLabel}
+          </h1>
+        </div>
+        <form onSubmit={handleSubmit}>
+          <div className="grid grid-cols-1 gap-4">
+            {/* First Name and Last Name */}
+            <div className="grid grid-cols-2 gap-4">
+              <div>
+                <label className="label">
+                  {translations[language].firstNameLabel}
+                </label>
+                <input
+                  type="text"
+                  name="first_name"
+                  value={applicant.first_name}
+                  onChange={handleChange}
+                  className="input input-bordered w-full"
+                  required
+                />
+              </div>
+              <div>
+                <label className="label">
+                  {translations[language].lastNameLabel}
+                </label>
+                <input
+                  type="text"
+                  name="last_name"
+                  value={applicant.last_name}
+                  onChange={handleChange}
+                  className="input input-bordered w-full"
+                  required
+                />
+              </div>
+            </div>
+
+            {/* Date of Birth, Address, Email */}
+            <div className="grid grid-cols-2 gap-4">
+              <div>
+                <label className="label">
+                  {translations[language].birthDateLabel}
+                </label>
+                <input
+                  type="date"
+                  name="date_of_birth"
+                  value={applicant.date_of_birth}
+                  onChange={handleChange}
+                  className="input input-bordered w-full"
+                  max={new Date().toISOString().split("T")[0]}
+                  min={
+                    new Date(
+                      new Date().setFullYear(new Date().getFullYear() - 18) // คำนวณวันที่อย่างน้อย 18 ปีที่แล้ว
+                    )
+                      .toISOString()
+                      .split("T")[0]
+                  } // ตั้ง min เป็น 18 ปีที่แล้ว
+                  required
+                />
+              </div>
+
+              <div>
+                <label className="label">
+                  {translations[language].emailLabel}
+                </label>
+                <input
+                  type="email"
+                  name="email"
+                  value={applicant.email}
+                  onChange={handleChange}
+                  className="input input-bordered w-full"
+                  required
+                />
+              </div>
+            </div>
+
+            {/* Phone Number and Position Applied */}
+            <div className="grid grid-cols-2 gap-4">
+              <div>
+                <label className="label">
+                  {translations[language].phoneLabel}
+                </label>
+                <input
+                  type="tel"
+                  name="phone_number"
+                  value={applicant.phone_number}
+                  onChange={handleChange}
+                  className="input input-bordered w-full"
+                  required
+                />
+              </div>
+              <div>
+                <label className="label">
+                  {translations[language].positionLabel}
+                </label>
+                <select
+                  name="position_applied"
+                  value={applicant.position_applied}
+                  onChange={handleChange}
+                  className="select select-bordered w-full"
+                  required
+                >
+                  <option value="" disabled>
+                    Select Position
+                  </option>
+                  <option value="maintenance">ช่างซ่อมบำรุง</option>
+                  <option value="installation">ช่างติดตั้ง</option>
+                </select>
+              </div>
+            </div>
+
+            {/* Interview Date and Status */}
+            <div className="grid grid-cols-2 gap-4">
+              <div>
+                <label className="label">
+                  {translations[language].interviewDateLabel}
+                </label>
+                <input
+                  type="date"
+                  name="interview_date"
+                  value={applicant.interview_date}
+                  onChange={handleChange}
+                  className="input input-bordered w-full"
+                />
+              </div>
+              <div>
+                <label className="label">
+                  {translations[language].statusLabel}
+                </label>
+                <select
+                  name="status_id"
+                  value={applicant.status_id}
+                  onChange={handleChange}
+                  className="select select-bordered w-full"
+                  required
+                >
+                  <option value="" disabled>
+                    Select Status
+                  </option>
+                  {Array.isArray(statuses) &&
+                    statuses.map((status) => (
+                      <option key={status.status_id} value={status.status_id}>
+                        {status.status_name}
+                      </option>
+                    ))}
+                </select>
+              </div>
+            </div>
+
             <div>
-              <label className="label">{translations[language].firstNameLabel}
+              <label className="label">
+                {translations[language].addressLabel}
               </label>
-              <input
-                type="text"
-                name="first_name"
-                value={applicant.first_name}
-                onChange={handleChange}
-                className="input input-bordered w-full"
-                required
-              />
-            </div>
-            <div>
-              <label className="label">{translations[language].lastNameLabel}</label>
-              <input
-                type="text"
-                name="last_name"
-                value={applicant.last_name}
-                onChange={handleChange}
-                className="input input-bordered w-full"
-                required
-              />
-            </div>
-          </div>
-
-          {/* Date of Birth, Address, Email */}
-          <div className="grid grid-cols-2 gap-4">
-            <div>
-              <label className="label">{translations[language].birthDateLabel}</label>
-              <input
-                type="date"
-                name="date_of_birth"
-                value={applicant.date_of_birth}
-                onChange={handleChange}
-                className="input input-bordered w-full"
-                max={new Date().toISOString().split("T")[0]}
-                min={new Date(
-                  new Date().setFullYear(new Date().getFullYear() - 18) // คำนวณวันที่อย่างน้อย 18 ปีที่แล้ว
-                )
-                  .toISOString()
-                  .split("T")[0]} // ตั้ง min เป็น 18 ปีที่แล้ว
-                required
-              />
-            </div>
-            
-            <div>
-              <label className="label">{translations[language].emailLabel}</label>
-              <input
-                type="email"
-                name="email"
-                value={applicant.email}
-                onChange={handleChange}
-                className="input input-bordered w-full"
-                required
-              />
-            </div>
-          </div>
-
-          {/* Phone Number and Position Applied */}
-          <div className="grid grid-cols-2 gap-4">
-            <div>
-              <label className="label">{translations[language].phoneLabel}</label>
-              <input
-                type="tel"
-                name="phone_number"
-                value={applicant.phone_number}
-                onChange={handleChange}
-                className="input input-bordered w-full"
-                required
-              />
-            </div>
-            <div>
-              <label className="label">{translations[language].positionLabel}</label>
-              <select
-                name="position_applied"
-                value={applicant.position_applied}
-                onChange={handleChange}
-                className="select select-bordered w-full"
-                required
-              >
-                <option value="" disabled>
-                  Select Position
-                </option>
-                <option value="maintenance">ช่างซ่อมบำรุง</option>
-                <option value="installation">ช่างติดตั้ง</option>
-              </select>
-            </div>
-          </div>
-
-          {/* Interview Date and Status */}
-          <div className="grid grid-cols-2 gap-4">
-            <div>
-              <label className="label">{translations[language].interviewDateLabel}</label>
-              <input
-                type="date"
-                name="interview_date"
-                value={applicant.interview_date}
-                onChange={handleChange}
-                className="input input-bordered w-full"
-              />
-            </div>
-            <div>
-              <label className="label">{translations[language].statusLabel}</label>
-              <select
-                name="status_id"
-                value={applicant.status_id}
-                onChange={handleChange}
-                className="select select-bordered w-full"
-                required
-              >
-                <option value="" disabled>
-                  Select Status
-                </option>
-                {Array.isArray(statuses) &&
-                  statuses.map((status) => (
-                    <option key={status.status_id} value={status.status_id}>
-                      {status.status_name}
-                    </option>
-                  ))}
-              </select>
-            </div>
-          </div>
-
-          <div>
-              <label className="label">{translations[language].addressLabel}</label>
               <textarea
                 name="address"
                 value={applicant.address}
@@ -359,70 +385,81 @@ const EditApplicant = () => {
                 required
               />
             </div>
-          {/* Notes */}
-          <div>
-            <label className="label">{translations[language].notesLabel}</label>
-            <textarea
-              name="notes"
-              value={applicant.notes}
-              onChange={handleChange}
-              className="textarea textarea-bordered w-full"
-            ></textarea>
-          </div>
+            {/* Notes */}
+            <div>
+              <label className="label">
+                {translations[language].notesLabel}
+              </label>
+              <textarea
+                name="notes"
+                value={applicant.notes}
+                onChange={handleChange}
+                className="textarea textarea-bordered w-full"
+              ></textarea>
+            </div>
 
-          {/* Image Uploads */}
-          <div className="grid grid-cols-2 gap-4">
-            <div>
-              <label className="label">{translations[language].id_card_image}</label>
-              <input
-                type="file"
-                name="id_card_image"
-                onChange={handleFileChange}
-                className="file-input file-input-bordered w-full"
-              />
+            {/* Image Uploads */}
+            <div className="grid grid-cols-2 gap-4">
+              <div>
+                <label className="label">
+                  {translations[language].id_card_image}
+                </label>
+                <input
+                  type="file"
+                  name="id_card_image"
+                  onChange={handleFileChange}
+                  className="file-input file-input-bordered w-full"
+                />
+              </div>
+              <div>
+                <label className="label">
+                  {translations[language].driver_license_image}
+                </label>
+                <input
+                  type="file"
+                  name="driver_license_image"
+                  onChange={handleFileChange}
+                  className="file-input file-input-bordered w-full"
+                />
+              </div>
             </div>
-            <div>
-              <label className="label">{translations[language].driver_license_image}</label>
-              <input
-                type="file"
-                name="driver_license_image"
-                onChange={handleFileChange}
-                className="file-input file-input-bordered w-full"
-              />
-            </div>
-          </div>
 
-          <div className="grid grid-cols-2 gap-4">
-            <div>
-              <label className="label">{translations[language].criminal_record_image}</label>
-              <input
-                type="file"
-                name="criminal_record_image"
-                onChange={handleFileChange}
-                className="file-input file-input-bordered w-full"
-              />
+            <div className="grid grid-cols-2 gap-4">
+              <div>
+                <label className="label">
+                  {translations[language].criminal_record_image}
+                </label>
+                <input
+                  type="file"
+                  name="criminal_record_image"
+                  onChange={handleFileChange}
+                  className="file-input file-input-bordered w-full"
+                />
+              </div>
+              <div>
+                <label className="label">
+                  {translations[language].statusLabel}
+                </label>
+                <input
+                  type="file"
+                  name="additional_image"
+                  onChange={handleFileChange}
+                  className="file-input file-input-bordered w-full"
+                />
+              </div>
             </div>
-            <div>
-              <label className="label">{translations[language].statusLabel}</label>
-              <input
-                type="file"
-                name="additional_image"
-                onChange={handleFileChange}
-                className="file-input file-input-bordered w-full"
-              />
-            </div>
-          </div>
 
-          <div className="mt-4">
-            <button
-              type="submit"
-              className="btn bg-blue hover:bg-blue text-white w-full"
-            >
-              {translations[language].submitButton}
-            </button>
+            <div className="mt-4">
+              <button
+                type="submit"
+                className="btn bg-blue hover:bg-blue text-white w-full"
+              >
+                {translations[language].submitButton}
+              </button>
+            </div>
           </div>
-        </div>
-      </form>
+        </form>
+      </div>
     </div>
   );
 };

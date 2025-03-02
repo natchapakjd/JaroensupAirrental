@@ -3,7 +3,8 @@ import axios from "axios";
 import Swal from "sweetalert2";
 import { Link } from "react-router-dom";
 import Loading from "../../components/Loading";
-
+import { jwtDecode } from "jwt-decode";
+import Cookies from "universal-cookie";
 // Translation strings for localization
 const translations = {
   en: {
@@ -47,7 +48,7 @@ const translations = {
     next: "ถัดไป",
     page: "หน้า",
     of: "จาก",
-  }
+  },
 };
 
 const CategoryContent = () => {
@@ -59,7 +60,11 @@ const CategoryContent = () => {
   const [totalPages, setTotalPages] = useState(1);
   const [rowsPerPage] = useState(10);
   const [searchTerm, setSearchTerm] = useState("");
-
+  const cookies = new Cookies();
+  const token = cookies.get("authToken");
+  const decodedToken = jwtDecode(token);
+  const tech_id = decodedToken.technicianId;
+  const user_id = decodedToken.id;
   // Get the language from localStorage, defaulting to 'en'
   const language = localStorage.getItem("language") || "en";
   const t = translations[language]; // Get the translation for the selected language
@@ -134,91 +139,95 @@ const CategoryContent = () => {
   if (error) return <p>{error}</p>;
 
   return (
-    <div className="p-8 rounded-lg shadow-lg w-full mx-auto h-screen font-prompt">
-      <div className="flex justify-between items-center mb-6">
-        <h1 className="text-2xl font-semibold">{t.heading}</h1>
-        <Link to="/dashboard/categories/add">
-          <button className="btn bg-blue text-white hover:bg-blue">
-            {t.addButton}
-          </button>
-        </Link>
-      </div>
-      <div className="mb-4">
-        <input
-          type="text"
-          value={searchTerm}
-          onChange={handleSearch}
-          placeholder={t.searchPlaceholder}
-          className="input input-bordered w-full"
-        />
-      </div>
-      {filteredCategories.length === 0 ? (
-        <p>{t.noCategories}</p>
-      ) : (
-        <>
-          <div className="overflow-x-auto">
-            <table className="table w-full border-collapse border border-gray-300 text-center">
-              <thead className="sticky-top bg-gray-200">
-                <tr>
-                  <th className="border p-2 text-center">{t.id}</th>
-                  <th className="border p-2 text-center">{t.name}</th>
-                  <th className="border p-2 text-center">{t.description}</th>
-                  <th className="border p-2 text-center">{t.actions}</th>
-                </tr>
-              </thead>
-              <tbody>
-                {filteredCategories.map((category, index) => (
-                  <tr key={index + 1}>
-                    <td className="border p-2 text-center">{index + 1}</td>
-                    <td className="border p-2 text-center">{category.name}</td>
-                    <td className="border p-2 text-center">
-                      {category.description}
-                    </td>
-                    <td className="border p-2 text-center">
-                      <Link
-                        to={`/dashboard/categories/edit/${category.category_id}`}
-                      >
-                        <button className="btn btn-success text-white mr-2">
-                          {t.editButton}
-                        </button>
-                      </Link>
-                      <button
-                        onClick={() => handleDelete(category.category_id)}
-                        className="btn btn-error text-white"
-                      >
-                        {t.deleteButton}
-                      </button>
-                    </td>
+    <div className="container mx-auto p-8">
+      <div className="p-8 rounded-lg shadow-lg w-full mx-auto  font-prompt">
+        <div className="flex justify-between items-center mb-6">
+          <h1 className="text-2xl font-semibold">{t.heading}</h1>
+          <Link to="/dashboard/categories/add">
+            <button className="btn bg-blue text-white hover:bg-blue">
+              {t.addButton}
+            </button>
+          </Link>
+        </div>
+        <div className="mb-4">
+          <input
+            type="text"
+            value={searchTerm}
+            onChange={handleSearch}
+            placeholder={t.searchPlaceholder}
+            className="input input-bordered w-full"
+          />
+        </div>
+        {filteredCategories.length === 0 ? (
+          <p>{t.noCategories}</p>
+        ) : (
+          <>
+            <div className="overflow-x-auto">
+              <table className="table w-full border-collapse border border-gray-300 text-center">
+                <thead className="sticky-top bg-gray-200">
+                  <tr>
+                    <th className="border p-2 text-center">{t.id}</th>
+                    <th className="border p-2 text-center">{t.name}</th>
+                    <th className="border p-2 text-center">{t.description}</th>
+                    <th className="border p-2 text-center">{t.actions}</th>
                   </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
+                </thead>
+                <tbody>
+                  {filteredCategories.map((category, index) => (
+                    <tr key={index + 1}>
+                      <td className="border p-2 text-center">{index + 1}</td>
+                      <td className="border p-2 text-center">
+                        {category.name}
+                      </td>
+                      <td className="border p-2 text-center">
+                        {category.description}
+                      </td>
+                      <td className="border p-2 text-center">
+                        <Link
+                          to={`/dashboard/categories/edit/${category.category_id}`}
+                        >
+                          <button className="btn btn-success text-white mr-2">
+                            {t.editButton}
+                          </button>
+                        </Link>
+                        <button
+                          onClick={() => handleDelete(category.category_id)}
+                          className="btn btn-error text-white"
+                        >
+                          {t.deleteButton}
+                        </button>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
 
-          {/* Pagination Controls */}
-          <div className="flex justify-between mt-4">
-            <p
-              onClick={() => handlePageChange(currentPage - 1)}
-              className={`cursor-pointer ${
-                currentPage === 1 ? "text-gray-400" : "text-black"
-              }`}
-            >
-              {t.previous}
-            </p>
-            <span className="flex items-center justify-center">
-              {t.page} {currentPage} {t.of} {totalPages}
-            </span>
-            <p
-              onClick={() => handlePageChange(currentPage + 1)}
-              className={`cursor-pointer ${
-                currentPage === totalPages ? "text-gray-400" : "text-black"
-              }`}
-            >
-              {t.next}
-            </p>
-          </div>
-        </>
-      )}
+            {/* Pagination Controls */}
+            <div className="flex justify-between mt-4">
+              <p
+                onClick={() => handlePageChange(currentPage - 1)}
+                className={`cursor-pointer ${
+                  currentPage === 1 ? "text-gray-400" : "text-black"
+                }`}
+              >
+                {t.previous}
+              </p>
+              <span className="flex items-center justify-center">
+                {t.page} {currentPage} {t.of} {totalPages}
+              </span>
+              <p
+                onClick={() => handlePageChange(currentPage + 1)}
+                className={`cursor-pointer ${
+                  currentPage === totalPages ? "text-gray-400" : "text-black"
+                }`}
+              >
+                {t.next}
+              </p>
+            </div>
+          </>
+        )}
+      </div>
     </div>
   );
 };

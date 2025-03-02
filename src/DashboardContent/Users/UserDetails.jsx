@@ -3,12 +3,15 @@ import axios from "axios";
 import { useParams } from "react-router-dom";
 import { format } from "date-fns"; // สำหรับจัดรูปแบบวันที่
 import Loading from "../../components/Loading";
+import BackButtonEdit from "../../components/BackButtonEdit";
 
 const UserDetails = () => {
   const { userId } = useParams();
   const [user, setUser] = useState(null);
   const [error, setError] = useState(null);
-  const [language, setLanguage] = useState(localStorage.getItem('language')||'th'); // State for language selection
+  const [language, setLanguage] = useState(
+    localStorage.getItem("language") || "th"
+  ); // State for language selection
 
   const translations = {
     en: {
@@ -92,158 +95,168 @@ const UserDetails = () => {
   }
 
   return (
-    <div className="container mx-auto p-8 bg-white shadow-xl rounded-lg mt-8">
-      <h1 className="text-3xl font-bold mb-6 text-gray-800">
-        {user.username}'s {translations[language].details}
-      </h1>
-
-      {/* Profile Section */}
-      <div className="flex flex-col md:flex-row items-center mb-8">
-        {user.image_url ? (
-          <img
-            src={`${user.image_url}`}
-            alt={`${user.username}'s profile`}
-            className="w-32 h-32 rounded-full mr-6 shadow-lg"
-          />
-        ) : (
-          <div className="w-32 h-32 mr-6 bg-gray-300 rounded-full shadow-lg"></div>
-        )}
-        <div className="text-center md:text-left">
-          <p className="text-lg font-medium text-gray-700">
-            <strong>{translations[language].username}:</strong> {user.username}
-          </p>
-          <p className="text-lg font-medium text-gray-700">
-            <strong>{translations[language].firstname}:</strong> {user.firstname}
-          </p>
-          <p className="text-lg font-medium text-gray-700">
-            <strong>{translations[language].lastname}:</strong> {user.lastname}
-          </p>
-          <p className="text-lg font-medium text-gray-700">
-            <strong>{translations[language].email}:</strong> {user.email}
-          </p>
-          <p className="text-lg font-medium text-gray-700">
-            <strong>{translations[language].phone}:</strong> {user.phone}
-          </p>
+    <div className="container mx-auto p-8">
+      <div className="container mx-auto p-8 bg-white shadow-xl rounded-lg ">
+        <div className="flex w-full">
+          <BackButtonEdit />
+          <h1 className="text-2xl font-semibold mx-2">
+            {user.username}'s {translations[language].details}
+          </h1>
         </div>
-      </div>
 
-      {/* User Details */}
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-        <div>
-          <p className="text-lg font-medium text-gray-700">
-            <strong>{translations[language].age}:</strong> {user.age}
-          </p>
-          <p className="text-lg font-medium text-gray-700">
-            <strong>{translations[language].address}:</strong> {user.address}
-          </p>
-          <p className="text-lg font-medium text-gray-700">
-            <strong>{translations[language].gender}:</strong> {user.gender_name}
-          </p>
-        </div>
-        <div>
-          <p className="text-lg font-medium text-gray-700">
-            <strong>{translations[language].dateOfBirth}:</strong>{" "}
-            {format(new Date(user.date_of_birth), "MM/dd/yyyy")}
-          </p>
-          <p className="text-lg font-medium text-gray-700">
-            <strong>{translations[language].role}:</strong> {user.role_name}
-          </p>
-          <p className="text-lg font-medium text-gray-700">
-            <strong>{translations[language].createdAt}:</strong>{" "}
-            {format(new Date(user.created_at), "MM/dd/yyyy")}
-          </p>
-        </div>
-      </div>
-
-      {user.role_id === 2 && user.technician_details && (
-        <div className="mt-8 bg-gray-100 p-6 rounded-lg shadow">
-          <h2 className="text-2xl font-bold text-gray-800 mb-4">
-            {translations[language].technicianDetails}
-          </h2>
-          <p className="text-lg font-medium text-gray-700">
-            <strong>{translations[language].nationality}:</strong>{" "}
-            {user.technician_details.nationality}
-          </p>
-          <p className="text-lg font-medium text-gray-700">
-            <strong>{translations[language].isOutsource}:</strong>{" "}
-            {user.technician_details.isOutsource.data[0] === 1
-              ? "Yes"
-              : "No"}
-          </p>
-          <p className="text-lg font-medium text-gray-700">
-            <strong>{translations[language].workExperience}:</strong>{" "}
-            {user.technician_details.work_experience}
-          </p>
-          <p className="text-lg font-medium text-gray-700">
-            <strong>{translations[language].specialSkills}:</strong>{" "}
-            {user.technician_details.special_skills}
-          </p>
-          <p className="text-lg font-medium text-gray-700">
-            <strong>{translations[language].backgroundCheckStatus}:</strong>{" "}
-            {user.technician_details.background_check_status}
-          </p>
-          <p className="text-lg font-medium text-gray-700">
-            <strong>{translations[language].startDate}:</strong>{" "}
-            {format(new Date(user.technician_details.start_date), "MM/dd/yyyy")}
-          </p>
-          <p className="text-lg font-medium text-gray-700">
-            <strong>{translations[language].statusId}:</strong>{" "}
-            {user.technician_details.status_id}
-          </p>
-
-          {/* Display images if available */}
-          <div className="mt-6">
-            {user.technician_details.id_card_image_url && (
-              <div className="mb-4">
-                <h3 className="text-lg font-bold text-gray-700">
-                  {translations[language].idCard}:
-                </h3>
-                <img
-                  src={user.technician_details.id_card_image_url}
-                  alt="ID Card"
-                  className="w-full max-w-md rounded-lg shadow-md"
-                />
-              </div>
-            )}
-            {user.technician_details.driver_license_image_url && (
-              <div className="mb-4">
-                <h3 className="text-lg font-bold text-gray-700">
-                  {translations[language].driversLicense}:
-                </h3>
-                <img
-                  src={user.technician_details.driver_license_image_url}
-                  alt="Driver's License"
-                  className="w-full max-w-md rounded-lg shadow-md"
-                />
-              </div>
-            )}
-            {user.technician_details.criminal_record_image_url && (
-              <div className="mb-4">
-                <h3 className="text-lg font-bold text-gray-700">
-                  {translations[language].criminalRecord}:
-                </h3>
-                <img
-                  src={user.technician_details.criminal_record_image_url}
-                  alt="Criminal Record"
-                  className="w-full max-w-md rounded-lg shadow-md"
-                />
-              </div>
-            )}
-            {user.technician_details.additional_image_url && (
-              <div className="mb-4">
-                <h3 className="text-lg font-bold text-gray-700">
-                  {translations[language].additionalDocument}:
-                </h3>
-                <img
-                  src={user.technician_details.additional_image_url}
-                  alt="Additional Document"
-                  className="w-full max-w-md rounded-lg shadow-md"
-                />
-              </div>
-            )}
+        {/* Profile Section */}
+        <div className="flex flex-col md:flex-row items-center mb-8">
+          {user.image_url ? (
+            <img
+              src={`${user.image_url}`}
+              alt={`${user.username}'s profile`}
+              className="w-32 h-32 rounded-full mr-6 shadow-lg"
+            />
+          ) : (
+            <div className="w-32 h-32 mr-6 bg-gray-300 rounded-full shadow-lg"></div>
+          )}
+          <div className="text-center md:text-left">
+            <p className="text-lg font-medium text-gray-700">
+              <strong>{translations[language].username}:</strong>{" "}
+              {user.username}
+            </p>
+            <p className="text-lg font-medium text-gray-700">
+              <strong>{translations[language].firstname}:</strong>{" "}
+              {user.firstname}
+            </p>
+            <p className="text-lg font-medium text-gray-700">
+              <strong>{translations[language].lastname}:</strong>{" "}
+              {user.lastname}
+            </p>
+            <p className="text-lg font-medium text-gray-700">
+              <strong>{translations[language].email}:</strong> {user.email}
+            </p>
+            <p className="text-lg font-medium text-gray-700">
+              <strong>{translations[language].phone}:</strong> {user.phone}
+            </p>
           </div>
         </div>
-      )}
+
+        {/* User Details */}
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <div>
+            <p className="text-lg font-medium text-gray-700">
+              <strong>{translations[language].age}:</strong> {user.age}
+            </p>
+            <p className="text-lg font-medium text-gray-700">
+              <strong>{translations[language].address}:</strong> {user.address}
+            </p>
+            <p className="text-lg font-medium text-gray-700">
+              <strong>{translations[language].gender}:</strong>{" "}
+              {user.gender_name}
+            </p>
+          </div>
+          <div>
+            <p className="text-lg font-medium text-gray-700">
+              <strong>{translations[language].dateOfBirth}:</strong>{" "}
+              {format(new Date(user.date_of_birth), "MM/dd/yyyy")}
+            </p>
+            <p className="text-lg font-medium text-gray-700">
+              <strong>{translations[language].role}:</strong> {user.role_name}
+            </p>
+            <p className="text-lg font-medium text-gray-700">
+              <strong>{translations[language].createdAt}:</strong>{" "}
+              {format(new Date(user.created_at), "MM/dd/yyyy")}
+            </p>
+          </div>
+        </div>
+
+        {user.role_id === 2 && user.technician_details && (
+          <div className="mt-8 bg-gray-100 p-6 rounded-lg shadow">
+            <h2 className="text-2xl font-bold text-gray-800 mb-4">
+              {translations[language].technicianDetails}
+            </h2>
+            <p className="text-lg font-medium text-gray-700">
+              <strong>{translations[language].nationality}:</strong>{" "}
+              {user.technician_details.nationality}
+            </p>
+            <p className="text-lg font-medium text-gray-700">
+              <strong>{translations[language].isOutsource}:</strong>{" "}
+              {user.technician_details.isOutsource.data[0] === 1 ? "Yes" : "No"}
+            </p>
+            <p className="text-lg font-medium text-gray-700">
+              <strong>{translations[language].workExperience}:</strong>{" "}
+              {user.technician_details.work_experience}
+            </p>
+            <p className="text-lg font-medium text-gray-700">
+              <strong>{translations[language].specialSkills}:</strong>{" "}
+              {user.technician_details.special_skills}
+            </p>
+            <p className="text-lg font-medium text-gray-700">
+              <strong>{translations[language].backgroundCheckStatus}:</strong>{" "}
+              {user.technician_details.background_check_status}
+            </p>
+            <p className="text-lg font-medium text-gray-700">
+              <strong>{translations[language].startDate}:</strong>{" "}
+              {format(
+                new Date(user.technician_details.start_date),
+                "MM/dd/yyyy"
+              )}
+            </p>
+            <p className="text-lg font-medium text-gray-700">
+              <strong>{translations[language].statusId}:</strong>{" "}
+              {user.technician_details.status_id}
+            </p>
+
+            {/* Display images if available */}
+            <div className="mt-6">
+              {user.technician_details.id_card_image_url && (
+                <div className="mb-4">
+                  <h3 className="text-lg font-bold text-gray-700">
+                    {translations[language].idCard}:
+                  </h3>
+                  <img
+                    src={user.technician_details.id_card_image_url}
+                    alt="ID Card"
+                    className="w-full max-w-md rounded-lg shadow-md"
+                  />
+                </div>
+              )}
+              {user.technician_details.driver_license_image_url && (
+                <div className="mb-4">
+                  <h3 className="text-lg font-bold text-gray-700">
+                    {translations[language].driversLicense}:
+                  </h3>
+                  <img
+                    src={user.technician_details.driver_license_image_url}
+                    alt="Driver's License"
+                    className="w-full max-w-md rounded-lg shadow-md"
+                  />
+                </div>
+              )}
+              {user.technician_details.criminal_record_image_url && (
+                <div className="mb-4">
+                  <h3 className="text-lg font-bold text-gray-700">
+                    {translations[language].criminalRecord}:
+                  </h3>
+                  <img
+                    src={user.technician_details.criminal_record_image_url}
+                    alt="Criminal Record"
+                    className="w-full max-w-md rounded-lg shadow-md"
+                  />
+                </div>
+              )}
+              {user.technician_details.additional_image_url && (
+                <div className="mb-4">
+                  <h3 className="text-lg font-bold text-gray-700">
+                    {translations[language].additionalDocument}:
+                  </h3>
+                  <img
+                    src={user.technician_details.additional_image_url}
+                    alt="Additional Document"
+                    className="w-full max-w-md rounded-lg shadow-md"
+                  />
+                </div>
+              )}
+            </div>
+          </div>
+        )}
+      </div>
     </div>
   );
 };

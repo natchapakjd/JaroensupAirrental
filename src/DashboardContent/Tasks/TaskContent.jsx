@@ -212,161 +212,174 @@ const TaskContent = () => {
   };
 
   return (
-    <div className="p-8 rounded-lg shadow-lg w-full mx-auto font-prompt h-full">
-      <div className="flex justify-between items-center mb-4">
-        <h2 className="text-xl font-semibold ">{currentLang.taskList}</h2>
-        <div className="flex gap-2">
-          {role === 3 && (
-            <>
-              <Link to="/dashboard/tasks/add">
-                <button className="btn bg-blue text-white hover:bg-blue">
-                  {currentLang.addTask}
-                </button>
-              </Link>
-              <Link to="/dashboard/tasks/assign">
-                <button className="btn btn-success text-white">
-                  {currentLang.assignTask}
-                </button>
-              </Link>
-            </>
-          )}
+    <div className="container mx-auto p-8">
+      {" "}
+      <div className="p-8 rounded-lg shadow-lg w-full mx-auto font-prompt h-full">
+        <div className="flex justify-between items-center mb-4">
+          <h2 className="text-xl font-semibold ">{currentLang.taskList}</h2>
+          <div className="flex gap-2">
+            {role === 3 && (
+              <>
+                <Link to="/dashboard/tasks/add">
+                  <button className="btn bg-blue text-white hover:bg-blue">
+                    {currentLang.addTask}
+                  </button>
+                </Link>
+                <Link to="/dashboard/tasks/assign">
+                  <button className="btn btn-success text-white">
+                    {currentLang.assignTask}
+                  </button>
+                </Link>
+              </>
+            )}
+          </div>
         </div>
-      </div>
 
-      <div className="flex mb-4 gap-4">
-        <input
-          type="text"
-          placeholder="Search by description or type..."
-          className="input input-bordered w-full"
-          value={searchTerm}
-          onChange={(e) => setSearchTerm(e.target.value)}
-        />
-        <select
-          className="select select-bordered"
-          value={filterStatus}
-          onChange={(e) => setFilterStatus(e.target.value)}
-        >
-          <option value="all">{currentLang.allStatus}</option>
-          {statuses.map((status) => (
-            <option key={status.status_id} value={status.status_name}>
-              {status.status_name}
-            </option>
-          ))}
-        </select>
-      </div>
-      <div className="overflow-x-auto">
-        <table className="table w-full border-collapse border border-gray-300">
-          <thead className="sticky top-0 bg-gray-200">
-            <tr>
-              <th className="border p-2 text-center">{currentLang.id}</th>
-              <th className="border p-2 text-center">{currentLang.type}</th>
-              <th className="border p-2 text-center">
-                {currentLang.description}
-              </th>
-              <th className="border p-2 text-center">{currentLang.dueDate}</th>
-              <th className="border p-2 text-center">{currentLang.dueTime}</th>
-              <th className="border p-2 text-center">{currentLang.status}</th>
-              <th className="border p-2 text-center">{currentLang.actions}</th>
-            </tr>
-          </thead>
-          <tbody>
-            {filteredTasks.length > 0 ? (
-              filteredTasks.map((task, index) => (
-                <tr key={index + 1} className="hover:bg-gray-100">
-                  <td className="border p-2 text-center">{index + 1}</td>
-                  <td className="border p-2 text-center">{task.type_name}</td>
-                  <td className="border p-2 text-center">{task.description}</td>
-                  <td className="border p-2 text-center">
-                    {new Date(task.appointment_date).toLocaleDateString()}
-                  </td>
-                  <td className="border p-2 text-center">
-                    {new Date(task.appointment_date).toLocaleTimeString([], {
-                      hour: "2-digit",
-                      minute: "2-digit",
-                    })}
-                  </td>
-                  <td className="border p-2 text-center">{task.status_name}</td>
-                  <td className="border p-2 text-center">
-                    <div className="flex justify-center gap-2">
-                      {role === 3 && (
-                        <>
-                          {task.status_id !== 4 && task.status_id !== 2 && (
-                            <Link
-                              to={`/dashboard/tasks/approve/${task.task_id}`}
-                            >
+        <div className="flex mb-4 gap-4">
+          <input
+            type="text"
+            placeholder="Search by description or type..."
+            className="input input-bordered w-full"
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
+          />
+          <select
+            className="select select-bordered"
+            value={filterStatus}
+            onChange={(e) => setFilterStatus(e.target.value)}
+          >
+            <option value="all">{currentLang.allStatus}</option>
+            {statuses.map((status) => (
+              <option key={status.status_id} value={status.status_name}>
+                {status.status_name}
+              </option>
+            ))}
+          </select>
+        </div>
+        <div className="overflow-x-auto">
+          <table className="table w-full border-collapse border border-gray-300">
+            <thead className="sticky top-0 bg-gray-200">
+              <tr>
+                <th className="border p-2 text-center">{currentLang.id}</th>
+                <th className="border p-2 text-center">{currentLang.type}</th>
+                <th className="border p-2 text-center">
+                  {currentLang.description}
+                </th>
+                <th className="border p-2 text-center">
+                  {currentLang.dueDate}
+                </th>
+                <th className="border p-2 text-center">
+                  {currentLang.dueTime}
+                </th>
+                <th className="border p-2 text-center">{currentLang.status}</th>
+                <th className="border p-2 text-center">
+                  {currentLang.actions}
+                </th>
+              </tr>
+            </thead>
+            <tbody>
+              {filteredTasks.length > 0 ? (
+                filteredTasks.map((task, index) => (
+                  <tr key={index + 1} className="hover:bg-gray-100">
+                    <td className="border p-2 text-center">{index + 1}</td>
+                    <td className="border p-2 text-center">{task.type_name}</td>
+                    <td className="border p-2 text-center">
+                      {task.description}
+                    </td>
+                    <td className="border p-2 text-center">
+                      {new Date(task.appointment_date).toLocaleDateString()}
+                    </td>
+                    <td className="border p-2 text-center">
+                      {new Date(task.appointment_date).toLocaleTimeString([], {
+                        hour: "2-digit",
+                        minute: "2-digit",
+                      })}
+                    </td>
+                    <td className="border p-2 text-center">
+                      {task.status_name}
+                    </td>
+                    <td className="border p-2 text-center">
+                      <div className="flex justify-center gap-2">
+                        {role === 3 && (
+                          <>
+                            {task.status_id !== 4 && task.status_id !== 2 && (
+                              <Link
+                                to={`/dashboard/tasks/approve/${task.task_id}`}
+                              >
+                                <button className="btn btn-success text-white">
+                                  {currentLang.approve}
+                                </button>
+                              </Link>
+                            )}
+
+                            {quantities[task.task_id] > 0 && (
+                              <button
+                                className="btn btn-success text-white"
+                                onClick={() => handleReturn(task.task_id)}
+                              >
+                                {currentLang.return}
+                              </button>
+                            )}
+                            <Link to={`/dashboard/tasks/edit/${task.task_id}`}>
                               <button className="btn btn-success text-white">
-                                {currentLang.approve}
+                                {currentLang.edit}
                               </button>
                             </Link>
-                          )}
-
-                          {quantities[task.task_id] > 0 && (
                             <button
-                              className="btn btn-success text-white"
-                              onClick={() => handleReturn(task.task_id)}
+                              onClick={() => handleDelete(task.task_id)}
+                              className="btn bg-red-500 text-white hover:bg-red-600"
                             >
-                              {currentLang.return}
+                              {currentLang.delete}
                             </button>
-                          )}
-                          <Link to={`/dashboard/tasks/edit/${task.task_id}`}>
-                            <button className="btn btn-success text-white">
-                              {currentLang.edit}
-                            </button>
-                          </Link>
-                          <button
-                            onClick={() => handleDelete(task.task_id)}
-                            className="btn bg-red-500 text-white hover:bg-red-600"
-                          >
-                            {currentLang.delete}
-                          </button>
-                        </>
-                      )}
-                      <button
-                        onClick={() => handleViewDetails(task.task_id)}
-                        className="btn bg-blue text-white hover:bg-blue"
-                      >
-                        {currentLang.viewDetails}
-                      </button>
-                    </div>
+                          </>
+                        )}
+                        <button
+                          onClick={() => handleViewDetails(task.task_id)}
+                          className="btn bg-blue text-white hover:bg-blue"
+                        >
+                          {currentLang.viewDetails}
+                        </button>
+                      </div>
+                    </td>
+                  </tr>
+                ))
+              ) : (
+                <tr>
+                  <td colSpan="7" className="border p-4 text-center">
+                    {currentLang.noTasksFound}
                   </td>
                 </tr>
-              ))
-            ) : (
-              <tr>
-                <td colSpan="7" className="border p-4 text-center">
-                  {currentLang.noTasksFound}
-                </td>
-              </tr>
-            )}
-          </tbody>
-        </table>
-      </div>
+              )}
+            </tbody>
+          </table>
+        </div>
 
-      <div className="flex justify-between mt-4">
-        <p
-          onClick={() => handlePageChange(currentPage - 1)}
-          className={`cursor-pointer ${
-            currentPage === 1 ? "text-gray-400" : "text-black"
-          }`}
-          style={{ pointerEvents: currentPage === 1 ? "none" : "auto" }}
-        >
-          {currentLang.previous}
-        </p>
+        <div className="flex justify-between mt-4">
+          <p
+            onClick={() => handlePageChange(currentPage - 1)}
+            className={`cursor-pointer ${
+              currentPage === 1 ? "text-gray-400" : "text-black"
+            }`}
+            style={{ pointerEvents: currentPage === 1 ? "none" : "auto" }}
+          >
+            {currentLang.previous}
+          </p>
 
-        <span>
-          {currentLang.page} {currentPage} {currentLang.of} {totalPages}
-        </span>
-        <p
-          onClick={() => handlePageChange(currentPage + 1)}
-          className={`cursor-pointer ${
-            currentPage === totalPages ? "text-gray-400" : "text-black"
-          }`}
-          style={{
-            pointerEvents: currentPage === totalPages ? "none" : "auto",
-          }}
-        >
-          {currentLang.next}
-        </p>
+          <span>
+            {currentLang.page} {currentPage} {currentLang.of} {totalPages}
+          </span>
+          <p
+            onClick={() => handlePageChange(currentPage + 1)}
+            className={`cursor-pointer ${
+              currentPage === totalPages ? "text-gray-400" : "text-black"
+            }`}
+            style={{
+              pointerEvents: currentPage === totalPages ? "none" : "auto",
+            }}
+          >
+            {currentLang.next}
+          </p>
+        </div>
       </div>
     </div>
   );

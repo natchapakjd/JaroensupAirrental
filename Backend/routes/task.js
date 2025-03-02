@@ -760,9 +760,10 @@ router.put("/task/update-status/:id", (req, res) => {
 
 router.get("/tasks/top3", (req, res) => {
   const query = `
-    SELECT t.*, COUNT(ta.assignment_id) AS assignment_count
+    SELECT t.*, COUNT(ta.assignment_id) AS assignment_count, st.status_name, st.status_id
     FROM tasks t
     JOIN taskassignments ta ON t.task_id = ta.task_id
+    JOIN status st ON t.status_id = st.status_id
     GROUP BY t.task_id
     ORDER BY assignment_count DESC
     LIMIT 3;
@@ -785,9 +786,10 @@ router.get("/tasks/top3/:user_id", (req, res) => {
   const { user_id } = req.params;
 
   const query = `
-    SELECT t.*, COUNT(ta.assignment_id) AS assignment_count
+    SELECT t.*, COUNT(ta.assignment_id) AS assignment_count, st.status_name, st.status_id
     FROM tasks t
     JOIN taskassignments ta ON t.task_id = ta.task_id
+    JOIN status st ON t.status_id = st.status_id
     WHERE t.user_id = ?
     GROUP BY t.task_id
     ORDER BY assignment_count DESC

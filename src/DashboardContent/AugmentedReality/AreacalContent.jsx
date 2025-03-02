@@ -5,6 +5,8 @@ import { Link } from "react-router-dom";
 import { useNavigate } from "react-router-dom";
 import Loading from "../../components/Loading";
 const apiUrl = import.meta.env.VITE_SERVER_URL;
+import Cookies from "universal-cookie";
+import { jwtDecode } from "jwt-decode";
 
 const translations = {
   en: {
@@ -74,7 +76,10 @@ const AreacalContent = () => {
   const [pageSize, setPageSize] = useState(10);
   const navigate = useNavigate();
   const [language, setLanguage] = useState(localStorage.getItem("language") || "en");
-
+  const cookies = new Cookies();
+    const token = cookies.get("authToken");
+    const decodedToken = jwtDecode(token);
+    const user_id = decodedToken.id;
   useEffect(() => {
     const interval = setInterval(() => {
       const currentLanguage = localStorage.getItem("language") || "en";
@@ -119,7 +124,7 @@ const AreacalContent = () => {
     return <Loading />;
   }
 
-  const handleDelete = async (calculationId) => {
+  const handleDelete = async (calculationId,location_name) => {
     const confirmDelete = await Swal.fire({
       title: translations[language].confirmDelete,
       text: translations[language].confirmDeleteText,
@@ -133,6 +138,10 @@ const AreacalContent = () => {
     if (confirmDelete.isConfirmed) {
       try {
         await axios.delete(`${apiUrl}/area_cal/${calculationId}`);
+        await axios.post(`${import.meta.env.VITE_SERVER_URL}/adminLog`, {
+          admin_id: user_id,  // กำหนด admin_id ของผู้ดูแลระบบ
+          action: `ลบพื้นที่(หมายเลข): ${calculationId} ${location_name}`,  // บันทึกชื่อสินค้า
+        });
         Swal.fire({
           title: translations[language].deleteSuccess,
           text: translations[language].deleteSuccessText,
@@ -152,8 +161,8 @@ const AreacalContent = () => {
   
 
   return (
-  <div className="p-4">
-    <div className="flex justify-between items-center mb-4 font-prompt">
+    <div className="container mx-auto p-8"><div className="p-4 rounded-lg shadow-lg">
+    <div className="flex justify-between items-center mb-4 font-prompt ">
       <h2 className="text-2xl font-bold mb-4">{translations[language].areaCalculations}</h2>
       <Link to="/dashboard/area-cal/add">
         <button className="btn bg-blue text-white hover:bg-blue">
@@ -189,14 +198,15 @@ const AreacalContent = () => {
               <td className="border p-2 text-center">{calculation.air_conditioners_needed}</td>
               <td className="border p-2 text-center">{calculation.room_type_name}</td>
               <td className="border p-2 text-center text-blue-600 font-bold">
-                {calculation.air_5ton_used}
+                {calculation.air_5ton_used ? calculation.air_5ton_used : 0}
               </td>
               <td className="border p-2 text-center text-green-600 font-bold">
-                {calculation.air_10ton_used}
+                {calculation.air_10ton_used ? calculation.air_10ton_used : 0}
               </td>
               <td className="border p-2 text-center text-red-600 font-bold">
-                {calculation.air_20ton_used}
+                {calculation.air_20ton_used ? calculation.air_20ton_used : 0}
               </td>
+
               <td>
                 <button
                   onClick={() =>
@@ -219,7 +229,7 @@ const AreacalContent = () => {
                   {translations[language].edit}
                 </button>
                 <button
-                  onClick={() => handleDelete(calculation.calculation_id)}
+                  onClick={() => handleDelete(calculation.calculation_id,calculation.location_name)}
                   className="btn btn-error text-white"
                 >
                   {translations[language].delete}
@@ -249,7 +259,8 @@ const AreacalContent = () => {
         </p>
       </div>
     </div>
-  </div>
+  </div></div>
+  
 );
 };
 

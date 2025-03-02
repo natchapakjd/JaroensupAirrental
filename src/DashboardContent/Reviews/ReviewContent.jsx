@@ -3,7 +3,8 @@ import { Link } from "react-router-dom"; // Import Link for navigation
 import axios from "axios";
 import Swal from "sweetalert2";
 import Loading from "../../components/Loading";
-
+import Cookies from "universal-cookie";
+import { jwtDecode } from "jwt-decode";
 const translations = {
   en: {
     title: "Reviews",
@@ -68,16 +69,31 @@ const ReviewContent = () => {
   const [totalCount, setTotalCount] = useState(0);
   const [searchTerm, setSearchTerm] = useState(""); // State for search term
   const [language, setLanguage] = useState(localStorage.getItem("language") || "en");
+  const cookies = new Cookies();
+  const token = cookies.get("authToken");
+  const decodeToken = jwtDecode(token);
+  const role = decodeToken.role;
+  const techId = decodeToken.technicianId;
 
   const pageSize = 10;
   const apiUrl = import.meta.env.VITE_SERVER_URL;
-
   useEffect(() => {
     const fetchReviews = async () => {
       try {
-        const response = await axios.get(`${apiUrl}/reviews-paging`, {
-          params: { page: currentPage, pageSize },
-        });
+        let response;
+        
+        if (role == 2) {
+          // ถ้าเป็น Technician (role == 2) ให้ส่ง techId ไปที่ API
+          response = await axios.get(`${apiUrl}/reviews-paging`, {
+            params: { page: currentPage, pageSize, tech_id: techId },
+          });
+        } else {
+          // ถ้าไม่ใช่ Technician ให้ดึงรีวิวทั้งหมด
+          response = await axios.get(`${apiUrl}/reviews-paging`, {
+            params: { page: currentPage, pageSize },
+          });
+        }
+  
         setReviews(response.data.data);
         setTotalPages(response.data.totalPages);
         setTotalCount(response.data.totalCount);
@@ -93,7 +109,7 @@ const ReviewContent = () => {
         setLoading(false);
       }
     };
-
+  
     fetchReviews();
   }, [currentPage, language]);
 
@@ -162,102 +178,103 @@ const ReviewContent = () => {
   };
 
   return (
-    <div className="p-8 rounded-lg shadow-lg w-full mx-auto h-screen">
-      <div className="flex justify-between items-center mb-6">
-        <h1 className="text-2xl font-semibold">{translations[language].title}</h1>
-        <Link to="/dashboard/reviews/add" className="btn bg-blue text-white hover:bg-blue">
-          {translations[language].addReview}
-        </Link>
-      </div>
+    <div className="container mx-auto p-8"> <div className="p-8 rounded-lg shadow-lg w-full mx-auto h-full">
+    <div className="flex justify-between items-center mb-6">
+      <h1 className="text-2xl font-semibold">{translations[language].title}</h1>
+      <Link to="/dashboard/reviews/add" className="btn bg-blue text-white hover:bg-blue">
+        {translations[language].addReview}
+      </Link>
+    </div>
 
-      {/* Search Box */}
-      <div className="mb-4">
-        <input
-          type="text"
-          value={searchTerm}
-          onChange={handleSearch}
-          placeholder={translations[language].searchPlaceholder}
-          className="input input-bordered w-full"
-        />
-      </div>
-        <div className="overflow-x-auto">
+    {/* Search Box */}
+    <div className="mb-4">
+      <input
+        type="text"
+        value={searchTerm}
+        onChange={handleSearch}
+        placeholder={translations[language].searchPlaceholder}
+        className="input input-bordered w-full"
+      />
+    </div>
+      <div className="overflow-x-auto">
 
-          
-      <table className="table w-full border-collapse border border-gray-300">
-        <thead className="sticky-top bg-gray-200">
-          <tr>
-            <th className="border p-2 text-center">{translations[language].reviewID}</th>
-            <th className="border p-2 text-center">{translations[language].user}</th>
-            <th className="border p-2 text-center">{translations[language].tech}</th>
-            <th className="border p-2 text-center">{translations[language].comment}</th>
-            <th className="border p-2 text-center">{translations[language].rating}</th>
-            <th className="border p-2 text-center">{translations[language].date}</th>
-            <th className="border p-2 text-center">{translations[language].actions}</th>
-          </tr>
-        </thead>
-        <tbody className="text-center">
-          {filteredReviews.length > 0 ? (
-            filteredReviews.map((review, index) => (
-              <tr key={index + 1}>
-                <td className="border p-2 text-center">{index + 1}</td>
-                <td className="border p-2 text-center">
-                  {review.member_firstname} {review.member_lastname}
-                </td>
-                <td className="border p-2 text-center">
-                  {review.tech_firstname} {review.tech_lastname}
-                </td>
-                <td className="border p-2 text-center">{review.comment}</td>
-                <td className="border p-2 text-center">{review.rating}</td>
-                <td className="border p-2 text-center">
-                  {new Date(review.created_at).toLocaleString()}
-                </td>
-                <td className="border p-2 text-center">
-                  <Link
-                    to={`/dashboard/reviews/${review.review_id}`}
-                    className="btn btn-success text-white mr-2"
-                  >
-                    {translations[language].edit}
-                  </Link>
-                  <button
-                    onClick={() => handleDelete(review.review_id)}
-                    className="btn btn-error text-white"
-                  >
-                    {translations[language].delete}
-                  </button>
-                </td>
-              </tr>
-            ))
-          ) : (
-            <tr>
-              <td colSpan="7" className="border border-gray-300 p-4">
-                {translations[language].noReviews}
+        
+    <table className="table w-full border-collapse border border-gray-300">
+      <thead className="sticky-top bg-gray-200">
+        <tr>
+          <th className="border p-2 text-center">{translations[language].reviewID}</th>
+          <th className="border p-2 text-center">{translations[language].user}</th>
+          <th className="border p-2 text-center">{translations[language].tech}</th>
+          <th className="border p-2 text-center">{translations[language].comment}</th>
+          <th className="border p-2 text-center">{translations[language].rating}</th>
+          <th className="border p-2 text-center">{translations[language].date}</th>
+          <th className="border p-2 text-center">{translations[language].actions}</th>
+        </tr>
+      </thead>
+      <tbody className="text-center">
+        {filteredReviews.length > 0 ? (
+          filteredReviews.map((review, index) => (
+            <tr key={index + 1}>
+              <td className="border p-2 text-center">{index + 1}</td>
+              <td className="border p-2 text-center">
+                {review.member_firstname} {review.member_lastname}
+              </td>
+              <td className="border p-2 text-center">
+                {review.tech_firstname} {review.tech_lastname}
+              </td>
+              <td className="border p-2 text-center">{review.comment}</td>
+              <td className="border p-2 text-center">{review.rating}</td>
+              <td className="border p-2 text-center">
+                {new Date(review.created_at).toLocaleString()}
+              </td>
+              <td className="border p-2 text-center">
+                <Link
+                  to={`/dashboard/reviews/${review.review_id}`}
+                  className="btn btn-success text-white mr-2"
+                >
+                  {translations[language].edit}
+                </Link>
+                <button
+                  onClick={() => handleDelete(review.review_id)}
+                  className="btn btn-error text-white"
+                >
+                  {translations[language].delete}
+                </button>
               </td>
             </tr>
-          )}
-        </tbody>
-      </table>
+          ))
+        ) : (
+          <tr>
+            <td colSpan="7" className="border border-gray-300 p-4">
+              {translations[language].noReviews}
+            </td>
+          </tr>
+        )}
+      </tbody>
+    </table>
 
-        </div>
-      <div className="flex justify-between mt-4">
-        <p
-          onClick={() => handlePageChange(currentPage - 1)}
-          className={`cursor-pointer ${currentPage === totalPages ? "text-gray-400" : "text-black"}`}
-        >
-         {translations[language].previous}
-
-        </p>
-        <span>
-        {translations[language].page} {currentPage}  {translations[language].of}  {totalPages}
-        </span>
-        <p
-          onClick={() => handlePageChange(currentPage + 1)}
-          className={`cursor-pointer ${currentPage === totalPages ? "text-gray-400" : "text-black"}`}
-        >
-                  {translations[language].next}
-
-        </p>
       </div>
+    <div className="flex justify-between mt-4">
+      <p
+        onClick={() => handlePageChange(currentPage - 1)}
+        className={`cursor-pointer ${currentPage === totalPages ? "text-gray-400" : "text-black"}`}
+      >
+       {translations[language].previous}
+
+      </p>
+      <span>
+      {translations[language].page} {currentPage}  {translations[language].of}  {totalPages}
+      </span>
+      <p
+        onClick={() => handlePageChange(currentPage + 1)}
+        className={`cursor-pointer ${currentPage === totalPages ? "text-gray-400" : "text-black"}`}
+      >
+                {translations[language].next}
+
+      </p>
     </div>
+  </div></div>
+   
   );
 };
 

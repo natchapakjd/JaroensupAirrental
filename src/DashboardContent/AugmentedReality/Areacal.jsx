@@ -6,6 +6,8 @@ import { useNavigate } from "react-router-dom";
 import { Link } from "react-router-dom";
 import { useRef } from "react";
 import axios from "axios";
+import Cookies from "universal-cookie";
+import { jwtDecode } from "jwt-decode";
 const Areacal = () => {
   const [width, setWidth] = useState(0);
   const [length, setLength] = useState(0);
@@ -35,7 +37,10 @@ const Areacal = () => {
   );
   const [scale, setScale] = useState(1); // ค่าเริ่มต้นของการซูม
   const containerRef = useRef(null);
-
+  const cookies = new Cookies();
+    const token = cookies.get("authToken");
+    const decodedToken = jwtDecode(token);
+    const user_id = decodedToken.id;
   const translations = {
     en: {
       title: "Area Calculations",
@@ -421,6 +426,10 @@ const Areacal = () => {
         `${import.meta.env.VITE_SERVER_URL}/area_cal`,
         data
       );
+      await axios.post(`${import.meta.env.VITE_SERVER_URL}/adminLog`, {
+        admin_id: user_id,  // กำหนด admin_id ของผู้ดูแลระบบ
+        action: `เพิ่มพื้นที่ใหม่โดยคำนวณพื้นที่(ชื่อสถานที่): ${data.location_name}`,  // บันทึกชื่อสินค้า
+      });
       Swal.fire(
         translations[currentLanguage].successMessage,
         "บันทึกข้อมูลเรียบร้อย",
@@ -1908,6 +1917,10 @@ const handleSelectAreaCal = async () => {
         ...newData,
         location_name: data.newLocationName, // ใช้ชื่อใหม่
       });
+      await axios.post(`${import.meta.env.VITE_SERVER_URL}/adminLog`, {
+        admin_id: user_id,  // กำหนด admin_id ของผู้ดูแลระบบ
+        action: `แก้ไขพื้นที่เดิม(หมายเลข): ${newData.calculation_id}`,  // บันทึกชื่อสินค้า
+      });
       Swal.fire("Success", "บันทึกข้อมูลซ้ำเรียบร้อย!", "success");
     } catch (error) {
       console.error("Error updating area calculation:", error);
@@ -1920,6 +1933,7 @@ const handleSelectAreaCal = async () => {
   };
   return (
     <>
+    <div className="container mx-auto p-8"></div>
       <div className="mx-5 my-5 font-prompt">
         <div className="flex flex-wrap items-center mb-4 justify-between">
           <h2 className="text-2xl font-bold mb-4">

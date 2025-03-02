@@ -23,7 +23,6 @@ import {
 import { jwtDecode } from "jwt-decode";
 import Cookies from "universal-cookie";
 import { IoReorderFour } from "react-icons/io5";
-
 const Sidebar = () => {
   const cookies = new Cookies();
   const token = cookies.get("authToken");

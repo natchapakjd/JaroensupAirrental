@@ -4,6 +4,8 @@ import { Link } from "react-router-dom";
 import Swal from "sweetalert2";
 import { format } from "date-fns";
 import Loading from "../../components/Loading";
+import Cookies from "universal-cookie";
+import { jwtDecode } from "jwt-decode";
 const translations = {
   en: {
     userList: "User List",
@@ -30,7 +32,7 @@ const translations = {
     previous: "previous",
     next: "next",
     of: "of",
-    page: "page"
+    page: "page",
   },
   th: {
     userList: "รายการผู้ใช้",
@@ -57,7 +59,7 @@ const translations = {
     previous: "ก่อนหน้า",
     next: "ถัดไป",
     of: "จาก",
-    page: "หน้า"
+    page: "หน้า",
   },
 };
 
@@ -69,9 +71,14 @@ const UserContent = () => {
   const [selectedRole, setSelectedRole] = useState("");
   const [currentPage, setCurrentPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
-  const [loading,setLoading] =useState(true)
-  const [language, setLanguage] = useState(localStorage.getItem("language"||"th"));
-
+  const [loading, setLoading] = useState(true);
+  const [language, setLanguage] = useState(
+    localStorage.getItem("language" || "th")
+  );
+  const cookies = new Cookies();
+  const token = cookies.get("authToken");
+  const decodeToken = jwtDecode(token);
+  const user_id = decodeToken.id;
   const pageLimit = 10;
 
   useEffect(() => {
@@ -80,7 +87,7 @@ const UserContent = () => {
   }, [currentPage]);
 
   const fetchUsers = async (page) => {
-    setLoading(true)
+    setLoading(true);
     try {
       const response = await axios.get(
         `${
@@ -91,26 +98,26 @@ const UserContent = () => {
       setUsers(users);
       setFilteredUsers(users);
       setTotalPages(Math.ceil(total / pageLimit));
-      setLoading(false)
+      setLoading(false);
     } catch (error) {
       console.error("Error fetching users:", error);
     }
   };
 
   const fetchRoles = async () => {
-    setLoading(true)
+    setLoading(true);
     try {
       const response = await axios.get(
         `${import.meta.env.VITE_SERVER_URL}/roles`
       );
       setRoles(response.data);
-      setLoading(false)
+      setLoading(false);
     } catch (error) {
       console.error("Error fetching roles:", error);
     }
   };
 
-  const handleDelete = async (userId) => {
+  const handleDelete = async (userId, name) => {
     const result = await Swal.fire({
       title: "Are you sure?",
       text: "You won't be able to revert this!",
@@ -129,6 +136,10 @@ const UserContent = () => {
           { withCredentials: true }
         );
         if (response.status === 200) {
+          axios.post(`${import.meta.env.VITE_SERVER_URL}/adminLog`, {
+            admin_id: user_id,
+            action: `ลบผู้ใช้ไอดี ${userId} ชื่อ-สกุล:${name}`,
+          });
           Swal.fire("Deleted!", "User has been deleted.", "success");
           fetchUsers(currentPage); // Refresh current page
         }
@@ -178,144 +189,152 @@ const UserContent = () => {
     }
   };
 
-  if(loading){
-    return <Loading/>
+  if (loading) {
+    return <Loading />;
   }
   return (
-    <div className="font-prompt mt-5 mx-16">
-      <div className="flex justify-between items-center mb-4">
-        <h2 className="text-xl font-semibold my-5">
-          {translations[language].userList}
-        </h2>
-        <div className="flex justify-end gap-2 mb-4">
-          <Link to="/dashboard/user/add-tech">
-            <button className="btn bg-success hover:bg-success text-white">
-              {translations[language].addTechnician}
-            </button>
-          </Link>
-          <Link to="/dashboard/user/add">
-            <button className="btn bg-blue hover:bg-blue text-white">
-              {translations[language].addUser}
-            </button>
-          </Link>
+    <div className="container mx-auto p-8">
+      <div className="font-prompt p-8 rounded-lg shadow-lg">
+        <div className="flex justify-between items-center mb-4 ">
+          <h2 className="text-xl font-semibold my-5">
+            {translations[language].userList}
+          </h2>
+          <div className="flex justify-end gap-2 mb-4">
+            <Link to="/dashboard/user/add-tech">
+              <button className="btn bg-success hover:bg-success text-white">
+                {translations[language].addTechnician}
+              </button>
+            </Link>
+            <Link to="/dashboard/user/add">
+              <button className="btn bg-blue hover:bg-blue text-white">
+                {translations[language].addUser}
+              </button>
+            </Link>
+          </div>
         </div>
-      </div>
 
-      <div className="flex justify-between items-center mb-4">
-        <div className="flex gap-4 w-full">
-          <input
-            type="text"
-            placeholder="Search User"
-            className="input input-bordered w-full "
-            value={searchText}
-            onChange={handleSearch}
-          />
-          <select
-            className="select select-bordered w-full max-w-xs"
-            value={selectedRole}
-            onChange={handleRoleChange}
-          >
-            <option value=""> {translations[language].role}</option>
-            {roles.map((role) => (
-              <option key={role.role_id} value={role.role_name}>
-                {role.role_name}
-              </option>
-            ))}
-          </select>
+        <div className="flex justify-between items-center mb-4">
+          <div className="flex gap-4 w-full">
+            <input
+              type="text"
+              placeholder="Search User"
+              className="input input-bordered w-full "
+              value={searchText}
+              onChange={handleSearch}
+            />
+            <select
+              className="select select-bordered w-full max-w-xs"
+              value={selectedRole}
+              onChange={handleRoleChange}
+            >
+              <option value=""> {translations[language].role}</option>
+              {roles.map((role) => (
+                <option key={role.role_id} value={role.role_name}>
+                  {role.role_name}
+                </option>
+              ))}
+            </select>
+          </div>
         </div>
-      </div>
 
-      <div className="overflow-x-auto">
-        <table className="table w-full">
-          <thead>
-            <tr>
-              <th> {translations[language].avatar}</th>
-              <th> {translations[language].username}</th>
-              <th> {translations[language].email}</th>
-              <th> {translations[language].role}</th>
-              <th> {translations[language].createdAt}</th>
-              <th> {translations[language].actions}</th>
-            </tr>
-          </thead>
-          <tbody>
-            {filteredUsers.length > 0 ? (
-              filteredUsers.map((user) => (
-                <tr key={user.user_id}>
-                  <td>
-                    <div className="avatar">
-                      <div className="mask mask-squircle h-12 w-12">
-                        {user.image_url ? (
-                          <img
-                            src={user.image_url}
-                            alt={user.username}
-                            className="object-cover w-full h-full"
-                          />
-                        ) : (
-                          <p>No Image</p>
-                        )}
+        <div className="overflow-x-auto">
+          <table className="table w-full">
+            <thead>
+              <tr>
+                <th> {translations[language].avatar}</th>
+                <th> {translations[language].username}</th>
+                <th> {translations[language].email}</th>
+                <th> {translations[language].role}</th>
+                <th> {translations[language].createdAt}</th>
+                <th> {translations[language].actions}</th>
+              </tr>
+            </thead>
+            <tbody>
+              {filteredUsers.length > 0 ? (
+                filteredUsers.map((user) => (
+                  <tr key={user.user_id}>
+                    <td>
+                      <div className="avatar">
+                        <div className="mask mask-squircle h-12 w-12">
+                          {user.image_url ? (
+                            <img
+                              src={user.image_url}
+                              alt={user.username}
+                              className="object-cover w-full h-full"
+                            />
+                          ) : (
+                            <p>No Image</p>
+                          )}
+                        </div>
                       </div>
-                    </div>
-                  </td>
-                  <td>{user.username}</td>
-                  <td>{user.email}</td>
-                  <td>{user.role_name}</td>
-                  <td>{format(new Date(user.created_at), "MM/dd/yyyy")}</td>
-                  <td>
-                    <div className="flex gap-2">
-                      <Link to={`/dashboard/user/${user.user_id}`}>
-                        <button className="btn btn-ghost btn-xs">
-                          {translations[language].details}
+                    </td>
+                    <td>{user.username}</td>
+                    <td>{user.email}</td>
+                    <td>{user.role_name}</td>
+                    <td>{format(new Date(user.created_at), "MM/dd/yyyy")}</td>
+                    <td>
+                      <div className="flex gap-2">
+                        <Link to={`/dashboard/user/${user.user_id}`}>
+                          <button className="btn btn-ghost btn-xs">
+                            {translations[language].details}
+                          </button>
+                        </Link>
+                        <Link to={`/dashboard/user/edit/${user.user_id}`}>
+                          <button className="btn btn-success text-white btn-xs">
+                            {translations[language].edit}
+                          </button>
+                        </Link>
+                        <button
+                          className="btn btn-error btn-xs text-white"
+                          onClick={() =>
+                            handleDelete(
+                              user.user_id,
+                              `${user.firstname} ${user.lastname}`
+                            )
+                          }
+                        >
+                          {translations[language].delete}
                         </button>
-                      </Link>
-                      <Link to={`/dashboard/user/edit/${user.user_id}`}>
-                        <button className="btn btn-success text-white btn-xs">
-                          {translations[language].edit}
-                        </button>
-                      </Link>
-                      <button
-                        className="btn btn-error btn-xs text-white"
-                        onClick={() => handleDelete(user.user_id)}
-                      >
-                        {translations[language].delete}
-                      </button>
-                    </div>
+                      </div>
+                    </td>
+                  </tr>
+                ))
+              ) : (
+                <tr>
+                  <td colSpan="6" className="text-center">
+                    No users found.
                   </td>
                 </tr>
-              ))
-            ) : (
-              <tr>
-                <td colSpan="6" className="text-center">
-                  No users found.
-                </td>
-              </tr>
-            )}
-          </tbody>
-        </table>
-      </div>
+              )}
+            </tbody>
+          </table>
+        </div>
 
-      {/* Pagination */}
-      <div className="flex justify-between mt-4">
-        <p
-          onClick={() => handlePageChange(currentPage - 1)}
-          disabled={currentPage <= 1}
-          className={`cursor-pointer ${
-            currentPage === totalPages ? "text-gray-400" : "text-black"
-          }`}
-        >
-          {translations[language].previous}
-        </p>
-        <span className="flex items-center justify-center">
-          {translations[language].page} {currentPage} {translations[language].of}  {totalPages}
-        </span>
-        <p
-          onClick={() => handlePageChange(currentPage + 1)}
-          disabled={currentPage >= totalPages}
-          className={`cursor-pointer ${
-            currentPage === totalPages ? "text-gray-400" : "text-black"
-          }`}
-        >
-          {translations[language].next}
-        </p>
+        {/* Pagination */}
+        <div className="flex justify-between mt-4">
+          <p
+            onClick={() => handlePageChange(currentPage - 1)}
+            disabled={currentPage <= 1}
+            className={`cursor-pointer ${
+              currentPage === totalPages ? "text-gray-400" : "text-black"
+            }`}
+          >
+            {translations[language].previous}
+          </p>
+          <span className="flex items-center justify-center">
+            {translations[language].page} {currentPage}{" "}
+            {translations[language].of} {totalPages}
+          </span>
+          <p
+            onClick={() => handlePageChange(currentPage + 1)}
+            disabled={currentPage >= totalPages}
+            className={`cursor-pointer ${
+              currentPage === totalPages ? "text-gray-400" : "text-black"
+            }`}
+          >
+            {translations[language].next}
+          </p>
+        </div>
       </div>
     </div>
   );

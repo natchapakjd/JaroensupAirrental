@@ -3,6 +3,7 @@ import { useParams, useNavigate } from "react-router-dom";
 import axios from "axios";
 import Swal from "sweetalert2";
 import { useAuth } from "../../context/AuthContext";
+import BackButtonEdit from "../../components/BackButtonEdit";
 
 const EditReview = () => {
   const { id } = useParams();
@@ -17,7 +18,9 @@ const EditReview = () => {
   });
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-  const [language, setLanguage] = useState(localStorage.getItem("language") || "en"); // Default to stored language or English
+  const [language, setLanguage] = useState(
+    localStorage.getItem("language") || "en"
+  ); // Default to stored language or English
 
   const translations = {
     en: {
@@ -101,15 +104,23 @@ const EditReview = () => {
     }
   };
 
-  if (loading) return <div className="text-center">{translations[language].loading}</div>;
+  if (loading)
+    return <div className="text-center">{translations[language].loading}</div>;
   if (error) return <div className="text-red-500 text-center">{error}</div>;
 
   return (
     <div className="container mx-auto p-8">
-      <div className="flex justify-between items-center mb-4">
-        <h2 className="text-2xl font-bold">{translations[language].pageTitle}</h2>
-      </div>
-      <form onSubmit={handleSubmit} className="bg-white p-6 rounded-lg shadow-md">
+      <form
+        onSubmit={handleSubmit}
+        className="bg-white p-6 rounded-lg shadow-md"
+      >
+        <div className="flex  w-full my-2">
+          <BackButtonEdit />
+          <h1 className="text-2xl font-semibold mx-2">
+            {" "}
+            {translations[language].pageTitle}
+          </h1>
+        </div>
         <div className="mb-4">
           <label className="block mb-2" htmlFor="task_id">
             {translations[language].taskLabel}
@@ -169,7 +180,10 @@ const EditReview = () => {
             className="textarea textarea-bordered w-full"
           />
         </div>
-        <button type="submit" className="btn bg-blue text-white hover:bg-blue-600">
+        <button
+          type="submit"
+          className="btn bg-blue text-white hover:bg-blue-600"
+        >
           {translations[language].updateButton}
         </button>
       </form>

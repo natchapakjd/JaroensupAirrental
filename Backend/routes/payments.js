@@ -192,7 +192,6 @@ router.put("/payments/:id", upload.single('slip_images'), async (req, res) => {
       amount,
       user_id,
       method_id,
-      payment_date,
       slipImagePath,
       status_id,
       id
@@ -201,13 +200,13 @@ router.put("/payments/:id", upload.single('slip_images'), async (req, res) => {
     if (task_id === '') {
       query = `
         UPDATE payments 
-        SET amount = ?, user_id = ?, order_id = ?, method_id = ?, payment_date = ?, image_url = ?, status_id = ? 
+        SET amount = ?, user_id = ?, order_id = ?, method_id = ?, image_url = ?, status_id = ? 
         WHERE payment_id = ?`;
       values.splice(2, 0, order_id); // Insert order_id into the correct position
     } else if (order_id === '') {
       query = `
         UPDATE payments 
-        SET amount = ?, user_id = ?, task_id = ?, method_id = ?, payment_date = ?, image_url = ?, status_id = ? 
+        SET amount = ?, user_id = ?, task_id = ?, method_id = ?, image_url = ?, status_id = ? 
         WHERE payment_id = ?`;
       values.splice(2, 0, task_id); // Insert task_id into the correct position
     } else {

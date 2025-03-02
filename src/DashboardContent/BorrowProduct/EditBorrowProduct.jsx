@@ -3,6 +3,7 @@ import { useParams, useNavigate } from "react-router-dom";
 import axios from "axios";
 import Swal from "sweetalert2";
 import Loading from "../../components/Loading";
+import BackButtonEdit from "../../components/BackButtonEdit";
 
 const EditBorrowProduct = () => {
   const { borrowingId } = useParams();
@@ -144,73 +145,79 @@ const EditBorrowProduct = () => {
   }
 
   return (
-    <div className="max-w-lg mx-auto p-6 bg-white shadow rounded-lg font-prompt my-5">
-      <h2 className="text-2xl font-bold mb-4">{translation.select_product}</h2>
-      <form onSubmit={handleSubmit} className="space-y-4">
-        <label className="block">
-          {translation.tech_id}
-          <input
-            type="text"
-            name="tech_id"
-            value={formData.tech_id}
-            onChange={handleChange}
-            className="w-full p-2 border rounded"
-            required
-            disabled
-          />
-        </label>
+    <div className="container mx-auto p-8"><div className=" mx-auto p-6 bg-white shadow rounded-lg font-prompt my-5">
+      <div className="flex  w-full my-2">
+          <BackButtonEdit />
+          <h1 className="text-2xl font-semibold mx-2">
+            {translation.select_product}
+          </h1>
+        </div>
+    <form onSubmit={handleSubmit} className="space-y-4">
+      <label className="block">
+        {translation.tech_id}
+        <input
+          type="text"
+          name="tech_id"
+          value={formData.tech_id}
+          onChange={handleChange}
+          className="input input-bordered w-full"
+          required
+          disabled
+        />
+      </label>
 
-        <label className="block">
-          {translation.select_product}
-          <select
-            name="product_id"
-            value={formData.product_id}
-            onChange={handleChange}
-            className="w-full p-2 border rounded"
-            required
-          >
-            {products.map((product) => (
-              <option key={product.product_id} value={product.product_id}>
-                {product.name}
-              </option>
-            ))}
-          </select>
-        </label>
-
-        <label className="block">
-          {translation.borrow_date}
-          <input
-            type="date"
-            name="borrow_date"
-            value={formData.borrow_date}
-            onChange={handleChange}
-            className="w-full p-2 border rounded"
-            required
-            min={new Date().toISOString().split("T")[0]} // Prevent selecting past dates
-          />
-        </label>
-
-        <label className="block">
-          {translation.return_date}
-          <input
-            type="date"
-            name="return_date"
-            value={formData.return_date}
-            onChange={handleChange}
-            className="w-full p-2 border rounded"
-            required
-            min={formData.borrow_date || new Date().toISOString().split("T")[0]} // Ensure return date is not before borrow date
-          />
-        </label>
-
-        <button
-          type="submit"
-          className="w-full bg-blue text-white py-2 rounded hover:bg-blue"
+      <label className="block">
+        {translation.select_product}
+        <select
+          name="product_id"
+          value={formData.product_id}
+          onChange={handleChange}
+          className="input input-bordered w-full"
+          required
         >
-          {translation.update}
-        </button>
-      </form>
-    </div>
+          {products.map((product) => (
+            <option key={product.product_id} value={product.product_id}>
+              {product.name}
+            </option>
+          ))}
+        </select>
+      </label>
+
+      <label className="block">
+        {translation.borrow_date}
+        <input
+          type="date"
+          name="borrow_date"
+          value={formData.borrow_date}
+          onChange={handleChange}
+          className="input input-bordered w-full"
+          required
+          min={new Date().toISOString().split("T")[0]} // Prevent selecting past dates
+        />
+      </label>
+
+      <label className="block">
+        {translation.return_date}
+        <input
+          type="date"
+          name="return_date"
+          value={formData.return_date}
+          onChange={handleChange}
+          className="input input-bordered w-full"
+          required
+          min={formData.borrow_date || new Date().toISOString().split("T")[0]} // Ensure return date is not before borrow date
+        />
+      </label>
+
+      <button
+        type="submit"
+        className="w-full bg-blue text-white py-2 rounded-md hover:bg-blue "
+      >
+        {translation.update}
+      </button>
+    </form>
+  </div></div> 
+    
   );
 };
 

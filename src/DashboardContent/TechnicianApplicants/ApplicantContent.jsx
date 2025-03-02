@@ -43,6 +43,17 @@ const ApplicantContent = () => {
       errorOccurred: "An error occurred!",
       of: "of",
       page: "page",
+      // Table headers
+      headerApplicantID: "Applicant ID",
+      headerFirstname: "Firstname",
+      headerLastname: "Lastname",
+      headerDob: "Date of Birth",
+      headerEmail: "Email",
+      headerPosition: "Position Applied",
+      headerStatus: "Status",
+      headerApplicantDate: "Applicant Date",
+      headerNote: "Note",
+      headerAction: "Action",
     },
     th: {
       title: "รายชื่อผู้สมัคร",
@@ -65,6 +76,17 @@ const ApplicantContent = () => {
       errorOccurred: "เกิดข้อผิดพลาด!",
       of: "จาก",
       page: "หน้า",
+      // Table headers
+      headerApplicantID: "รหัสผู้สมัคร",
+      headerFirstname: "ชื่อ",
+      headerLastname: "นามสกุล",
+      headerDob: "วันเกิด",
+      headerEmail: "อีเมล",
+      headerPosition: "ตำแหน่งที่สมัคร",
+      headerStatus: "สถานะ",
+      headerApplicantDate: "วันที่สมัคร",
+      headerNote: "หมายเหตุ",
+      headerAction: "การกระทำ",
     },
   };
 
@@ -197,152 +219,175 @@ const ApplicantContent = () => {
   if (error) return <p>{error}</p>;
 
   return (
-    <div className="p-8 rounded-lg shadow-lg w-full mx-auto font-prompt h-full">
-      <div className="flex justify-between items-center mb-4">
-        <h2 className="text-xl font-semibold mt-8 mb-5">{t.title}</h2>
-        <Link to="/dashboard/applicants/add">
-          <button className="btn bg-blue text-white hover:bg-blue">
-            {t.addApplicant}
-          </button>
-        </Link>
-      </div>
-      {/* Search and Filter */}
-      <div className="flex justify-between items-center mb-4 gap-4">
-        <input
-          type="text"
-          placeholder={t.searchPlaceholder}
-          value={searchQuery}
-          onChange={(e) => setSearchQuery(e.target.value)}
-          className="input input-bordered w-full"
-        />
-        <select
-          value={filterStatus}
-          onChange={(e) => setFilterStatus(e.target.value)}
-          className="input input-bordered w-full md:w-1/3"
-        >
-          <option value="">{t.filterStatus}</option>
-          <option value="1">{t.filterPending}</option>
-          <option value="7">{t.filterHiring}</option>
-        </select>
-      </div>
-      <div className="overflow-x-auto">
-        <table className="w-full border-collapse border border-gray-300 font-prompt">
-          <thead className="sticky-top bg-gray-200">
-            <tr>
-              <th className="border p-2 text-center">Applicant ID</th>
-              <th className="border p-2 text-center">Firstname</th>
-              <th className="border p-2 text-center">Lastname</th>
-              <th className="border p-2 text-center">Date of birth</th>
-              <th className="border p-2 text-center">Email</th>
-              <th className="border p-2 text-center">Position Applied</th>
-              <th className="border p-2 text-center">Status</th>
-              <th className="border p-2 text-center">Applicant date</th>
-              <th className="border p-2 text-center">Note</th>
-              <th className="border p-2 text-center">Action</th>
-            </tr>
-          </thead>
-          <tbody className="text-center">
-            {filteredApplicants.length > 0 ? (
-              filteredApplicants
-                .slice((currentPage - 1) * pageSize, currentPage * pageSize)
-                .map((applicant, index) => (
-                  <tr key={index + 1}>
-                    <td className="border p-2 text-center">{index + 1}</td>
-                    <td className="border p-2 text-center">
-                      {applicant.first_name}
-                    </td>
-                    <td className="border p-2 text-center">
-                      {applicant.last_name}
-                    </td>
-                    <td className="border p-2 text-center">
-                      {new Date(applicant.date_of_birth).toLocaleDateString(
-                        "en-GB"
-                      )}
-                    </td>
-                    <td className="border p-2 text-center">
-                      {applicant.email}
-                    </td>
-                    <td className="border p-2 text-center">
-                      {applicant.position_applied}
-                    </td>
-                    <td className="border p-2 text-center">
-                      {applicant.status_name}
-                    </td>
-                    <td className="border p-2 text-center">
-                      {new Date(applicant.application_date).toLocaleDateString(
-                        "en-GB"
-                      )}
-                    </td>
-                    <td className="border p-2 text-center">
-                      {applicant.notes || "No notes"}
-                    </td>
-                    <td className="border p-2 text-center">
-                      {applicant.status_id === 1 && (
+    <div className="container mx-auto p-8">
+      {" "}
+      <div className="p-8 rounded-lg shadow-lg w-full mx-auto font-prompt h-full">
+        <div className="flex justify-between items-center mb-4">
+          <h2 className="text-xl font-semibold mt-8 mb-5">{t.title}</h2>
+          <Link to="/dashboard/applicants/add">
+            <button className="btn bg-blue text-white hover:bg-blue">
+              {t.addApplicant}
+            </button>
+          </Link>
+        </div>
+        {/* Search and Filter */}
+        <div className="flex justify-between items-center mb-4 gap-4">
+          <input
+            type="text"
+            placeholder={t.searchPlaceholder}
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+            className="input input-bordered w-full"
+          />
+          <select
+            value={filterStatus}
+            onChange={(e) => setFilterStatus(e.target.value)}
+            className="input input-bordered w-full md:w-1/3"
+          >
+            <option value="">{t.filterStatus}</option>
+            <option value="1">{t.filterPending}</option>
+            <option value="7">{t.filterHiring}</option>
+          </select>
+        </div>
+        <div className="overflow-x-auto">
+          <table className="table w-full border-collapse border border-gray-300 font-prompt">
+            <thead className="sticky-top bg-gray-200">
+              <tr>
+                <th className="border p-2 text-center">
+                  {translations[language].headerApplicantID}
+                </th>
+                <th className="border p-2 text-center">
+                  {translations[language].headerFirstname}
+                </th>
+                <th className="border p-2 text-center">
+                  {translations[language].headerLastname}
+                </th>
+                <th className="border p-2 text-center">
+                  {translations[language].headerDob}
+                </th>
+                <th className="border p-2 text-center">
+                  {translations[language].headerEmail}
+                </th>
+                <th className="border p-2 text-center">
+                  {translations[language].headerPosition}
+                </th>
+                <th className="border p-2 text-center">
+                  {translations[language].headerStatus}
+                </th>
+                <th className="border p-2 text-center">
+                  {translations[language].headerApplicantDate}
+                </th>
+                <th className="border p-2 text-center">
+                  {translations[language].headerNote}
+                </th>
+                <th className="border p-2 text-center">
+                  {translations[language].headerAction}
+                </th>
+              </tr>
+            </thead>
+            <tbody className="text-center">
+              {filteredApplicants.length > 0 ? (
+                filteredApplicants
+                  .slice((currentPage - 1) * pageSize, currentPage * pageSize)
+                  .map((applicant, index) => (
+                    <tr key={index + 1}>
+                      <td className="border p-2 text-center">{index + 1}</td>
+                      <td className="border p-2 text-center">
+                        {applicant.first_name}
+                      </td>
+                      <td className="border p-2 text-center">
+                        {applicant.last_name}
+                      </td>
+                      <td className="border p-2 text-center">
+                        {new Date(applicant.date_of_birth).toLocaleDateString(
+                          "en-GB"
+                        )}
+                      </td>
+                      <td className="border p-2 text-center">
+                        {applicant.email}
+                      </td>
+                      <td className="border p-2 text-center">
+                        {applicant.position_applied}
+                      </td>
+                      <td className="border p-2 text-center">
+                        {applicant.status_name}
+                      </td>
+                      <td className="border p-2 text-center">
+                        {new Date(
+                          applicant.application_date
+                        ).toLocaleDateString("en-GB")}
+                      </td>
+                      <td className="border p-2 text-center">
+                        {applicant.notes || "No notes"}
+                      </td>
+                      <td className="border p-2 text-center">
+                        {applicant.status_id === 1 && (
+                          <button
+                            className="btn btn-success text-white mr-2"
+                            onClick={() => handleAccept(applicant.applicant_id)}
+                          >
+                            {t.accept}
+                          </button>
+                        )}
+                        {applicant.status_id === 7 && (
+                          <button
+                            className="btn btn-success text-white mr-2"
+                            onClick={() =>
+                              handleSendEmail(applicant.applicant_id)
+                            }
+                          >
+                            {t.sendEmail}
+                          </button>
+                        )}
                         <button
-                          className="btn btn-success text-white mr-2"
-                          onClick={() => handleAccept(applicant.applicant_id)}
-                        >
-                          {t.accept}
-                        </button>
-                      )}
-                      {applicant.status_id === 7 && (
-                        <button
-                          className="btn btn-success text-white mr-2"
+                          className="btn bg-blue hover:bg-blue text-white"
                           onClick={() =>
-                            handleSendEmail(applicant.applicant_id)
+                            handleViewDetails(applicant.applicant_id)
                           }
                         >
-                          {t.sendEmail}
+                          {t.viewDetails}
                         </button>
-                      )}
-                      <button
-                        className="btn bg-blue hover:bg-blue text-white"
-                        onClick={() =>
-                          handleViewDetails(applicant.applicant_id)
-                        }
-                      >
-                        {t.viewDetails}
-                      </button>
 
-                      <button
-                        className="btn btn-error text-white ml-2"
-                        onClick={() => handleDelete(applicant.applicant_id)}
-                      >
-                        {t.reject}
-                      </button>
-                    </td>
-                  </tr>
-                ))
-            ) : (
-              <tr>
-                <td colSpan="9" className="border border-gray-300 p-4">
-                  {t.noApplicantsFound}
-                </td>
-              </tr>
-            )}
-          </tbody>
-        </table>
-      </div>
+                        <button
+                          className="btn btn-error text-white ml-2"
+                          onClick={() => handleDelete(applicant.applicant_id)}
+                        >
+                          {t.reject}
+                        </button>
+                      </td>
+                    </tr>
+                  ))
+              ) : (
+                <tr>
+                  <td colSpan="9" className="border border-gray-300 p-4">
+                    {t.noApplicantsFound}
+                  </td>
+                </tr>
+              )}
+            </tbody>
+          </table>
+        </div>
 
-      <div className="flex justify-between items-center mt-4">
-        <p
-          className={`cursor-pointer ${
-            currentPage === totalPages ? "text-gray-400" : "text-black"
-          }`}
-          onClick={() => handlePageChange(currentPage - 1)}
-        >
-          {t.previous}
-        </p>
-        <span>{`${t.page}
+        <div className="flex justify-between items-center mt-4">
+          <p
+            className={`cursor-pointer ${
+              currentPage === totalPages ? "text-gray-400" : "text-black"
+            }`}
+            onClick={() => handlePageChange(currentPage - 1)}
+          >
+            {t.previous}
+          </p>
+          <span>{`${t.page}
 ${currentPage} ${t.of} ${totalPages}`}</span>
-        <p
-          onClick={() => handlePageChange(currentPage + 1)}
-          className={`cursor-pointer ${
-            currentPage === totalPages ? "text-gray-400" : "text-black"
-          }`}
-        >
-          {t.next}
-        </p>
+          <p
+            onClick={() => handlePageChange(currentPage + 1)}
+            className={`cursor-pointer ${
+              currentPage === totalPages ? "text-gray-400" : "text-black"
+            }`}
+          >
+            {t.next}
+          </p>
+        </div>
       </div>
     </div>
   );
