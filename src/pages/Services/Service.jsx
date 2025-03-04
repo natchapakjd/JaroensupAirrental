@@ -54,12 +54,22 @@ const Service = () => {
     };
   }, []);
 
-  const filteredTaskTypes = taskTypes.filter(
-    (taskType) =>
-      taskType.type_name === "งานเช่าเครื่องปรับอากาศ" ||
-      taskType.type_name === "ขายสินค้า" ||
-      taskType.type_name === "งานซ่อมบำรุงเครื่องปรับอากาศ"
-  );
+  const filteredTaskTypes = taskTypes
+  .filter((taskType) =>
+    taskType.type_name === "งานเช่าเครื่องปรับอากาศ" ||
+    taskType.type_name === "ขายสินค้า" ||
+    taskType.type_name === "งานซ่อมบำรุงเครื่องปรับอากาศ" ||
+    taskType.type_name === "งานเช่าและล้างเครื่องปรับอากาศ"
+  )
+  .map((taskType) => {
+    if (taskType.type_name === "งานเช่าเครื่องปรับอากาศ") {
+      taskType.type_name = "งานเช่าและล้างเครื่องปรับอากาศ";
+      taskType.description = "เช่าและล้างเครื่องปรับอากาศ พร้อมติดตั้ง";
+
+    }
+    return taskType;
+  });
+
 
   return (
     <>

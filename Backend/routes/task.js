@@ -47,38 +47,54 @@ router.get("/task-paging", (req, res) => {
 });
 
 router.get("/task-paging/:id", (req, res) => {
-  const userId = req.params.id; 
-  const limit = parseInt(req.query.limit) || 10; 
-  const page = parseInt(req.query.page) || 1; 
-  const offset = (page - 1) * limit; 
+  const userId = req.params.id;
+  const limit = parseInt(req.query.limit) || 10; // Default to 10 if no limit is specified
+  const page = parseInt(req.query.page) || 1; // Default to page 1 if no page is specified
+  const offset = (page - 1) * limit; // Calculate the offset based on page and limit
 
-  let query = "SELECT t.*,tt.type_name ,st.status_name FROM tasks t JOIN status st ON t.status_id = st.status_id JOIN tasktypes tt ON t.task_type_id = tt.task_type_id WHERE user_id = ?"; 
-  const queryParams = [userId];
+  // Main query to get tasks with pagination and filter by task_type_id = 1
+  let query = `
+    SELECT t.*, tt.type_name, st.status_name 
+    FROM tasks t 
+    JOIN status st ON t.status_id = st.status_id 
+    JOIN tasktypes tt ON t.task_type_id = tt.task_type_id 
+    WHERE user_id = ? AND t.task_type_id = 1
+    LIMIT ? OFFSET ?
+  `;
 
-  query += " LIMIT ? OFFSET ?";
-  queryParams.push(limit, offset);
+  const queryParams = [userId, limit, offset];
+
+  // Query the tasks
   db.query(query, queryParams, (err, result) => {
     if (err) {
       console.error("Error fetching tasks: ", err);
       return res.status(500).json({ error: "Failed to fetch tasks" });
     }
 
-    const countQuery = "SELECT COUNT(*) AS total FROM tasks WHERE user_id = ?";
-    
+    // Count query to get the total number of tasks for the user with task_type_id = 1
+    const countQuery = `
+      SELECT COUNT(*) AS total 
+      FROM tasks 
+      WHERE user_id = ? AND task_type_id = 1
+    `;
+
     db.query(countQuery, [userId], (err, countResult) => {
       if (err) {
         console.error("Error fetching task count: ", err);
         return res.status(500).json({ error: "Failed to fetch task count" });
       }
 
-      const totalTasks = countResult[0].total; 
+      const totalTasks = countResult[0].total;
+
+      // Send the response with tasks and the total task count
       res.status(200).json({
-        tasks: result,        
+        tasks: result,
         totalTasks: totalTasks,
       });
     });
   });
 });
+
 
 router.get("/tasks/paged", (req, res) => {
   const { page = 1, limit = 10 } = req.query; // Default to page 1, 10 items per page
@@ -175,7 +191,7 @@ router.get("/tasks", (req, res) => {
     SELECT 
       tasks.*, 
       users.*,
-      tasktypes.*,
+      tasktypes.description as tt_description,
       status.*
     FROM 
       tasks
@@ -186,7 +202,7 @@ router.get("/tasks", (req, res) => {
     INNER JOIN 
       tasktypes ON tasks.task_type_id = tasktypes.task_type_id
     WHERE 
-      tasks.isActive = 1
+      tasks.isActive = 1 and tasks.task_type_id = 1
   `;
 
   db.query(query, (err, result) => {

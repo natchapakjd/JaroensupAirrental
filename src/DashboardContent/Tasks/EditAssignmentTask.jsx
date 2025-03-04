@@ -103,7 +103,7 @@ const EditAssignmentTask = () => {
             >
               <option value="">{translation[language].selectTask}</option>
               {task.map((taskItem, index) => (
-                <option key={index + 1} value={taskItem.task_id}>
+                <option key={taskItem.task_id} value={taskItem.task_id}>
                   {index + 1}. {taskItem.description}
                 </option>
               ))}

@@ -136,9 +136,10 @@ const UserHistory = () => {
       );
       setTaskHistory(filteredTasks);
       setTotalTasks(filteredTasks.length);
+      console.log(filteredTasks)
   
       const orderResponse = await axios.get(
-        `${import.meta.env.VITE_SERVER_URL}/v1/orders/${user_id}?page=${orderPage}&limit=100`
+        `${import.meta.env.VITE_SERVER_URL}/v1/orders/${user_id}?page=${orderPage}&limit=10`
       );
       setOrderHistory(orderResponse.data.orders);
       setTotalOrders(orderResponse.data.totalCount);
@@ -389,7 +390,7 @@ const UserHistory = () => {
                           {translations[language].cancelTask}
                         </button>
                       )}
-                      {task.status_id === 1 && ( // If task is in progress
+                      {task.status_id === 5 && ( // If task is in progress
                         <button
                           onClick={() => handleCompleteTask(task.task_id)} // Mark task as completed
                           className="ml-5 text-green-600"
@@ -419,7 +420,7 @@ const UserHistory = () => {
           </button>
           <span>
             {translations[language].page} {taskPage} {translations[language].of}{" "}
-            {Math.ceil(totalTasks / 10) || 1}
+            {Math.ceil(totalTasks / 10)}
           </span>
           <button
             onClick={() => handleTaskPageChange(1)}
@@ -466,9 +467,9 @@ const UserHistory = () => {
             </thead>
             <tbody>
               {filteredOrders.length > 0 ? (
-                filteredOrders.map((order) => (
-                  <tr key={order.id}>
-                    <td>{order.id}</td>
+                filteredOrders.map((order,index) => (
+                  <tr key={index+1}>
+                    <td>{index+1}</td>
                     <td>{order.total_price.toFixed(2)}</td>
                     <td>{new Date(order.created_at).toLocaleString()}</td>
                     <td>{order.status_name}</td>

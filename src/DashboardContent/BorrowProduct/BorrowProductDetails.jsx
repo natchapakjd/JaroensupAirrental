@@ -2,31 +2,39 @@ import React, { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
 import axios from "axios";
 import BackButton from "../../components/BackButton";
+import Loading from "../../components/Loading";
 const BorrowProductDetails = () => {
   const { task_id } = useParams(); // ดึง task_id จาก URL
   const [borrowingData, setBorrowingData] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
+
   useEffect(() => {
-    const fetchBorrowingDetails = async () => {
-      try {
-        const response = await axios.get(
-        `${import.meta.env.VITE_SERVER_URL}/v2/equipment-borrowing/id/${task_id}` // ส่ง task_id ไปยัง API
-        );
-        setBorrowingData(response.data); // บันทึกข้อมูลที่ได้รับจาก API
-      } catch (err) {
-        setError("Failed to fetch borrowing details");
-        console.error("Error fetching borrowing details:", err);
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    fetchBorrowingDetails();
+    if (task_id) {
+      fetchBorrowingDetails();
+    } else {
+      setError("Task ID is missing");
+      setLoading(false);  // Make sure loading is set to false even if no task_id
+    }
   }, [task_id]);
+  
 
-  if (loading) return <div>Loading...</div>;
+  const fetchBorrowingDetails = async () => {
+    try {
+      const response = await axios.get(
+        `${import.meta.env.VITE_SERVER_URL}/v2/equipment-borrowing/id/${task_id}` // sending task_id to API
+      );
+      setBorrowingData(response.data); // Store the data from the API response
+      console.log(response)
+      setLoading(false);
+    } catch (err) {
+      setError("Failed to fetch borrowing details");
+      console.error("Error fetching borrowing details:", err);
+    }
+  };
+
+  if (loading) return <Loading/>;
   if (error) return <div className="text-red-500">{error}</div>;
   if (!borrowingData) return <div>No data found</div>;
 

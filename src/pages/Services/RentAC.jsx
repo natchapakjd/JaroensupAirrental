@@ -95,7 +95,9 @@ const RentAC = () => {
   const filteredTaskTypes = taskTypes.filter(
     (taskType) =>
       taskType.type_name === "งานเช่าเครื่องปรับอากาศ" ||
-      taskType.type_name === "งานซ่อมบำรุงเครื่องปรับอากาศ"
+      taskType.type_name === "งานซ่อมบำรุงเครื่องปรับอากาศ" ||
+      taskType.type_name === "ล้างเครื่่องปรับอากาศ"
+
   );
 
   const handleLocationSelect = (lat, lon, displayName) => {
@@ -174,8 +176,8 @@ const RentAC = () => {
         ...formData,
         rental_start_date: rentalStartDate,
         user_id: userId,
-        latitude: selectedLocation ? formData.latitude : "",  // ✅ ถ้าไม่ได้เลือกแผนที่จะไม่ส่งค่า
-        longitude: selectedLocation ? formData.longitude : "",
+        latitude: selectedLocation ? formData.latitude : null,  // ✅ ถ้าไม่ได้เลือกแผนที่จะไม่ส่งค่า
+        longitude: selectedLocation ? formData.longitude : null,
       });
 
       Swal.fire({
@@ -206,6 +208,20 @@ const RentAC = () => {
       });
     }
   };
+
+  function getCurrentDateTimeInThailand() {
+    const now = new Date();
+    
+    // Convert to Thailand time (UTC+7)
+    const thailandTime = new Date(now.toLocaleString("en-US", { timeZone: "Asia/Bangkok" }));
+    
+    // Add one day to the Thailand time
+    thailandTime.setDate(thailandTime.getDate() + 1);
+    
+    // Format as a string for datetime-local input (yyyy-mm-ddThh:mm)
+    return thailandTime.toISOString().slice(0, 16);
+  }
+  
 
   return (
     <>
@@ -261,32 +277,36 @@ const RentAC = () => {
               />
             </div>
             <div className="mb-4">
-              <label className="block text-gray-700">Rental Start Date</label>
+              <label className="block text-gray-700">Start Date</label>
               <input
                 type="datetime-local"
                 name="appointment_date"
                 value={formData.appointment_date}
                 onChange={handleChange}
-                min={new Date().toISOString().slice(0, 16)} // Prevent past dates
+                min={getCurrentDateTimeInThailand()}
                 required
                 className="input input-bordered w-full"
               />
             </div>
             <div className="mb-4">
-              <label className="block text-gray-700">Rental End Date</label>
+              <label className="block text-gray-700">End Date</label>
               <input
                 type="date"
                 name="rental_end_date"
                 value={formData.rental_end_date}
                 onChange={handleChange}
-                min={new Date().toISOString().slice(0, 10)} // Prevent past dates
+                min={
+                  formData.appointment_date
+                    ? formData.appointment_date.slice(0, 10)
+                    : new Date().toISOString().slice(0, 10)
+                } // Ensure end date is >= start date
                 required
                 className="input input-bordered w-full"
               />
             </div>
 
-             {/* 🔥 ปุ่มเลือกแผนที่ */}
-             <div className="mb-4">
+            {/* 🔥 ปุ่มเลือกแผนที่ */}
+            <div className="mb-4">
               <p
                 type="button"
                 onClick={() => setShowMap(!showMap)}
@@ -296,28 +316,29 @@ const RentAC = () => {
               </p>
             </div>
 
-                {showMap && (<MapContainer
-              center={[13.7563, 100.5018]}
-              zoom={10}
-              style={{ height: "400px", width: "100%", maxHeight: "400px" }}
-            >
-              <TileLayer
-                url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
-                attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
-              />
-              {selectedLocation && (
-                <Marker position={selectedLocation} icon={icon}>
-                  <Popup>
-                    Location: {selectedLocation.lat}, {selectedLocation.lng}
-                  </Popup>
-                </Marker>
-              )}
-              <MapClick /> {/* Include MapClick to handle click events */}
-              <div className="absolute top-0 left-12 z-[1000]">
-                <Searchbox onSelectLocation={handleLocationSelect} />
-              </div>
-            </MapContainer>)}
-            
+            {showMap && (
+              <MapContainer
+                center={[13.7563, 100.5018]}
+                zoom={10}
+                style={{ height: "400px", width: "100%", maxHeight: "400px" }}
+              >
+                <TileLayer
+                  url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+                  attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+                />
+                {selectedLocation && (
+                  <Marker position={selectedLocation} icon={icon}>
+                    <Popup>
+                      Location: {selectedLocation.lat}, {selectedLocation.lng}
+                    </Popup>
+                  </Marker>
+                )}
+                <MapClick /> {/* Include MapClick to handle click events */}
+                <div className="absolute top-0 left-12 z-[1000]">
+                  <Searchbox onSelectLocation={handleLocationSelect} />
+                </div>
+              </MapContainer>
+            )}
 
             <button
               type="submit"

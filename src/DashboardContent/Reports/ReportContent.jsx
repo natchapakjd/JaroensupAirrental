@@ -167,7 +167,7 @@ const ReportContent = () => {
               <YAxis />
               <Tooltip />
               <Legend />
-              <Line type="monotone" dataKey="income" stroke="#8884d8" name="Income" />
+              <Line type="monotone" dataKey="income" stroke="#8884d8"  />
             </LineChart>
           </ResponsiveContainer>
         </div>

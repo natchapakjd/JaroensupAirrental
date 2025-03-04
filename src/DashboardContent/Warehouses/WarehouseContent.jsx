@@ -219,10 +219,13 @@ const WarehouseContent = () => {
         {/* Pagination Controls */}
         <div className="flex justify-between mt-4">
           <p
-            onClick={() => setCurrentPage(currentPage - 1)}
-            disabled={currentPage <= 1}
+            onClick={() => {
+              if (currentPage > 1) setCurrentPage(currentPage - 1);
+            }}
             className={`cursor-pointer ${
-              currentPage === 1 ? "text-gray-400" : "text-black"
+              currentPage === 1
+                ? "text-gray-400 cursor-not-allowed"
+                : "text-black"
             }`}
           >
             {translations[language].previous}
@@ -232,10 +235,13 @@ const WarehouseContent = () => {
             {translations[language].of} {totalPages}
           </span>
           <p
-            onClick={() => setCurrentPage(currentPage + 1)}
-            disabled={currentPage >= totalPages}
+            onClick={() => {
+              if (currentPage < totalPages) setCurrentPage(currentPage + 1);
+            }}
             className={`cursor-pointer ${
-              currentPage === totalPages ? "text-gray-400" : "text-black"
+              currentPage === totalPages
+                ? "text-gray-400 cursor-not-allowed"
+                : "text-black"
             }`}
           >
             {translations[language].next}

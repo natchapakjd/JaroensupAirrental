@@ -60,15 +60,15 @@ const Footer = () => {
           <h6 className="footer-title">{translations[lang].services}</h6>
           <a className="link link-hover">{translations[lang].branding}</a>
           <a className="link link-hover">{translations[lang].design}</a>
-          <a className="link link-hover">{translations[lang].marketing}</a>
-          <a className="link link-hover">{translations[lang].advertisement}</a>
+          {/* <a className="link link-hover">{translations[lang].marketing}</a>
+          <a className="link link-hover">{translations[lang].advertisement}</a> */}
         </nav>
         <nav>
           <h6 className="footer-title">{translations[lang].company}</h6>
           <a className="link link-hover">{translations[lang].aboutUs}</a>
           <a className="link link-hover">{translations[lang].contact}</a>
-          <a className="link link-hover">{translations[lang].jobs}</a>
-          <a className="link link-hover">{translations[lang].pressKit}</a>
+          {/* <a className="link link-hover">{translations[lang].jobs}</a>
+          <a className="link link-hover">{translations[lang].pressKit}</a> */}
         </nav>
         <nav>
           <h6 className="footer-title">{translations[lang].legal}</h6>

@@ -4,6 +4,8 @@ import Swal from "sweetalert2";
 import Cookies from "universal-cookie";
 import { jwtDecode } from "jwt-decode";
 import { Link } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
+
 const BorrowProductTable = () => {
   const [borrowingData, setBorrowingData] = useState([]);
   const [filteredData, setFilteredData] = useState([]);
@@ -283,6 +285,7 @@ const BorrowProductTable = () => {
     }
   };
 
+
   const handleCancel = async (borrowing_id) => {
     const result = await Swal.fire({
       title: currentLang.areYouSure,
@@ -335,204 +338,218 @@ const BorrowProductTable = () => {
     });
   };
 
+  const handleNavigate = (task_id) => {
+    window.location.href = `/dashboard/borrows/details/${task_id}`;
+  };
+  
+
   return (
-    <div className="container mx-auto p-8"><div className="p-8 rounded-lg shadow-lg w-full mx-auto font-prompt h-full">
-    <div className="flex justify-between items-center mb-4">
-      <h2 className="text-xl font-semibold">
-        {currentLang.borrowedEquipmentList}
-      </h2>
+    <div className="container mx-auto p-8">
+      <div className="p-8 rounded-lg shadow-lg w-full mx-auto font-prompt h-full">
+        <div className="flex justify-between items-center mb-4">
+          <h2 className="text-xl font-semibold">
+            {currentLang.borrowedEquipmentList}
+          </h2>
 
-      {role === 3 && (
-        <Link to="/dashboard/borrows/add">
-          <button className="btn bg-blue text-white hover:bg-blue">
-            {currentLang.createBorrowingTask}
-          </button>
-        </Link>
-      )}
-    </div>
+          {role === 3 && (
+            <Link to="/dashboard/borrows/add">
+              <button className="btn bg-blue text-white hover:bg-blue">
+                {currentLang.createBorrowingTask}
+              </button>
+            </Link>
+          )}
+        </div>
 
-    {/* Search and Filter Section */}
-    <div className="flex  gap-4 mb-6 justify-between">
-      <input
-        type="text"
-        placeholder="Search by name or product "
-        className="input input-bordered w-full"
-        value={searchQuery}
-        onChange={handleSearchChange}
-      />
-      <select
-        className="select select-bordered max-w-sm"
-        value={statusFilter}
-        onChange={handleStatusFilterChange}
-      >
-        <option value="">{currentLang.allStatus}</option>
-        <option value="pending">{currentLang.pending}</option>
-        <option value="approve">{currentLang.approve}</option>
-        <option value="completed">{currentLang.completed}</option>
-      </select>
-    </div>
-    <div className="overflow-x-auto">
-      <table className="table w-full border-collapse border border-gray-300 ">
-        <thead className="sticky-top bg-gray-200">
-          <tr>
-            <th className="border p-2 text-center">
-              {currentLang.borrowingID}
-            </th>
-            <th className="border p-2 text-center">
-              {currentLang.technicianName}
-            </th>
-            <th className="border p-2 text-center">
-              {currentLang.productName}
-            </th>
-            <th className="border p-2 text-center">
-              {currentLang.borrowDate}
-            </th>
-            <th className="border p-2 text-center">
-              {currentLang.returnDate}
-            </th>
-            <th className="border p-2 text-center">{currentLang.status}</th>
-            <th className="border p-2 text-center">{currentLang.taskType}</th>
-            {role === 3 && (
-              <th className="border p-2 text-center">
-                {currentLang.idCardImage}
-              </th>
-            )}
-            <th className="border p-2 text-center">{currentLang.actions}</th>
-            <th className="border p-2 text-center">
-              {currentLang.warningTH}
-            </th>
-          </tr>
-        </thead>
-        <tbody className="text-center">
-          {filteredData.length > 0 ? (
-            filteredData.map((item, index) => (
-              <tr key={index + 1}>
-                <td className="border p-2 text-center">{index + 1}</td>
-                <td className="border p-2 text-center">
-                  {item.firstname} {item.lastname}
-                </td>
-                <td className="border p-2 text-center">
-                  {item.product_name}
-                </td>
-                <td className="border p-2 text-center">
-                  {new Date(item.borrow_date).toLocaleDateString()}
-                </td>
-                <td className="border p-2 text-center">
-                  {item.return_date
-                    ? new Date(item.return_date).toLocaleDateString()
-                    : currentLang.equipmentNotReturned}
-                </td>
-
-                <td className="border p-2 text-center">{item.status_name}</td>
-                <td className="border p-2 text-center">{item.task_desc}</td>
+        {/* Search and Filter Section */}
+        <div className="flex  gap-4 mb-6 justify-between">
+          <input
+            type="text"
+            placeholder="Search by name or product "
+            className="input input-bordered w-full"
+            value={searchQuery}
+            onChange={handleSearchChange}
+          />
+          <select
+            className="select select-bordered max-w-sm"
+            value={statusFilter}
+            onChange={handleStatusFilterChange}
+          >
+            <option value="">{currentLang.allStatus}</option>
+            <option value="pending">{currentLang.pending}</option>
+            <option value="approve">{currentLang.approve}</option>
+            <option value="completed">{currentLang.completed}</option>
+          </select>
+        </div>
+        <div className="overflow-x-auto">
+          <table className="table w-full border-collapse border border-gray-300 ">
+            <thead className="sticky-top bg-gray-200">
+              <tr>
+                <th className="border p-2 text-center">
+                  {currentLang.borrowingID}
+                </th>
+                <th className="border p-2 text-center">
+                  {currentLang.technicianName}
+                </th>
+                <th className="border p-2 text-center">
+                  {currentLang.productName}
+                </th>
+                <th className="border p-2 text-center">
+                  {currentLang.borrowDate}
+                </th>
+                <th className="border p-2 text-center">
+                  {currentLang.returnDate}
+                </th>
+                <th className="border p-2 text-center">{currentLang.status}</th>
+                <th className="border p-2 text-center">
+                  {currentLang.taskType}
+                </th>
                 {role === 3 && (
-                  <td className="border p-2 text-center">
-                    {item.id_card_image ? (
-                      <img
-                        src={item.id_card_image}
-                        alt="ID Card"
-                        className="w-16 h-16 object-cover cursor-pointer hover:scale-110 transition duration-200"
-                        onClick={() => openImagePopup(item.id_card_image)}
-                      />
-                    ) : (
-                      <p>{currentLang.noImage}</p>
-                    )}
-                  </td>
+                  <th className="border p-2 text-center">
+                    {currentLang.idCardImage}
+                  </th>
                 )}
+                <th className="border p-2 text-center">
+                  {currentLang.actions}
+                </th>
+                <th className="border p-2 text-center">
+                  {currentLang.warningTH}
+                </th>
+              </tr>
+            </thead>
+            <tbody className="text-center">
+              {filteredData.length > 0 ? (
+                filteredData.map((item, index) => (
+                  <tr key={index + 1}>
+                    <td className="border p-2 text-center">{index + 1}</td>
+                    <td className="border p-2 text-center">
+                      {item.firstname} {item.lastname}
+                    </td>
+                    <td className="border p-2 text-center">
+                      {item.product_name}
+                    </td>
+                    <td className="border p-2 text-center">
+                      {new Date(item.borrow_date).toLocaleDateString()}
+                    </td>
+                    <td className="border p-2 text-center">
+                      {item.return_date
+                        ? new Date(item.return_date).toLocaleDateString()
+                        : currentLang.equipmentNotReturned}
+                    </td>
 
-                <td className="border p-2 text-center">
-                  <div className="flex justify-center gap-2">
-                    {role === 2 && item.status_id === 4 ? (
-                      <button
-                        onClick={() => handleReturn(item.task_id)}
-                        className="btn btn-error text-white"
-                      >
-                        {currentLang.return}
-                      </button>
-                    ) : null}
-                    {role === 3 && item.status_id !== 2 ? (
-                      <button
-                        onClick={() => handleReturn(item.task_id)}
-                        className="btn bg-blue text-white hover:bg-blue"
-                      >
-                        {currentLang.return}
-                      </button>
-                    ) : null}
-                    {role === 3 &&
-                    item.status_id !== 4 &&
-                    item.status_id !== 2 ? (
-                      <button
-                        onClick={() => handleApprove(item.task_id)}
-                        className="btn btn-success text-white"
-                      >
-                        {currentLang.approve}
-                      </button>
-                    ) : null}
-                    <Link to={`/dashboard/borrows/details/${item.task_id}`}>
-                      <button className="btn bg-success text-white hover:bg-success">
-                        {currentLang.details}
-                      </button>
-                    </Link>
+                    <td className="border p-2 text-center">
+                      {item.status_name}
+                    </td>
+                    <td className="border p-2 text-center">{item.task_desc}</td>
+                    {role === 3 && (
+                      <td className="border p-2 text-center">
+                        {item.id_card_image ? (
+                          <img
+                            src={item.id_card_image}
+                            alt="ID Card"
+                            className="w-16 h-16 object-cover cursor-pointer hover:scale-110 transition duration-200"
+                            onClick={() => openImagePopup(item.id_card_image)}
+                          />
+                        ) : (
+                          <p>{currentLang.noImage}</p>
+                        )}
+                      </td>
+                    )}
 
-                    {role === 3 ? (
-                      <Link
-                        to={`/dashboard/borrows/edit/${item.borrowing_id}`}
-                      >
-                        <button className="btn bg-success text-white hover:bg-success">
-                          {currentLang.edit}
+                    <td className="border p-2 text-center">
+                      <div className="flex justify-center gap-2">
+                        {role === 2 && item.status_id === 4 ? (
+                          <button
+                            onClick={() => handleReturn(item.task_id)}
+                            className="btn btn-error text-white"
+                          >
+                            {currentLang.return}
+                          </button>
+                        ) : null}
+                        {role === 3 && item.status_id !== 2 ? (
+                          <button
+                            onClick={() => handleReturn(item.task_id)}
+                            className="btn bg-blue text-white hover:bg-blue"
+                          >
+                            {currentLang.return}
+                          </button>
+                        ) : null}
+                        {role === 3 &&
+                        item.status_id !== 4 &&
+                        item.status_id !== 2 ? (
+                          <button
+                            onClick={() => handleApprove(item.task_id)}
+                            className="btn btn-success text-white"
+                          >
+                            {currentLang.approve}
+                          </button>
+                        ) : null}
+
+                        <button
+                          className="btn bg-success text-white hover:bg-success"
+                          onClick={() => handleNavigate(item.task_id)} // Wrap the function in an arrow function
+                        >
+                          {currentLang.details}
                         </button>
-                      </Link>
-                    ) : null}
 
-                    {role === 3 ? (
-                      <button
-                        onClick={() => handleCancel(item.task_id)}
-                        className="btn btn-error text-white"
-                      >
-                        {currentLang.cancel}
-                      </button>
-                    ) : null}
-                  </div>
-                </td>
-                <td className="border p-2 text-center">
+                        {role === 3 ? (
+                          <Link
+                            to={`/dashboard/borrows/edit/${item.borrowing_id}`}
+                          >
+                            <button className="btn bg-success text-white hover:bg-success">
+                              {currentLang.edit}
+                            </button>
+                          </Link>
+                        ) : null}
+
+                        {role === 3 ? (
+                          <button
+                            onClick={() => handleCancel(item.task_id)}
+                            className="btn btn-error text-white"
+                          >
+                            {currentLang.cancel}
+                          </button>
+                        ) : null}
+                      </div>
+                    </td>
+                    {/* <td className="border p-2 text-center">
                   {item.isOverdue ? (
                     <span className="text-red-500 font-bold">⚠️</span>
                   ) : (
                     currentLang.noWarning
                   )}
-                </td>
-              </tr>
-            ))
-          ) : (
-            <tr>
-              <td colSpan="8" className="border p-4">
-                {currentLang.noBorrowingData}
-              </td>
-            </tr>
-          )}
-        </tbody>
-      </table>
-    </div>
+                </td> */}
+                  </tr>
+                ))
+              ) : (
+                <tr>
+                  <td colSpan="8" className="border p-4">
+                    {currentLang.noBorrowingData}
+                  </td>
+                </tr>
+              )}
+            </tbody>
+          </table>
+        </div>
 
-    <div className="flex justify-between mt-4">
-      <p
-        onClick={() => handlePageChange(currentPage - 1)}
-        disabled={currentPage === 1}
-      >
-        {currentLang.previous}
-      </p>
-      <span>
-        {currentLang.page} {currentPage} {currentLang.of} {totalPages}
-      </span>
-      <p
-        onClick={() => handlePageChange(currentPage + 1)}
-        disabled={currentPage === totalPages}
-      >
-        {currentLang.next}
-      </p>
+        <div className="flex justify-between mt-4">
+          <p
+            onClick={() => handlePageChange(currentPage - 1)}
+            disabled={currentPage === 1}
+          >
+            {currentLang.previous}
+          </p>
+          <span>
+            {currentLang.page} {currentPage} {currentLang.of} {totalPages}
+          </span>
+          <p
+            onClick={() => handlePageChange(currentPage + 1)}
+            disabled={currentPage === totalPages}
+          >
+            {currentLang.next}
+          </p>
+        </div>
+      </div>
     </div>
-  </div></div>
-    
   );
 };
 

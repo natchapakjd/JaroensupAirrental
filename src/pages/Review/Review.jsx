@@ -81,6 +81,7 @@ const Review = () => {
         );
         if (response.data) {
           setExistingReview(response.data);
+          console.log(existingReview)
         }
       } catch (error) {
         console.error("Error fetching existing review:", error);
@@ -146,18 +147,7 @@ const Review = () => {
     }
   };
 
-  if (loading) {
-    return (
-      <>
-        <Navbar />
-        <div className="flex justify-center items-center h-screen">
-          <div className="spinner-border animate-spin inline-block w-12 h-12 border-4 rounded-full border-t-4 border-blue-500"></div>
-          <p className="ml-4">{translations[language].loading}</p>
-        </div>
-      </>
-    );
-  }
-
+  
   return (
     <div>
       <Navbar />

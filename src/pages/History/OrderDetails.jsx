@@ -112,7 +112,7 @@ const OrderDetails = () => {
                   <th className="border border-gray-300 p-2">{translations[language].totalPrice}</th>
                 </tr>
               </thead>
-              <tbody>
+              <tbody className='text-center'>
                 {order.items.map((item) => (
                   <tr key={item.product_id}>
                     <td className="border border-gray-300 p-2">{item.product_id}</td>

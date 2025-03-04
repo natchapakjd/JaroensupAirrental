@@ -45,7 +45,7 @@ const AssignTask = () => {
       assignedTasks: "งานที่ได้รับมอบหมาย",
       appointmentId: "รหัสการนัดหมาย",
       task: "งาน",
-      technicianName: "ชื่อช่างภายนอก",
+      technicianName: "ชื่อช่างที่ถูกมอบหมาย",
       action: "การกระทำ",
       noAssignedTasks: "ไม่มีงานที่ได้รับมอบหมาย",
       assignButton: "มอบหมายงาน",
@@ -180,7 +180,7 @@ const AssignTask = () => {
               <option value="">{t.selectTask}</option>
               {unassignedTasks.map((task, index) => (
                 <option key={index + 1} value={task.task_id}>
-                  {index + 1}. {task.description}
+                  {index + 1}. {task.firstname} {task.lastname} รายละเอียดงาน: {task.description} 
                 </option>
               ))}
             </select>
