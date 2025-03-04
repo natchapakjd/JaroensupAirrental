@@ -15,7 +15,7 @@ const UserDetails = () => {
 
   const translations = {
     en: {
-      details: "Details",
+      details: "Personal Details",
       username: "Username",
       firstname: "First Name",
       lastname: "Last Name",
@@ -32,7 +32,7 @@ const UserDetails = () => {
       isOutsource: "Is Outsource",
       workExperience: "Work Experience",
       specialSkills: "Special Skills",
-      backgroundCheckStatus: "Background Check Status",
+      backgroundCheckStatus: "Background Criminal Check Status",
       startDate: "Start Date",
       statusId: "Status ID",
       idCard: "ID Card",
@@ -42,7 +42,7 @@ const UserDetails = () => {
       failedToLoad: "Failed to load user details. Please try again later.",
     },
     th: {
-      details: "รายละเอียด",
+      details: "ข้อมูลส่วนตัว",
       username: "ชื่อผู้ใช้",
       firstname: "ชื่อจริง",
       lastname: "นามสกุล",
@@ -59,7 +59,7 @@ const UserDetails = () => {
       isOutsource: "เป็นผู้รับจ้าง",
       workExperience: "ประสบการณ์การทำงาน",
       specialSkills: "ทักษะพิเศษ",
-      backgroundCheckStatus: "สถานะการตรวจสอบประวัติ",
+      backgroundCheckStatus: "สถานะการตรวจสอบประวัติอาชญากรรม",
       startDate: "วันที่เริ่มงาน",
       statusId: "สถานะ ID",
       idCard: "บัตรประชาชน",
@@ -95,9 +95,9 @@ const UserDetails = () => {
   }
 
   return (
-    <div className="container mx-auto p-8">
-      <div className="container mx-auto p-8 bg-white shadow-xl rounded-lg ">
-        <div className="flex w-full">
+    <div className="p-8 bg-gray-50 min-h-screen">
+      <div className="max-w-4xl mx-auto bg-white shadow-lg rounded-lg p-6">
+        <div  className="flex w-full">
           <BackButtonEdit />
           <h1 className="text-2xl font-semibold mx-2">
             {user.username}'s {translations[language].details}
@@ -105,40 +105,27 @@ const UserDetails = () => {
         </div>
 
         {/* Profile Section */}
-        <div className="flex flex-col md:flex-row items-center mb-8">
+        <div className="flex flex-col items-center md:flex-row md:items-start gap-6">
           {user.image_url ? (
             <img
-              src={`${user.image_url}`}
+              src={user.image_url}
               alt={`${user.username}'s profile`}
-              className="w-32 h-32 rounded-full mr-6 shadow-lg"
+              className="w-32 h-32 rounded-full shadow-lg border-2 border-gray-300"
             />
           ) : (
-            <div className="w-32 h-32 mr-6 bg-gray-300 rounded-full shadow-lg"></div>
+            <div className="w-32 h-32 bg-gray-300 rounded-full shadow-lg"></div>
           )}
           <div className="text-center md:text-left">
-            <p className="text-lg font-medium text-gray-700">
-              <strong>{translations[language].username}:</strong>{" "}
-              {user.username}
-            </p>
-            <p className="text-lg font-medium text-gray-700">
-              <strong>{translations[language].firstname}:</strong>{" "}
-              {user.firstname}
-            </p>
-            <p className="text-lg font-medium text-gray-700">
-              <strong>{translations[language].lastname}:</strong>{" "}
-              {user.lastname}
-            </p>
-            <p className="text-lg font-medium text-gray-700">
-              <strong>{translations[language].email}:</strong> {user.email}
-            </p>
-            <p className="text-lg font-medium text-gray-700">
-              <strong>{translations[language].phone}:</strong> {user.phone}
-            </p>
+            <h2 className="text-2xl font-semibold text-gray-800">
+              {user.firstname} {user.lastname}
+            </h2>
+            <p className="text-gray-600">{translations[language].email}: {user.email}</p>
+            <p className="text-gray-600">{translations[language].phone}: {user.phone}</p>
           </div>
         </div>
 
         {/* User Details */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mt-6">
           <div>
             <p className="text-lg font-medium text-gray-700">
               <strong>{translations[language].age}:</strong> {user.age}

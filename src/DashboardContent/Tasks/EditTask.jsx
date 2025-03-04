@@ -71,16 +71,28 @@ const EditTask = () => {
   const language = localStorage.getItem("language") || "en"; // Default to English
 
   useEffect(() => {
+    // ถ้า finishDate น้อยกว่า startDate ให้ล้างค่า finishDate
+    if (finishDate && finishDate < startDate) {
+      setFinishDate("");
+    }
+  }, [startDate]);
+
+  useEffect(() => {
     // Fetch task types
+    
     const fetchTaskTypes = async () => {
       try {
         const response = await axios.get(`${apiUrl}/taskTypes`);
-        setTaskTypes(response.data);
+        
+        const filteredTaskTypes = response.data.filter(
+          (task) => task.task_type_id === 1 || task.task_type_id === 12
+        );
+    
+        setTaskTypes(filteredTaskTypes);
       } catch (error) {
         console.error("Error fetching task types:", error);
       }
     };
-
     // // Fetch products
     // const fetchProducts = async () => {
     //   try {
@@ -207,12 +219,27 @@ const EditTask = () => {
               required
             >
               <option value="">Select Task Type</option>
-              {taskTypes.map((taskType) => (
+              {taskTypes.map((taskType,index) => (
                 <option
                   key={taskType.task_type_id}
                   value={taskType.task_type_id}
                 >
-                  {taskType.type_name}
+                 {index+1}. {taskType.type_name}
+                </option>
+              ))}
+            </select>
+          </div>
+          <div>
+            <label className="block mb-2">{translations[language].user}</label>
+            <select
+              value={userId}
+              onChange={(e) => setUserId(e.target.value)}
+              className="border p-2 w-full"
+            >
+              <option value="">Select User</option>
+              {users.map((user, index) => (
+                <option key={index + 1} value={user.user_id}>
+                  {index + 1}. {user.firstname} {user.lastname}
                 </option>
               ))}
             </select>
@@ -248,35 +275,36 @@ const EditTask = () => {
             </select>
           </div>
           <div>
-            <label className="block text-gray-700">
-              {translations[language].rentalStartDate}
-            </label>
-            <input
-              type="datetime-local"
-              name="appointment_date"
-              value={appointmentDate}
-              onChange={(e) => {
-                const fullDate = e.target.value;
-                setAppointmentDate(fullDate);
-                setStartDate(fullDate.split("T")[0]); // Extract date part only
-              }}
-              min={new Date().toISOString().slice(0, 16)} // Prevent past dates
-              required
-              className="input input-bordered w-full"
-            />
-          </div>
-          <div>
-            <label className="block mb-2">
-              {translations[language].rentalEndDate}
-            </label>
-            <input
-              type="date"
-              value={finishDate}
-              onChange={(e) => setFinishDate(e.target.value)}
-              className="border p-2 w-full"
-              min={new Date().toISOString().split("T")[0]} // Ensure correct format for "date"
-            />
-          </div>
+        <label className="block text-gray-700">
+          {translations[language].rentalStartDate}
+        </label>
+        <input
+          type="datetime-local"
+          name="appointment_date"
+          value={appointmentDate}
+          onChange={(e) => {
+            const fullDate = e.target.value;
+            setAppointmentDate(fullDate);
+            setStartDate(fullDate.split("T")[0]); // ดึงเฉพาะวันที่
+          }}
+          min={new Date().toISOString().slice(0, 16)} // ป้องกันเลือกวันที่ผ่านมา
+          required
+          className="input input-bordered w-full"
+        />
+      </div>
+
+      <div>
+        <label className="block mb-2">
+          {translations[language].rentalEndDate}
+        </label>
+        <input
+          type="date"
+          value={finishDate}
+          onChange={(e) => setFinishDate(e.target.value)}
+          className="border p-2 w-full"
+          min={startDate || new Date().toISOString().split("T")[0]} // กำหนด min เป็น startDate ถ้ามีค่า
+        />
+      </div>
           <div>
             <label className="block mb-2">
               {translations[language].address}
@@ -300,21 +328,6 @@ const EditTask = () => {
             />
           </div>
 
-          <div>
-            <label className="block mb-2">{translations[language].user}</label>
-            <select
-              value={userId}
-              onChange={(e) => setUserId(e.target.value)}
-              className="border p-2 w-full"
-            >
-              <option value="">Select User</option>
-              {users.map((user, index) => (
-                <option key={index + 1} value={user.user_id}>
-                  {index + 1}. {user.firstname} - {user.lastname}
-                </option>
-              ))}
-            </select>
-          </div>
 
           <div className="mb-4">
             <p

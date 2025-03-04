@@ -14,7 +14,7 @@ const translations = {
     noWarehouses: "ไม่มีคลังสินค้า",
     id: "รหัส",
     location: "ที่ตั้ง",
-    capacity: "จำนวนแอร์ที่มี",
+    capacity: "จำนวนแอร์ทั้งหมดที่มี",
     actions: "การกระทำ",
     edit: "แก้ไข",
     delete: "ลบ",
@@ -26,6 +26,9 @@ const translations = {
     deleteText: "คุณจะไม่สามารถย้อนกลับได้!",
     deleteSuccess: "ลบเรียบร้อย!",
     deleteFail: "ลบไม่สำเร็จ",
+    air_5ton: "จำนวนแอร์ 5 ตันที่มี",
+    air_10ton: "จำนวนแอร์ 10 ตันที่มี",
+    air_20ton: "จำนวนแอร์ 20 ตันที่มี",
   },
   en: {
     warehouses: "Warehouses",
@@ -46,6 +49,9 @@ const translations = {
     deleteText: "You won't be able to revert this!",
     deleteSuccess: "Deleted!",
     deleteFail: "Failed to delete warehouse.",
+    air_5ton: "Quantity of available 5-ton air conditioners!",
+    air_10ton: "Quantity of available 10-ton air conditioners!",
+    air_20ton: "Quantity of available 20-ton air conditioners!"
   },
 };
 const WarehouseContent = () => {
@@ -181,7 +187,11 @@ const WarehouseContent = () => {
                   <th>{translations[language].id}</th>
                   <th>{translations[language].location}</th>
                   <th>{translations[language].capacity}</th>
+                  <th>{translations[language].air_5ton}</th>
+                  <th>{translations[language].air_10ton}</th>
+                  <th>{translations[language].air_20ton}</th>
                   <th>{translations[language].actions}</th>
+
                 </tr>
               </thead>
               <tbody>
@@ -193,6 +203,15 @@ const WarehouseContent = () => {
                     </td>
                     <td className="border p-2 text-center">
                       {warehouse.capacity}
+                    </td>
+                    <td className="border p-2 text-center text-blue-600 font-bold">
+                      {warehouse.air_5_ton? warehouse.air_5_ton : 0}
+                    </td>
+                    <td className="border p-2 text-center text-green-600 font-bold">
+                      {warehouse.air_10_ton ? warehouse.air_10_ton : 0}
+                    </td>
+                    <td className="border p-2 text-center text-red-600 font-bold">
+                      {warehouse.air_20_ton ? warehouse.air_20_ton : 0}
                     </td>
                     <td className="border p-2 text-center">
                       <Link

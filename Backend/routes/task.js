@@ -115,7 +115,8 @@ router.get("/tasks/paged", (req, res) => {
     INNER JOIN 
       tasktypes ON tasks.task_type_id = tasktypes.task_type_id
     WHERE 
-      tasks.isActive = 1 and tasks.task_type_id  = 1
+        tasks.isActive = 1 
+        AND (tasks.task_type_id = 1 OR tasks.task_type_id = 12)
     LIMIT ? OFFSET ?;
   `;
 
@@ -145,13 +146,80 @@ router.get("/tasks/paged", (req, res) => {
   });
 });
 
+router.get("/v2/tasks/paged", (req, res) => {
+  const { page = 1, limit = 10, user_id } = req.query; // รับ user_id จาก query params
+  const offset = (page - 1) * limit;
+
+  let query = `
+    SELECT 
+      tasks.*, 
+      users.username,
+      tasktypes.type_name,
+      status.status_name
+    FROM 
+      tasks
+    INNER JOIN 
+      users ON tasks.user_id = users.user_id
+    INNER JOIN 
+      status ON tasks.status_id = status.status_id
+    INNER JOIN 
+      tasktypes ON tasks.task_type_id = tasktypes.task_type_id
+    WHERE 
+        tasks.isActive = 1 
+        AND (tasks.task_type_id = 1 OR tasks.task_type_id = 12)
+  `;
+
+  let countQuery = `
+    SELECT COUNT(*) AS total 
+    FROM tasks 
+    WHERE task_type_id = 1 
+      AND isActive = 1
+  `;
+
+  let queryParams = [];
+  let countParams = [];
+
+  if (user_id) {
+    query += " AND tasks.user_id = ?";
+    countQuery += " AND user_id = ?";
+    queryParams.push(user_id);
+    countParams.push(user_id);
+  }
+
+  query += " LIMIT ? OFFSET ?";
+  queryParams.push(parseInt(limit), parseInt(offset));
+
+  db.query(countQuery, countParams, (err, countResult) => {
+    if (err) {
+      console.error("Error counting tasks: ", err);
+      return res.status(500).json({ error: "Failed to fetch tasks count" });
+    }
+
+    const total = countResult[0].total;
+
+    db.query(query, queryParams, (err, result) => {
+      if (err) {
+        console.error("Error fetching paged tasks: ", err);
+        return res.status(500).json({ error: "Failed to fetch tasks" });
+      }
+
+      res.status(200).json({
+        total,
+        page: parseInt(page),
+        limit: parseInt(limit),
+        tasks: result,
+      });
+    });
+  });
+});
+
 router.get("/task/:id", (req, res) => {
   const taskId = req.params.id;
 
   const query = `
     SELECT 
       tasks.*, 
-      tasktypes.*,
+      tasktypes.type_name,
       status.*,
       rental.*,
       users.firstname,
@@ -202,7 +270,8 @@ router.get("/tasks", (req, res) => {
     INNER JOIN 
       tasktypes ON tasks.task_type_id = tasktypes.task_type_id
     WHERE 
-      tasks.isActive = 1 and tasks.task_type_id = 1
+        tasks.isActive = 1 
+        AND (tasks.task_type_id = 1 OR tasks.task_type_id = 12)
   `;
 
   db.query(query, (err, result) => {

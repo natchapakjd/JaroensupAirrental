@@ -90,7 +90,7 @@ const UserHistory = () => {
   const [statusFilterOrder, setStatusFilterOrder] = useState("");
   const [reviewFilter, setReviewFilter] = useState("");
   const [orderSearchTerm, setOrderSearchTerm] = useState(""); // New search term for orders
-  const [appointmentData,setAppointmentData] =useState();
+  const [appointmentData, setAppointmentData] = useState();
   const navigate = useNavigate();
   const cookies = new Cookies();
   const token = cookies.get("authToken");
@@ -121,7 +121,9 @@ const UserHistory = () => {
   const filteredOrders = orderHistory.filter((order) => {
     return (
       (order.id.toString().includes(orderSearchTerm.toLowerCase()) ||
-        order.status_name.toLowerCase().includes(orderSearchTerm.toLowerCase())) &&
+        order.status_name
+          .toLowerCase()
+          .includes(orderSearchTerm.toLowerCase())) &&
       (statusFilterOrder ? order.status_name === statusFilterOrder : true)
     );
   });
@@ -129,21 +131,24 @@ const UserHistory = () => {
   const fetchUserData = async (taskPage, orderPage) => {
     try {
       const taskResponse = await axios.get(
-        `${import.meta.env.VITE_SERVER_URL}/task-paging/${user_id}?page=${taskPage}&limit=100`
+        `${
+          import.meta.env.VITE_SERVER_URL
+        }/task-paging/${user_id}?page=${taskPage}&limit=10`
       );
       const filteredTasks = taskResponse.data.tasks.filter(
         (task) => task.task_type_id === 1
       );
       setTaskHistory(filteredTasks);
       setTotalTasks(filteredTasks.length);
-      console.log(filteredTasks)
-  
+
       const orderResponse = await axios.get(
-        `${import.meta.env.VITE_SERVER_URL}/v1/orders/${user_id}?page=${orderPage}&limit=10`
+        `${
+          import.meta.env.VITE_SERVER_URL
+        }/v1/orders/${user_id}?page=${orderPage}&limit=10`
       );
       setOrderHistory(orderResponse.data.orders);
       setTotalOrders(orderResponse.data.totalCount);
-  
+
       const paymentResponse = await axios.get(
         `${import.meta.env.VITE_SERVER_URL}/payments/${user_id}`
       );
@@ -152,17 +157,20 @@ const UserHistory = () => {
         return acc;
       }, {});
       setPaymentHistory(payments);
-  
+
       // ดึงข้อมูลการนัดหมาย (appointment)
       const appointmentResponse = await axios.get(
         `${import.meta.env.VITE_SERVER_URL}/appointments`
       );
-      const appointments = appointmentResponse.data.reduce((acc, appointment) => {
-        acc[appointment.task_id] = appointment;
-        return acc;
-      }, {});
+      const appointments = appointmentResponse.data.reduce(
+        (acc, appointment) => {
+          acc[appointment.task_id] = appointment;
+          return acc;
+        },
+        {}
+      );
       setAppointmentData(appointments);
-  
+
       setLoading(false);
     } catch (error) {
       console.error("Error fetching user history:", error);
@@ -247,26 +255,33 @@ const UserHistory = () => {
     try {
       // Show confirmation dialog before proceeding
       const confirmation = await Swal.fire({
-        title: "Are you sure?",
-        text: "This task will be deleted permanently.",
+        title: "คุณแน่ใจหรือไม่?",
+        text: "งานนี้จะถูกลบถาวรและไม่สามารถกู้คืนได้!",
         icon: "warning",
         showCancelButton: true,
-        confirmButtonText: "Yes, delete it!",
-        cancelButtonText: "Cancel",
+        confirmButtonText: "ใช่, ลบเลย!",
+        cancelButtonText: "ยกเลิก",
+      });
+
+      await axios.post(`${import.meta.env.VITE_SERVER_URL}/task-log`, {
+        task_id: taskId,
+        user_id: user_id, // ระบุ user ที่ทำการลบ
+        action: `ยกเลิกบริการงานเช่า(หมายเลข): ${taskId} `,
       });
 
       if (confirmation.isConfirmed) {
         const result = await axios.delete(
           `${import.meta.env.VITE_SERVER_URL}/v2/task/${taskId}`
         );
+
         // After deleting, fetch user data again to refresh the task list
         fetchUserData(taskPage, orderPage);
 
         // Display success message with Swal
         Swal.fire({
-          title: "Task deleted successfully.",
+          title: "ลบงานสำเร็จ!",
           icon: "success",
-          confirmButtonText: "OK",
+          confirmButtonText: "ตกลง",
         });
       }
     } catch (error) {
@@ -274,9 +289,9 @@ const UserHistory = () => {
 
       // Display error message with Swal
       Swal.fire({
-        title: "Failed to delete task.",
+        title: "ไม่สามารถลบงานได้",
         icon: "error",
-        confirmButtonText: "OK",
+        confirmButtonText: "ตกลง",
       });
     }
   };
@@ -287,7 +302,7 @@ const UserHistory = () => {
   return (
     <>
       <Navbar />
-      <div className="container mx-auto mt-10 font-prompt">
+      <div className="container mx-2 my-10 font-prompt md:mx-auto">
         <h2 className="text-2xl font-bold mb-4">
           {translations[language].userHistory}
         </h2>
@@ -324,92 +339,102 @@ const UserHistory = () => {
           <option value="false">ยังไม่รีวิว</option>
         </select> */}
           </div>
-          <table className="table table-zebra w-full">
-            <thead>
-              <tr>
-                <th>{translations[language].taskId}</th>
-                <th>{translations[language].taskType}</th>
-                <th>{translations[language].description}</th>
-                <th>{translations[language].address}</th>
-                <th>{translations[language].status}</th>
-                <th>{translations[language].appointmentDate}</th>
-                <th>{translations[language].createdAt}</th>
-                <th>{translations[language].details}</th>
-                <th>{translations[language].actions}</th>
-              </tr>
-            </thead>
-            <tbody>
-              {filteredTasks.length > 0 ? (
-                filteredTasks.map((task, index) => (
-                  <tr key={index + 1}>
-                    <td>{index + 1}</td>
-                    <td>{task.type_name}</td>
-                    <td>{task.description}</td>
-                    <td>{task.address}</td>
-                    <td>{task.status_name}</td>
-                    <td>{new Date(task.appointment_date).toLocaleString()}</td>
-                    <td>{new Date(task.created_at).toLocaleString()}</td>
-                    <td>
-                      <button
-                        onClick={() => handleTaskDetail(task.task_id)}
-                        className="text-blue-500 hover:underline"
-                      >
-                        {translations[language].details}
-                      </button>
-                    </td>
-                    <td>
-                      {
-                        appointmentData[task.task_id] && task.status_id === 2 && ( 
+          <div className="overflow-x-auto">
+            <table className="table table-zebra w-full">
+              <thead>
+                <tr>
+                  <th>{translations[language].taskId}</th>
+                  <th>{translations[language].taskType}</th>
+                  <th>{translations[language].description}</th>
+                  <th>{translations[language].address}</th>
+                  <th>{translations[language].status}</th>
+                  <th>{translations[language].appointmentDate}</th>
+                  <th>{translations[language].createdAt}</th>
+                  <th>{translations[language].details}</th>
+                  <th>{translations[language].actions}</th>
+                </tr>
+              </thead>
+              <tbody>
+                {filteredTasks.length > 0 ? (
+                  filteredTasks.map((task, index) => (
+                    <tr key={index + 1}>
+                      <td>{index + 1}</td>
+                      <td>{task.type_name}</td>
+                      <td>{task.description}</td>
+                      <td>{task.address}</td>
+                      <td>{task.status_name}</td>
+                      <td>
+                        {new Date(task.appointment_date).toLocaleString()}
+                      </td>
+                      <td>
+                        {new Date(
+                          new Date(task.created_at).getTime() +
+                            7 * 60 * 60 * 1000
+                        ).toLocaleString()}
+                      </td>
+                      <td>
+                        <button
+                          onClick={() => handleTaskDetail(task.task_id)}
+                          className="text-blue-500 hover:underline"
+                        >
+                          {translations[language].details}
+                        </button>
+                      </td>
+                      <td>
+                        {appointmentData[task.task_id] &&
+                          task.status_id === 2 && (
+                            <button
+                              onClick={() => handleReview(task.task_id)}
+                              className="ml-5 text-blue-600"
+                            >
+                              <div className="flex pt-1 mt-1">
+                                <MdOutlineStar className="text-yellow-400" />
+                                {translations[language].review}
+                              </div>
+                            </button>
+                          )}
+                        {paymentHistory[task.task_id] && (
                           <button
-                            onClick={() => handleReview(task.task_id)}
+                            onClick={() => handlePaymentSlip(task.task_id)}
                             className="ml-5 text-blue-600"
                           >
                             <div className="flex pt-1 mt-1">
-                              <MdOutlineStar className="text-yellow-400" />
-                              {translations[language].review}
+                              {" "}
+                              {translations[language].attachSlip}
                             </div>
                           </button>
-                        )
-                      }
-                      {paymentHistory[task.task_id] && (
-                        <button
-                          onClick={() => handlePaymentSlip(task.task_id)}
-                          className="ml-5 text-blue-600"
-                        >
-                          <div className="flex pt-1 mt-1">
-                            {" "}
-                            {translations[language].attachSlip}
-                          </div>
-                        </button>
-                      )}
-                      {task.status_id !== 2 && task.status_id !== 4 && task.status_id !== 5 &&( // If task is in progress
-                        <button
-                          onClick={() => handleDeleteTask(task.task_id)} // Add delete button
-                          className="ml-5 text-red-600"
-                        >
-                          {translations[language].cancelTask}
-                        </button>
-                      )}
-                      {task.status_id === 5 && ( // If task is in progress
-                        <button
-                          onClick={() => handleCompleteTask(task.task_id)} // Mark task as completed
-                          className="ml-5 text-green-600"
-                        >
-                          {translations[language].markDone}
-                        </button>
-                      )}
+                        )}
+                        {task.status_id !== 2 &&
+                          task.status_id !== 4 &&
+                          task.status_id !== 5 && ( // If task is in progress
+                            <button
+                              onClick={() => handleDeleteTask(task.task_id)} // Add delete button
+                              className="ml-5 text-red-600"
+                            >
+                              {translations[language].cancelTask}
+                            </button>
+                          )}
+                        {task.status_id === 5 && ( // If task is in progress
+                          <button
+                            onClick={() => handleCompleteTask(task.task_id)} // Mark task as completed
+                            className="ml-5 text-green-600"
+                          >
+                            {translations[language].markDone}
+                          </button>
+                        )}
+                      </td>
+                    </tr>
+                  ))
+                ) : (
+                  <tr>
+                    <td colSpan="9" className="text-center">
+                      No task history found.
                     </td>
                   </tr>
-                ))
-              ) : (
-                <tr>
-                  <td colSpan="9" className="text-center">
-                    No task history found.
-                  </td>
-                </tr>
-              )}
-            </tbody>
-          </table>
+                )}
+              </tbody>
+            </table>
+          </div>
         </div>
         <div className="flex justify-between mt-4">
           <button
@@ -435,79 +460,80 @@ const UserHistory = () => {
             {translations[language].orderHistory}
           </h3>
           <div className="flex space-x-4 mb-4">
-          <input
-            type="text"
-            placeholder="Search order history"
-            value={orderSearchTerm}
-            onChange={(e) => setOrderSearchTerm(e.target.value)}
-            className="border p-2 rounded w-full"
+            <input
+              type="text"
+              placeholder="Search order history"
+              value={orderSearchTerm}
+              onChange={(e) => setOrderSearchTerm(e.target.value)}
+              className="border p-2 rounded w-full"
             />
 
-          <select
-            value={statusFilter}
-            onChange={(e) => setStatusFilterOrder(e.target.value)}
-            className="border p-2 rounded"
-          >
-            <option value="">สถานะทั้งหมด</option>
-            <option value="pending">รอดำเนินการ</option>
-            <option value="completed">เสร็จสิ้น</option>
-          </select>
+            <select
+              value={statusFilter}
+              onChange={(e) => setStatusFilterOrder(e.target.value)}
+              className="border p-2 rounded"
+            >
+              <option value="">สถานะทั้งหมด</option>
+              <option value="pending">รอดำเนินการ</option>
+              <option value="completed">เสร็จสิ้น</option>
+            </select>
           </div>
-          
-          <table className="table table-zebra w-full">
-            <thead>
-              <tr>
-                <th>{translations[language].orderId}</th>
-                <th>{translations[language].totalPrice}</th>
-                <th>{translations[language].orderDate}</th>
-                <th>{translations[language].status}</th>
-                <th>{translations[language].details}</th>
-                <th>{translations[language].actions}</th>
-              </tr>
-            </thead>
-            <tbody>
-              {filteredOrders.length > 0 ? (
-                filteredOrders.map((order,index) => (
-                  <tr key={index+1}>
-                    <td>{index+1}</td>
-                    <td>{order.total_price.toFixed(2)}</td>
-                    <td>{new Date(order.created_at).toLocaleString()}</td>
-                    <td>{order.status_name}</td>
-                    <td>
-                      <button
-                        onClick={() => handleOrderDetail(order.id)}
-                        className="hover:underline text-blue-500"
-                      >
-                        {translations[language].details}
-                      </button>
-                    </td>
-                    <td>
-                      {paymentHistory[order.task_id] ? (
+          <div className="overflow-x-auto">
+            <table className="table table-zebra w-full">
+              <thead>
+                <tr>
+                  <th>{translations[language].orderId}</th>
+                  <th>{translations[language].totalPrice}</th>
+                  <th>{translations[language].orderDate}</th>
+                  <th>{translations[language].status}</th>
+                  <th>{translations[language].details}</th>
+                  <th>{translations[language].actions}</th>
+                </tr>
+              </thead>
+              <tbody>
+                {filteredOrders.length > 0 ? (
+                  filteredOrders.map((order, index) => (
+                    <tr key={index + 1}>
+                      <td>{index + 1}</td>
+                      <td>{order.total_price.toFixed(2)}</td>
+                      <td>{new Date(order.created_at).toLocaleString()}</td>
+                      <td>{order.status_name}</td>
+                      <td>
                         <button
-                          onClick={() => handlePaymentSlip(order.task_id)}
-                          className="ml-5 text-blue-600"
+                          onClick={() => handleOrderDetail(order.id)}
+                          className="hover:underline text-blue-500"
                         >
-                          <div className="flex pt-1 mt-1">
-                            {translations[language].attachSlip}
-                          </div>
+                          {translations[language].details}
                         </button>
-                      ) : (
-                        <span className="text-gray-400">
-                          {translations[language].noSlip}
-                        </span>
-                      )}
+                      </td>
+                      <td>
+                        {paymentHistory[order.task_id] ? (
+                          <button
+                            onClick={() => handlePaymentSlip(order.task_id)}
+                            className="ml-5 text-blue-600"
+                          >
+                            <div className="flex pt-1 mt-1">
+                              {translations[language].attachSlip}
+                            </div>
+                          </button>
+                        ) : (
+                          <span className="text-gray-400">
+                            {translations[language].noSlip}
+                          </span>
+                        )}
+                      </td>
+                    </tr>
+                  ))
+                ) : (
+                  <tr>
+                    <td colSpan="5" className="text-center">
+                      {translations[language].noOrder}
                     </td>
                   </tr>
-                ))
-              ) : (
-                <tr>
-                  <td colSpan="5" className="text-center">
-                    {translations[language].noOrder}
-                  </td>
-                </tr>
-              )}
-            </tbody>
-          </table>
+                )}
+              </tbody>
+            </table>
+          </div>
 
           <div className="flex justify-between mt-4">
             <p

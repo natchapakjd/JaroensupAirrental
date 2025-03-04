@@ -53,7 +53,7 @@ const BorrowProductTable = () => {
       edit: "edit",
       borrowingID: "borrowing ID",
       technicianName: "tech name",
-      productName: "product name]",
+      productName: "product name",
       borrowDate: "borrow date",
       returnDate: "return date",
       status: "status",
@@ -62,6 +62,7 @@ const BorrowProductTable = () => {
       actions: "action",
       warningTH: "warning",
       details: "details",
+      noBorrowingData: "No borrowing data"
     },
     th: {
       borrowedEquipmentList: "รายการอุปกรณ์ที่ยืม",
@@ -103,6 +104,7 @@ const BorrowProductTable = () => {
       actions: "การดำเนินการ",
       warningTH: "คำเตือน",
       details: "รายละเอียด",
+      noBorrowingData: "ไม่มีข้อมูลการยืมอุปกรณ์"
     },
   };
   const currentLang = translation[language] || translation.en;
@@ -511,18 +513,18 @@ const BorrowProductTable = () => {
                         ) : null}
                       </div>
                     </td>
-                    {/* <td className="border p-2 text-center">
+                    <td className="border p-2 text-center">
                   {item.isOverdue ? (
                     <span className="text-red-500 font-bold">⚠️</span>
                   ) : (
                     currentLang.noWarning
                   )}
-                </td> */}
+                </td>
                   </tr>
                 ))
               ) : (
                 <tr>
-                  <td colSpan="8" className="border p-4">
+                  <td colSpan="10" className="border p-4">
                     {currentLang.noBorrowingData}
                   </td>
                 </tr>

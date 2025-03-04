@@ -72,14 +72,26 @@ const AddTask = () => {
   const t = translations[currentLanguage];
 
   useEffect(() => {
+    if (rentalEndDate && rentalEndDate < rentalStartDate) {
+      setRentalEndDate("");
+    }
+  }, [rentalStartDate]);
+
+  useEffect(() => {
     const fetchTaskTypes = async () => {
       try {
         const response = await axios.get(`${apiUrl}/taskTypes`);
-        setTaskTypes(response.data);
+        
+        const filteredTaskTypes = response.data.filter(
+          (task) => task.task_type_id === 1 || task.task_type_id === 12
+        );
+    
+        setTaskTypes(filteredTaskTypes);
       } catch (error) {
         console.error("Error fetching task types:", error);
       }
     };
+    
 
     const fetchProducts = async () => {
       try {
@@ -132,8 +144,8 @@ const AddTask = () => {
         address,
         quantity_used: quantityUsed,
         user_id: userId,
-        latitude: latitude, // ✅ ถ้าไม่เลือกแผนที่จะให้เป็น ""
-        longitude: longitude,
+        latitude: latitude ? latitude : null, // ✅ ถ้าไม่เลือกแผนที่จะให้เป็น ""
+        longitude: longitude ? longitude : null,
       });
 
       if (response.status === 201) {
@@ -207,7 +219,7 @@ const AddTask = () => {
               onChange={(e) => {
                 const fullDate = e.target.value;
                 setAppointmentDate(fullDate);
-                setRentalStartDate(fullDate.split("T")[0]);
+                setRentalStartDate(fullDate.split("T")[0]); // แยกเอาแค่วันที่
               }}
               min={new Date().toISOString().slice(0, 16)}
               required
@@ -221,7 +233,7 @@ const AddTask = () => {
               type="date"
               value={rentalEndDate}
               onChange={(e) => setRentalEndDate(e.target.value)}
-              min={new Date().toISOString().split("T")[0]}
+              min={rentalStartDate || new Date().toISOString().split("T")[0]} // กำหนด min เป็น rentalStartDate ถ้ามีค่า
               required
               className="input input-bordered w-full"
             />

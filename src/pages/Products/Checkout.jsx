@@ -6,6 +6,8 @@ import Swal from "sweetalert2";
 import axios from "axios";
 import Cookies from "universal-cookie";
 import { jwtDecode } from "jwt-decode";
+import { useContext } from "react";
+import { CartContext } from "../../context/CartContext";
 
 const Checkout = () => {
   const location = useLocation();
@@ -19,6 +21,7 @@ const Checkout = () => {
   const token = cookies.get("authToken");
   const decodedToken = jwtDecode(token);
   const userId = decodedToken.id;
+  const { removeFromCart } = useContext(CartContext); 
 
   useEffect(() => {
     fetchProfile();
@@ -193,7 +196,16 @@ const Checkout = () => {
   
 
   const handleRemoveItem = (productId) => {
-    setCartItems(cartItems.filter((item) => item.product_id !== productId));
+    removeFromCart(productId);
+    setCartItems((prev) =>
+      prev
+        .map((item) =>
+          item.product_id === productId
+            ? { ...item, quantity: item.quantity - 1 }
+            : item
+        )
+        .filter((item) => item.quantity > 0) // ถ้าจำนวนเป็น 0 ให้ลบออก
+    );
   };
 
   const handleContinueShopping = () => {

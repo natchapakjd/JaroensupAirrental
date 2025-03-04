@@ -19,6 +19,7 @@ const TaskContent = () => {
   const decodedToken = jwtDecode(token);
   const role = decodedToken.role;
   const techId = decodedToken.technicianId;
+  const user_id =decodedToken.id
   const apiUrl = import.meta.env.VITE_SERVER_URL;
   const language = localStorage.getItem("language") || "en";
 
@@ -76,6 +77,7 @@ const TaskContent = () => {
   const currentLang = translation[language];
 
   const navigate = useNavigate();
+  
   useEffect(() => {
     fetchTasks();
     fetchStatuses();
@@ -87,6 +89,30 @@ const TaskContent = () => {
     });
   }, [tasks]);
 
+  // const fetchTasks = async () => {
+  //   try {
+  //     const apiEndpoint = role === 2 ? `${apiUrl}/v2/tasks/paged` : `${apiUrl}/tasks/paged`;
+  
+  //     const params = {
+  //       page: currentPage,
+  //       limit: tasksPerPage,
+  //     };
+  
+  //     if (role === 2) {
+  //       params.user_id = user_id; // ส่ง user_id ไปเมื่อ role === 2
+  //     }
+  
+  //     const response = await axios.get(apiEndpoint, { params });
+  
+  //     const { tasks, total } = response.data;
+  //     setTasks(tasks.filter((t) => t.task_type_id === 1));
+  //     setTotalTasks(total);
+  //   } catch (error) {
+  //     console.error("Error fetching paged tasks:", error);
+  //   }
+  // };
+  
+
   const fetchTasks = async () => {
     try {
       const response = await axios.get(`${apiUrl}/tasks/paged`, {
@@ -97,7 +123,7 @@ const TaskContent = () => {
       });
 
       const { tasks, total } = response.data;
-      setTasks(tasks.filter((t) => t.task_type_id === 1));
+      setTasks(tasks.filter((t) => t.task_type_id === 1 || t.task_type_id ===12));
       setTotalTasks(total);
     } catch (error) {
       console.error("Error fetching paged tasks:", error);
@@ -213,7 +239,6 @@ const TaskContent = () => {
 
   return (
     <div className="container mx-auto p-8">
-      {" "}
       <div className="p-8 rounded-lg shadow-lg w-full mx-auto font-prompt h-full">
         <div className="flex justify-between items-center mb-4">
           <h2 className="text-xl font-semibold ">{currentLang.taskList}</h2>
@@ -302,7 +327,7 @@ const TaskContent = () => {
                       <div className="flex justify-center gap-2">
                         {role === 3 && (
                           <>
-                            {task.status_id !== 4 && task.status_id !== 2 && (
+                            {task.status_id !== 4 && task.status_id !== 2 &&  task.task_type_id !== 12 && (
                               <Link
                                 to={`/dashboard/tasks/approve/${task.task_id}`}
                               >

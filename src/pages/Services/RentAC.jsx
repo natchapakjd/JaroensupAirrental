@@ -24,6 +24,35 @@ const icon = L.icon({
   iconAnchor: [12, 41],
 });
 
+const translations = {
+  th: {
+    title: "แบบฟอร์มแจ้งบริการ",
+    taskType: "ประเภทงาน",
+    selectTaskType: "เลือกประเภทงาน",
+    description: "รายละเอียด",
+    address: "ที่อยู่",
+    startDate: "วันที่เริ่ม",
+    endDate: "วันที่สิ้นสุด",
+    chooseLocation: "เลือกตำแหน่งบนแผนที่",
+    hideMap: "ซ่อนแผนที่ ❌",
+    submit: "ส่งข้อมูล",
+    loading: "กำลังโหลด...",
+  },
+  en: {
+    title: "Service Request Form",
+    taskType: "Task Type",
+    selectTaskType: "Select Task Type",
+    description: "Description",
+    address: "Address",
+    startDate: "Start Date",
+    endDate: "End Date",
+    chooseLocation: "Select Location on Map",
+    hideMap: "Hide Map ❌",
+    submit: "Submit",
+    loading: "Loading...",
+  },
+};
+
 const RentAC = () => {
   const { taskTypeId } = useParams();
   const cookies = new Cookies();
@@ -45,10 +74,21 @@ const RentAC = () => {
   const [selectedLocation, setSelectedLocation] = useState(null);
   const [profile, setProfile] = useState();
   const [showMap, setShowMap] = useState(false); // ✅ ควบคุมการแสดงแผนที่
-
+  const [language,setLanguage] = useState(localStorage.getItem('language')||'th')
   const token = cookies.get("authToken");
   const decodedToken = jwtDecode(token);
   const userId = decodedToken.id;
+
+  useEffect(() => {
+      const interval = setInterval(() => {
+        const currentLanguage = localStorage.getItem("language") || "th";
+        if (currentLanguage !== language) {
+          setLanguage(currentLanguage);
+        }
+      }, 100);
+  
+      return () => clearInterval(interval);
+  }, [language]);
 
   useEffect(() => {
     const fetchProducts = async () => {
@@ -180,6 +220,14 @@ const RentAC = () => {
         longitude: selectedLocation ? formData.longitude : null,
       });
 
+      const taskId = response.data.task_id; // รับค่า task_id จาก response
+      // 🔥 เก็บ log ว่าผู้ใช้สร้าง task
+      await axios.post(`${import.meta.env.VITE_SERVER_URL}/task-log`, {
+        task_id: taskId,
+        user_id: userId,
+        action: "สั่งงานเช่า",
+      });
+
       Swal.fire({
         title: "สำเร็จ!",
         text: "แบบฟอร์มถูกส่งเรียบร้อยแล้ว",
@@ -227,7 +275,7 @@ const RentAC = () => {
     <>
       <Navbar />
       <div className="container mx-auto mt-10 font-prompt">
-        <h2 className="text-2xl font-bold mb-4 mx-2">แบบฟอร์มแจ้งบริการ</h2>
+        <h2 className="text-2xl font-bold mb-4 mx-2">{translations[language].title}</h2>
         {loading ? (
           <p>Loading...</p>
         ) : (
@@ -236,7 +284,7 @@ const RentAC = () => {
             className="bg-white p-6 rounded-lg shadow-md"
           >
             <div className="mb-4">
-              <label className="block text-gray-700">Task Type</label>
+              <label className="block text-gray-700">{translations[language].taskType}</label>
               <select
                 name="task_type_id"
                 value={formData.task_type_id}
@@ -244,7 +292,7 @@ const RentAC = () => {
                 required
                 className="select select-bordered w-full"
               >
-                <option value="">เลือกประเภทงาน</option>
+                <option value="">{translations[language].selectTaskType}</option>
                 {filteredTaskTypes.map((taskType) => (
                   <option
                     key={taskType.task_type_id}
@@ -256,7 +304,7 @@ const RentAC = () => {
               </select>
             </div>
             <div className="mb-4">
-              <label className="block text-gray-700">Description</label>
+              <label className="block text-gray-700">{translations[language].description}</label>
               <textarea
                 name="description"
                 value={formData.description}
@@ -266,7 +314,7 @@ const RentAC = () => {
               ></textarea>
             </div>
             <div className="mb-4">
-              <label className="block text-gray-700">Address</label>
+              <label className="block text-gray-700">{translations[language].address}</label>
               <input
                 type="text"
                 name="address"
@@ -277,7 +325,7 @@ const RentAC = () => {
               />
             </div>
             <div className="mb-4">
-              <label className="block text-gray-700">Start Date</label>
+              <label className="block text-gray-700">{translations[language].startDate}</label>
               <input
                 type="datetime-local"
                 name="appointment_date"
@@ -289,7 +337,7 @@ const RentAC = () => {
               />
             </div>
             <div className="mb-4">
-              <label className="block text-gray-700">End Date</label>
+              <label className="block text-gray-700">{translations[language].endDate}</label>
               <input
                 type="date"
                 name="rental_end_date"
@@ -344,7 +392,7 @@ const RentAC = () => {
               type="submit"
               className="btn bg-blue hover:bg-blue text-white my-5 w-full"
             >
-              Submit
+              {translations[language].submit}
             </button>
           </form>
         )}

@@ -75,41 +75,77 @@ const TaskDetails = () => {
   }
 
   return (
-    <div className="p-8 rounded-lg shadow-lg w-full mx-auto font-prompt h-screen">
-      <div className="flex  w-full my-2">
-        <BackButtonEdit />
-        <h1 className="text-2xl font-semibold mx-2">
-        {t.taskDetails}: {task.title}
-        </h1>
-      </div>
-      
-      <div className="mb-4">
-        {task.task_id && <p><strong>{t.id}:</strong> {task.task_id}</p>}
-        {task.description && <p><strong>{t.description}:</strong> {task.description}</p>}
-        {task.status_id && <p><strong>{t.status}:</strong> {task.status_name}</p>}
-        {task.appointment_date && <p><strong>{t.startDate}:</strong> {new Date(task.appointment_date).toLocaleString()}</p>}
-        {task.rental_end_date && <p><strong>{t.finishDate}:</strong> {new Date(task.rental_end_date).toLocaleDateString()}</p>}
-        {task.address && <p><strong>{t.address}:</strong> {task.address}</p>}
-        {task.quantity_used && <p><strong>{t.quantityUsed}:</strong> {task.quantity_used}</p>}
-        {task.user_id && <p><strong>{t.name}:</strong> {task.firstname} {task.lastname}</p>}
-      </div>
+    <div className="container mx-auto p-8">
+      <div className="p-8 rounded-lg shadow-lg w-full mx-auto font-prompt h-full">
+        <div className="flex  w-full my-2">
+          <BackButtonEdit />
+          <h1 className="text-2xl font-semibold mx-2">
+            {t.taskDetails}: {task.title}
+          </h1>
+        </div>
 
-      {/* Map Section */}
-      {task.latitude && task.longitude && (
-        <MapContainer
-          center={[task.latitude, task.longitude]} // Center the map on task's lat/long
-          zoom={13}
-          style={{ height: "400px", width: "100%" }}
-        >
-          <TileLayer
-            url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
-            attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
-          />
-          <Marker position={[task.latitude, task.longitude]}>
-            <Popup>{task.title}</Popup>
-          </Marker>
-        </MapContainer>
-      )}
+        <div className="mb-4">
+          {task.task_id && (
+            <p>
+              <strong>{t.id}:</strong> {task.task_id}
+            </p>
+          )}
+          {task.description && (
+            <p>
+              <strong>{t.description}:</strong> {task.description}
+            </p>
+          )}
+          {task.status_id && (
+            <p>
+              <strong>{t.status}:</strong> {task.status_name}
+            </p>
+          )}
+          {task.appointment_date && (
+            <p>
+              <strong>{t.startDate}:</strong>{" "}
+              {new Date(task.appointment_date).toLocaleString()}
+            </p>
+          )}
+          {task.rental_end_date && (
+            <p>
+              <strong>{t.finishDate}:</strong>{" "}
+              {new Date(task.rental_end_date).toLocaleDateString()}
+            </p>
+          )}
+          {task.address && (
+            <p>
+              <strong>{t.address}:</strong> {task.address}
+            </p>
+          )}
+          {task.quantity_used && (
+            <p>
+              <strong>{t.quantityUsed}:</strong> {task.quantity_used}
+            </p>
+          )}
+          {task.user_id && (
+            <p>
+              <strong>{t.name}:</strong> {task.firstname} {task.lastname}
+            </p>
+          )}
+        </div>
+
+        {/* Map Section */}
+        {task.latitude && task.longitude && (
+          <MapContainer
+            center={[task.latitude, task.longitude]} // Center the map on task's lat/long
+            zoom={13}
+            style={{ height: "400px", width: "100%" }}
+          >
+            <TileLayer
+              url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+              attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+            />
+            <Marker position={[task.latitude, task.longitude]}>
+              <Popup>{task.title}</Popup>
+            </Marker>
+          </MapContainer>
+        )}
+      </div>
     </div>
   );
 };

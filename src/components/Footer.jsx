@@ -1,20 +1,20 @@
 import React from "react";
-import { useState,useEffect } from "react";
-
+import { useState, useEffect } from "react";
+import LINE_QR_CODE from "../assets/images/Line/LINE_QR.png";
 const translations = {
   en: {
     services: "Services",
-    branding: "Branding",
-    design: "Design",
-    marketing: "Marketing",
+    branding: "Our Services",
+    design: "Our Past Work",
+    marketing: "Register as tech outsource",
     advertisement: "Advertisement",
     company: "Company",
     aboutUs: "About us",
     contact: "Contact",
     jobs: "Jobs",
     pressKit: "Press kit",
-    legal: "Legal",
-    termsOfUse: "Terms of use",
+    legal: "Add Friends",
+    termsOfUse: "You can inquire about and contact us for product and service information 24/7",
     privacyPolicy: "Privacy policy",
     cookiePolicy: "Cookie policy",
     companyName: "Jaroensup Ltd.",
@@ -22,17 +22,17 @@ const translations = {
   },
   th: {
     services: "บริการ",
-    branding: "การสร้างแบรนด์",
-    design: "การออกแบบ",
-    marketing: "การตลาด",
+    branding: "บริการของเรา",
+    design: "ผลงานเก่าของเรา",
+    marketing: "สมัครเป็นช่างภายนอก",
     advertisement: "การโฆษณา",
     company: "บริษัท",
     aboutUs: "เกี่ยวกับเรา",
     contact: "ติดต่อ",
     jobs: "งาน",
     pressKit: "ชุดข้อมูลสื่อ",
-    legal: "กฎหมาย",
-    termsOfUse: "เงื่อนไขการใช้งาน",
+    legal: "ช่องทางติดต่อ",
+    termsOfUse: "สอบถามและติดต่อข้อมูลสินค้า และบริการได้ 24 ชม.",
     privacyPolicy: "นโยบายความเป็นส่วนตัว",
     cookiePolicy: "นโยบายคุกกี้",
     companyName: "เจริญทรัพย์ จำกัด",
@@ -41,41 +41,49 @@ const translations = {
 };
 
 const Footer = () => {
-  const [lang,setLang] =useState(localStorage.getItem('language')||'th')
+  const [lang, setLang] = useState(localStorage.getItem("language") || "th");
   useEffect(() => {
-      const handleStorageChange = () => {
-        const storedLanguage = localStorage.getItem("language") || "th";
-        setLang(storedLanguage);
-      };
-    
-      window.addEventListener("storage", handleStorageChange);
-      return () => window.removeEventListener("storage", handleStorageChange);
+    const handleStorageChange = () => {
+      const storedLanguage = localStorage.getItem("language") || "th";
+      setLang(storedLanguage);
+    };
+
+    window.addEventListener("storage", handleStorageChange);
+    return () => window.removeEventListener("storage", handleStorageChange);
   }, []);
-  
 
   return (
     <>
       <footer className="footer bg-gray-200 text-base-content p-10 font-prompt">
         <nav>
           <h6 className="footer-title">{translations[lang].services}</h6>
-          <a className="link link-hover">{translations[lang].branding}</a>
-          <a className="link link-hover">{translations[lang].design}</a>
+          <a className="link link-hover" href="/services">
+            {translations[lang].branding}
+          </a>
+          <a className="link link-hover" href="/register-tech">
+            {translations[lang].marketing}
+          </a>
           {/* <a className="link link-hover">{translations[lang].marketing}</a>
           <a className="link link-hover">{translations[lang].advertisement}</a> */}
         </nav>
         <nav>
           <h6 className="footer-title">{translations[lang].company}</h6>
-          <a className="link link-hover">{translations[lang].aboutUs}</a>
-          <a className="link link-hover">{translations[lang].contact}</a>
+          <a className="link link-hover" href="/contact">
+            {translations[lang].contact}
+          </a>
+          <a className="link link-hover" href="/experience">
+            {translations[lang].design}
+          </a>
+
           {/* <a className="link link-hover">{translations[lang].jobs}</a>
           <a className="link link-hover">{translations[lang].pressKit}</a> */}
         </nav>
         <nav>
           <h6 className="footer-title">{translations[lang].legal}</h6>
           <a className="link link-hover">{translations[lang].termsOfUse}</a>
-          <a className="link link-hover">{translations[lang].privacyPolicy}</a>
-          <a className="link link-hover">{translations[lang].cookiePolicy}</a>
-        </nav>
+
+          <img src={LINE_QR_CODE} alt="QR Code" className="w-16 h-16" />
+          </nav>
       </footer>
       <footer className="footer bg-black text-white text-base-content px-10 py-4 font-prompt">
         <aside className="grid-flow-col items-center">

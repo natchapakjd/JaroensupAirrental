@@ -35,8 +35,8 @@ const Sidebar = () => {
   const translations = {
     en: {
       dashboard: "Dashboard",
-      tasks: "Tasks",
-      borrowing: "Borrowing",
+      tasks: "AC Rental & Cleaning Services",
+      borrowing: "Borrowing Equipment",
       products: "Products",
       orders: "Orders",
       users: "Users",
@@ -55,8 +55,8 @@ const Sidebar = () => {
     },
     th: {
       dashboard: "แดชบอร์ด",
-      tasks: "งานเช่า",
-      borrowing: "การยืม",
+      tasks: "บริการเช่าและล้างแอร์",
+      borrowing: "รายการยืมอุปกรณ์",
       products: "สินค้า",
       orders: "คำสั่งซื้อ",
       users: "ผู้ใช้งาน",
