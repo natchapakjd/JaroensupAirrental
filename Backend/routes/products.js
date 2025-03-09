@@ -365,27 +365,45 @@ router.get("/product-type", (req, res) => {
 router.get("/products/ac-count", (req, res) => {
   const query = `
     SELECT 
-      SUM(CASE WHEN pd.name = "แอร์ 60000BTU" THEN pd.stock_quantity ELSE 0 END) AS air_60000_btu,
-      SUM(CASE WHEN pd.name = "แอร์ 120000BTU" THEN pd.stock_quantity ELSE 0 END) AS air_120000_btu,
-      SUM(CASE WHEN pd.name = "แอร์ 20ตัน" THEN pd.stock_quantity ELSE 0 END) AS air_240000_btu
+      SUM(CASE WHEN pd.name = "แอร์ 60000BTU" THEN pd.stock_quantity ELSE 0 END) AS air_5_ton,
+      SUM(CASE WHEN pd.name = "แอร์ 120000BTU" THEN pd.stock_quantity ELSE 0 END) AS air_10_ton,
+      SUM(CASE WHEN pd.name = "แอร์ 20ตัน" THEN pd.stock_quantity ELSE 0 END) AS air_20_ton
     FROM products pd
   `;
 
   db.query(query, (err, result) => {
     if (err) {
-      console.error("Error counting AC products: " + err);
+      console.error("Error counting AC products:", err);
       return res.status(500).json({ error: "Failed to fetch AC counts" });
     }
 
-    const counts = result[0] || { air_60000_btu: 0, air_120000_btu: 0, air_240000_btu: 0 };
+    const counts = result[0] || { air_5_ton: 0, air_10_ton: 0, air_20_ton: 0 };
 
-    res.status(200).json({
-      air_60000_btu: counts.air_60000_btu || 0,
-      air_120000_btu: counts.air_120000_btu || 0,
-      air_240000_btu: counts.air_240000_btu || 0,
+    // คำนวณค่า capacity รวมทั้งหมด
+    const totalCapacity = (counts.air_5_ton || 0) + (counts.air_10_ton || 0) + (counts.air_20_ton || 0);
+
+    // อัปเดตตาราง warehouses (สมมติว่า warehouse_id = 1)
+    const updateQuery = `
+      UPDATE warehouses 
+      SET air_5_ton = ?, air_10_ton = ?, air_20_ton = ?, capacity = ?
+      WHERE warehouse_id = 1
+    `;
+
+    db.query(updateQuery, [counts.air_5_ton, counts.air_10_ton, counts.air_20_ton, totalCapacity], (updateErr) => {
+      if (updateErr) {
+        console.error("Error updating warehouse AC count:", updateErr);
+        return res.status(500).json({ error: "Failed to update warehouse AC counts" });
+      }
+
+      res.status(200).json({
+        message: "AC counts and capacity updated successfully",
+        air_5_ton: counts.air_5_ton || 0,
+        air_10_ton: counts.air_10_ton || 0,
+        air_20_ton: counts.air_20_ton || 0,
+        capacity: totalCapacity
+      });
     });
   });
 });
-
 
 module.exports = router;

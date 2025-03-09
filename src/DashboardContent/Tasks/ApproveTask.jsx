@@ -193,7 +193,7 @@ const ApproveTask = () => {
             <div className="w-1/2">
               <label
                 htmlFor={`product-${index}`}
-                className="block text-sm font-medium text-gray-700"
+                className="block text-md text-gray-700"
               >
                 {t("selectProduct")} {index + 1}
               </label>

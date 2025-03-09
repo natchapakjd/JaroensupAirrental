@@ -74,20 +74,23 @@ const RentAC = () => {
   const [selectedLocation, setSelectedLocation] = useState(null);
   const [profile, setProfile] = useState();
   const [showMap, setShowMap] = useState(false); // ✅ ควบคุมการแสดงแผนที่
-  const [language,setLanguage] = useState(localStorage.getItem('language')||'th')
+  const [language, setLanguage] = useState(
+    localStorage.getItem("language") || "th"
+  );
+  const [selectedFiles, setSelectedFiles] = useState([]);
   const token = cookies.get("authToken");
   const decodedToken = jwtDecode(token);
   const userId = decodedToken.id;
 
   useEffect(() => {
-      const interval = setInterval(() => {
-        const currentLanguage = localStorage.getItem("language") || "th";
-        if (currentLanguage !== language) {
-          setLanguage(currentLanguage);
-        }
-      }, 100);
-  
-      return () => clearInterval(interval);
+    const interval = setInterval(() => {
+      const currentLanguage = localStorage.getItem("language") || "th";
+      if (currentLanguage !== language) {
+        setLanguage(currentLanguage);
+      }
+    }, 100);
+
+    return () => clearInterval(interval);
   }, [language]);
 
   useEffect(() => {
@@ -132,12 +135,15 @@ const RentAC = () => {
     fetchProfile();
   }, [taskTypeId]);
 
+  const handleUpload = (e) => {
+    setSelectedFiles([...e.target.files]); // เก็บไฟล์ทั้งหมดที่เลือก
+  };
+
   const filteredTaskTypes = taskTypes.filter(
     (taskType) =>
       taskType.type_name === "งานเช่าเครื่องปรับอากาศ" ||
       taskType.type_name === "งานซ่อมบำรุงเครื่องปรับอากาศ" ||
       taskType.type_name === "ล้างเครื่่องปรับอากาศ"
-
   );
 
   const handleLocationSelect = (lat, lon, displayName) => {
@@ -211,23 +217,44 @@ const RentAC = () => {
 
     try {
       const rentalStartDate = formData.appointment_date.split("T")[0];
+      const data = new FormData(); // ✅ Create a new FormData instance
 
-      const response = await axios.post(`${import.meta.env.VITE_SERVER_URL}/tasks`, {
-        ...formData,
-        rental_start_date: rentalStartDate,
-        user_id: userId,
-        latitude: selectedLocation ? formData.latitude : null,  // ✅ ถ้าไม่ได้เลือกแผนที่จะไม่ส่งค่า
-        longitude: selectedLocation ? formData.longitude : null,
+      Object.keys(formData).forEach((key) => {
+        if (formData[key] && !Array.isArray(formData[key])) {
+          data.append(key, formData[key]);
+        }
       });
 
-      const taskId = response.data.task_id; // รับค่า task_id จาก response
-      // 🔥 เก็บ log ว่าผู้ใช้สร้าง task
+      selectedFiles.forEach((file) => {
+        data.append("images", file); // Add images to the form data
+      });
+
+      // Add custom fields that are not part of formData directly
+      data.append("quantity_used", 0);
+      data.append("rental_start_date", rentalStartDate);
+
+      const userId = decodedToken.id;
+      if (userId) {
+        data.append("user_id", userId); // Ensure user_id is correctly appended
+      }
+
+      // Send request
+      const response = await axios.post(
+        `${import.meta.env.VITE_SERVER_URL}/v2/tasks`,
+        data,
+        { headers: { "Content-Type": "multipart/form-data" } } // Important when using FormData
+      );
+
+      const taskId = response.data.task_id;
+
+      // Create task log
       await axios.post(`${import.meta.env.VITE_SERVER_URL}/task-log`, {
         task_id: taskId,
         user_id: userId,
         action: "สั่งงานเช่า",
       });
 
+      // Success message
       Swal.fire({
         title: "สำเร็จ!",
         text: "แบบฟอร์มถูกส่งเรียบร้อยแล้ว",
@@ -257,25 +284,89 @@ const RentAC = () => {
     }
   };
 
+  // const handleSubmit = async (e) => {
+  //   e.preventDefault();
+
+  //   try {
+  //     const rentalStartDate = formData.appointment_date.split("T")[0];
+  //     selectedFiles.forEach((file) => {
+  //       formData.append("images", file);
+  //     });
+
+  //     const response = await axios.post(
+  //       `${import.meta.env.VITE_SERVER_URL}/v2/tasks`,
+  //       {
+  //         ...formData,
+  //         rental_start_date: rentalStartDate,
+  //         user_id: userId,
+  //         latitude: selectedLocation ? formData.latitude : null, // ✅ ถ้าไม่ได้เลือกแผนที่จะไม่ส่งค่า
+  //         longitude: selectedLocation ? formData.longitude : null,
+  //       }
+  //     );
+
+  //     const taskId = response.data.task_id; // รับค่า task_id จาก response
+  //     // 🔥 เก็บ log ว่าผู้ใช้สร้าง task
+  //     await axios.post(`${import.meta.env.VITE_SERVER_URL}/task-log`, {
+  //       task_id: taskId,
+  //       user_id: userId,
+  //       action: "สั่งงานเช่า",
+  //     });
+
+  //     Swal.fire({
+  //       title: "สำเร็จ!",
+  //       text: "แบบฟอร์มถูกส่งเรียบร้อยแล้ว",
+  //       icon: "success",
+  //       timer: 2000,
+  //       showConfirmButton: false,
+  //     }).then(() => {
+  //       setFormData({
+  //         user_id: "",
+  //         description: "",
+  //         task_type_id: taskTypeId || "",
+  //         address: "",
+  //         appointment_date: "",
+  //         rental_end_date: "",
+  //       });
+  //       setSelectedLocation(null);
+  //       setShowMap(false);
+  //       navigate("/history");
+  //     });
+  //   } catch (error) {
+  //     console.error("Error creating task:", error);
+  //     Swal.fire({
+  //       title: "เกิดข้อผิดพลาด!",
+  //       text: "ไม่สามารถส่งแบบฟอร์มได้ กรุณาลองใหม่อีกครั้ง",
+  //       icon: "error",
+  //     });
+  //   }
+  // };
+
   function getCurrentDateTimeInThailand() {
     const now = new Date();
-    
+
     // Convert to Thailand time (UTC+7)
-    const thailandTime = new Date(now.toLocaleString("en-US", { timeZone: "Asia/Bangkok" }));
-    
+    const thailandTime = new Date(
+        now.toLocaleString("en-US", { timeZone: "Asia/Bangkok" })
+    );
+
     // Add one day to the Thailand time
     thailandTime.setDate(thailandTime.getDate() + 1);
-    
+
+    // ปรับเวลาให้เป็นเลขถ้วนๆ (ชั่วโมงเต็ม)  
+    thailandTime.setMinutes(0, 0, 0);
+
     // Format as a string for datetime-local input (yyyy-mm-ddThh:mm)
     return thailandTime.toISOString().slice(0, 16);
-  }
-  
+}
+
 
   return (
     <>
       <Navbar />
       <div className="container mx-auto mt-10 font-prompt">
-        <h2 className="text-2xl font-bold mb-4 mx-2">{translations[language].title}</h2>
+        <h2 className="text-2xl font-bold mb-4 mx-2">
+          {translations[language].title}
+        </h2>
         {loading ? (
           <p>Loading...</p>
         ) : (
@@ -284,7 +375,9 @@ const RentAC = () => {
             className="bg-white p-6 rounded-lg shadow-md"
           >
             <div className="mb-4">
-              <label className="block text-gray-700">{translations[language].taskType}</label>
+              <label className="block text-gray-700">
+                {translations[language].taskType}
+              </label>
               <select
                 name="task_type_id"
                 value={formData.task_type_id}
@@ -292,7 +385,9 @@ const RentAC = () => {
                 required
                 className="select select-bordered w-full"
               >
-                <option value="">{translations[language].selectTaskType}</option>
+                <option value="">
+                  {translations[language].selectTaskType}
+                </option>
                 {filteredTaskTypes.map((taskType) => (
                   <option
                     key={taskType.task_type_id}
@@ -304,7 +399,9 @@ const RentAC = () => {
               </select>
             </div>
             <div className="mb-4">
-              <label className="block text-gray-700">{translations[language].description}</label>
+              <label className="block text-gray-700">
+                {translations[language].description}
+              </label>
               <textarea
                 name="description"
                 value={formData.description}
@@ -314,18 +411,23 @@ const RentAC = () => {
               ></textarea>
             </div>
             <div className="mb-4">
-              <label className="block text-gray-700">{translations[language].address}</label>
-              <input
-                type="text"
+              <label className="block text-gray-700">
+                {translations[language].address}
+              </label>
+              <textarea
                 name="address"
                 value={formData.address}
                 onChange={handleChange}
                 required
-                className="input input-bordered w-full"
-              />
+                className="textarea textarea-bordered w-full "
+              ></textarea>
+             
             </div>
+
             <div className="mb-4">
-              <label className="block text-gray-700">{translations[language].startDate}</label>
+              <label className="block text-gray-700">
+                {translations[language].startDate}
+              </label>
               <input
                 type="datetime-local"
                 name="appointment_date"
@@ -337,7 +439,9 @@ const RentAC = () => {
               />
             </div>
             <div className="mb-4">
-              <label className="block text-gray-700">{translations[language].endDate}</label>
+              <label className="block text-gray-700">
+                {translations[language].endDate}
+              </label>
               <input
                 type="date"
                 name="rental_end_date"
@@ -387,6 +491,17 @@ const RentAC = () => {
                 </div>
               </MapContainer>
             )}
+            <input
+              type="file"
+              multiple
+              onChange={handleUpload}
+              className="block w-full text-sm text-gray-500 mt-4
+            file:mr-4 file:py-2 file:px-4
+            file:rounded-lg file:border-0
+            file:text-sm file:font-semibold
+            file:bg-blue-50 file:text-blue-700
+            hover:file:bg-blue hover:file:text-white"
+            />
 
             <button
               type="submit"

@@ -8,6 +8,8 @@ import { jwtDecode } from "jwt-decode";
 import Cookies from "universal-cookie";
 import Swal from "sweetalert2"; // Ensure Swal is imported
 import Loading from "../../components/Loading";
+import BookingPdf from "./BookingPdf";
+import OrderReceipt from "./OrderReceipt";
 
 const translations = {
   th: {
@@ -38,6 +40,7 @@ const translations = {
     next: "ถัดไป",
     page: "หน้า",
     of: "จาก",
+    file: "ไฟล์",
     completeTaskConfirm:
       "คุณแน่ใจหรือไม่ว่าต้องการทำเครื่องหมายว่างานนี้เสร็จสมบูรณ์?",
     deleteTaskConfirm: "คุณแน่ใจหรือไม่ว่าต้องการลบงานนี้?",
@@ -73,6 +76,7 @@ const translations = {
     completeTaskConfirm:
       "Are you sure you want to mark this task as completed?",
     deleteTaskConfirm: "Are you sure you want to delete this task?",
+    file: "File",
   },
 };
 
@@ -91,6 +95,7 @@ const UserHistory = () => {
   const [reviewFilter, setReviewFilter] = useState("");
   const [orderSearchTerm, setOrderSearchTerm] = useState(""); // New search term for orders
   const [appointmentData, setAppointmentData] = useState();
+  const [rentals,setRentals] = useState();
   const navigate = useNavigate();
   const cookies = new Cookies();
   const token = cookies.get("authToken");
@@ -109,7 +114,7 @@ const UserHistory = () => {
     window.addEventListener("storage", handleStorageChange);
     return () => window.removeEventListener("storage", handleStorageChange);
   }, []);
-
+  
   const filteredTasks = taskHistory.filter((task) => {
     return (
       task.description.toLowerCase().includes(searchTerm.toLowerCase()) &&
@@ -120,7 +125,7 @@ const UserHistory = () => {
 
   const filteredOrders = orderHistory.filter((order) => {
     return (
-      (order.id.toString().includes(orderSearchTerm.toLowerCase()) ||
+      (order.order_id.toString().includes(orderSearchTerm.toLowerCase()) ||
         order.status_name
           .toLowerCase()
           .includes(orderSearchTerm.toLowerCase())) &&
@@ -130,25 +135,30 @@ const UserHistory = () => {
 
   const fetchUserData = async (taskPage, orderPage) => {
     try {
+      // Fetch task history
       const taskResponse = await axios.get(
-        `${
-          import.meta.env.VITE_SERVER_URL
-        }/task-paging/${user_id}?page=${taskPage}&limit=10`
+        `${import.meta.env.VITE_SERVER_URL}/task-paging/${user_id}?page=${taskPage}&limit=5`
       );
       const filteredTasks = taskResponse.data.tasks.filter(
-        (task) => task.task_type_id === 1
+        (task) => task.task_type_id === 1 || task.task_type_id === 12
       );
       setTaskHistory(filteredTasks);
-      setTotalTasks(filteredTasks.length);
-
+      setTotalTasks(taskResponse.data.totalTasks)
+      // Fetch order history
       const orderResponse = await axios.get(
-        `${
-          import.meta.env.VITE_SERVER_URL
-        }/v1/orders/${user_id}?page=${orderPage}&limit=10`
+        `${import.meta.env.VITE_SERVER_URL}/v1/orders/${user_id}?page=${orderPage}&limit=5`
       );
-      setOrderHistory(orderResponse.data.orders);
+     
+      const orders = orderResponse.data.orders.map(order => {
+        return {
+          ...order,
+          items: order.items || [] // Ensure 'items' exists, even if it's empty
+        };
+      });
+      setOrderHistory(orders);
       setTotalOrders(orderResponse.data.totalCount);
-
+  
+      // Fetch payment history
       const paymentResponse = await axios.get(
         `${import.meta.env.VITE_SERVER_URL}/payments/${user_id}`
       );
@@ -157,8 +167,34 @@ const UserHistory = () => {
         return acc;
       }, {});
       setPaymentHistory(payments);
-
-      // ดึงข้อมูลการนัดหมาย (appointment)
+  
+      // Fetch rentals data
+      const rentalResponse = await axios.get(`${import.meta.env.VITE_SERVER_URL}/rentals`);
+  
+      // Access rentalData array
+      const rentalData = rentalResponse.data.rentalData;
+  
+      if (Array.isArray(rentalData)) {
+        // If rentalData is an array, we can safely use .filter() to get all rentals for a task
+        setRentals(rentalData);
+  
+        // Combine rentals with tasks based on task_id
+        const tasksWithRentals = filteredTasks.map((task) => {
+          // Filter all rentals related to the task_id
+          const rentalsForTask = rentalData.filter(rental => rental.task_id === task.task_id);
+          return {
+            ...task,
+            rentalDetails: rentalsForTask.length > 0 ? rentalsForTask : null // Add all rentals for this task or null if no rentals found
+          };
+        });
+        setTaskHistory(tasksWithRentals);
+        console.log(tasksWithRentals);
+      } else {
+        // Handle case where rentalData is not an array
+        console.error("Rental data is not in expected format:", rentalData);
+      }
+  
+      // Fetch appointment data
       const appointmentResponse = await axios.get(
         `${import.meta.env.VITE_SERVER_URL}/appointments`
       );
@@ -170,7 +206,6 @@ const UserHistory = () => {
         {}
       );
       setAppointmentData(appointments);
-
       setLoading(false);
     } catch (error) {
       console.error("Error fetching user history:", error);
@@ -352,6 +387,7 @@ const UserHistory = () => {
                   <th>{translations[language].createdAt}</th>
                   <th>{translations[language].details}</th>
                   <th>{translations[language].actions}</th>
+                  <th>{translations[language].file}</th>
                 </tr>
               </thead>
               <tbody>
@@ -421,7 +457,16 @@ const UserHistory = () => {
                           >
                             {translations[language].markDone}
                           </button>
+                          
                         )}
+                       
+                      </td>
+                      <td>
+                      {
+                          task.status_id !== 1 && task.task_type_id === 1 && (
+                            <BookingPdf task = {task}/>
+                          )
+                        }
                       </td>
                     </tr>
                   ))
@@ -444,8 +489,7 @@ const UserHistory = () => {
             {translations[language].previous}
           </button>
           <span>
-            {translations[language].page} {taskPage} {translations[language].of}{" "}
-            {Math.ceil(totalTasks / 10)}
+            {translations[language].page} {taskPage} {translations[language].of} {Math.ceil(totalTasks / 10)}
           </span>
           <button
             onClick={() => handleTaskPageChange(1)}
@@ -500,7 +544,7 @@ const UserHistory = () => {
                       <td>{order.status_name}</td>
                       <td>
                         <button
-                          onClick={() => handleOrderDetail(order.id)}
+                          onClick={() => handleOrderDetail(order.order_id)}
                           className="hover:underline text-blue-500"
                         >
                           {translations[language].details}
@@ -522,7 +566,13 @@ const UserHistory = () => {
                           </span>
                         )}
                       </td>
+                      {
+                          order.status_id !== 1 && (
+                            <OrderReceipt order = {order}/>
+                          )
+                        }
                     </tr>
+                    
                   ))
                 ) : (
                   <tr>
@@ -555,6 +605,7 @@ const UserHistory = () => {
           </div>
         </div>
       </div>
+
       <Footer />
     </>
   );

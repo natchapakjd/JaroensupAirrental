@@ -1,11 +1,11 @@
-import React, { useState, useEffect } from 'react';
-import axios from 'axios';
-import { useParams } from 'react-router-dom';
-import Navbar from '../../components/Navbar';
-import Footer from '../../components/Footer';
-import Swal from 'sweetalert2';  // Import SweetAlert2
+import React, { useState, useEffect } from "react";
+import axios from "axios";
+import { useParams } from "react-router-dom";
+import Navbar from "../../components/Navbar";
+import Footer from "../../components/Footer";
+import Swal from "sweetalert2"; // Import SweetAlert2
 import QRCode from "../../assets/images/Payment/QR.png";
-
+import BackButtonEdit from "../../components/BackButtonEdit";
 const translations = {
   en: {
     payment_management: "Admin Payment Management",
@@ -42,7 +42,7 @@ const translations = {
     error_select_slip: "โปรดเลือกภาพใบเสร็จเพื่ออัปโหลด",
     success_slip_updated: "อัปเดตภาพใบเสร็จสำเร็จ!",
     error_update_slip: "ไม่สามารถอัปเดตภาพใบเสร็จได้",
-  }
+  },
 };
 
 const Payment = () => {
@@ -51,9 +51,11 @@ const Payment = () => {
   const [orders, setOrders] = useState([]);
   const [selectedOrder, setSelectedOrder] = useState(null); // Store selected order
   const [newSlipImage, setNewSlipImage] = useState(null); // Store new slip image
-  const [language,setLanguage] =useState(localStorage.getItem("language"||"th"))  
+  const [language, setLanguage] = useState(
+    localStorage.getItem("language" || "th")
+  );
   const t = translations[language];
-  
+
   useEffect(() => {
     const interval = setInterval(() => {
       const currentLanguage = localStorage.getItem("language") || "th";
@@ -64,16 +66,17 @@ const Payment = () => {
 
     return () => clearInterval(interval);
   }, [language]);
-      
-  
+
   useEffect(() => {
     // Fetch orders created by the admin
     const fetchOrders = async () => {
       try {
-        const response = await axios.get(`${import.meta.env.VITE_SERVER_URL}/payment-task/${paymentId}`);
+        const response = await axios.get(
+          `${import.meta.env.VITE_SERVER_URL}/payment-task/${paymentId}`
+        );
         setOrders(response.data);
       } catch (error) {
-        console.error('Error fetching orders:', error);
+        console.error("Error fetching orders:", error);
       }
     };
 
@@ -94,38 +97,38 @@ const Payment = () => {
       // Use Swal instead of alert
       Swal.fire({
         title: t.error_select_slip,
-        icon: 'error',
-        confirmButtonText: 'OK',
+        icon: "error",
+        confirmButtonText: "OK",
       });
       return;
     }
 
     const formData = new FormData();
-    formData.append('slip_image', newSlipImage);
+    formData.append("slip_image", newSlipImage);
 
     try {
       const response = await axios.put(
         `${import.meta.env.VITE_SERVER_URL}/payments/${paymentId}/slip_image`, // Correct endpoint with paymentId
         formData,
-        { headers: { 'Content-Type': 'multipart/form-data' } }
+        { headers: { "Content-Type": "multipart/form-data" } }
       );
 
       // Success notification with SweetAlert
       Swal.fire({
         title: t.success_slip_updated,
-        icon: 'success',
-        confirmButtonText: 'OK',
+        icon: "success",
+        confirmButtonText: "OK",
       });
       setSelectedOrder(null); // Deselect order after submission
       setNewSlipImage(null); // Clear file input
     } catch (error) {
-      console.error('Error updating slip image:', error);
+      console.error("Error updating slip image:", error);
 
       // Error notification with SweetAlert
       Swal.fire({
         title: t.error_update_slip,
-        icon: 'error',
-        confirmButtonText: 'OK',
+        icon: "error",
+        confirmButtonText: "OK",
       });
     }
   };
@@ -134,20 +137,27 @@ const Payment = () => {
     <>
       <Navbar />
       <div className="container mx-auto mt-10 font-prompt">
-        <h2 className="text-2xl font-bold mb-4 text-center md:text-left">{t.payment_management}</h2>
-
+        <div className="flex w-full my-2">
+          <BackButtonEdit />
+          <h1 className="text-2xl font-semibold mx-2">
+            {t.payment_management}
+          </h1>
+        </div>
         <div className="mb-8 text-center">
-          <h3 className="text-xl font-semibold mb-4">{t.qr_code_for_payment}</h3>
+          <h3 className="text-xl font-semibold mb-4">
+            {t.qr_code_for_payment}
+          </h3>
           <div className="flex justify-center flex-col">
-            <div className='flex justify-center item-center'> <img 
-              src={QRCode}
-              alt="Payment QR Code" 
-              className="w-60 h-60 my-2"
-            /></div>
-           
-            <h3 className='text-xl my-2'>Promptpay  นาย ชัชวาลย์ แตงเจริญ</h3>
+            <div className="flex justify-center item-center">
+              {" "}
+              <img
+                src={QRCode}
+                alt="Payment QR Code"
+                className="w-60 h-60 my-2"
+              />
+            </div>
 
-
+            <h3 className="text-xl my-2">Promptpay นาย ชัชวาลย์ แตงเจริญ</h3>
           </div>
         </div>
 
@@ -193,7 +203,9 @@ const Payment = () => {
                 ))
               ) : (
                 <tr>
-                  <td colSpan="5" className="text-center">{t.no_orders_found}</td>
+                  <td colSpan="5" className="text-center">
+                    {t.no_orders_found}
+                  </td>
                 </tr>
               )}
             </tbody>
@@ -202,10 +214,20 @@ const Payment = () => {
 
         {selectedOrder && (
           <div className="mt-5">
-            <h3 className="text-xl font-semibold mb-2">{t.upload_change_slip}</h3>
-            <form onSubmit={(e) => { e.preventDefault(); handleSubmit(selectedOrder); }}>
+            <h3 className="text-xl font-semibold mb-2">
+              {t.upload_change_slip}
+            </h3>
+            <form
+              onSubmit={(e) => {
+                e.preventDefault();
+                handleSubmit(selectedOrder);
+              }}
+            >
               <div className="mb-4">
-                <label className="block text-sm font-medium text-gray-700" htmlFor="slip_image">
+                <label
+                  className="block text-sm font-medium text-gray-700"
+                  htmlFor="slip_image"
+                >
                   {t.select_payment_slip_image}
                 </label>
                 <input
@@ -217,7 +239,10 @@ const Payment = () => {
                 />
               </div>
 
-              <button type="submit" className="btn bg-blue hover:bg-blue text-white">
+              <button
+                type="submit"
+                className="btn bg-blue hover:bg-blue text-white"
+              >
                 {t.upload_slip}
               </button>
             </form>

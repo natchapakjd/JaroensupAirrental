@@ -167,7 +167,6 @@ router.post("/appointments", (req, res) => {
 
 router.post("/v2/appointments", (req, res) => {
   const { tech_ids, task_id } = req.body; // tech_ids เป็นอาร์เรย์ของ tech_id
-  console.log(tech_ids,task_id)
   if (!Array.isArray(tech_ids) || tech_ids.length === 0) {
     return res.status(400).json({ error: "Tech IDs must be an array with at least one value" });
   }

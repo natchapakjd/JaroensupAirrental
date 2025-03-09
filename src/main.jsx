@@ -31,6 +31,8 @@ import Payment from "./pages/Payment/Payment";
 import XrGallaryContainer from "./components/AugmentedReality/XR-Gallary/XrGallaryContainer";
 import WorkExperienceDetails from "./pages/common/WorkExperienceDetails";
 import TaskDetails from "./pages/History/TaskDetails";
+import TaskImages from "./pages/History/TaskImages";
+
 const router = createBrowserRouter([
   {
     path: "/",
@@ -151,6 +153,10 @@ const router = createBrowserRouter([
   {
     path: "/task/:taskId",
     element: <TaskDetails/>,
+  },
+  {
+    path: "/task/edit-img/:taskId",
+    element: <TaskImages/>,
   }
 ]);
 

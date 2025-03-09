@@ -69,35 +69,57 @@ router.get("/warehouse/:id", (req, res) => {
 });
 
 router.post("/warehouses", (req, res) => {
-  const { name, location, capacity } = req.body;
-  const query = "INSERT INTO warehouses (name, location, capacity) VALUES (?, ?, ?)";
+  const {location, capacity, air_5_ton = 0, air_10_ton = 0, air_20_ton = 0 } = req.body;
 
-  db.query(query, [name, location, capacity], (err, result) => {
+  const query = `
+    INSERT INTO warehouses (location, capacity, air_5_ton, air_10_ton, air_20_ton) 
+    VALUES (?, ?, ?, ?, ?)
+  `;
+
+  db.query(query, [location, capacity, air_5_ton, air_10_ton, air_20_ton], (err, result) => {
     if (err) {
-      console.error("Error creating warehouse: " + err);
-      res.status(500).json({ error: "Failed to create warehouse" });
-    } else {
-      res.status(201).json({ warehouse_id: result.insertId, name, location, capacity });
+      console.error("Error creating warehouse:", err);
+      return res.status(500).json({ error: "Failed to create warehouse" });
     }
+    
+    res.status(201).json({ 
+      warehouse_id: result.insertId, 
+      location, 
+      capacity, 
+      air_5_ton, 
+      air_10_ton, 
+      air_20_ton 
+    });
   });
 });
 
 router.put("/warehouse/:id", (req, res) => {
   const id = req.params.id;
-  const { location, capacity } = req.body;
-  const query = "UPDATE warehouses SET location = ?, capacity = ? WHERE warehouse_id = ?";
+  const { location, air_5_ton, air_10_ton, air_20_ton} = req.body;
 
-  db.query(query, [location, capacity, id], (err, result) => {
+  // คำนวณ capacity ใหม่ (รวมทุกแอร์)
+  const newCapacity = (air_5_ton || 0) + (air_10_ton || 0) + (air_20_ton || 0);
+
+  const query = `
+    UPDATE warehouses 
+    SET location = ?, air_5_ton = ?, air_10_ton = ?, air_20_ton = ?, capacity = ? 
+    WHERE warehouse_id = ?
+  `;
+
+  db.query(query, [location, air_5_ton, air_10_ton, air_20_ton, newCapacity, id], (err, result) => {
     if (err) {
-      console.error("Error updating warehouse: " + err);
-      res.status(500).json({ error: "Failed to update warehouse" });
-    } else if (result.affectedRows === 0) {
-      res.status(404).json({ error: "Warehouse not found" });
-    } else {
-      res.json({ warehouse_id: id, location, capacity });
+      console.error("Error updating warehouse:", err);
+      return res.status(500).json({ error: "Failed to update warehouse" });
     }
+
+    if (result.affectedRows === 0) {
+      return res.status(404).json({ error: "Warehouse not found" });
+    }
+
+    res.json({ warehouse_id: id, location, air_5_ton, air_10_ton, air_20_ton, capacity: newCapacity });
   });
 });
+
 
 router.delete("/warehouse/:id", (req, res) => {
   const id = req.params.id;

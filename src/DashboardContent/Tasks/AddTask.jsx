@@ -169,7 +169,7 @@ const AddTask = () => {
           <BackButtonEdit />
           <h1 className="text-2xl font-semibold mx-2">{t.addTaskTitle}</h1>
         </div>
-        <form onSubmit={handleSubmit} className="space-y-4 text-sm font-medium">
+        <form onSubmit={handleSubmit} className="space-y-4 text-md">
           <div>
             <label className="block mb-2">{t.taskType}</label>
             <select
