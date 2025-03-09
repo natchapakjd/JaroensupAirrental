@@ -185,11 +185,7 @@ const UserDetails = () => {
                 "MM/dd/yyyy"
               )}
             </p>
-            <p className="text-lg font-medium text-gray-700">
-              <strong>{translations[language].statusId}:</strong>{" "}
-              {user.technician_details.status_id}
-            </p>
-
+            
             {/* Display images if available */}
             <div className="mt-6">
               {user.technician_details.id_card_image_url && (

@@ -13,7 +13,7 @@ const TaskContent = () => {
   const [searchTerm, setSearchTerm] = useState("");
   const [filterStatus, setFilterStatus] = useState("all");
   const [currentPage, setCurrentPage] = useState(1);
-  const [tasksPerPage, setTasksPerPage] = useState(5);
+  const [tasksPerPage, setTasksPerPage] = useState(10);
   const [totalTasks, setTotalTasks] = useState(1);
   const [quantities, setQuantities] = useState({}); // Store quantities
   const [loading, setLoading] = useState(true);
@@ -365,7 +365,7 @@ const TaskContent = () => {
                                 <Link
                                   to={`/dashboard/tasks/approve/${task.task_id}`}
                                 >
-                                  <button className="btn btn-success text-white">
+                                  <button className="btn btn-primary text-white">
                                     {currentLang.approve}
                                   </button>
                                 </Link>

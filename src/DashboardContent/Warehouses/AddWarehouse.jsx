@@ -95,10 +95,10 @@ const AddWarehouse = () => {
           <h1 className="text-2xl font-semibold mx-2">{translations[language].addWarehouse}</h1>
         </div>
 
-        <form onSubmit={handleSubmit} className="text-sm font-medium">
+        <form onSubmit={handleSubmit} className="text-md ">
       
           <div className="mb-4">
-            <label htmlFor="location" className="block text-sm font-medium text-gray-700">
+            <label htmlFor="location" className="block text-md  text-gray-700">
               {translations[language].location}
             </label>
             <input
@@ -106,13 +106,13 @@ const AddWarehouse = () => {
               id="location"
               value={location}
               onChange={(e) => setLocation(e.target.value)}
-              className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
+              className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-md"
               required
             />
           </div>
 
           <div className="mb-4">
-            <label htmlFor="air_5_ton" className="block text-sm font-medium text-gray-700">
+            <label htmlFor="air_5_ton" className="block text-md  text-gray-700">
               {translations[language].air_5_ton}
             </label>
             <input
@@ -120,14 +120,14 @@ const AddWarehouse = () => {
               id="air_5_ton"
               value={air5Ton}
               onChange={(e) => setAir5Ton(parseInt(e.target.value, 10) || 0)}
-              className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
+              className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-md"
               min="0"
               required
             />
           </div>
 
           <div className="mb-4">
-            <label htmlFor="air_10_ton" className="block text-sm font-medium text-gray-700">
+            <label htmlFor="air_10_ton" className="block text-md  text-gray-700">
               {translations[language].air_10_ton}
             </label>
             <input
@@ -135,14 +135,14 @@ const AddWarehouse = () => {
               id="air_10_ton"
               value={air10Ton}
               onChange={(e) => setAir10Ton(parseInt(e.target.value, 10) || 0)}
-              className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
+              className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-md"
               min="0"
               required
             />
           </div>
 
           <div className="mb-4">
-            <label htmlFor="air_20_ton" className="block text-sm font-medium text-gray-700">
+            <label htmlFor="air_20_ton" className="block text-md  text-gray-700">
               {translations[language].air_20_ton}
             </label>
             <input
@@ -150,7 +150,7 @@ const AddWarehouse = () => {
               id="air_20_ton"
               value={air20Ton}
               onChange={(e) => setAir20Ton(parseInt(e.target.value, 10) || 0)}
-              className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
+              className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-md"
               min="0"
               required
             />

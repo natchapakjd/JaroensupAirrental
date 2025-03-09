@@ -904,24 +904,22 @@ router.get("/tasks/top3/:user_id", (req, res) => {
   const { user_id } = req.params;
 
   const query = `
-    SELECT t.*, COUNT(ta.assignment_id) AS assignment_count, st.status_name, st.status_id
+    SELECT t.*, st.status_name, st.status_id
     FROM tasks t
-    JOIN taskassignments ta ON t.task_id = ta.task_id
     JOIN status st ON t.status_id = st.status_id
     WHERE t.user_id = ?
-    GROUP BY t.task_id
-    ORDER BY assignment_count DESC
+    ORDER BY t.updatedAt DESC
     LIMIT 3;
   `;
 
   db.query(query, [user_id], (err, result) => {
     if (err) {
-      console.error(`Error fetching top 3 tasks for user ${user_id}:`, err);
-      return res.status(500).json({ error: "Failed to fetch top 3 tasks for the user" });
+      console.error(`Error fetching top 3 recently updated tasks for user ${user_id}:`, err);
+      return res.status(500).json({ error: "Failed to fetch top 3 recently updated tasks for the user" });
     }
 
     res.status(200).json({
-      message: `Top 3 tasks for user ${user_id}`,
+      message: `Top 3 recently updated tasks for user ${user_id}`,
       tasks: result,
     });
   });
@@ -1045,6 +1043,7 @@ router.get("/task_images/:task_id", (req, res) => {
     res.json(results);
   });
 });
+
 router.post("/task_images", upload.single("image"), async (req, res) => {
   const { task_id } = req.body;
 
@@ -1210,6 +1209,23 @@ router.get("/rentals", (req, res) => {
       rentalData: result
     });
   });
+});
+
+router.get('/user-task-counts', async (req, res) => {
+  try {
+    const query = `
+      SELECT user_id, COUNT(*) as task_count
+      FROM tasks
+      WHERE task_type_id = 11
+      GROUP BY user_id
+    `;
+    const [results] = await db.query(query); // Assuming MySQL with promise-based queries
+
+    res.status(200).json(results);
+  } catch (error) {
+    console.error('Error fetching task counts:', error);
+    res.status(500).json({ error: 'Failed to fetch task counts' });
+  }
 });
 
 module.exports = router;

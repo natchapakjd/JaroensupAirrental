@@ -213,7 +213,9 @@ const HistoryLogContent = () => {
                         </td>
                         <td className="border p-2">{log.action}</td>
                         <td className="border p-2">
-                          {new Date(log.timestamp).toLocaleString()}
+                          {new Date(log.timestamp).toLocaleString("th-TH", {
+                            timeZone: "Asia/Bangkok",
+                          })}
                         </td>
                       </tr>
                     ))
@@ -326,8 +328,11 @@ const HistoryLogContent = () => {
                     <td className="border p-2">{log.type_name}</td>
                     <td className="border p-2">{log.action}</td>
                     <td className="border p-2">
-                      {new Date(log.created_at).toLocaleString()}
+                      {new Date(log.created_at).toLocaleString("th-TH", {
+                        timeZone: "Asia/Bangkok",
+                      })}
                     </td>
+
                     <td className="border p-2">
                       <button
                         onClick={() =>

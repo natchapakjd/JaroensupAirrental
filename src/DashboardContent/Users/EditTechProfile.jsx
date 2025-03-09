@@ -129,7 +129,7 @@ const EditTechProfile = () => {
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2 gap-6">
             {/* Nationality */}
             <div className="mb-4">
-              <label className="block text-sm font-medium">
+              <label className="block text-md">
                 {translations[language].nationality}
               </label>
               <input
@@ -142,7 +142,7 @@ const EditTechProfile = () => {
             </div>
             {/* Work Experience */}
             <div className="mb-4">
-              <label className="block text-sm font-medium">
+              <label className="block text-md">
                 {translations[language].workExperience}
               </label>
               <input
@@ -155,7 +155,7 @@ const EditTechProfile = () => {
             </div>
             {/* Special Skills */}
             <div className="mb-4">
-              <label className="block text-sm font-medium">
+              <label className="block text-md">
                 {translations[language].specialSkills}
               </label>
               <input
@@ -168,7 +168,7 @@ const EditTechProfile = () => {
             </div>
             {/* Background Check Status */}
             <div className="mb-4">
-              <label className="block text-sm font-medium">
+              <label className="block text-md">
                 {translations[language].backgroundCheckStatus}
               </label>
               <input
@@ -181,7 +181,7 @@ const EditTechProfile = () => {
             </div>
             {/* Bank Account Number */}
             <div className="mb-4">
-              <label className="block text-sm font-medium">
+              <label className="block text-md">
                 {translations[language].bankAccountNumber}
               </label>
               <input
@@ -194,7 +194,7 @@ const EditTechProfile = () => {
             </div>
             {/* Start Date */}
             <div className="mb-4">
-              <label className="block text-sm font-medium">
+              <label className="block text-md">
                 {translations[language].startDate}
               </label>
               <input
@@ -207,7 +207,7 @@ const EditTechProfile = () => {
             </div>
             {/* Status */}
             <div className="mb-4">
-              <label className="block text-sm font-medium">
+              <label className="block text-sm text-md">
                 {translations[language].status}
               </label>
               <select
@@ -226,7 +226,7 @@ const EditTechProfile = () => {
             </div>
             {/* ID Card Image URL */}
             <div className="mb-4">
-              <label className="block text-sm font-medium">
+              <label className="block text-md">
                 {translations[language].idCardImageUrl}
               </label>
               <input
@@ -239,7 +239,7 @@ const EditTechProfile = () => {
             </div>
             {/* Driver License Image URL */}
             <div className="mb-4">
-              <label className="block text-sm font-medium">
+              <label className="block text-md">
                 {translations[language].driverLicenseImageUrl}
               </label>
               <input
@@ -252,7 +252,7 @@ const EditTechProfile = () => {
             </div>
             {/* Criminal Record Image URL */}
             <div className="mb-4">
-              <label className="block text-sm font-medium">
+              <label className="block text-md">
                 {translations[language].criminalRecordImageUrl}
               </label>
               <input
@@ -265,7 +265,7 @@ const EditTechProfile = () => {
             </div>
             {/* Additional Image URL */}
             <div className="mb-4">
-              <label className="block text-sm font-medium">
+              <label className="block text-md">
                 {translations[language].additionalImageUrl}
               </label>
               <input
@@ -278,7 +278,7 @@ const EditTechProfile = () => {
             </div>
             {/* Is Outsource */}
             <div className="mb-4">
-              <label className="block text-sm font-medium">
+              <label className="block text-md">
                 {translations[language].isOutsource}
               </label>
               <input

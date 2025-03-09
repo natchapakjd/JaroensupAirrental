@@ -7,7 +7,7 @@ import Cookies from "universal-cookie";
 import BackButtonEdit from "../../components/BackButtonEdit";
 
 const BorrowPage = () => {
-  const language = localStorage.getItem("language") || "th";
+  const language = localStorage.getItem("language") || "en";
   const translation = language === "th" ? {
     borrow_equipment: "ยืมอุปกรณ์",
     select_product: "เลือกรายการอุปกรณ์",
@@ -236,7 +236,7 @@ const BorrowPage = () => {
                       onChange={() => handleCheckboxChange(product.product_id)}
                       className="checkbox border-blue-500 checked:bg-blue-500 checked:border-blue-500 focus:ring-blue-400"
                     />
-                    <span className="text-gray-800 font-medium">
+                    <span className="text-gray-800 ">
                       {product.name} (ID: {product.product_id}) - Stock: {product.stock_quantity}
                     </span>
                   </div>
@@ -263,7 +263,7 @@ const BorrowPage = () => {
         {/* Technician Selection */}
         {role === 3 && (
           <div className="mb-6">
-            <label className="block mb-2 text-gray-700 font-medium">{translation.select_technician}</label>
+            <label className="block mb-2 text-gray-700 ">{translation.select_technician}</label>
             <select
               value={selectedTechId}
               onChange={(e) => setSelectedTechId(e.target.value)}
@@ -281,7 +281,7 @@ const BorrowPage = () => {
 
         {/* Borrow Date */}
         <div className="mb-6">
-          <label className="block mb-2 text-gray-700 font-medium">{translation.borrow_date}</label>
+          <label className="block mb-2 text-gray-700 ">{translation.borrow_date}</label>
           <input
             type="date"
             value={borrowDate}
@@ -293,7 +293,7 @@ const BorrowPage = () => {
 
         {/* Return Date */}
         <div className="mb-6">
-          <label className="block mb-2 text-gray-700 font-medium">{translation.return_date}</label>
+          <label className="block mb-2 text-gray-700 ">{translation.return_date}</label>
           <input
             type="date"
             value={returnDate}
@@ -305,7 +305,7 @@ const BorrowPage = () => {
 
         {/* ID Card Image */}
         <div className="mb-6">
-          <label className="block mb-2 text-gray-700 font-medium">{translation.id_card_image}</label>
+          <label className="block mb-2 text-gray-700 ">{translation.id_card_image}</label>
           <input
             type="file"
             name="id_card_image"

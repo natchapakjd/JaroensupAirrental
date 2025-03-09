@@ -149,7 +149,7 @@ const AddTechnician = () => {
 
         <form
           onSubmit={handleSubmit}
-          className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm font-medium"
+          className="grid grid-cols-1 md:grid-cols-2 gap-4 text-md"
         >
           {/* User Selection */}
           <div>

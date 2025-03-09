@@ -248,10 +248,11 @@ label {
 }
 
 /* สไตล์สำหรับกล่อง 5Ton */
+/* สไตล์สำหรับกล่อง 5Ton */
 .box.fiveton {
     width: 40px;
     height: 40px;
-    background-color: #ff9800;
+    background-color: #ff9800; /* สีหลัก */
     color: white;
     display: flex;
     align-items: center;
@@ -263,13 +264,13 @@ label {
 }
 
 .box.fiveton:hover {
-    background-color: #ffa726;
+    background-color: #ffa726; /* สีเมื่อ hover */
     transform: scale(1.1);
     box-shadow: 0 8px 12px rgba(0, 0, 0, 0.3);
 }
 
 .box.fiveton:active {
-    background-color: #fb8c00;
+    background-color: #fb8c00; /* สีเมื่อ active */
     transform: scale(0.95);
 }
 
@@ -277,7 +278,7 @@ label {
 .box.tenton {
     width: 40px;
     height: 40px;
-    background-color: #ff9800;
+    background-color: #4caf50; /* เปลี่ยนเป็นสีเขียว */
     color: white;
     display: flex;
     align-items: center;
@@ -289,13 +290,13 @@ label {
 }
 
 .box.tenton:hover {
-    background-color: #ffa726;
+    background-color: #66bb6a; /* สีเมื่อ hover */
     transform: scale(1.1);
     box-shadow: 0 8px 12px rgba(0, 0, 0, 0.3);
 }
 
 .box.tenton:active {
-    background-color: #fb8c00;
+    background-color: #388e3c; /* สีเมื่อ active */
     transform: scale(0.95);
 }
 
@@ -303,7 +304,7 @@ label {
 .box.twentyton {
     width: 40px;
     height: 40px;
-    background-color: #ff9800;
+    background-color: #2196f3; /* เปลี่ยนเป็นสีน้ำเงิน */
     color: white;
     display: flex;
     align-items: center;
@@ -315,15 +316,16 @@ label {
 }
 
 .box.twentyton:hover {
-    background-color: #ffa726;
+    background-color: #42a5f5; /* สีเมื่อ hover */
     transform: scale(1.1);
     box-shadow: 0 8px 12px rgba(0, 0, 0, 0.3);
 }
 
 .box.twentyton:active {
-    background-color: #fb8c00;
+    background-color: #1e88e5; /* สีเมื่อ active */
     transform: scale(0.95);
 }
+
 
 /*css column จำนวนแอร์หลังประเภท*/
 .ac-selection {
