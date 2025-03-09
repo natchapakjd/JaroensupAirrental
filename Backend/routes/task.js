@@ -1211,21 +1211,4 @@ router.get("/rentals", (req, res) => {
   });
 });
 
-router.get('/user-task-counts', async (req, res) => {
-  try {
-    const query = `
-      SELECT user_id, COUNT(*) as task_count
-      FROM tasks
-      WHERE task_type_id = 11
-      GROUP BY user_id
-    `;
-    const [results] = await db.query(query); // Assuming MySQL with promise-based queries
-
-    res.status(200).json(results);
-  } catch (error) {
-    console.error('Error fetching task counts:', error);
-    res.status(500).json({ error: 'Failed to fetch task counts' });
-  }
-});
-
 module.exports = router;

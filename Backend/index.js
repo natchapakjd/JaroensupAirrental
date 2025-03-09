@@ -32,10 +32,16 @@ const shipping = require('./routes/shipping')
 const area_type = require('./routes/area_type')
 const area_images = require('./routes/area_images')
 // Middleware setup
-// app.use(cors({
-//   origin: 'http://localhost:5173', 
-//   credentials: true, 
-// }));
+
+const corsOptions = {
+  origin: [
+    "https://jaroensup.com",
+    "https://www.jaroensup.com",
+    "http://localhost:5173"
+  ],
+  credentials: true
+};
+app.use(cors(corsOptions));
 
 // app.use(cors({
 //   origin: 'https://jaroensup-airrental-frontend.vercel.app', 

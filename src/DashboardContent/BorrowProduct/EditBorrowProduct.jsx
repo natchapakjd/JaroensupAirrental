@@ -1,343 +1,368 @@
 import React, { useEffect, useState } from "react";
-import { useLocation, useNavigate } from "react-router-dom";
+import { useParams, useNavigate } from "react-router-dom";
 import axios from "axios";
 import Swal from "sweetalert2";
-import { jwtDecode } from "jwt-decode";
-import Cookies from "universal-cookie";
+import Loading from "../../components/Loading";
 import BackButtonEdit from "../../components/BackButtonEdit";
 
-const BorrowPage = () => {
-  const language = localStorage.getItem("language") || "th";
+const EditBorrowProduct = () => {
+  const { borrowingId } = useParams();
+  const navigate = useNavigate();
+  const [formData, setFormData] = useState({
+    tech_id: "",
+    borrow_date: "",
+    return_date: "",
+    products: [],
+  });
+  const [loading, setLoading] = useState(true);
+  const [productsList, setProductsList] = useState([]);
+  const [technicians, setTechnicians] = useState([]);
+
+  const language = localStorage.getItem("language") || "en";
   const translation = language === "th" ? {
-    borrow_equipment: "ยืมอุปกรณ์",
+    tech_id: "รหัสช่าง",
     select_product: "เลือกรายการอุปกรณ์",
     quantity: "จำนวน",
-    select_technician: "เลือกช่าง",
     borrow_date: "วันที่ยืม",
     return_date: "วันที่คืน",
-    id_card_image: "รูปบัตรประจำตัว",
-    pdpa_consent: "ฉันยินยอมให้มีการเก็บรวบรวมและประมวลผลข้อมูลส่วนบุคคลของฉันตามนโยบายความเป็นส่วนตัว (PDPA)",
-    borrow_button: "ยืมอุปกรณ์",
-    no_products: "ยังไม่มีอุปกรณ์ที่เลือก",
-    error_fill_fields: "กรุณากรอกข้อมูลให้ครบถ้วนและเลือกอุปกรณ์อย่างน้อยหนึ่งรายการ",
-    error_pdpa_consent: "คุณต้องยินยอมตามข้อกำหนด PDPA ก่อนดำเนินการ",
-    error_quantity_exceed: "จำนวนสำหรับ {name} เกินสต็อกที่มีอยู่ ({stock})",
-    success_message: "ยืมอุปกรณ์สำเร็จ!",
-    error_message: "ไม่สามารถยืมอุปกรณ์ได้",
+    update: "อัพเดต",
+    select_technician: "เลือกช่าง",
+    borrow_date_error: "วันที่ยืมไม่สามารถเป็นอดีตได้",
+    return_date_error: "วันที่คืนไม่สามารถก่อนวันที่ยืมได้",
+    invalid_date: "วันที่ไม่ถูกต้อง",
+    success_message: "บันทึกข้อมูลการยืมอุปกรณ์สำเร็จ",
+    error_message: "ไม่สามารถบันทึกข้อมูลการยืมอุปกรณ์ได้",
+    quantity_exceed: "จำนวนเกินสต็อกที่มีอยู่",
+    duplicate_product: "อุปกรณ์นี้ถูกเลือกแล้ว",
   } : {
-    borrow_equipment: "Borrow Equipment",
-    select_product: "Select Products to Borrow",
+    tech_id: "Technician ID",
+    select_product: "Select Product",
     quantity: "Quantity",
-    select_technician: "Select Technician",
     borrow_date: "Borrow Date",
     return_date: "Return Date",
-    id_card_image: "ID Card Image",
-    pdpa_consent: "I consent to the collection and processing of my personal data in accordance with the Privacy Policy (PDPA)",
-    borrow_button: "Borrow Equipment",
-    no_products: "No products selected yet.",
-    error_fill_fields: "Please fill in all required fields and select at least one product.",
-    error_pdpa_consent: "You must consent to the PDPA terms before submitting.",
-    error_quantity_exceed: "Quantity for {name} exceeds available stock ({stock}).",
-    success_message: "Equipment borrowed successfully!",
-    error_message: "Failed to borrow equipment.",
+    update: "Update",
+    select_technician: "Select Technician",
+    borrow_date_error: "Borrow date cannot be in the past",
+    return_date_error: "Return date cannot be before the borrow date",
+    invalid_date: "Invalid Date",
+    success_message: "Borrowing record updated successfully",
+    error_message: "Failed to update borrowing record",
+    quantity_exceed: "Quantity exceeds available stock",
+    duplicate_product: "This product is already selected",
   };
 
-  const location = useLocation();
-  const navigate = useNavigate();
-  const { selectedProducts } = location.state || { selectedProducts: [] };
-  const cookies = new Cookies();
-  const token = cookies.get("authToken");
-  const decodedToken = jwtDecode(token);
-  const role = decodedToken.role;
-  const techId = decodedToken.id;
-  const [allProducts, setAllProducts] = useState([]);
-  const [filteredProducts, setFilteredProducts] = useState([]);
-  const [selectedProductIds, setSelectedProductIds] = useState(new Set());
-  const [borrowDate, setBorrowDate] = useState("");
-  const [returnDate, setReturnDate] = useState("");
-  const [quantities, setQuantities] = useState({});
-  const [technicians, setTechnicians] = useState([]);
-  const [selectedTechId, setSelectedTechId] = useState("");
-  const [idCardImage, setIdCardImage] = useState(null);
-  const [isConsentChecked, setIsConsentChecked] = useState(false);
-
   useEffect(() => {
-    const fetchAllProducts = async () => {
-      try {
-        const response = await axios.get(`${import.meta.env.VITE_SERVER_URL}/products`);
-        setAllProducts(response.data);
-      } catch (error) {
-        console.error("Error fetching all products:", error);
-        Swal.fire({ title: "Error", text: translation.error_message, icon: "error" });
-      }
-    };
-    fetchAllProducts();
-  }, []);
-
-  useEffect(() => {
-    const fetchTechnicians = async () => {
-      try {
-        const response = await axios.get(`${import.meta.env.VITE_SERVER_URL}/technicians`);
-        setTechnicians(response.data);
-      } catch (error) {
-        console.error("Error fetching technicians:", error);
-        Swal.fire({ title: "Error", text: translation.error_message, icon: "error" });
-      }
-    };
+    fetchBorrowingDetails();
+    fetchProducts();
     fetchTechnicians();
   }, []);
 
-  useEffect(() => {
-    if (selectedProducts.length > 0 && allProducts.length > 0) {
-      const filtered = allProducts.filter((product) =>
-        selectedProducts.includes(product.product_id)
+  const fetchBorrowingDetails = async () => {
+    try {
+      const response = await axios.get(
+        `${import.meta.env.VITE_SERVER_URL}/v3/equipment-borrowing/id/${borrowingId}`
       );
-      setFilteredProducts(filtered);
-      const initialQuantities = filtered.reduce((acc, product) => {
-        acc[product.product_id] = 1;
-        return acc;
-      }, {});
-      setQuantities(initialQuantities);
-      setSelectedProductIds(new Set(filtered.map((p) => p.product_id)));
+      setFormData({
+        tech_id: response.data.tech_id,
+        borrow_date: response.data.borrow_date.split(" ")[0],
+        return_date: response.data.return_date.split(" ")[0],
+        products: response.data.products.map((p) => ({
+          product_id: p.product_id,
+          quantity: p.quantity,
+        })),
+      });
+      setLoading(false);
+    } catch (error) {
+      console.error("Error fetching borrowing details:", error);
+      Swal.fire("Error!", "Failed to fetch borrowing details", "error");
     }
-  }, [selectedProducts, allProducts]);
+  };
 
-  const handleQuantityChange = (productId, value) => {
-    const product = filteredProducts.find((p) => p.product_id === productId);
-    const maxQuantity = product?.stock_quantity || 0;
-    const quantity = Math.max(1, Math.min(parseInt(value) || 1, maxQuantity));
+  const fetchProducts = async () => {
+    try {
+      const response = await axios.get(`${import.meta.env.VITE_SERVER_URL}/products`);
+      setProductsList(response.data); // สมมติว่ามี stock_quantity ในข้อมูล
+    } catch (error) {
+      console.error("Error fetching products:", error);
+    }
+  };
 
-    if (parseInt(value) > maxQuantity) {
+  const fetchTechnicians = async () => {
+    try {
+      const response = await axios.get(`${import.meta.env.VITE_SERVER_URL}/technicians`);
+      setTechnicians(response.data);
+    } catch (error) {
+      console.error("Error fetching technicians:", error);
+      Swal.fire("Error", "Failed to fetch technicians", "error");
+    }
+  };
+
+  const handleChange = (e) => {
+    const { name, value } = e.target;
+    if (name === "borrow_date" && formData.return_date && value > formData.return_date) {
       Swal.fire({
-        title: "Warning",
-        text: translation.error_quantity_exceed
-          .replace("{name}", product.name)
-          .replace("{stock}", maxQuantity),
+        title: translation.invalid_date,
+        text: "Borrow date cannot be after the return date.",
         icon: "warning",
       });
+      return;
     }
-
-    setQuantities((prev) => ({ ...prev, [productId]: quantity }));
+    if (name === "return_date" && value < formData.borrow_date) {
+      Swal.fire({
+        title: translation.invalid_date,
+        text: "Return date cannot be before the borrow date.",
+        icon: "warning",
+      });
+      return;
+    }
+    setFormData({ ...formData, [name]: value });
   };
 
-  const handleCheckboxChange = (productId) => {
-    const updatedSelected = new Set(selectedProductIds);
-    if (updatedSelected.has(productId)) {
-      updatedSelected.delete(productId);
+  const handleProductChange = (index, field, value) => {
+    const updatedProducts = [...formData.products];
+    const product = productsList.find((p) => p.product_id === parseInt(updatedProducts[index].product_id, 10));
+  
+    if (field === "quantity") {
+      const qty = parseInt(value) || 1;
+      if (product && qty > product.stock_quantity) {
+        Swal.fire({
+          title: "Warning",
+          text: `${translation.quantity_exceed} (${product.stock_quantity})`,
+          icon: "warning",
+        });
+        updatedProducts[index][field] = product.stock_quantity;
+      } else {
+        updatedProducts[index][field] = qty;
+      }
     } else {
-      updatedSelected.add(productId);
+      updatedProducts[index][field] = parseInt(value, 10) || value; // แปลง product_id เป็น integer
     }
-    setSelectedProductIds(updatedSelected);
+    setFormData({ ...formData, products: updatedProducts });
   };
 
-  const handleConsentChange = () => {
-    setIsConsentChecked((prev) => !prev);
+  const addProduct = () => {
+    // แปลง product_id ใน formData.products เป็น integer ก่อนใส่ใน Set
+    const selectedProductIds = new Set(
+      formData.products.map((p) => parseInt(p.product_id, 10))
+    );
+    // กรอง productsList โดยแปลง product_id เป็น integer เพื่อเปรียบเทียบ
+    const availableProducts = productsList.filter(
+      (p) => !selectedProductIds.has(parseInt(p.product_id, 10))
+    );
+    if (availableProducts.length === 0) {
+      Swal.fire({
+        title: "Warning",
+        text: translation.duplicate_product,
+        icon: "warning",
+      });
+      return;
+    }
+  
+    setFormData({
+      ...formData,
+      products: [...formData.products, { product_id: "", quantity: 1 }],
+    });
+  };
+  
+  const removeProduct = (index) => {
+    const updatedProducts = formData.products.filter((_, i) => i !== index);
+    setFormData({ ...formData, products: updatedProducts });
   };
 
-  const handleBorrow = async () => {
-    if (!borrowDate || !returnDate || selectedProductIds.size === 0) {
-      Swal.fire({ title: "Error", text: translation.error_fill_fields, icon: "error" });
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+
+    const today = new Date().toISOString().split("T")[0];
+    if (formData.borrow_date < today) {
+      Swal.fire(translation.error_message, translation.borrow_date_error, "error");
+      return;
+    }
+    if (formData.return_date < formData.borrow_date) {
+      Swal.fire(translation.error_message, translation.return_date_error, "error");
+      return;
+    }
+    if (!formData.tech_id) {
+      Swal.fire(translation.error_message, "Please select a technician.", "error");
+      return;
+    }
+    if (formData.products.length === 0 || formData.products.some((p) => !p.product_id)) {
+      Swal.fire(translation.error_message, "Please select at least one product.", "error");
       return;
     }
 
-    if (!isConsentChecked) {
-      Swal.fire({ title: "Error", text: translation.error_pdpa_consent, icon: "error" });
-      return;
-    }
-
-    for (const product of filteredProducts.filter((p) => selectedProductIds.has(p.product_id))) {
-      const qty = quantities[product.product_id] || 1;
-      if (qty > product.stock_quantity) {
+    // ตรวจสอบ stock_quantity อีกครั้งก่อน submit
+    for (const product of formData.products) {
+      const stockProduct = productsList.find((p) => p.product_id === product.product_id);
+      if (stockProduct && product.quantity > stockProduct.stock_quantity) {
         Swal.fire({
           title: "Error",
-          text: translation.error_quantity_exceed
-            .replace("{name}", product.name)
-            .replace("{stock}", product.stock_quantity),
+          text: `${translation.quantity_exceed} for ${stockProduct.name} (${stockProduct.stock_quantity})`,
           icon: "error",
         });
         return;
       }
     }
 
-    const formData = new FormData();
-    formData.append("tech_id", selectedTechId ? selectedTechId : techId);
-    formData.append("borrow_date", borrowDate);
-    formData.append("return_date", returnDate);
-    formData.append("user_id", selectedTechId ? selectedTechId : techId);
-    formData.append(
-      "products",
-      JSON.stringify(
-        filteredProducts
-          .filter((product) => selectedProductIds.has(product.product_id))
-          .map((product) => ({
-            product_id: product.product_id,
-            quantity: quantities[product.product_id] || 1,
-          }))
-      )
-    );
-    if (idCardImage) {
-      formData.append("id_card_image", idCardImage);
-    }
-
     try {
-      const response = await axios.post(
-        `${import.meta.env.VITE_SERVER_URL}/v2/equipment-borrowing`,
-        formData,
-        { headers: { "Content-Type": "multipart/form-data" } }
+      await axios.put(
+        `${import.meta.env.VITE_SERVER_URL}/v4/equipment-borrowing/id/${borrowingId}`,
+        formData
       );
-
-      if (response.status === 200) {
-        const taskLogResponse = await axios.post(
-          `${import.meta.env.VITE_SERVER_URL}/task-log`,
-          {
-            task_id: response.data.task_id,
-            user_id: selectedTechId ? selectedTechId : techId,
-            action: language === "th" ? "ยืมอุปกรณ์" : "Borrow Equipment",
-          }
-        );
-
-        Swal.fire({ title: "Success", text: translation.success_message, icon: "success" });
-        if (taskLogResponse.status === 201) {
-          navigate("/dashboard/borrows");
-        }
-      }
+      Swal.fire("Success!", translation.success_message, "success");
+      navigate("/dashboard/borrows");
     } catch (error) {
-      console.error("Error borrowing equipment:", error.response?.data || error);
-      Swal.fire({
-        title: "Error",
-        text: error.response?.data?.error || translation.error_message,
-        icon: "error",
-      });
+      console.error("Error updating borrowing record:", error.response?.data || error);
+      Swal.fire("Error!", translation.error_message, "error");
     }
   };
 
+  // ฟังก์ชันกรองผลิตภัณฑ์ที่ยังไม่ได้เลือก
+  const getAvailableProducts = (currentIndex) => {
+    const selectedProductIds = new Set(
+      formData.products
+        .filter((_, i) => i !== currentIndex)
+        .map((p) => p.product_id)
+    );
+    return productsList.filter((p) => !selectedProductIds.has(p.product_id));
+  };
+
+  if (loading) return <Loading />;
+
   return (
-    <div className="container mx-auto p-8 min-h-screen font-prompt">
-      <div className="p-8 rounded-lg shadow-xl w-full mx-auto bg-white transform transition-all duration-300 hover:shadow-2xl">
-        <div className="flex items-center">
-          <BackButtonEdit />
-          <h1 className="text-2xl font-semibold mx-2">{translation.borrow_equipment}</h1>
-        </div>
+    <div className="container mx-auto p-8 min-h-screen ">
+  <div className="max-w-3xl mx-auto p-8 bg-white rounded-lg shadow-xl transform transition-all duration-300 hover:shadow-2xl">
+    <div className="flex items-center justify-between mb-6">
+      <div className="flex items-center">
+        <BackButtonEdit />
+        <h1 className="text-2xl font-semibold mx-2">
+          {translation.select_product}
+        </h1>
+      </div>
+    </div>
 
-        {/* Selected Products with Checkboxes */}
-        <div className="mb-8">
-          <h3 className="text-lg font-semibold mb-4 text-gray-700">{translation.select_product}</h3>
-          {filteredProducts.length > 0 ? (
-            <ul className="space-y-4">
-              {filteredProducts.map((product) => (
-                <li
-                  key={product.product_id}
-                  className="flex items-center justify-between p-4 bg-gray-50 rounded-lg shadow-sm hover:bg-gray-100 transition-colors"
-                >
-                  <div className="flex items-center space-x-4">
-                    <input
-                      type="checkbox"
-                      checked={selectedProductIds.has(product.product_id)}
-                      onChange={() => handleCheckboxChange(product.product_id)}
-                      className="checkbox border-blue-500 checked:bg-blue-500 checked:border-blue-500 focus:ring-blue-400"
-                    />
-                    <span className="text-gray-800 font-medium">
-                      {product.name} (ID: {product.product_id}) - Stock: {product.stock_quantity}
-                    </span>
-                  </div>
-                  <div className="flex items-center space-x-2">
-                    <label className="text-gray-600">{translation.quantity}:</label>
-                    <input
-                      type="number"
-                      min="1"
-                      max={product.stock_quantity}
-                      value={quantities[product.product_id] || 1}
-                      onChange={(e) => handleQuantityChange(product.product_id, e.target.value)}
-                      className="input input-bordered w-20 text-center focus:ring-2 focus:ring-blue-400"
-                      disabled={!selectedProductIds.has(product.product_id)}
-                    />
-                  </div>
-                </li>
-              ))}
-            </ul>
-          ) : (
-            <p className="text-gray-500 italic">{translation.no_products}</p>
-          )}
-        </div>
+    <form onSubmit={handleSubmit} className="space-y-6 ">
+      {/* Technician Dropdown */}
+      <div className="form-control">
+        <label className="label">
+          <span className="label-text text-gray-700 text-md">
+            {translation.select_technician}
+          </span>
+        </label>
+        <select
+          name="tech_id"
+          value={formData.tech_id}
+          onChange={handleChange}
+          className="select select-bordered w-full bg-gray-50 focus:ring-2 focus:ring-indigo-400 transition-colors"
+          required
+        >
+          <option value="">{translation.select_technician}</option>
+          {technicians.map((tech) => (
+            <option key={tech.user_id} value={tech.user_id}>
+              {tech.firstname} {tech.lastname} (ID: {tech.user_id})
+            </option>
+          ))}
+        </select>
+      </div>
 
-        {/* Technician Selection */}
-        {role === 3 && (
-          <div className="mb-6">
-            <label className="block mb-2 text-gray-700 font-medium">{translation.select_technician}</label>
+      {/* Products Selection */}
+      <div className="form-control">
+        <label className="label">
+          <span className="label-text text-gray-700 text-md">
+            {translation.select_product}
+          </span>
+        </label>
+        {formData.products.map((product, index) => (
+          <div
+            key={index}
+            className="flex items-center space-x-4 mb-4 p-4 bg-gray-50 rounded-lg shadow-sm hover:bg-gray-100 transition-colors"
+          >
             <select
-              value={selectedTechId}
-              onChange={(e) => setSelectedTechId(e.target.value)}
-              className="select select-bordered w-full focus:ring-2 focus:ring-blue-400"
+              value={product.product_id}
+              onChange={(e) => handleProductChange(index, "product_id", e.target.value)}
+              className="select select-bordered w-full bg-white focus:ring-2 focus:ring-indigo-400"
+              required
             >
-              <option value="">{language === "th" ? "-- เลือกช่าง --" : "-- Select a Technician --"}</option>
-              {technicians.map((tech) => (
-                <option key={tech.user_id} value={tech.user_id}>
-                  {tech.firstname} {tech.lastname} (ID: {tech.user_id})
+              <option value="">{translation.select_product}</option>
+              {getAvailableProducts(index).map((p) => (
+                <option key={p.product_id} value={p.product_id}>
+                  {p.name} (Stock: {p.stock_quantity})
                 </option>
               ))}
             </select>
-          </div>
-        )}
-
-        {/* Borrow Date */}
-        <div className="mb-6">
-          <label className="block mb-2 text-gray-700 font-medium">{translation.borrow_date}</label>
-          <input
-            type="date"
-            value={borrowDate}
-            onChange={(e) => setBorrowDate(e.target.value)}
-            className="input input-bordered w-full focus:ring-2 focus:ring-blue-400"
-            min={new Date().toISOString().split("T")[0]}
-          />
-        </div>
-
-        {/* Return Date */}
-        <div className="mb-6">
-          <label className="block mb-2 text-gray-700 font-medium">{translation.return_date}</label>
-          <input
-            type="date"
-            value={returnDate}
-            onChange={(e) => setReturnDate(e.target.value)}
-            className="input input-bordered w-full focus:ring-2 focus:ring-blue-400"
-            min={borrowDate || new Date().toISOString().split("T")[0]}
-          />
-        </div>
-
-        {/* ID Card Image */}
-        <div className="mb-6">
-          <label className="block mb-2 text-gray-700 font-medium">{translation.id_card_image}</label>
-          <input
-            type="file"
-            name="id_card_image"
-            onChange={(e) => setIdCardImage(e.target.files[0])}
-            className="file-input file-input-bordered w-full h-12 text-gray-700 bg-gray-50 hover:bg-gray-100 transition-colors"
-          />
-        </div>
-
-        {/* PDPA Consent Checkbox */}
-        <div className="mb-6">
-          <label className="flex items-center space-x-3">
             <input
-              type="checkbox"
-              checked={isConsentChecked}
-              onChange={handleConsentChange}
-              className="checkbox border-blue-500 checked:bg-blue-500 checked:border-blue-500 focus:ring-blue-400"
+              type="number"
+              min="1"
+              max={productsList.find((p) => p.product_id === product.product_id)?.stock_quantity || 1}
+              value={product.quantity}
+              onChange={(e) => handleProductChange(index, "quantity", e.target.value)}
+              className="input input-bordered w-24 text-center focus:ring-2 focus:ring-indigo-400"
+              required
             />
-            <span className="text-gray-700">{translation.pdpa_consent}</span>
-          </label>
-        </div>
-
-        {/* Submit Button */}
+            <button
+              type="button"
+              onClick={() => removeProduct(index)}
+              className="btn btn-error btn-sm bg-blue-500 hover:bg-blue-600 text-white"
+            >
+              Remove
+            </button>
+          </div>
+        ))}
         <button
-          onClick={handleBorrow}
-          className="btn w-full bg-primary text-white py-3 rounded-lg hover:bg-primary transition-colors duration-300 shadow-md disabled:bg-gray-400 disabled:cursor-not-allowed"
-          disabled={!isConsentChecked}
+          type="button"
+          onClick={addProduct}
+          className="btn btn-primary btn-sm mt-2 bg-blue-500 hover:bg-primary text-white"
         >
-          {translation.borrow_button}
+          Add Product
         </button>
       </div>
-    </div>
+
+      {/* Borrow Date */}
+      <div className="form-control">
+        <label className="label">
+          <span className="label-text text-gray-700 text-md">
+            {translation.borrow_date}
+          </span>
+        </label>
+        <input
+          type="date"
+          name="borrow_date"
+          value={formData.borrow_date}
+          onChange={handleChange}
+          className="input input-bordered w-full bg-gray-50 focus:ring-2 focus:ring-indigo-400 transition-colors"
+          required
+          min={new Date().toISOString().split("T")[0]}
+        />
+      </div>
+
+      {/* Return Date */}
+      <div className="form-control">
+        <label className="label">
+          <span className="label-text text-gray-700 text-md">
+            {translation.return_date}
+          </span>
+        </label>
+        <input
+          type="date"
+          name="return_date"
+          value={formData.return_date}
+          onChange={handleChange}
+          className="input input-bordered w-full bg-gray-50 focus:ring-2 focus:ring-indigo-400 transition-colors"
+          required
+          min={formData.borrow_date || new Date().toISOString().split("T")[0]}
+        />
+      </div>
+
+      {/* Submit Button */}
+      <button
+        type="submit"
+        className="btn w-full btn-primary text-white py-3 rounded-lg  transition-colors duration-300 shadow-md"
+      >
+        {translation.update}
+      </button>
+    </form>
+  </div>
+</div>
   );
 };
 
-export default BorrowPage;
+export default EditBorrowProduct;
