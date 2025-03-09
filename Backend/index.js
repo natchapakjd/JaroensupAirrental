@@ -37,10 +37,11 @@ const area_images = require('./routes/area_images')
 //   credentials: true, 
 // }));
 
-app.use(cors({
-  origin: 'https://jaroensup-airrental-frontend.vercel.app', 
-  credentials: true, 
-}));
+// app.use(cors({
+//   origin: 'https://jaroensup-airrental-frontend.vercel.app', 
+//   credentials: true, 
+// }));
+app.use(cors())
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
 // app.use(cors({credentials:true}))
