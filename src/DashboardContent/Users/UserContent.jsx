@@ -201,7 +201,7 @@ const UserContent = () => {
           </h2>
           <div className="flex justify-end gap-2 mb-4">
             <Link to="/dashboard/user/add-tech">
-              <button className="btn bg-success hover:bg-success text-white">
+              <button className="btn btn-success text-white">
                 {translations[language].addTechnician}
               </button>
             </Link>

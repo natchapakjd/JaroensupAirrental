@@ -256,7 +256,7 @@ const AreacalDetails = () => {
                     </button>
                     <button
                       onClick={() => updateImagePopup(image.id)}
-                      className="btn bg-success text-white hover:bg-success mt-2"
+                      className="btn btn-success text-white  mt-2"
                     >
                       {translations.updateImageButton}
                     </button>

@@ -38,14 +38,12 @@ import EditOrder from '../DashboardContent/Orders/EditOrder'
 import ApplicantContent from '../DashboardContent/TechnicianApplicants/ApplicantContent'
 import ApplicantDetails from '../DashboardContent/TechnicianApplicants/ApplicantDetails'
 import ChangePassword from '../pages/Settings/ChangePassword'
-import BorrowProductContent from '../DashboardContent/BorrowProduct/BorrowProductContent'
 import BorrowProductTable from '../DashboardContent/BorrowProduct/BorrowProductTable'
 import ProfileSetting from '../pages/Settings/ProfileSetting'
 import AddTechnician from '../DashboardContent/Users/AddTechnician'
 import SendApplicantEmail from '../DashboardContent/TechnicianApplicants/SendApplicantEmail'
 import LineProfile from '../pages/Settings/LineProfile'
 import EditReview from '../DashboardContent/Reviews/EditReview'
-import AddBorrowProduct from '../DashboardContent/BorrowProduct/AddBorrowProduct'
 import UpdateTaskTech from '../DashboardContent/Tasks/UpdateTaskTech'
 import EditBrand from '../DashboardContent/Brands/EditBrand'
 import EditWarehouse from '../DashboardContent/Warehouses/EditWarehouse'
@@ -67,6 +65,7 @@ import Setting from '../DashboardContent/Settings/Setting'
 import BorrowProductDetails from '../DashboardContent/BorrowProduct/BorrowProductDetails'
 import OrderDetailsLog from '../DashboardContent/Orders/OrderDetailsLog'
 import AddTaskImages from '../DashboardContent/Tasks/AddTaskImages'
+import BorrowPage from '../DashboardContent/BorrowProduct/BorrowPage'
 const DashboardRoute = () => {
   return (
       <div className='flex'>
@@ -97,10 +96,8 @@ const DashboardRoute = () => {
             <Route path="payments" element={<PaymentContent />} />
             <Route path="payments/add" element={<AddPayment />} />
             <Route path="payments/edit/:paymentId" element={<EditPayment />} />
-            <Route path="borrows/:productId" element={<BorrowProductContent />} />
             <Route path="borrows" element={<BorrowProductTable />} />
             <Route path="borrows/details/:task_id" element={<BorrowProductDetails />} />
-            <Route path="borrows/add" element={<AddBorrowProduct />} />
             <Route path="orders" element={<OrderContent />} />
             <Route path="orders/details/:orderId" element={<OrderDetails/>} />
             <Route path="orders/detail-log/:taskId" element={<OrderDetailsLog/>} />
@@ -139,6 +136,7 @@ const DashboardRoute = () => {
             <Route path="area-cal/edit/:areaId" element={<EditAreacal />} /> 
             <Route path="borrows/edit/:borrowingId" element={<EditBorrowProduct />} /> 
             <Route path="area-cal/details/:area_calculation_id" element={<AreacalDetails />} />
+            <Route path="borrows/new" element={<BorrowPage />} />
 
           </Routes>
         </div>

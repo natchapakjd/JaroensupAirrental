@@ -109,8 +109,6 @@ const Interface = forwardRef(({ props }, ref) => {
       });
   }, []);
 
-  
-
   useEffect(() => {
     axios
       .get(`${import.meta.env.VITE_SERVER_URL}/area-types`)
@@ -164,22 +162,21 @@ const Interface = forwardRef(({ props }, ref) => {
   };
 
   const openImageUploadPopup = (selectedAppointment) => {
-    if(!isPresenting){
+    if (!isPresenting) {
       if (!selectedAppointment) {
         alert("กรุณาเลือก Appointment ก่อนอัปโหลดภาพ!");
         return;
       }
-  
+
       MySwal.fire({
         title: "อัปโหลดรูปภาพ",
         html: <ImageUpload areaCalculationId={selectedAppointment} />,
         showConfirmButton: false, // ซ่อนปุ่ม OK เพราะอัปโหลดเสร็จเอง
         width: "50%",
       });
-    }else{
-      alert('โปรดกลับไปหน้าหลัก AR ก่อนอัพโหลดรูปภาพ')
+    } else {
+      alert("โปรดกลับไปหน้าหลัก AR ก่อนอัพโหลดรูปภาพ");
     }
-    
   };
 
   return (
@@ -297,14 +294,20 @@ const Interface = forwardRef(({ props }, ref) => {
                   value={selectedAppointment}
                   onChange={(e) => setSelectedAppointment(e.target.value)}
                 >
-                  {appointments.map((appointment) => (
-                    <option
-                      key={appointment.assignment_id}
-                      value={appointment.assignment_id}
-                    >
-                      {appointment.assignment_id} - {appointment.description}
+                  {appointments.length > 0 ? (
+                    appointments.map((appointment) => (
+                      <option
+                        key={appointment.assignment_id}
+                        value={appointment.assignment_id}
+                      >
+                        {appointment.assignment_id} - {appointment.description}
+                      </option>
+                    ))
+                  ) : (
+                    <option value="" disabled>
+                      ไม่มีข้อมูล
                     </option>
-                  ))}
+                  )}
                 </select>
               </div>
 

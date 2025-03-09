@@ -81,11 +81,11 @@ const AddAttribute = () => {
           </h1>
         </div>
 
-        <form onSubmit={handleSubmit} className="text-sm font-medium">
+        <form onSubmit={handleSubmit} className="text-sm ">
           <div className="mb-4">
             <label
               htmlFor="name"
-              className="block text-sm font-medium text-gray-700"
+              className="block text-md  text-gray-700"
             >
               {translations[language].nameLabel}
             </label>
@@ -100,7 +100,7 @@ const AddAttribute = () => {
           </div>
           <button
             type="submit"
-            className={`btn bg-blue text-white hover:bg-blue focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm w-full sm:w-auto px-5 py-2.5 text-center ${
+            className={`btn bg-blue text-white hover:bg-blue focus:ring-4 focus:outline-none focus:ring-blue-300  rounded-lg text-sm w-full sm:w-auto px-5 py-2.5 text-center ${
               loading ? "opacity-50 cursor-not-allowed" : ""
             }`}
             disabled={loading}

@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import axios from "axios";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import Swal from "sweetalert2";
 import { jwtDecode } from "jwt-decode";
 import Cookies from "universal-cookie";
@@ -23,6 +23,7 @@ const ProductContent = () => {
   const role = decodedToken.role;
   const user_id = decodedToken.id;
   const [selectedProducts, setSelectedProducts] = useState([]);
+  const navigate = useNavigate();
 
   const translation = {
     en: {
@@ -149,6 +150,7 @@ const ProductContent = () => {
         return [...prevSelectedProducts, productId]; // Select
       }
     });
+    console.log(selectedProducts);
   };
 
   const fetchBrands = async () => {
@@ -229,6 +231,21 @@ const ProductContent = () => {
     });
   };
 
+  const handleNavigateToBorrowPage = () => {
+    if (selectedProducts.length === 0) {
+      Swal.fire({
+        title: "Error",
+        text: "Please select at least one product to borrow.",
+        icon: "error",
+      });
+      return;
+    }
+    console.log(selectedProducts);
+    navigate("/dashboard/borrows/new", {
+      state: { selectedProducts }, // ส่ง selectedProducts ไปยังหน้า BorrowPage
+    });
+  };
+
   const handlePageChange = (newPage) => {
     if (newPage > 0 && newPage <= totalPages) {
       setCurrentPage(newPage);
@@ -255,13 +272,12 @@ const ProductContent = () => {
           </h2>
 
           <div className="flex">
-            {role === 3 && (
-              <Link to="/dashboard/borrows/new">
-                <button className="btn bg-blue text-white hover:bg-blue">
-                  {translation[currentLanguage].borrowProduct}
-                </button>
-              </Link>
-            )}
+            <button
+              onClick={handleNavigateToBorrowPage}
+              className="btn bg-success text-white hover:bg-success"
+            >
+              {translation[currentLanguage].borrowProduct}
+            </button>
             {role === 3 && (
               <Link to="/dashboard/products/add">
                 <button className="btn bg-blue text-white hover:bg-blue">
@@ -313,6 +329,7 @@ const ProductContent = () => {
           <table className="table w-full border-collapse border border-gray-300 font-prompt">
             <thead className="sticky top-0 bg-gray-200">
               <tr>
+                
                 <th className="border p-2 text-center"></th>
                 <th className="border p-2 text-center">
                   {translation[currentLanguage].id}
@@ -341,9 +358,11 @@ const ProductContent = () => {
                 <th className="border p-2 text-center">
                   {translation[currentLanguage].productImage}
                 </th>
-                <th className="border p-2 text-center">
-                  {translation[currentLanguage].actions}
-                </th>
+                {role === 3 && (
+                  <th className="border p-2 text-center">
+                    {translation[currentLanguage].actions}
+                  </th>
+                )}
               </tr>
             </thead>
             <tbody className="text-center">
@@ -389,9 +408,9 @@ const ProductContent = () => {
                         translation[currentLanguage].noImage
                       )}
                     </td>
-                    <td className="border p-2 text-center">
-                      <div className="flex justify-center gap-2">
-                        {role === 3 ? (
+                    {role === 3 && (
+                      <td className="border p-2 text-center">
+                        <div className="flex justify-center gap-2">
                           <>
                             <Link
                               to={`/dashboard/products/edit/${product.product_id}`}
@@ -409,15 +428,9 @@ const ProductContent = () => {
                               {translation[currentLanguage].delete}
                             </button>
                           </>
-                        ) : (
-                          <Link to={`/dashboard/borrows/${product.product_id}`}>
-                            <button className="btn btn-success text-white">
-                              {translation[currentLanguage].borrow}
-                            </button>
-                          </Link>
-                        )}
-                      </div>
-                    </td>
+                        </div>
+                      </td>
+                    )}
                   </tr>
                 ))
               ) : (
