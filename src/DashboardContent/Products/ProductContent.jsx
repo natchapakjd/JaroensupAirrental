@@ -56,7 +56,8 @@ const ProductContent = () => {
       borrow: "borrow",
       edit: "edit",
       delete: "delete",
-      noImage: "No image"
+      noImage: "No image",
+      borrowProduct: "Borrow Product",
     },
     th: {
       productList: "รายการสินค้า",
@@ -89,10 +90,10 @@ const ProductContent = () => {
       borrow: "ยืมอุปกรณ์",
       edit: "แก้ไข",
       delete: "ลบสินค้า",
-      noImage: "ไม่มีรูปภาพ"
+      noImage: "ไม่มีรูปภาพ",
+      borrowProduct: "สร้างรายการยืม",
     },
   };
-  
 
   const [currentLanguage, setCurrentLanguage] = useState(
     localStorage.getItem("language", "th")
@@ -206,13 +207,13 @@ const ProductContent = () => {
               admin_id: user_id,
               action: `ลบสินค้าไอดี ${productId} ชื่อสินค้า: ${productName}`, // เพิ่มชื่อสินค้าใน log
             });
-  
+
             Swal.fire({
               title: translation[currentLanguage].productDeleted,
-              text: `${productName}`, 
+              text: `${productName}`,
               icon: "success",
             });
-  
+
             setProducts(
               products.filter((product) => product.product_id !== productId)
             );
@@ -227,7 +228,6 @@ const ProductContent = () => {
       }
     });
   };
-  
 
   const handlePageChange = (newPage) => {
     if (newPage > 0 && newPage <= totalPages) {
@@ -254,13 +254,22 @@ const ProductContent = () => {
             {translation[currentLanguage].productList}
           </h2>
 
-          {role === 3 && (
-            <Link to="/dashboard/products/add">
-              <button className="btn bg-blue text-white hover:bg-blue">
-                {translation[currentLanguage].addProduct}
-              </button>
-            </Link>
-          )}
+          <div className="flex">
+            {role === 3 && (
+              <Link to="/dashboard/borrows/new">
+                <button className="btn bg-blue text-white hover:bg-blue">
+                  {translation[currentLanguage].borrowProduct}
+                </button>
+              </Link>
+            )}
+            {role === 3 && (
+              <Link to="/dashboard/products/add">
+                <button className="btn bg-blue text-white hover:bg-blue">
+                  {translation[currentLanguage].addProduct}
+                </button>
+              </Link>
+            )}
+          </div>
         </div>
 
         {/* Filter and Search Section */}
@@ -304,8 +313,7 @@ const ProductContent = () => {
           <table className="table w-full border-collapse border border-gray-300 font-prompt">
             <thead className="sticky top-0 bg-gray-200">
               <tr>
-                <th className="border p-2 text-center">
-                </th>
+                <th className="border p-2 text-center"></th>
                 <th className="border p-2 text-center">
                   {translation[currentLanguage].id}
                 </th>
@@ -414,7 +422,7 @@ const ProductContent = () => {
                 ))
               ) : (
                 <tr>
-                  <td colSpan="10" className="border border-gray-300 p-4">
+                  <td colSpan="11" className="border border-gray-300 p-4">
                     {translation[currentLanguage].noProducts}
                   </td>
                 </tr>

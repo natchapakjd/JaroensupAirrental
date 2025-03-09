@@ -249,8 +249,10 @@ const ReviewContent = () => {
                     </td>
                     <td className="border p-2 text-center">{review.comment}</td>
                     <td className="border p-2 text-center  place-items-center">
-                      {review.rating}
-                      <MdOutlineStar className="text-yellow-400" />
+                      <div className="flex">
+                        {review.rating}
+                        <MdOutlineStar className="text-yellow-400 pb-1  text-xl" />
+                      </div>
                     </td>
 
                     <td className="border p-2 text-center">

@@ -66,7 +66,7 @@ import AreacalDetails from '../DashboardContent/AugmentedReality/AreacalDetails'
 import Setting from '../DashboardContent/Settings/Setting'
 import BorrowProductDetails from '../DashboardContent/BorrowProduct/BorrowProductDetails'
 import OrderDetailsLog from '../DashboardContent/Orders/OrderDetailsLog'
-
+import AddTaskImages from '../DashboardContent/Tasks/AddTaskImages'
 const DashboardRoute = () => {
   return (
       <div className='flex'>
@@ -109,6 +109,7 @@ const DashboardRoute = () => {
             <Route path="tasks/add" element={<AddTask />} />
             <Route path="tasks/edit/:taskId" element={<EditTask />} />
             <Route path="tasks/approve/:taskId" element={<ApproveTask />} />
+            <Route path="tasks/add-image/:taskId" element={<AddTaskImages />} />
             <Route path="user" element={<UserContent />} />
             {/* <Route path="augmented-reality" element={<ThreeScene />} /> */}
             <Route path="analytics" element={<ReportContent />} />

@@ -4,22 +4,25 @@ import { Link, useNavigate } from "react-router-dom";
 import Swal from "sweetalert2";
 import Cookies from "universal-cookie";
 import { jwtDecode } from "jwt-decode"; // Fix for jwtDecode import
-
+import BookingPDF from "../../pages/History/BookingPdf";
+import Loading from "../../components/Loading";
 const TaskContent = () => {
   const [tasks, setTasks] = useState([]);
   const [statuses, setStatuses] = useState([]);
+  const [rentals, setRentals] = useState([]);
   const [searchTerm, setSearchTerm] = useState("");
   const [filterStatus, setFilterStatus] = useState("all");
   const [currentPage, setCurrentPage] = useState(1);
-  const [tasksPerPage, setTasksPerPage] = useState(10);
+  const [tasksPerPage, setTasksPerPage] = useState(5);
   const [totalTasks, setTotalTasks] = useState(1);
   const [quantities, setQuantities] = useState({}); // Store quantities
+  const [loading, setLoading] = useState(true);
   const cookies = new Cookies();
   const token = cookies.get("authToken");
   const decodedToken = jwtDecode(token);
   const role = decodedToken.role;
   const techId = decodedToken.technicianId;
-  const user_id =decodedToken.id
+  const user_id = decodedToken.id;
   const apiUrl = import.meta.env.VITE_SERVER_URL;
   const language = localStorage.getItem("language") || "en";
 
@@ -47,6 +50,7 @@ const TaskContent = () => {
       next: "Next",
       of: "of",
       page: "page",
+      file: "file",
     },
     th: {
       taskList: "รายการงาน",
@@ -71,17 +75,18 @@ const TaskContent = () => {
       next: "ถัดไป",
       of: "จาก",
       page: "หน้า",
+      file: "ไฟล์",
     },
   };
 
   const currentLang = translation[language];
 
   const navigate = useNavigate();
-  
+
   useEffect(() => {
     fetchTasks();
     fetchStatuses();
-  }, [currentPage, tasksPerPage, tasks]);
+  }, [currentPage]);
 
   useEffect(() => {
     tasks.forEach((task) => {
@@ -89,41 +94,54 @@ const TaskContent = () => {
     });
   }, [tasks]);
 
-  // const fetchTasks = async () => {
-  //   try {
-  //     const apiEndpoint = role === 2 ? `${apiUrl}/v2/tasks/paged` : `${apiUrl}/tasks/paged`;
-  
-  //     const params = {
-  //       page: currentPage,
-  //       limit: tasksPerPage,
-  //     };
-  
-  //     if (role === 2) {
-  //       params.user_id = user_id; // ส่ง user_id ไปเมื่อ role === 2
-  //     }
-  
-  //     const response = await axios.get(apiEndpoint, { params });
-  
-  //     const { tasks, total } = response.data;
-  //     setTasks(tasks.filter((t) => t.task_type_id === 1));
-  //     setTotalTasks(total);
-  //   } catch (error) {
-  //     console.error("Error fetching paged tasks:", error);
-  //   }
-  // };
-  
-
   const fetchTasks = async () => {
     try {
-      const response = await axios.get(`${apiUrl}/tasks/paged`, {
-        params: {
-          page: currentPage,
-          limit: tasksPerPage,
-        },
-      });
+      const response = await axios.get(
+        `${import.meta.env.VITE_SERVER_URL}/tasks/paged`,
+        {
+          params: {
+            page: currentPage,
+            limit: tasksPerPage,
+          },
+        }
+      );
 
       const { tasks, total } = response.data;
-      setTasks(tasks.filter((t) => t.task_type_id === 1 || t.task_type_id ===12));
+
+      // Filter relevant tasks
+      const filteredTasks = tasks.filter(
+        (t) => t.task_type_id === 1 || t.task_type_id === 12
+      );
+
+      // Fetch rental data
+      const rentalResponse = await axios.get(
+        `${import.meta.env.VITE_SERVER_URL}/rentals`
+      );
+
+      // Access rentalData array safely
+      const rentalData =
+        rentalResponse.data?.rentalData || rentalResponse.data || [];
+
+      if (!Array.isArray(rentalData)) {
+        console.error("Unexpected rentalData format:", rentalData);
+        return;
+      }
+
+      // Store rentals
+      setRentals(rentalData);
+
+      // Combine rentals with tasks based on task_id
+      const tasksWithRentals = filteredTasks.map((task) => {
+        const rentalsForTask = rentalData.filter(
+          (rental) => rental.task_id === task.task_id
+        );
+        return {
+          ...task,
+          rentalDetails: rentalsForTask.length > 0 ? rentalsForTask : null,
+        };
+      });
+
+      setTasks(tasksWithRentals);
       setTotalTasks(total);
     } catch (error) {
       console.error("Error fetching paged tasks:", error);
@@ -139,6 +157,7 @@ const TaskContent = () => {
           [taskId]: response.data.totalQuantity,
         }));
       }
+      setLoading(false);
     } catch (error) {
       console.error("Error fetching rental quantities:", error);
     }
@@ -237,6 +256,9 @@ const TaskContent = () => {
     setCurrentPage(newPage);
   };
 
+  if (loading) {
+    <Loading />;
+  }
   return (
     <div className="container mx-auto p-8">
       <div className="p-8 rounded-lg shadow-lg w-full mx-auto font-prompt h-full">
@@ -300,6 +322,7 @@ const TaskContent = () => {
                 <th className="border p-2 text-center">
                   {currentLang.actions}
                 </th>
+                <th className="border p-2 text-center">{currentLang.file}</th>
               </tr>
             </thead>
             <tbody>
@@ -312,14 +335,23 @@ const TaskContent = () => {
                       {task.description}
                     </td>
                     <td className="border p-2 text-center">
-                      {new Date(task.appointment_date).toLocaleDateString()}
+                      {new Date(task.appointment_date).toLocaleDateString(
+                        "th-TH",
+                        {
+                          timeZone: "Asia/Bangkok",
+                        }
+                      )}
                     </td>
                     <td className="border p-2 text-center">
-                      {new Date(task.appointment_date).toLocaleTimeString([], {
+                      {new Date(
+                        new Date(task.appointment_date).getTime() +
+                          7 * 60 * 60 * 1000
+                      ).toLocaleTimeString("th-TH", {
                         hour: "2-digit",
                         minute: "2-digit",
                       })}
                     </td>
+
                     <td className="border p-2 text-center">
                       {task.status_name}
                     </td>
@@ -327,24 +359,27 @@ const TaskContent = () => {
                       <div className="flex justify-center gap-2">
                         {role === 3 && (
                           <>
-                            {task.status_id !== 4 && task.status_id !== 2 &&  task.task_type_id !== 12 && (
-                              <Link
-                                to={`/dashboard/tasks/approve/${task.task_id}`}
-                              >
-                                <button className="btn btn-success text-white">
-                                  {currentLang.approve}
-                                </button>
-                              </Link>
-                            )}
+                            {task.status_id !== 4 &&
+                              task.status_id !== 2 &&
+                              task.task_type_id !== 12 && (
+                                <Link
+                                  to={`/dashboard/tasks/approve/${task.task_id}`}
+                                >
+                                  <button className="btn btn-success text-white">
+                                    {currentLang.approve}
+                                  </button>
+                                </Link>
+                              )}
 
-                            {quantities[task.task_id] > 0 && (
-                              <button
-                                className="btn btn-success text-white"
-                                onClick={() => handleReturn(task.task_id)}
-                              >
-                                {currentLang.return}
-                              </button>
-                            )}
+                            {quantities[task.task_id] > 0 &&
+                              task.status_id !== 2 && (
+                                <button
+                                  className="btn btn-success text-white"
+                                  onClick={() => handleReturn(task.task_id)}
+                                >
+                                  {currentLang.return}
+                                </button>
+                              )}
                             <Link to={`/dashboard/tasks/edit/${task.task_id}`}>
                               <button className="btn btn-success text-white">
                                 {currentLang.edit}
@@ -366,11 +401,16 @@ const TaskContent = () => {
                         </button>
                       </div>
                     </td>
+                    <td className="flex justify-center">
+                      {task.status_id !== 1 && task.task_type_id === 1 && (
+                        <BookingPDF task={task} />
+                      )}
+                    </td>
                   </tr>
                 ))
               ) : (
                 <tr>
-                  <td colSpan="7" className="border p-4 text-center">
+                  <td colSpan="8" className="border p-4 text-center">
                     {currentLang.noTasksFound}
                   </td>
                 </tr>

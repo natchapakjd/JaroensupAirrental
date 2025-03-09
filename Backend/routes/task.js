@@ -2,7 +2,19 @@ const express = require("express");
 const router = express.Router();
 const db = require("../db");
 const cron = require("node-cron");
+const multer = require("multer");
+const path = require("path");
+const fs = require("fs");
 const isAdmin = require('../middlewares/isAdmin');
+const cloudinary = require('../cloundinary-config')
+
+const storage = multer.diskStorage({
+  destination: "uploads/task-images",
+  filename: (req, file, cb) => {
+    cb(null, `${Date.now()}-${file.originalname}`);
+  },
+});
+const upload = multer({ storage });
 
 cron.schedule("0 0 * * *", () => {
   const query = `
@@ -54,11 +66,12 @@ router.get("/task-paging/:id", (req, res) => {
 
   // Main query to get tasks with pagination and filter by task_type_id = 1
   let query = `
-    SELECT t.*, tt.type_name, st.status_name 
+    SELECT t.*, tt.type_name, st.status_name ,us.firstname,us.lastname
     FROM tasks t 
-    JOIN status st ON t.status_id = st.status_id 
+    JOIN status st ON t.status_id = st.status_id  
     JOIN tasktypes tt ON t.task_type_id = tt.task_type_id 
-    WHERE user_id = ? AND t.task_type_id = 1
+    JOIN users us ON t.user_id = us.user_id
+    WHERE t.user_id = ? AND (t.task_type_id = 1 OR t.task_type_id = 12) AND t.isActive = 1 
     LIMIT ? OFFSET ?
   `;
 
@@ -104,6 +117,8 @@ router.get("/tasks/paged", (req, res) => {
     SELECT 
       tasks.*, 
       users.username,
+      users.firstname,
+      users.lastname,
       tasktypes.type_name,
       status.status_name
     FROM 
@@ -356,6 +371,7 @@ router.post("/tasks", (req, res) => {
 
 router.put("/task/:id", (req, res) => {
   const id = req.params.id;
+
   const {
     user_id,
     description,
@@ -368,8 +384,18 @@ router.put("/task/:id", (req, res) => {
     status_id,
     rental_start_date,
     rental_end_date,
+    total
   } = req.body;
-  console.log(req.body)
+
+  console.log(req.body);
+
+  // Format appointment_date to MySQL format (YYYY-MM-DD HH:MM:SS)
+  const formattedAppointmentDate = new Date(appointment_date).toISOString().slice(0, 19).replace('T', ' ');
+
+  // Format rental_start_date and rental_end_date to YYYY-MM-DD (no time)
+  const formattedRentalStartDate = new Date(rental_start_date).toISOString().slice(0, 10);  // 'YYYY-MM-DD'
+  const formattedRentalEndDate = new Date(rental_end_date).toISOString().slice(0, 10);  // 'YYYY-MM-DD'
+
   // Update the task
   const updateTaskQuery = `
     UPDATE tasks
@@ -382,7 +408,8 @@ router.put("/task/:id", (req, res) => {
       appointment_date = ?,
       latitude = ?,
       longitude = ?,
-      status_id = ?
+      status_id = ?,
+      total = ?
     WHERE task_id = ?`;
 
   db.query(
@@ -393,10 +420,11 @@ router.put("/task/:id", (req, res) => {
       task_type_id,
       quantity_used,
       address,
-      appointment_date,
+      formattedAppointmentDate,
       latitude,
       longitude,
       status_id,
+      total,
       id,
     ],
     (err, result) => {
@@ -422,7 +450,7 @@ router.put("/task/:id", (req, res) => {
 
           db.query(
             updateRentalQuery,
-            [rental_start_date, rental_end_date, id],
+            [formattedRentalStartDate, formattedRentalEndDate, id],
             (err) => {
               if (err) {
                 console.error("Error updating rental record: " + err);
@@ -439,8 +467,8 @@ router.put("/task/:id", (req, res) => {
                 appointment_date,
                 latitude,
                 longitude,
-                rental_start_date,
-                rental_end_date,
+                rental_start_date: formattedRentalStartDate,
+                rental_end_date: formattedRentalEndDate,
               });
             }
           );
@@ -452,7 +480,7 @@ router.put("/task/:id", (req, res) => {
 
           db.query(
             insertRentalQuery,
-            [id, rental_start_date, rental_end_date],
+            [id, formattedRentalStartDate, formattedRentalEndDate],
             (err) => {
               if (err) {
                 console.error("Error creating rental record: " + err);
@@ -469,8 +497,8 @@ router.put("/task/:id", (req, res) => {
                 appointment_date,
                 latitude,
                 longitude,
-                rental_start_date,
-                rental_end_date,
+                rental_start_date: formattedRentalStartDate,
+                rental_end_date: formattedRentalEndDate,
               });
             }
           );
@@ -479,6 +507,7 @@ router.put("/task/:id", (req, res) => {
     }
   );
 });
+
 
 
 router.delete("/task/:id",(req, res) => {
@@ -659,9 +688,16 @@ router.post('/rental', (req, res) => {
         });
       });
 
-      // อัพเดทสถานะของงานเป็น status_id = 4
-      const updateTaskStatusQuery = 'UPDATE tasks SET status_id = 4 WHERE task_id = ?';
-      db.query(updateTaskStatusQuery, [task_id], (err) => {
+      // คำนวณ total quantity_used และอัพเดตใน tasks
+      const totalQuantityUsed = rentals.reduce((total, rental) => total + Number(rental.quantity), 0);  // Ensures it's a number
+
+      // อัพเดทสถานะของงานเป็น status_id = 4 และ quantity_used
+      const updateTaskStatusQuery = `
+        UPDATE tasks 
+        SET status_id = 4, quantity_used = quantity_used + ? 
+        WHERE task_id = ?
+      `;
+      db.query(updateTaskStatusQuery, [totalQuantityUsed, task_id], (err) => {
         if (err) {
           console.error('Error updating task status:', err);
           return res.status(500).json({ message: 'Failed to update task status' });
@@ -672,6 +708,7 @@ router.post('/rental', (req, res) => {
     });
   });
 });
+
 
 
 // rental/return endpoint สำหรับคืนทรัพยากร
@@ -695,23 +732,26 @@ router.put('/rental/return/:taskId', async (req, res) => {
         return res.status(400).json({ message: 'No items found for this task' });
       }
 
-      // 2. อัพเดตสถานะของ task ให้เป็น 2
+      // 2. คำนวณ total quantity used ในการยืมทั้งหมด
+      const totalQuantityUsed = taskItemsResult.reduce((total, item) => total + item.quantity, 0);
+
+      // 3. อัพเดตสถานะของ task ให้เป็น 2 (เช่น สถานะ "เสร็จสิ้น")
       const updateStatusQuery = `
         UPDATE tasks 
-        SET status_id = 2 
+        SET status_id = 2, quantity_used = ? 
         WHERE task_id = ?
       `;
-      db.query(updateStatusQuery, [taskId], (err, updateStatusResult) => {
+      db.query(updateStatusQuery, [totalQuantityUsed, taskId], (err, updateStatusResult) => {
         if (err) {
           console.error("Error updating task status:", err);
           return res.status(500).json({ message: 'Failed to update task status' });
         }
 
-        // 3. คืนสินค้ากลับใน products และ warehouses ตามที่ระบุใน task_items
+        // 4. คืนสินค้ากลับใน products และ warehouses ตามที่ระบุใน task_items
         taskItemsResult.forEach((taskItem) => {
           const { product_id, quantity } = taskItem;
 
-          // 3.1 เพิ่ม stock_quantity ใน products
+          // 4.1 เพิ่ม stock_quantity ใน products
           const updateProductQuery = `
             UPDATE products 
             SET stock_quantity = stock_quantity + ? 
@@ -719,7 +759,7 @@ router.put('/rental/return/:taskId', async (req, res) => {
           `;
           db.query(updateProductQuery, [quantity, product_id]);
 
-          // 3.2 เพิ่ม capacity ใน warehouses
+          // 4.2 เพิ่ม capacity ใน warehouses
           const getWarehouseQuery = `
             SELECT warehouse_id FROM products WHERE product_id = ?
           `;
@@ -739,16 +779,9 @@ router.put('/rental/return/:taskId', async (req, res) => {
               db.query(updateWarehouseQuery, [quantity, warehouseId]);
             }
           });
-          
-          // 3.3 อัพเดต quantity ใน rental เป็น 0
-          const updateRentalQuery = `
-            UPDATE rental
-            SET quantity = 0
-            WHERE task_id = ? AND product_id = ?
-          `;
-          db.query(updateRentalQuery, [taskId, product_id]);
         });
 
+        // Send success response
         res.status(200).json({ message: 'Return processed and quantities updated' });
       });
     });
@@ -894,5 +927,289 @@ router.get("/tasks/top3/:user_id", (req, res) => {
   });
 });
 
+router.post("/v2/tasks", upload.array("images", 10), async (req, res) => {
+  const {
+    user_id,
+    description,
+    task_type_id,
+    quantity_used = 0, 
+    address,
+    appointment_date,
+    latitude,
+    longitude,
+    rental_start_date,
+    rental_end_date,
+  } = req.body;
+  
+  // ✅ ตรวจสอบค่า required
+  if (!user_id || !task_type_id || !address || !appointment_date) {
+    return res.status(400).json({ error: "Missing required fields." });
+  }
+
+  const query = `
+    INSERT INTO tasks 
+    (user_id, description, task_type_id, quantity_used, address, appointment_date, latitude, longitude, isActive) 
+    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
+  `;
+
+  db.query(
+    query,
+    [
+      user_id,
+      description || "", // ✅ ป้องกัน NULL
+      task_type_id,
+      quantity_used,
+      address,
+      appointment_date, 
+      latitude || null,
+      longitude || null,
+      1,
+    ],
+    async (err, result) => {
+      if (err) {
+        console.error("Error creating task:", err);
+        return res.status(500).json({ error: "Failed to create task" });
+      }
+
+      const taskId = result.insertId;
+
+      // ✅ ตรวจสอบก่อน insert rental
+      if (rental_start_date && rental_end_date) {
+        const rentalQuery = `
+          INSERT INTO rental (task_id, rental_start_date, rental_end_date) 
+          VALUES (?, ?, ?)
+        `;
+
+        db.query(rentalQuery, [taskId, rental_start_date, rental_end_date], (err) => {
+          if (err) {
+            console.error("Error creating rental record:", err);
+            return res.status(500).json({ error: "Failed to create rental record" });
+          }
+        });
+      }
+
+      try {
+        // ✅ อัปโหลดรูปไป Cloudinary
+        const imageUrls = [];
+        for (const file of req.files) {
+          const result = await cloudinary.uploader.upload(file.path, { folder: "task_images" });
+          imageUrls.push(result.secure_url);
+          fs.unlinkSync(file.path);
+        }
+
+        // ✅ บันทึก URL ลงตาราง task_images
+        if (imageUrls.length > 0) {
+          const imageQuery = "INSERT INTO task_images (task_id, image_url, uploaded_at) VALUES ?";
+          const imageValues = imageUrls.map((url) => [taskId, url, new Date()]);
+
+          db.query(imageQuery, [imageValues], (err) => {
+            if (err) {
+              console.error("Error saving task images:", err);
+              return res.status(500).json({ error: "Failed to save task images" });
+            }
+          });
+        }
+
+        // ✅ ส่ง response กลับ
+        res.status(201).json({
+          task_id: taskId,
+          user_id,
+          description,
+          task_type_id,
+          quantity_used,
+          address,
+          appointment_date,
+          latitude,
+          longitude,
+          rental_start_date,
+          rental_end_date,
+          images: imageUrls,
+        });
+
+      } catch (uploadError) {
+        console.error("Error uploading images:", uploadError);
+        return res.status(500).json({ error: "Failed to upload images." });
+      }
+    }
+  );
+});
+
+router.get("/task_images/:task_id", (req, res) => {
+  const { task_id } = req.params;
+
+  db.query("SELECT * FROM task_images WHERE task_id = ?", [task_id], (err, results) => {
+    if (err) {
+      console.error("Error fetching images:", err);
+      return res.status(500).json({ error: "Failed to fetch images." });
+    }
+    res.json(results);
+  });
+});
+router.post("/task_images", upload.single("image"), async (req, res) => {
+  const { task_id } = req.body;
+
+  if (!req.file) {
+    return res.status(400).json({ error: "No image uploaded." });
+  }
+
+  try {
+    // ✅ อัปโหลดรูปไปยัง Cloudinary
+    const result = await cloudinary.uploader.upload(req.file.path, {
+      folder: "task_images",
+    });
+
+    const imageUrl = result.secure_url;
+    const uploaded_at = new Date();
+
+    // ✅ บันทึกลง MySQL
+    db.query(
+      "INSERT INTO task_images (task_id, image_url, uploaded_at) VALUES (?, ?, ?)",
+      [task_id, imageUrl, uploaded_at],
+      (err, dbResult) => {
+        if (err) {
+          console.error("Error inserting image:", err);
+          return res.status(500).json({ error: "Failed to save image." });
+        }
+
+        // ✅ ลบไฟล์ต้นฉบับออกจากเซิร์ฟเวอร์
+        fs.unlinkSync(req.file.path);
+
+        res.json({
+          id: dbResult.insertId,
+          task_id,
+          image_url: imageUrl,
+          uploaded_at,
+        });
+      }
+    );
+  } catch (error) {
+    console.error("Error uploading image:", error);
+    res.status(500).json({ error: "Failed to upload image." });
+  }
+});
+
+router.put("/task_images/:image_id", (req, res) => {
+  const { image_id } = req.params;
+  const { task_id, image_url } = req.body; // รับข้อมูลใหม่จาก body
+
+  // ตรวจสอบว่ามีข้อมูลที่ต้องอัปเดตไหม
+  if (!task_id || !image_url) {
+    return res.status(400).json({ error: "task_id and image_url are required." });
+  }
+
+  // คำสั่ง SQL สำหรับอัปเดตข้อมูล
+  db.query(
+    "UPDATE task_images SET task_id = ?, image_url = ? WHERE id = ?",
+    [task_id, image_url, image_id],
+    (err, result) => {
+      if (err) {
+        console.error("Error updating image:", err);
+        return res.status(500).json({ error: "Failed to update image." });
+      }
+
+      if (result.affectedRows === 0) {
+        return res.status(404).json({ error: "Image not found." });
+      }
+
+      res.json({ message: "Image updated successfully!" });
+    }
+  );
+});
+
+
+router.delete("/task_images/:image_id", (req, res) => {
+  const { image_id } = req.params;
+
+  // ดึง URL ของรูปจาก Database ก่อนเพื่อลบจาก Cloudinary
+  db.query("SELECT image_url FROM task_images WHERE id = ?", [image_id], async (err, results) => {
+    if (err) {
+      console.error("Error fetching image:", err);
+      return res.status(500).json({ error: "Failed to fetch image." });
+    }
+
+    if (results.length === 0) {
+      return res.status(404).json({ error: "Image not found." });
+    }
+
+    const imageUrl = results[0].image_url;
+    const publicId = imageUrl.split("/").pop().split(".")[0]; // ดึง public_id ของ Cloudinary
+
+    try {
+      // ✅ ลบจาก Cloudinary
+      await cloudinary.uploader.destroy(`task_images/${publicId}`);
+
+      // ✅ ลบจาก Database
+      db.query("DELETE FROM task_images WHERE id = ?", [image_id], (deleteErr) => {
+        if (deleteErr) {
+          console.error("Error deleting image:", deleteErr);
+          return res.status(500).json({ error: "Failed to delete image." });
+        }
+        res.json({ message: "Image deleted successfully!" });
+      });
+    } catch (cloudinaryError) {
+      console.error("Error deleting from Cloudinary:", cloudinaryError);
+      res.status(500).json({ error: "Failed to delete image from Cloudinary." });
+    }
+  });
+});
+
+router.get("/rental/:taskId", (req, res) => {
+  const taskId = req.params.taskId;
+
+  // SQL query to get rental and product data
+  const query = `
+    SELECT 
+      r.task_id,
+      p.product_id,
+      p.name AS product_name,
+      SUM(r.quantity) AS total_quantity_used
+    FROM rental r
+    JOIN products p ON r.product_id = p.product_id
+    WHERE r.task_id = ?
+    GROUP BY r.task_id, r.product_id, p.name;
+  `;
+
+  // Query execution
+  db.query(query, [taskId], (err, result) => {
+    if (err) {
+      console.error("Error fetching rental data: ", err);
+      return res.status(500).json({ error: "Failed to fetch rental data" });
+    }
+
+    // Return the result
+    res.status(200).json({
+      rentalData: result
+    });
+  });
+});
+
+router.get("/rentals", (req, res) => {
+  // SQL query to get rental and product data for all tasks
+  const query = `
+    SELECT 
+      r.task_id,
+      p.product_id,
+      p.name AS product_name,
+      SUM(r.quantity) AS total_quantity_used,
+      r.rental_start_date,
+      r.rental_end_date
+    FROM rental r
+    JOIN products p ON r.product_id = p.product_id
+    GROUP BY r.task_id, r.product_id, p.name;
+  `;
+
+  // Query execution
+  db.query(query, (err, result) => {
+    if (err) {
+      console.error("Error fetching rental data: ", err);
+      return res.status(500).json({ error: "Failed to fetch rental data" });
+    }
+
+    // Return the result
+    res.status(200).json({
+      rentalData: result
+    });
+  });
+});
 
 module.exports = router;

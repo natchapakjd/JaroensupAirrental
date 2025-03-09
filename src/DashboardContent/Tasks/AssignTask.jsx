@@ -31,7 +31,7 @@ const AssignTask = () => {
       selectTechnician: "Select Technician",
       assignedTasks: "Assigned Tasks",
       appointmentId: "Appointment ID",
-      task: "Task",
+      task: "Task description",
       technicianName: "Technician Name",
       action: "Action",
       noAssignedTasks: "No assigned tasks",
@@ -53,7 +53,7 @@ const AssignTask = () => {
       selectTechnician: "เลือกช่างภายนอก",
       assignedTasks: "งานที่ได้รับมอบหมาย",
       appointmentId: "รหัสการนัดหมาย",
-      task: "งาน",
+      task: "รายละเอียดงาน",
       technicianName: "ชื่อช่างที่ถูกมอบหมาย",
       action: "การกระทำ",
       noAssignedTasks: "ไม่มีงานที่ได้รับมอบหมาย",
@@ -128,43 +128,36 @@ const AssignTask = () => {
 
   const handleAssign = async (e) => {
     e.preventDefault();
+  
+    // Remove duplicates and combine the tech IDs into a single array (no need for string concatenation)
+    const uniqueTechIds = [...new Set(selectedTechIds)];
+  
+    console.log("Unique Tech IDs:", uniqueTechIds);
+  
     try {
-      await Promise.all(
-        selectedTechIds.map(async (techId) => {
-          await axios.post(`${apiUrl}/v2/appointments`, {
-            task_id: selectedTaskId,
-            tech_ids: selectedTechIds,
-          });
-
-          // ดึง Line Token ของแต่ละช่าง
-          // const lineTokenResponse = await axios.get(`${apiUrl}/linetoken-tech/${techId}`);
-          // setLineToken(lineTokenResponse.data[0].linetoken);
-
-          // // ส่งแจ้งเตือน Line
-          // await axios.post(`${apiUrl}/send-message`, {
-          //   userId: lineTokenResponse.data[0].linetoken,
-          //   message: "แจ้งเตือนจากระบบ:\n\nคุณได้รับมอบหมายงานใหม่จากแอดมิน.\n\nกรุณาตรวจสอบและดำเนินการ.",
-          // });
-        })
-      );
-
-      // อัปเดตตารางงานที่ถูกมอบหมายใหม่
+      // Send the request with combined unique tech_ids in a single request
+      await axios.post(`${apiUrl}/v2/appointments`, {
+        task_id: selectedTaskId,
+        tech_ids: uniqueTechIds, // Send unique tech IDs array
+      });
+  
+      // Optionally, you can also fetch the updated assigned tasks here
       const updatedAssignedTasks = await axios.get(`${apiUrl}/appointments`);
       setAssignedTasks(updatedAssignedTasks.data);
-
-      // ✅ แจ้งเตือนเมื่อมอบหมายสำเร็จ
+  
+      // ✅ Show success notification
       await Swal.fire({
         title: "สำเร็จ!",
         text: "มอบหมายงานเรียบร้อยแล้ว",
         icon: "success",
         confirmButtonText: "ตกลง",
       });
-
+  
       navigate("/dashboard/tasks/assign");
     } catch (error) {
       console.error("Error assigning task:", error);
-
-      // ❌ แจ้งเตือนเมื่อเกิดข้อผิดพลาด
+  
+      // ❌ Show error notification
       await Swal.fire({
         title: "ข้อผิดพลาด!",
         text: "ไม่สามารถมอบหมายงานได้ กรุณาลองใหม่",
@@ -173,6 +166,7 @@ const AssignTask = () => {
       });
     }
   };
+  
 
   const handleDelete = async (assignmentId) => {
     const result = await Swal.fire({
@@ -220,7 +214,7 @@ const AssignTask = () => {
           <BackButtonEdit />
           <h1 className="text-2xl font-semibold mx-2">{t.assignTask}</h1>
         </div>
-        <form onSubmit={handleAssign} className="space-y-4 text-sm font-medium">
+        <form onSubmit={handleAssign} className="space-y-4 text-md">
           <div className="mb-4">
             <label className="block mb-2">ประเภทงาน</label>
             <select

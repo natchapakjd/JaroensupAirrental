@@ -33,49 +33,6 @@ router.get("/area_images/:area_calculation_id", (req, res) => {
   );
 });
 
-// 📌 (2) อัปโหลดรูปภาพและบันทึกลง Database
-router.post("/area_images", upload.single("image"), async (req, res) => {
-  const { area_calculation_id } = req.body;
-
-  if (!req.file) {
-    return res.status(400).json({ error: "No image uploaded." });
-  }
-
-  try {
-    // ✅ อัปโหลดไปยัง Cloudinary
-    const result = await cloudinary.uploader.upload(req.file.path, {
-      folder: "area_images",
-    });
-
-    const imageUrl = result.secure_url;
-    const uploaded_at = new Date();
-
-    // ✅ บันทึกข้อมูลลง Database
-    db.query(
-      "INSERT INTO area_images (area_calculation_id, image_url, uploaded_at) VALUES (?, ?, ?)",
-      [area_calculation_id, imageUrl, uploaded_at],
-      (err, dbResult) => {
-        if (err) {
-          console.error("Error inserting image:", err);
-          return res.status(500).json({ error: "Failed to save image." });
-        }
-
-        // ✅ ลบไฟล์ต้นฉบับหลังอัปโหลดไป Cloudinary
-        fs.unlinkSync(req.file.path);
-
-        res.json({
-          id: dbResult.insertId,
-          area_calculation_id,
-          image_url: imageUrl,
-          uploaded_at,
-        });
-      }
-    );
-  } catch (error) {
-    console.error("Error uploading image:", error);
-    res.status(500).json({ error: "Failed to upload image." });
-  }
-});
 
 // 📌 (3) ลบรูปภาพ
 router.delete("/area_images/:id", (req, res) => {
@@ -112,6 +69,49 @@ router.delete("/area_images/:id", (req, res) => {
       res.status(500).json({ error: "Failed to delete image from Cloudinary." });
     }
   });
+});
+
+router.post("/area_images", upload.single("image"), async (req, res) => {
+  const { area_calculation_id } = req.body;
+
+  if (!req.file) {
+    return res.status(400).json({ error: "No image uploaded." });
+  }
+
+  try {
+    // ✅ อัปโหลดไฟล์ไปยัง Cloudinary
+    const result = await cloudinary.uploader.upload(req.file.path, {
+      folder: "area_images",
+    });
+
+    const imageUrl = result.secure_url;
+    const uploaded_at = new Date();
+
+    // ✅ บันทึกข้อมูลลง Database
+    db.query(
+      "INSERT INTO area_images (area_calculation_id, image_url, uploaded_at) VALUES (?, ?, ?)",
+      [area_calculation_id, imageUrl, uploaded_at],
+      (err, dbResult) => {
+        if (err) {
+          console.error("Error inserting image:", err);
+          return res.status(500).json({ error: "Failed to save image." });
+        }
+
+        // ✅ ลบไฟล์ต้นฉบับออกจากเซิร์ฟเวอร์
+        fs.unlinkSync(req.file.path);
+
+        res.json({
+          id: dbResult.insertId,
+          area_calculation_id,
+          image_url: imageUrl,
+          uploaded_at,
+        });
+      }
+    );
+  } catch (error) {
+    console.error("Error uploading image:", error);
+    res.status(500).json({ error: "Failed to upload image." });
+  }
 });
 
 module.exports = router;

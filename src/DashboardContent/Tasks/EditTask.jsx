@@ -5,6 +5,8 @@ import { MapContainer, TileLayer, Marker, useMapEvents } from "react-leaflet";
 import "leaflet/dist/leaflet.css";
 import Searchbox from "../../components/Searchbox";
 import BackButtonEdit from "../../components/BackButtonEdit";
+import { jwtDecode } from "jwt-decode";
+import Cookies from "universal-cookie";
 
 const translations = {
   en: {
@@ -62,6 +64,7 @@ const EditTask = () => {
   const [finishDate, setFinishDate] = useState("");
   const [taskTypes, setTaskTypes] = useState([]);
   const [showMap, setShowMap] = useState(false);
+  const [total, setTotal] = useState(0);
   // const [products, setProducts] = useState([]);
   const [users, setUsers] = useState([]);
   const [statuses, setStatuses] = useState([]); // Add statuses state
@@ -69,6 +72,10 @@ const EditTask = () => {
   const navigate = useNavigate();
   const apiUrl = import.meta.env.VITE_SERVER_URL; // Use the environment variable
   const language = localStorage.getItem("language") || "en"; // Default to English
+  const cookies = new Cookies();
+  const token = cookies.get("authToken");
+  const decodedToken = jwtDecode(token);
+  const user_id = decodedToken.id;
 
   useEffect(() => {
     // ถ้า finishDate น้อยกว่า startDate ให้ล้างค่า finishDate
@@ -79,15 +86,15 @@ const EditTask = () => {
 
   useEffect(() => {
     // Fetch task types
-    
+
     const fetchTaskTypes = async () => {
       try {
         const response = await axios.get(`${apiUrl}/taskTypes`);
-        
+
         const filteredTaskTypes = response.data.filter(
           (task) => task.task_type_id === 1 || task.task_type_id === 12
         );
-    
+
         setTaskTypes(filteredTaskTypes);
       } catch (error) {
         console.error("Error fetching task types:", error);
@@ -138,8 +145,9 @@ const EditTask = () => {
         setLatitude(task.latitude);
         setLongitude(task.longitude);
         setStatusId(task.status_id); // Change to statusId
-        setStartDate(task.start_date);
-        setFinishDate(task.finish_date);
+        setStartDate(task.rental_start_date);
+        setFinishDate(task.rental_end_date);
+        setTotal(task.total)
       } catch (error) {
         console.error("Error fetching task:", error);
       }
@@ -163,6 +171,7 @@ const EditTask = () => {
     setAddress(displayName);
     setLatitude(lat);
     setLongitude(lon);
+    console.log(lat,lon,displayName)
   };
 
   const handleSubmit = async (e) => {
@@ -182,16 +191,18 @@ const EditTask = () => {
         status_id: statusId, // Use statusId in the request
         rental_start_date: startDate,
         rental_end_date: finishDate,
+        total
+      });
+
+      await axios.post(`${apiUrl}/task-log`, {
+        task_id: response.data.task_id,
+        user_id: userId,
+        action: "แก้ไขงาน",
       });
 
       if (response.status === 200) {
         navigate("/dashboard/tasks");
-        await axios.post(`${apiUrl}/taskLog`, {
-          task_id: taskId,
-          user_id: userId,
-          action: "Updated Task",
-          created_at: new Date().toISOString(),
-        });
+       
       }
     } catch (error) {
       console.error("Error updating task:", error);
@@ -219,12 +230,12 @@ const EditTask = () => {
               required
             >
               <option value="">Select Task Type</option>
-              {taskTypes.map((taskType,index) => (
+              {taskTypes.map((taskType, index) => (
                 <option
                   key={taskType.task_type_id}
                   value={taskType.task_type_id}
                 >
-                 {index+1}. {taskType.type_name}
+                  {index + 1}. {taskType.type_name}
                 </option>
               ))}
             </select>
@@ -275,36 +286,35 @@ const EditTask = () => {
             </select>
           </div>
           <div>
-        <label className="block text-gray-700">
-          {translations[language].rentalStartDate}
-        </label>
-        <input
-          type="datetime-local"
-          name="appointment_date"
-          value={appointmentDate}
-          onChange={(e) => {
-            const fullDate = e.target.value;
-            setAppointmentDate(fullDate);
-            setStartDate(fullDate.split("T")[0]); // ดึงเฉพาะวันที่
-          }}
-          min={new Date().toISOString().slice(0, 16)} // ป้องกันเลือกวันที่ผ่านมา
-          required
-          className="input input-bordered w-full"
-        />
-      </div>
+            <label className="block text-gray-700">
+              {translations[language].rentalStartDate}
+            </label>
+            <input
+              type="datetime-local"
+              name="appointment_date"
+              value={appointmentDate}
+              onChange={(e) => {
+                const fullDate = e.target.value;
+                setAppointmentDate(fullDate);
+                setStartDate(fullDate.split("T")[0]); // ดึงเฉพาะวันที่
+              }}
+              min={new Date().toISOString().slice(0, 16)} // ป้องกันเลือกวันที่ผ่านมา
+              className="input input-bordered w-full"
+            />
+          </div>
 
-      <div>
-        <label className="block mb-2">
-          {translations[language].rentalEndDate}
-        </label>
-        <input
-          type="date"
-          value={finishDate}
-          onChange={(e) => setFinishDate(e.target.value)}
-          className="border p-2 w-full"
-          min={startDate || new Date().toISOString().split("T")[0]} // กำหนด min เป็น startDate ถ้ามีค่า
-        />
-      </div>
+          <div>
+            <label className="block mb-2">
+              {translations[language].rentalEndDate}
+            </label>
+            <input
+              type="date"
+              value={finishDate}
+              onChange={(e) => setFinishDate(e.target.value)}
+              className="border p-2 w-full"
+              min={startDate || new Date().toISOString().split("T")[0]} // กำหนด min เป็น startDate ถ้ามีค่า
+            />
+          </div>
           <div>
             <label className="block mb-2">
               {translations[language].address}
@@ -328,7 +338,15 @@ const EditTask = () => {
             />
           </div>
 
-
+          <div>
+            <label className="block mb-2">Total Price</label>
+            <input
+              type="number"
+              value={total}
+              onChange={(e) => setTotal(e.target.value)}
+              className="border p-2 w-full"
+            />
+          </div>
           <div className="mb-4">
             <p
               type="button"

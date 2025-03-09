@@ -5,6 +5,7 @@ import { Link } from "react-router-dom";
 import Loading from "../../components/Loading";
 import { jwtDecode } from "jwt-decode";
 import Cookies from "universal-cookie";
+import OrderReceipt from "../../pages/History/OrderReceipt";
 const translations = {
   en: {
     orders: "Orders",
@@ -29,6 +30,7 @@ const translations = {
     yesDeleteIt: "Yes, delete it!",
     deleted: "Deleted!",
     orderDeleted: "The order has been deleted.",
+    file: "file",
   },
   th: {
     orders: "คำสั่งซื้อ",
@@ -53,6 +55,7 @@ const translations = {
     yesDeleteIt: "ใช่, ลบเลย!",
     deleted: "ลบเรียบร้อย!",
     orderDeleted: "คำสั่งซื้อถูกลบแล้ว",
+    file: "ไฟล์",
   },
 };
 
@@ -64,12 +67,14 @@ const OrderContent = () => {
   const [totalPages, setTotalPages] = useState(1); // Total pages state
   const [searchQuery, setSearchQuery] = useState(""); // State for search query
   const apiUrl = import.meta.env.VITE_SERVER_URL;
-  const [language,setLanguage] = useState(localStorage.getItem('language')||'th')
+  const [language, setLanguage] = useState(
+    localStorage.getItem("language") || "th"
+  );
   const cookies = new Cookies();
   const token = cookies.get("authToken");
   const decodedToken = jwtDecode(token);
   const user_id = decodedToken.id;
-  
+
   useEffect(() => {
     fetchOrders();
   }, [page, searchQuery]); // Fetch orders when page or search query changes
@@ -111,7 +116,7 @@ const OrderContent = () => {
       confirmButtonText: translations[language].yesDeleteIt,
       cancelButtonText: translations[language].cancel,
     });
-  
+
     if (result.isConfirmed) {
       try {
         const response = await axios.delete(`${apiUrl}/v1/orders/${orderId}`);
@@ -121,13 +126,13 @@ const OrderContent = () => {
             admin_id: user_id, // ID ของแอดมินที่ลบ
             action: `ลบคำสั่งซื้อไอดี ${orderId}`,
           });
-  
+
           Swal.fire({
             title: translations[language].deleted,
             text: translations[language].orderDeleted,
             icon: "success",
           });
-  
+
           setOrders(orders.filter((order) => order.id !== orderId));
         } else {
           throw new Error("Failed to delete order.");
@@ -141,7 +146,6 @@ const OrderContent = () => {
       }
     }
   };
-  
 
   const handleNextPage = () => {
     if (page < totalPages) {
@@ -163,100 +167,128 @@ const OrderContent = () => {
   if (error) return <div className="text-red-500 text-center">{error}</div>;
 
   return (
-    <div className="container mx-auto p-8"><div className="table p-8 rounded-lg shadow-lg w-full mx-auto font-prompt h-full">
-    <div className="flex justify-between items-center mb-4">
-      <h2 className="text-xl font-semibold">{translations[language].orders}</h2>
-      <Link to="/dashboard/orders/add">
-        <button className="btn bg-blue text-white hover:bg-blue">
-          {translations[language].addOrder}
-        </button>
-      </Link>
-    </div>
+    <div className="container mx-auto p-8">
+      <div className="table p-8 rounded-lg shadow-lg w-full mx-auto font-prompt h-full">
+        <div className="flex justify-between items-center mb-4">
+          <h2 className="text-xl font-semibold">
+            {translations[language].orders}
+          </h2>
+          <Link to="/dashboard/orders/add">
+            <button className="btn bg-blue text-white hover:bg-blue">
+              {translations[language].addOrder}
+            </button>
+          </Link>
+        </div>
 
-    {/* Search input */}
-    <div className="mb-4">
-      <input
-        type="text"
-        value={searchQuery}
-        onChange={handleSearchChange}
-        placeholder={translations[language].searchPlaceholder}
-        className="input input-bordered w-full"
-      />
-    </div>
-    <div className="overflow-x-auto">
-    <table className="w-full border-collapse border border-gray-300">
-      <thead className="sticky-top bg-gray-200">
-        <tr>
-          <th className="border p-2 text-center">{translations[language].orderId}</th>
-          <th className="border p-2 text-center">{translations[language].user}</th>
-          <th className="border p-2 text-center">{translations[language].totalAmount}</th>
-          <th className="border p-2 text-center">{translations[language].orderDate}</th>
-          <th className="border p-2 text-center">{translations[language].actions}</th>
-        </tr>
-      </thead>
-      <tbody className="text-center">
-        {orders.length > 0 ? (
-          orders.map((order, index) => (
-            <tr key={index + 1}>
-              <td className="border p-2 text-center">{index + 1}</td>
-              <td className="border p-2 text-center">
-                {order.firstname} {order.lastname}
-              </td>
-              <td className="border p-2 text-center">{order.total_price}</td>
-              <td className="border p-2 text-center">
-                {new Date(order.created_at).toLocaleString()}
-              </td>
-              <td className="border p-2 text-center">
-                <div className="flex justify-center gap-2">
-                  <button
-                    onClick={() => handleDelete(order.id)}
-                    className="btn btn-error text-white"
-                  >
-                    {translations[language].cancel}
-                  </button>
-                  <Link to={`/dashboard/orders/details/${order.id}`}>
-                    <button className="btn btn-success  text-white">
-                      {translations[language].viewDetails}
-                    </button>
-                  </Link>
-                </div>
-              </td>
-            </tr>
-          ))
-        ) : (
-          <tr>
-            <td colSpan="6" className="border border-gray-300 p-4">
-              {translations[language].noOrders}
-            </td>
-          </tr>
-        )}
-      </tbody>
-    </table>
+        {/* Search input */}
+        <div className="mb-4">
+          <input
+            type="text"
+            value={searchQuery}
+            onChange={handleSearchChange}
+            placeholder={translations[language].searchPlaceholder}
+            className="input input-bordered w-full"
+          />
+        </div>
+        <div className="overflow-x-auto">
+          <table className="w-full border-collapse border border-gray-300">
+            <thead className="sticky-top bg-gray-200">
+              <tr>
+                <th className="border p-2 text-center">
+                  {translations[language].orderId}
+                </th>
+                <th className="border p-2 text-center">
+                  {translations[language].user}
+                </th>
+                <th className="border p-2 text-center">
+                  {translations[language].totalAmount}
+                </th>
+                <th className="border p-2 text-center">
+                  {translations[language].orderDate}
+                </th>
+                <th className="border p-2 text-center">
+                  {translations[language].actions}
+                </th>
+                <th className="border p-2 text-center">
+                  {translations[language].file}
+                </th>
+              </tr>
+            </thead>
+            <tbody className="text-center">
+              {orders.length > 0 ? (
+                orders.map((order, index) => (
+                  <tr key={index + 1}>
+                    <td className="border p-2 text-center">{index + 1}</td>
+                    <td className="border p-2 text-center">
+                      {order.firstname} {order.lastname}
+                    </td>
+                    <td className="border p-2 text-center">
+                      {order.total_price}
+                    </td>
+                    <td className="border p-2 text-center">
+                      {new Date(order.created_at).toLocaleString()}
+                    </td>
+                    <td className="border p-2 text-center">
+                      <div className="flex justify-center gap-2">
+                        <button
+                          onClick={() => handleDelete(order.order_id)}
+                          className="btn btn-error text-white"
+                        >
+                          {translations[language].cancel}
+                        </button>
+                        <Link
+                          to={`/dashboard/orders/details/${order.order_id}`}
+                        >
+                          <button className="btn btn-success  text-white">
+                            {translations[language].viewDetails}
+                          </button>
+                        </Link>
+                      </div>
+                    </td>
+                    <td className="border p-2 text-center">
+                      <div className="flex justify-center">
+                        <OrderReceipt order={order} />
+                      </div>
+                    </td>
+                  </tr>
+                ))
+              ) : (
+                <tr>
+                  <td colSpan="7" className="border border-gray-300 p-4">
+                    {translations[language].noOrders}
+                  </td>
+                </tr>
+              )}
+            </tbody>
+          </table>
+        </div>
 
+        <div className="flex justify-between mt-4">
+          <p
+            onClick={handlePreviousPage}
+            className={`cursor-pointer ${
+              page === 1 ? "text-gray-400" : "text-black"
+            }`}
+            style={{ pointerEvents: page === 1 ? "none" : "auto" }}
+          >
+            {translations[language].previous}
+          </p>
+          <span>
+            {translations[language].page} {page} {translations[language].of}{" "}
+            {totalPages}
+          </span>
+          <p
+            onClick={handleNextPage}
+            className={`cursor-pointer ${
+              page === totalPages ? "text-gray-400" : "text-black"
+            }`}
+            style={{ pointerEvents: page === totalPages ? "none" : "auto" }}
+          >
+            {translations[language].next}
+          </p>
+        </div>
+      </div>
     </div>
-   
-
-    <div className="flex justify-between mt-4">
-      <p
-        onClick={handlePreviousPage}
-        className={`cursor-pointer ${page === 1 ? "text-gray-400" : "text-black"}`}
-        style={{ pointerEvents: page === 1 ? "none" : "auto" }}
-      >
-        {translations[language].previous}
-      </p>
-      <span>
-        {translations[language].page} {page} {translations[language].of} {totalPages}
-      </span>
-      <p
-        onClick={handleNextPage}
-        className={`cursor-pointer ${page === totalPages ? "text-gray-400" : "text-black"}`}
-        style={{ pointerEvents: page === totalPages ? "none" : "auto" }}
-      >
-        {translations[language].next}
-      </p>
-    </div>
-  </div></div>
-    
   );
 };
 export default OrderContent;
