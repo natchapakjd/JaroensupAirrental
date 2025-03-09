@@ -200,11 +200,11 @@ const AddUser = () => {
           </h1>
         </div>
        
-        <form onSubmit={handleSubmit} className="space-y-4">
+        <form onSubmit={handleSubmit} className="space-y-4 text-md">
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2 gap-6">
             {/* Username */}
             <div>
-              <label className="block text-sm font-medium text-gray-700">
+              <label className="block  text-gray-700">
                 {translations[language].username}:
               </label>
               <input

@@ -218,7 +218,7 @@ const AddOrder = () => {
           </h1>
         </div>
         
-        <form onSubmit={handleSubmit} className="space-y-4 text-sm font-medium">
+        <form onSubmit={handleSubmit} className="space-y-4 text-md">
           <div>
             <label className="label">
               <span className="label-text">

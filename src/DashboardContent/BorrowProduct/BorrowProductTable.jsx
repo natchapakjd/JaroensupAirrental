@@ -62,7 +62,8 @@ const BorrowProductTable = () => {
       actions: "action",
       warningTH: "warning",
       details: "details",
-      noBorrowingData: "No borrowing data"
+      noBorrowingData: "No borrowing data",
+      deletingSuccess: "Deleting success",
     },
     th: {
       borrowedEquipmentList: "รายการอุปกรณ์ที่ยืม",
@@ -86,6 +87,7 @@ const BorrowProductTable = () => {
       confirmDelete: "ใช่, ลบมัน!",
       deleted: "ลบแล้ว!",
       deletingError: "ไม่สามารถยกเลิกงานได้",
+      deletingSuccess: "ยกเลิกงานสำเร็จ",
       equipmentReturnError: "การคืนอุปกรณ์ยังไม่ได้รับการอนุมัติ",
       errorFetchingData: "ไม่สามารถโหลดข้อมูลการยืมได้",
       of: "จาก",
@@ -111,7 +113,7 @@ const BorrowProductTable = () => {
 
   useEffect(() => {
     fetchBorrowingData(techId);
-  }, [currentPage]);
+  }, [currentPage,borrowingData]);
 
   useEffect(() => {
     applyFilters();
@@ -124,14 +126,14 @@ const BorrowProductTable = () => {
       let techData;
       if (role === 3) {
         response = await axios.get(
-          `${import.meta.env.VITE_SERVER_URL}/equipment-borrowings-paging`,
+          `${import.meta.env.VITE_SERVER_URL}/v2/equipment-borrowings-paging`,
           { params: { page: currentPage, limit: rowsPerPage } }
         );
       } else if (role === 2) {
         response = await axios.get(
           `${
             import.meta.env.VITE_SERVER_URL
-          }/equipment-borrowing-paging/${techId}`,
+          }/v2/equipment-borrowing-paging/${techId}`,
           { params: { page: currentPage, limit: rowsPerPage } }
         );
       }
@@ -240,7 +242,7 @@ const BorrowProductTable = () => {
       const response = await axios.put(
         `${
           import.meta.env.VITE_SERVER_URL
-        }/equipment-borrowing/return/${taskId}`
+        }/v2/equipment-borrowing/return/${taskId}`
       );
 
       if (response.status === 200) {
@@ -266,7 +268,7 @@ const BorrowProductTable = () => {
       const response = await axios.put(
         `${
           import.meta.env.VITE_SERVER_URL
-        }/equipment-borrowing/approve/${taskId}`
+        }/v2/equipment-borrowing/approve/${taskId}`
       );
 
       if (response.status === 200) {
@@ -305,14 +307,14 @@ const BorrowProductTable = () => {
         const response = await axios.delete(
           `${
             import.meta.env.VITE_SERVER_URL
-          }/equipment-borrowing/${borrowing_id}`,
+          }/v2/equipment-borrowing/${borrowing_id}`,
           { withCredentials: true }
         );
 
         if (response.status === 200) {
           Swal.fire({
             title: currentLang.deleted,
-            text: currentLang.deletingError,
+            text: currentLang.deletingSuccess,
             icon: "success",
           });
           fetchBorrowingData(techId); // Refresh data after deletion
@@ -353,13 +355,11 @@ const BorrowProductTable = () => {
             {currentLang.borrowedEquipmentList}
           </h2>
 
-          {role === 3 && (
-            <Link to="/dashboard/borrows/add">
+            <Link to="/dashboard/products">
               <button className="btn bg-blue text-white hover:bg-blue">
                 {currentLang.createBorrowingTask}
               </button>
             </Link>
-          )}
         </div>
 
         {/* Search and Filter Section */}
@@ -392,9 +392,9 @@ const BorrowProductTable = () => {
                 <th className="border p-2 text-center">
                   {currentLang.technicianName}
                 </th>
-                <th className="border p-2 text-center">
+                {/* <th className="border p-2 text-center">
                   {currentLang.productName}
-                </th>
+                </th> */}
                 <th className="border p-2 text-center">
                   {currentLang.borrowDate}
                 </th>
@@ -426,9 +426,9 @@ const BorrowProductTable = () => {
                     <td className="border p-2 text-center">
                       {item.firstname} {item.lastname}
                     </td>
-                    <td className="border p-2 text-center">
+                    {/* <td className="border p-2 text-center">
                       {item.product_name}
-                    </td>
+                    </td> */}
                     <td className="border p-2 text-center">
                       {new Date(item.borrow_date).toLocaleDateString()}
                     </td>
@@ -462,7 +462,7 @@ const BorrowProductTable = () => {
                         {role === 2 && item.status_id === 4 ? (
                           <button
                             onClick={() => handleReturn(item.task_id)}
-                            className="btn btn-error text-white"
+                            className="btn btn-primary text-white"
                           >
                             {currentLang.return}
                           </button>
@@ -470,7 +470,7 @@ const BorrowProductTable = () => {
                         {role === 3 && item.status_id !== 2 ? (
                           <button
                             onClick={() => handleReturn(item.task_id)}
-                            className="btn bg-blue text-white hover:bg-blue"
+                            className="btn btn-primary text-white "
                           >
                             {currentLang.return}
                           </button>
@@ -487,7 +487,7 @@ const BorrowProductTable = () => {
                         ) : null}
 
                         <button
-                          className="btn bg-success text-white hover:bg-success"
+                          className="btn btn-success text-white "
                           onClick={() => handleNavigate(item.task_id)} // Wrap the function in an arrow function
                         >
                           {currentLang.details}
@@ -497,15 +497,15 @@ const BorrowProductTable = () => {
                           <Link
                             to={`/dashboard/borrows/edit/${item.borrowing_id}`}
                           >
-                            <button className="btn bg-success text-white hover:bg-success">
+                            <button className="btn btn-success text-white ">
                               {currentLang.edit}
                             </button>
                           </Link>
                         ) : null}
 
-                        {role === 3 ? (
+                        {role === 3 || (role ===2 && item.status_id ===1) ? (
                           <button
-                            onClick={() => handleCancel(item.task_id)}
+                            onClick={() => handleCancel(item.borrowing_id)}
                             className="btn btn-error text-white"
                           >
                             {currentLang.cancel}
@@ -537,6 +537,7 @@ const BorrowProductTable = () => {
           <p
             onClick={() => handlePageChange(currentPage - 1)}
             disabled={currentPage === 1}
+            className="cursor-pointer"
           >
             {currentLang.previous}
           </p>
@@ -546,6 +547,7 @@ const BorrowProductTable = () => {
           <p
             onClick={() => handlePageChange(currentPage + 1)}
             disabled={currentPage === totalPages}
+            className="cursor-pointer"
           >
             {currentLang.next}
           </p>

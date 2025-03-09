@@ -48,7 +48,7 @@ const Settings = () => {
           <div className="flex justify-center mt-4">
             <button
               onClick={goToLineProfile}
-              className="btn bg-success text-white hover:bg-success"
+              className="btn btn-success text-white "
             >
               {translations[language].allow}
             </button>

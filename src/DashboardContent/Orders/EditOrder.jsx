@@ -227,7 +227,7 @@ const EditOrder = () => {
             {translations[language].editOrderTitle}
           </h1>
         </div>
-        <form onSubmit={handleSubmit} className="space-y-4 text-sm font-medium">
+        <form onSubmit={handleSubmit} className="space-y-4 text-md">
           {items.map((item, index) => (
             <div key={index} className="flex items-center space-x-4">
               <div className="flex-1">

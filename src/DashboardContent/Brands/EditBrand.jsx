@@ -86,11 +86,11 @@ const EditBrand = () => {
           <BackButtonEdit />
           <h1 className="text-2xl font-semibold mx-2">{t.heading} </h1>
         </div>
-        <form onSubmit={handleSubmit} className="text-sm font-medium">
+        <form onSubmit={handleSubmit} className="text-md ">
           <div className="mb-4">
             <label
               htmlFor="name"
-              className="block text-sm font-medium text-gray-700"
+              className="block text-md  text-gray-700"
             >
               {t.nameLabel}
             </label>
@@ -99,14 +99,14 @@ const EditBrand = () => {
               id="name"
               value={name}
               onChange={(e) => setName(e.target.value)}
-              className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
+              className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-md"
               required
             />
           </div>
           <div className="mb-4">
             <label
               htmlFor="description"
-              className="block text-sm font-medium text-gray-700"
+              className="block text-md  text-gray-700"
             >
               {t.descriptionLabel}
             </label>
@@ -114,14 +114,14 @@ const EditBrand = () => {
               id="description"
               value={description}
               onChange={(e) => setDescription(e.target.value)}
-              className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
+              className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-md"
               rows="4"
               required
             />
           </div>
           <button
             type="submit"
-            className={`btn bg-blue text-white hover:bg-blue focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm w-full sm:w-auto px-5 py-2.5 text-center ${
+            className={`btn bg-blue text-white hover:bg-blue focus:ring-4 focus:outline-none focus:ring-blue-300  rounded-lg text-md w-full sm:w-auto px-5 py-2.5 text-center ${
               loading ? "opacity-50 cursor-not-allowed" : ""
             }`}
             disabled={loading}

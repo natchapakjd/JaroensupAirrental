@@ -177,7 +177,7 @@ const EditPayment = () => {
           <BackButtonEdit />
           <h1 className="text-2xl font-semibold mx-2">{t.title} </h1>
         </div>
-        <form onSubmit={handleSubmit} className="text-sm font-medium">
+        <form onSubmit={handleSubmit} className="text-md">
           {taskId && (
             <div className="mb-4">
               <label className="block mb-2">{t.taskLabel}</label>

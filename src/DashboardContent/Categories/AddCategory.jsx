@@ -92,7 +92,7 @@ const AddCategory = () => {
           <div className="mb-4">
             <label
               htmlFor="name"
-              className="block text-gray-700 font-medium mb-2"
+              className="block text-gray-700  mb-2"
             >
               {t.nameLabel}:
             </label>
@@ -109,7 +109,7 @@ const AddCategory = () => {
           <div className="mb-4">
             <label
               htmlFor="description"
-              className="block text-gray-700 font-medium mb-2"
+              className="block text-gray-700  mb-2"
             >
               {t.descriptionLabel}:
             </label>
@@ -124,7 +124,7 @@ const AddCategory = () => {
           </div>
           <button
             type="submit"
-            className="text-white bg-blue hover:bg-blue focus:ring-4 focus:outline-none focus:ring-blue font-medium rounded-lg text-sm w-full sm:w-auto px-5 py-2.5 text-center"
+            className="text-white bg-blue hover:bg-blue focus:ring-4 focus:outline-none focus:ring-blue  rounded-lg text-sm w-full sm:w-auto px-5 py-2.5 text-center"
           >
             {t.addButton}
           </button>

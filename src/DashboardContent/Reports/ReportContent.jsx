@@ -85,7 +85,7 @@ const ReportContent = () => {
         <CSVLink
           data={taskCounts}
           filename={"report-data.csv"}
-          className="bg-success hover:bg-success text-white px-4 py-2 rounded-lg shadow-md font-prompt"
+          className="btn btn-success text-white px-4 py-2 rounded-lg shadow-md font-prompt"
           target="_blank"
         >
           {translations[language].exportCsvButton}

@@ -9,9 +9,12 @@ const DashboardContent = () => {
   const [totalProducts, setTotalProducts] = useState(0);
   const [totalOrders, setTotalOrders] = useState(0);
   const [totalRevenue, setTotalRevenue] = useState(0);
+  const [totalTasks, setTotalTasks] = useState(0);
+  const [totalBorrowing, setTotalBorrowing] = useState(0);
   const [loading, setLoading] = useState(true);
   const [recentActivity, setRecentActivity] = useState([]);
   const [user, setUser] = useState(null);
+
   const cookies = new Cookies();
   const token = cookies.get("authToken");
   const decodeToken = jwtDecode(token);
@@ -36,6 +39,8 @@ const DashboardContent = () => {
       seeAllProduct: "View and manage all your products.",
       seeAllRecentOrders: "See all recent orders and their status.",
       seeAllAnalysis: "Analyze sales and performance data.",
+      totalBorrowingProduct: "จำนวนอุปกรณ์ที่ยืมทั้งหมด",
+      totalTask: "จำนวนงานทั้งหมด",
     },
     th: {
       welcomeMessage: "ยินดีต้อนรับกลับ, {name}!",
@@ -53,6 +58,8 @@ const DashboardContent = () => {
       seeAllProduct: "ดูและจัดการสินค้าทั้งหมด",
       seeAllRecentOrders: "ดูคำสั่งซื้อล่าสุดและสถานะของพวกมัน",
       seeAllAnalysis: "วิเคราะห์ข้อมูลการขายและประสิทธิภาพ",
+      totalBorrowingProduct: "Total Borrowing Product",
+      totalTask: "Total Task",
     },
     // You can add more languages here.
   };
@@ -64,15 +71,45 @@ const DashboardContent = () => {
   useEffect(() => {
     const fetchDashboardData = async () => {
       try {
+        // ดึงข้อมูลจำนวนสินค้าทั้งหมด
         const productResponse = await axios.get(
           `${import.meta.env.VITE_SERVER_URL}/products/count`
         );
+  
+        // ดึงข้อมูลจำนวนคำสั่งซื้อทั้งหมด
         const orderResponse = await axios.get(
           `${import.meta.env.VITE_SERVER_URL}/v2/orders/count`
         );
+  
+        // ดึงข้อมูลรายได้รวม
         const revenueResponse = await axios.get(
           `${import.meta.env.VITE_SERVER_URL}/payments-sum/total`
         );
+  
+        // ถ้า role == 2 ให้ fetch ข้อมูล task และ borrowing
+        if (role === 2) {
+          try {
+            const taskResponse = await axios.get(
+              `${import.meta.env.VITE_SERVER_URL}/tasks/count/${id}`
+            );
+            setTotalTasks(taskResponse.data.total_tasks || 0);
+          } catch (error) {
+            console.error("Error fetching tasks count:", error);
+            setTotalTasks(0);
+          }
+        
+          try {
+            const borrowResponse = await axios.get(
+              `${import.meta.env.VITE_SERVER_URL}/user-borrowing-counts/${id}`
+            );
+            setTotalBorrowing(borrowResponse.data.borrow_count || 0);
+          } catch (error) {
+            console.error("Error fetching borrow count:", error);
+            setTotalBorrowing(0);
+          }
+        }
+  
+        // อัปเดต state
         setTotalProducts(productResponse.data.count || 0);
         setTotalOrders(orderResponse.data.totalOrders || 0);
         setTotalRevenue(revenueResponse.data.total_amount || 0);
@@ -81,49 +118,50 @@ const DashboardContent = () => {
         console.error("Error fetching dashboard data:", error);
       }
     };
-
+  
     const fetchRecentActivity = async () => {
       try {
         let activityResponse;
   
         if (role === 2) {
-          // Role is 2, so send user_id
+          // ถ้าเป็น Role 2 ให้ดึงเฉพาะงานของ user
           activityResponse = await axios.get(
             `${import.meta.env.VITE_SERVER_URL}/tasks/top3/${id}`
           );
         } else if (role === 3) {
-          // Role is 3, so fetch all tasks
+          // ถ้าเป็น Role 3 ให้ดึงงานทั้งหมด
           activityResponse = await axios.get(
             `${import.meta.env.VITE_SERVER_URL}/tasks/top3`
           );
         }
   
         setRecentActivity(activityResponse.data.tasks || []);
-        console.log("Recent Activity Data:", activityResponse.data.tasks);
       } catch (error) {
         console.error("Error fetching recent activity:", error);
       }
     };
   
-
-    fetchRecentActivity();
-    fetchUserByID(id);
-    fetchDashboardData();
-  }, []);
-
-  const fetchUserByID = async (userId) => {
-    try {
-      const response = await axios.get(
-        `${import.meta.env.VITE_SERVER_URL}/user/${userId}`
-      );
-      if (response.status === 200) {
-        setUser(response.data);
+    const fetchUserByID = async (userId) => {
+      try {
+        const response = await axios.get(
+          `${import.meta.env.VITE_SERVER_URL}/user/${userId}`
+        );
+        if (response.status === 200) {
+          setUser(response.data);
+        }
+      } catch (err) {
+        console.error("Error fetching user:", err);
+        setUser(null);
       }
-    } catch (err) {
-      console.error("Error fetching user image:", err);
-      setUser(null); // Reset user state on error
+    };
+  
+    if (id) {
+      fetchUserByID(id);
+      fetchDashboardData();
+      fetchRecentActivity();
     }
-  };
+  }, [id, role]);
+  
 
   if (loading) {
     return <Loading />;
@@ -171,7 +209,7 @@ const DashboardContent = () => {
               {role === 2 ? <>Total Borrowing Product</> : <>{t.totalOrders}</>}
             </h2>
             <p className="text-3xl font-bold">
-              {role === 2 ? "5" : totalOrders}
+              {role === 2 ? totalBorrowing : totalOrders}
             </p>
           </div>
           <div className="bg-white text-green-600 p-4 rounded-full">
@@ -198,7 +236,7 @@ const DashboardContent = () => {
               {role === 2 ? <>Total Task</> : <>{t.totalRevenue}</>}
             </h2>
             <p className="text-3xl font-bold">
-              {role === 2 ? "3" : totalRevenue.toFixed(2)}
+              {role === 2 ? totalTasks : totalRevenue.toFixed(2)}
             </p>
           </div>
           <div className="bg-white text-red-600 p-4 rounded-full">
@@ -311,7 +349,11 @@ const DashboardContent = () => {
                     </span>
                   </p>
                   <Link
-                    to={`/dashboard/tasks/${activity.task_id}`} // Assuming the task detail page is at /task/:id
+                    to={
+                      activity.task_type_id === 11
+                        ? `/dashboard/borrows/details/${activity.task_id}`
+                        : `/dashboard/tasks/${activity.task_id}`
+                    }
                     className="text-blue-500 hover:underline mt-2 inline-block"
                   >
                     ดูรายละเอียดงาน

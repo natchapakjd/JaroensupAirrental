@@ -190,14 +190,14 @@ const EditUser = () => {
           {user.role_id === 2 ? (
             <div className="flex justify-end gap-2 mb-4">
               <Link to={`/dashboard/user/edit-tech/${userId}`}>
-                <button className="btn bg-success hover:bg-success text-white">
+                <button className="btn btn-success text-white">
                   {translations[language].edit_technician_profile}
                 </button>
               </Link>
             </div>
           ) : null}
         </div>
-        <form onSubmit={handleSubmit} className="text-sm font-medium">
+        <form onSubmit={handleSubmit} className="text-md ">
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2 gap-6">
             {/* Username */}
             <div>

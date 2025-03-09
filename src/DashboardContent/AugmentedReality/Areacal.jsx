@@ -38,9 +38,9 @@ const Areacal = () => {
   const [scale, setScale] = useState(1); // ค่าเริ่มต้นของการซูม
   const containerRef = useRef(null);
   const cookies = new Cookies();
-    const token = cookies.get("authToken");
-    const decodedToken = jwtDecode(token);
-    const user_id = decodedToken.id;
+  const token = cookies.get("authToken");
+  const decodedToken = jwtDecode(token);
+  const user_id = decodedToken.id;
   const translations = {
     en: {
       title: "Area Calculations",
@@ -78,7 +78,7 @@ const Areacal = () => {
       acCountMessage: "Total BTU from AC:",
       btuDifferenceMessage: "BTU is enough now",
       applyButtonMessage: "Apply",
-      saveRepeat : "Save exist area"
+      saveRepeat: "Save exist area",
     },
     th: {
       title: "การคำนวณพื้นที่",
@@ -114,8 +114,7 @@ const Areacal = () => {
       acCountMessage: "BTU รวมจากแอร์:",
       btuDifferenceMessage: "BTU เพียงพอแล้ว",
       applyButtonMessage: "ต้องการใช้ค่านี้",
-      saveRepeat : "บันทึกจากพื้นที่เดิม"
-
+      saveRepeat: "บันทึกจากพื้นที่เดิม",
     },
   };
 
@@ -144,11 +143,11 @@ const Areacal = () => {
   //   };
   // }, [scale]);
   useEffect(() => {
-
     const fetchAreaCalData = async () => {
       try {
         const response = await axios.get(
-          `${import.meta.env.VITE_SERVER_URL}/area_cals`);
+          `${import.meta.env.VITE_SERVER_URL}/area_cals`
+        );
         setAreaCalList(response.data); // สมมติ API ส่งข้อมูลเป็น array
       } catch (error) {
         console.error("Error fetching area calculation data:", error);
@@ -159,7 +158,6 @@ const Areacal = () => {
     fetchAreaCalData();
   }, []);
 
-  
   useEffect(() => {
     const storedLanguage = localStorage.getItem("language") || "en";
     setCurrentLanguage(storedLanguage);
@@ -326,12 +324,12 @@ const Areacal = () => {
       const response = await axios.get(
         `${import.meta.env.VITE_SERVER_URL}/products/ac-count`
       );
-      const { air_60000_btu, air_120000_btu, air_240000_btu } = response.data;
+      const { air_5_ton, air_10_ton, air_20_ton } = response.data;
 
       setAirInventory({
-        air5ton: air_60000_btu || 0,
-        air10ton: air_120000_btu || 0,
-        air20ton: air_240000_btu || 0,
+        air5ton: air_5_ton || 0,
+        air10ton: air_10_ton || 0,
+        air20ton: air_20_ton || 0,
       });
 
       Swal.fire(
@@ -352,33 +350,39 @@ const Areacal = () => {
   const handleSelectAssignment = async () => {
     const { value: formValues } = await Swal.fire({
       title: translations[currentLanguage].selectAssignmentTitle,
-      html: `
-        <select id="assignment-select" class="input-air">
-          ${assignments
-            .map(
-              (assignment) =>
-                `<option value="${assignment.assignment_id}">
-                  ${assignment.assignment_id} - ${assignment.description}
-                </option>`
-            )
-            .join("")}
-        </select>
-        <br/>
-        <input type="text" id="location-name" class="input-air" placeholder="ใส่ชื่อสถานที่ (Location Name)" />
-      `,
+      html:
+        assignments.length > 0
+          ? `
+          <select id="assignment-select" class="input-air">
+            ${assignments
+              .map(
+                (assignment) => `
+                  <option value="${assignment.assignment_id}">
+                    ${assignment.assignment_id} - ${assignment.description}
+                  </option>`
+              )
+              .join("")}
+          </select>
+          <br/>
+        `
+          : "<p style='color: red;'>❌ ไม่มีข้อมูลการมอบหมาย</p>",
+      input: "text",
+      inputPlaceholder: "ใส่ชื่อสถานที่ (Location Name)",
       showCancelButton: true,
       confirmButtonText: "ตกลง",
       preConfirm: () => {
-        const selectedId = document.getElementById("assignment-select").value;
-        const locationName = document
-          .getElementById("location-name")
-          .value.trim();
+        const locationName = Swal.getInput().value.trim();
 
         if (!locationName) {
           Swal.showValidationMessage("กรุณากรอกชื่อสถานที่!");
           return false;
         }
 
+        if (assignments.length === 0) {
+          return { locationName };
+        }
+
+        const selectedId = document.getElementById("assignment-select").value;
         const selected = assignments.find(
           (a) => a.assignment_id.toString() === selectedId
         );
@@ -427,8 +431,8 @@ const Areacal = () => {
         data
       );
       await axios.post(`${import.meta.env.VITE_SERVER_URL}/adminLog`, {
-        admin_id: user_id,  // กำหนด admin_id ของผู้ดูแลระบบ
-        action: `เพิ่มพื้นที่ใหม่โดยคำนวณพื้นที่(ชื่อสถานที่): ${data.location_name}`,  // บันทึกชื่อสินค้า
+        admin_id: user_id, // กำหนด admin_id ของผู้ดูแลระบบ
+        action: `เพิ่มพื้นที่ใหม่โดยคำนวณพื้นที่(ชื่อสถานที่): ${data.location_name}`, // บันทึกชื่อสินค้า
       });
       Swal.fire(
         translations[currentLanguage].successMessage,
@@ -574,9 +578,9 @@ const Areacal = () => {
     const buttonContainer = document.createElement("div");
     const applyButton = document.createElement("button");
     applyButton.id = "applyButton";
-    if(currentLanguage === 'en'){
+    if (currentLanguage === "en") {
       applyButton.textContent = "Use this values";
-    }else{
+    } else {
       applyButton.textContent = "ต้องการใช้ค่านี้";
     }
     applyButton.classList.add("b-air");
@@ -944,6 +948,7 @@ const Areacal = () => {
     await new Promise((resolve) => setTimeout(resolve, 50));
     setAcPlacements([]);
     setHasQuickPlacedAC(false); // รีเซ็ตสถานะเมื่อสร้าง Grid ใหม่
+    calculateBTUWithMinAC();
   };
   function handleDrop(e) {
     e.preventDefault();
@@ -1603,7 +1608,7 @@ const Areacal = () => {
       });
 
       // ✅ 15. อัปเดต acPlacements
-      setAcPlacements(newPlacements);
+      setAcPlacements((newPlacements));
 
       Swal.fire("โหลดสำเร็จ!", "โหลดการวางแอร์เรียบร้อย", "success");
     } catch (error) {
@@ -1856,35 +1861,47 @@ const Areacal = () => {
       Swal.fire("สำเร็จ!", `เลือก Assignment ID: ${selectedId}`, "success");
     }
   };
-const handleSelectAreaCal = async () => {
+  const handleSelectAreaCal = async () => {
     const { value: formValues } = await Swal.fire({
       title: "เลือกข้อมูลคำนวณพื้นที่",
-      html: `
+      html:
+        areaCalList.length > 0
+          ? `
         <select id="area-cal-select" class="input-air">
           ${areaCalList
             .map(
-              (area,index) => `
+              (area, index) => `
                 <option value="${area.calculation_id}">
-                  ${index+1} - ${area.location_name} (${area.width}x${area.height})
+                  ${index + 1} - ${area.location_name} (${area.width}x${
+                    area.height
+                  })
                 </option>`
             )
             .join("")}
         </select>
         <br/>
-        <input type="text" id="location-name" class="input-air" placeholder="ใส่ชื่อสถานที่ใหม่" />
-      `,
+      `
+          : "<p style='color: red;'>❌ ไม่มีข้อมูลให้เลือก</p>",
+      input: "text",
+      inputPlaceholder: "ใส่ชื่อสถานที่ใหม่",
       showCancelButton: true,
       confirmButtonText: "ตกลง",
       preConfirm: () => {
-        const selectedId = document.getElementById("area-cal-select").value;
-        const newLocationName = document.getElementById("location-name").value.trim();
-
+        const newLocationName = Swal.getInput().value.trim();
         if (!newLocationName) {
           Swal.showValidationMessage("กรุณากรอกชื่อสถานที่ใหม่!");
           return false;
         }
 
-        const selected = areaCalList.find((a) => a.calculation_id.toString() === selectedId);
+        if (areaCalList.length === 0) {
+          return { newLocationName };
+        }
+
+        const selectedId = document.getElementById("area-cal-select").value;
+        const selected = areaCalList.find(
+          (a) => a.calculation_id.toString() === selectedId
+        );
+
         return { ...selected, newLocationName };
       },
     });
@@ -1897,11 +1914,12 @@ const handleSelectAreaCal = async () => {
   };
 
   const handleSaveRepeat = async (data) => {
-    
+    console.log(acPlacements)
+
     const acUsage = updateACUsageInGrid();
     const newData = {
-      calculation_id : data.calculation_id,
-      assignment_id :data.assignment_id,
+      calculation_id: data.calculation_id,
+      assignment_id: data.assignment_id,
       width: parseFloat(width),
       height: parseFloat(length),
       air_conditioners_needed: parseInt(AirConditionerNeeded) || 0,
@@ -1913,13 +1931,15 @@ const handleSelectAreaCal = async () => {
     };
     try {
       await axios.put(
-          `${import.meta.env.VITE_SERVER_URL}/v2/area_cal/${data.calculation_id}`, {
-        ...newData,
-        location_name: data.newLocationName, // ใช้ชื่อใหม่
-      });
+        `${import.meta.env.VITE_SERVER_URL}/v2/area_cal/${data.calculation_id}`,
+        {
+          ...newData,
+          location_name: data.newLocationName, // ใช้ชื่อใหม่
+        }
+      );
       await axios.post(`${import.meta.env.VITE_SERVER_URL}/adminLog`, {
-        admin_id: user_id,  // กำหนด admin_id ของผู้ดูแลระบบ
-        action: `แก้ไขพื้นที่เดิม(หมายเลข): ${newData.calculation_id}`,  // บันทึกชื่อสินค้า
+        admin_id: user_id, // กำหนด admin_id ของผู้ดูแลระบบ
+        action: `แก้ไขพื้นที่เดิม(หมายเลข): ${newData.calculation_id}`, // บันทึกชื่อสินค้า
       });
       Swal.fire("Success", "บันทึกข้อมูลซ้ำเรียบร้อย!", "success");
     } catch (error) {
@@ -1933,7 +1953,7 @@ const handleSelectAreaCal = async () => {
   };
   return (
     <>
-    <div className="container mx-auto p-8"></div>
+      <div className="container mx-auto p-8"></div>
       <div className="mx-5 my-5 font-prompt">
         <div className="flex flex-wrap items-center mb-4 justify-between">
           <h2 className="text-2xl font-bold mb-4">
@@ -1942,7 +1962,7 @@ const handleSelectAreaCal = async () => {
           <div className="flex flex-wrap gap-2">
             <button
               onClick={handleNavigateToAR}
-              className="btn bg-yellow-500 text-white hover:bg-yellow-600 w-full md:w-auto"
+              className="btn btn-primary text-white  w-full md:w-auto"
             >
               {translations[currentLanguage].arFeature}
             </button>
@@ -1953,7 +1973,7 @@ const handleSelectAreaCal = async () => {
               {translations[currentLanguage].selectPlace}
             </button>
             <button
-              className="btn bg-success text-white hover:bg-success w-full md:w-auto"
+              className="btn btn-success text-white  w-full md:w-auto"
               onClick={fetchACInventory}
             >
               {translations[currentLanguage].fetchACData}
@@ -2122,7 +2142,6 @@ const handleSelectAreaCal = async () => {
           onClick={handleEraserGrid}
           style={{ transform: `scale(${scale})` }}
           ref={containerRef}
-
         ></div>
         <div className="toolbox">
           {/* <div id="acBox" className="box ac" draggable="true">
@@ -2170,10 +2189,16 @@ const handleSelectAreaCal = async () => {
           </div>
         </div>
         <div className="flex justify-end gap-5">
-        <button onClick={handleSelectAreaCal} className="btn btn-success text-white">
+          <button
+            onClick={handleSelectAreaCal}
+            className="btn btn-success text-white"
+          >
             {translations[currentLanguage].saveRepeat}
           </button>
-          <button onClick={handleSelectAssignment} className="b-air">
+          <button
+            onClick={handleSelectAssignment}
+            className="btn btn-primary  text-white"
+          >
             {translations[currentLanguage].save}
           </button>
         </div>
