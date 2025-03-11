@@ -19,7 +19,7 @@ const BorrowProductTable = () => {
   const decodedToken = jwtDecode(token);
   const techId = decodedToken.id;
   const role = decodedToken.role;
-  const language = localStorage.getItem("language") || "en"; // Default to "en" if no language is set
+  const language = localStorage.getItem("language") || "th"; // Default to "en" if no language is set
 
   const translation = {
     en: {
@@ -106,14 +106,14 @@ const BorrowProductTable = () => {
       actions: "การดำเนินการ",
       warningTH: "คำเตือน",
       details: "รายละเอียด",
-      noBorrowingData: "ไม่มีข้อมูลการยืมอุปกรณ์"
+      noBorrowingData: "ไม่มีข้อมูลการยืมอุปกรณ์",
     },
   };
   const currentLang = translation[language] || translation.en;
 
   useEffect(() => {
     fetchBorrowingData(techId);
-  }, [currentPage,borrowingData]);
+  }, [currentPage, borrowingData]);
 
   useEffect(() => {
     applyFilters();
@@ -148,7 +148,7 @@ const BorrowProductTable = () => {
         ) {
           sendOverdueNotification(item.linetoken, item.borrowing_id);
           return { ...item, isOverdue: true }; // Add warning flag
-        }        
+        }
         return { ...item, isOverdue: false };
       });
 
@@ -289,7 +289,6 @@ const BorrowProductTable = () => {
     }
   };
 
-
   const handleCancel = async (borrowing_id) => {
     const result = await Swal.fire({
       title: currentLang.areYouSure,
@@ -345,7 +344,6 @@ const BorrowProductTable = () => {
   const handleNavigate = (task_id) => {
     window.location.href = `/dashboard/borrows/details/${task_id}`;
   };
-  
 
   return (
     <div className="container mx-auto p-8">
@@ -355,11 +353,11 @@ const BorrowProductTable = () => {
             {currentLang.borrowedEquipmentList}
           </h2>
 
-            <Link to="/dashboard/products">
-              <button className="btn bg-blue text-white hover:bg-blue">
-                {currentLang.createBorrowingTask}
-              </button>
-            </Link>
+          <Link to="/dashboard/products">
+            <button className="btn bg-blue text-white hover:bg-blue">
+              {currentLang.createBorrowingTask}
+            </button>
+          </Link>
         </div>
 
         {/* Search and Filter Section */}
@@ -439,7 +437,21 @@ const BorrowProductTable = () => {
                     </td>
 
                     <td className="border p-2 text-center">
-                      {item.status_name}
+                      <span
+                        className={`px-2 py-1 rounded ${
+                          item.status_name === "pending"
+                            ? "bg-yellow-100 text-yellow-800"
+                            : item.status_name === "active"
+                              ? "bg-blue-100 text-blue-800"
+                              : item.status_name === "approve"
+                                ? "bg-green-100 text-green-800"
+                                : item.status_name === "completed"
+                                  ? "bg-gray-100 text-gray-800"
+                                  : "bg-gray-200 text-gray-600"
+                        }`}
+                      >
+                        {item.status_name}
+                      </span>
                     </td>
                     <td className="border p-2 text-center">{item.task_desc}</td>
                     {role === 3 && (
@@ -503,7 +515,7 @@ const BorrowProductTable = () => {
                           </Link>
                         ) : null}
 
-                        {role === 3 || (role ===2 && item.status_id ===1) ? (
+                        {role === 3 || (role === 2 && item.status_id === 1) ? (
                           <button
                             onClick={() => handleCancel(item.borrowing_id)}
                             className="btn btn-error text-white"
@@ -514,12 +526,12 @@ const BorrowProductTable = () => {
                       </div>
                     </td>
                     <td className="border p-2 text-center">
-                  {item.isOverdue ? (
-                    <span className="text-red-500 font-bold">⚠️</span>
-                  ) : (
-                    currentLang.noWarning
-                  )}
-                </td>
+                      {item.isOverdue ? (
+                        <span className="text-red-500 font-bold">⚠️</span>
+                      ) : (
+                        currentLang.noWarning
+                      )}
+                    </td>
                   </tr>
                 ))
               ) : (

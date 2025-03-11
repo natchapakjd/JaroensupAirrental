@@ -110,17 +110,17 @@ const EditReview = () => {
 
   return (
     <div className="container mx-auto p-8">
+      <div className="flex  w-full my-2">
+          <BackButtonEdit />
+          <h1 className="text-2xl font-semibold mx-2">
+            {translations[language].pageTitle}
+          </h1>
+        </div>
       <form
         onSubmit={handleSubmit}
         className="bg-white p-6 rounded-lg shadow-md"
       >
-        <div className="flex  w-full my-2">
-          <BackButtonEdit />
-          <h1 className="text-2xl font-semibold mx-2">
-            {" "}
-            {translations[language].pageTitle}
-          </h1>
-        </div>
+        
         <div className="mb-4">
           <label className="block mb-2" htmlFor="task_id">
             {translations[language].taskLabel}

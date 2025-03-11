@@ -1,6 +1,8 @@
 import React, { useState, useEffect } from "react";
 import Navbar from "../../components/Navbar";
 import Footer from "../../components/Footer";
+import Cookies from "universal-cookie";
+import { jwtDecode } from "jwt-decode";
 
 const translations = {
   th: {
@@ -23,6 +25,8 @@ const translations = {
 
 const Home = () => {
   const [language, setLanguage] = useState(localStorage.getItem("language") || "th");
+  const cookies = new Cookies();
+  const token = cookies.get("authToken");
 
   useEffect(() => {
     const handleLanguageChange = () => {
@@ -54,15 +58,17 @@ const Home = () => {
               <p className="mt-6 text-lg leading-8 text-white">
                 {translations[language].enhanceEfficiency}
               </p>
-              <div className="mt-5 flex items-center justify-center gap-x-6">
-                <a
-                  href="/register"
-                  className="rounded-md bg-sky-500 px-3.5 py-2.5 text-sm font-semibold text-white shadow-sm hover:bg-sky-400 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-sky-400"
-                  rel="noreferrer"
-                >
-                  {translations[language].tryNow}
-                </a>
-              </div>
+              {!token && (
+                <div className="mt-5 flex items-center justify-center gap-x-6">
+                  <a
+                    href="/register"
+                    className="rounded-md bg-sky-500 px-3.5 py-2.5 text-sm font-semibold text-white shadow-sm hover:bg-sky-400 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-sky-400"
+                    rel="noreferrer"
+                  >
+                    {translations[language].tryNow}
+                  </a>
+                </div>
+              )}
             </div>
           </div>
         </div>

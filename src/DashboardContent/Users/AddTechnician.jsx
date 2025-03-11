@@ -71,7 +71,7 @@ const AddTechnician = () => {
   });
 
   const [language, setLanguage] = useState(
-    localStorage.getItem("language" || "th")
+    localStorage.getItem("language")|| "th"
   ); // You can change this dynamically
 
   useEffect(() => {

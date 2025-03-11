@@ -24,6 +24,7 @@ const BorrowPage = () => {
     error_quantity_exceed: "จำนวนสำหรับ {name} เกินสต็อกที่มีอยู่ ({stock})",
     success_message: "ยืมอุปกรณ์สำเร็จ!",
     error_message: "ไม่สามารถยืมอุปกรณ์ได้",
+    image_card: "กรุณาอัปโหลดภาพบัตรประชาชน"
   } : {
     borrow_equipment: "Borrow Equipment",
     select_product: "Select Products to Borrow",
@@ -40,6 +41,7 @@ const BorrowPage = () => {
     error_quantity_exceed: "Quantity for {name} exceeds available stock ({stock}).",
     success_message: "Equipment borrowed successfully!",
     error_message: "Failed to borrow equipment.",
+    image_card: "Plese upload id card image."
   };
 
   const location = useLocation();
@@ -175,9 +177,12 @@ const BorrowPage = () => {
           }))
       )
     );
-    if (idCardImage) {
-      formData.append("id_card_image", idCardImage);
+
+    if (!idCardImage) {
+      Swal.fire({ title: "Error", text: `${translation.image_card}`, icon: "error" });
+      return;
     }
+    
 
     try {
       const response = await axios.post(

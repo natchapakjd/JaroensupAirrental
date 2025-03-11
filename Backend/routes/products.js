@@ -21,7 +21,7 @@ const upload = multer({ storage: storage });
 
 router.get("/products", (req, res) => {
   const page = parseInt(req.query.page) || 1;
-  const pageSize = parseInt(req.query.pageSize) || 10;
+  const pageSize = parseInt(req.query.pageSize) || 30;
   const offset = (page - 1) * pageSize;
 
   const query =
@@ -37,6 +37,73 @@ router.get("/products", (req, res) => {
   });
 });
 
+router.get("/v4/product/:id", (req, res) => {
+  const productId = req.params.id;
+
+  // Query to fetch product details with associated tables and product attributes
+  const query = `
+    SELECT pd.*, 
+           ct.name AS category_name, 
+           wh.location, 
+           b.name AS brand_name, 
+           pdt.product_type_name,
+           pa.product_attribute_id, 
+           pa.attribute_id, 
+           pa.value AS attribute_value,
+           a.name AS attribute_name
+    FROM products pd
+    JOIN brands b ON pd.brand_id = b.brand_id
+    JOIN categories ct ON pd.category_id = ct.category_id
+    JOIN warehouses wh ON pd.warehouse_id = wh.warehouse_id
+    JOIN product_type pdt ON pd.product_type_id = pdt.product_type_id
+    LEFT JOIN productattributes pa ON pd.product_id = pa.product_id
+    LEFT JOIN attributes a ON pa.attribute_id = a.attribute_id
+    WHERE pd.product_id = ?
+  `;
+
+  db.query(query, [productId], (err, result) => {
+    if (err) {
+      console.error("Error fetching product by ID: " + err);
+      return res.status(500).json({ error: "Failed to fetch product" });
+    }
+
+    if (result.length === 0) {
+      return res.status(404).json({ error: "Product not found" });
+    }
+
+    // จัดกลุ่ม Attributes
+    const product = result[0];
+    const attributes = result
+      .filter((row) => row.product_attribute_id)
+      .map((row) => ({
+        product_attribute_id: row.product_attribute_id,
+        attribute_id: row.attribute_id,
+        attribute_name: row.attribute_name, // เพิ่ม attribute_name
+        value: row.attribute_value,
+      }));
+
+    res.json({
+      product: {
+        ...product,
+        attributes: attributes,
+      },
+    });
+  });
+});
+
+router.get("/product-types", (req, res) => {
+  const query = "SELECT * FROM  product_type";
+
+  db.query(query, (err, result) => {
+    if (err) {
+      console.error("Error fetching product_types: " + err);
+      res.status(500).json({ error: "Failed to fetch product_types" });
+    } else {
+      res.json(result);
+    }
+  });
+});
+
 router.get("/products-paging", (req, res) => {
   const page = parseInt(req.query.page) || 1;
   const pageSize = parseInt(req.query.pageSize) || 10;
@@ -44,11 +111,12 @@ router.get("/products-paging", (req, res) => {
 
   // Query to fetch the products with JOIN and pagination
   const query = `
-    SELECT pd.*, ct.name as category_name, wh.location, b.name as brand_name 
+    SELECT pd.*, ct.name as category_name, wh.location, b.name as brand_name, pdt.product_type_name
     FROM products pd
     JOIN brands b ON pd.brand_id = b.brand_id
     JOIN categories ct ON pd.category_id = ct.category_id
     JOIN warehouses wh ON pd.warehouse_id = wh.warehouse_id
+    JOIN product_type pdt ON pd.product_type_id = pdt.product_type_id
     LIMIT ? OFFSET ?`;
 
   // Query to get the total count of products
@@ -168,15 +236,15 @@ router.post(
     }
 
     try {
-      // Step 1: Check current stock and warehouse capacity
-        const warehouseQuery = `
+      // Step 1: Check current stock and warehouse max_capacity
+      const warehouseQuery = `
         SELECT 
-          w.capacity, 
+          max_capacity, 
           COALESCE(SUM(p.stock_quantity), 0) AS current_stock
         FROM warehouses w
         LEFT JOIN products p ON w.warehouse_id = p.warehouse_id
         WHERE w.warehouse_id = ?
-        GROUP BY w.capacity
+        GROUP BY w.max_capacity
       `;
 
       const warehouseResult = await new Promise((resolve, reject) =>
@@ -186,12 +254,12 @@ router.post(
         })
       );
 
-      const { capacity, current_stock } = warehouseResult;
+      const { max_capacity, current_stock } = warehouseResult;
 
-      if (current_stock + parseInt(stock_quantity) > capacity) {
+      if (current_stock + parseInt(stock_quantity) > max_capacity) {
         return res
           .status(400)
-          .json({ error: "Stock exceeds warehouse capacity." });
+          .json({ error: "Stock exceeds warehouse max_capacity." });
       }
 
       // Step 2: Compress product image
@@ -235,13 +303,9 @@ router.post(
         (err, results) => {
           if (err) {
             console.error("Error inserting product:", err);
-            return res
-              .status(500)
-              .json({ error: "Failed to add product." });
+            return res.status(500).json({ error: "Failed to add product." });
           }
-          res
-            .status(200)
-            .json({ message: "Product added successfully!" });
+          res.status(200).json({ message: "Product added successfully!" });
         }
       );
     } catch (err) {
@@ -250,13 +314,9 @@ router.post(
     }
   }
 );
-
-
-
-
 router.put("/product/:id", upload.single("product_image"), async (req, res) => {
   const id = req.params.id;
-  console.log(req.body)
+  console.log(req.body);
   const {
     name,
     description,
@@ -289,9 +349,11 @@ router.put("/product/:id", upload.single("product_image"), async (req, res) => {
       fs.unlinkSync(compressedImagePath);
     }
 
+    // If no new image is provided, don't change the image URL
     const query = `
       UPDATE products
-      SET name = ?, description = ?, price = ?, stock_quantity = ?, brand_id = ?, category_id = ?, warehouse_id = ?, product_type_id = ?, image_url = ? WHERE product_id = ?
+      SET name = ?, description = ?, price = ?, stock_quantity = ?, brand_id = ?, category_id = ?, warehouse_id = ?, product_type_id = ?, image_url = COALESCE(?, image_url)
+      WHERE product_id = ?
     `;
 
     db.query(
@@ -305,7 +367,7 @@ router.put("/product/:id", upload.single("product_image"), async (req, res) => {
         category_id,
         warehouse_id,
         product_type_id || null, // Include product_type_id here, set to null if not provided
-        productImageUrl || null,
+        productImageUrl || null, // Use existing image URL if no new image URL
         id,
       ],
       (err, result) => {
@@ -361,7 +423,6 @@ router.get("/product-type", (req, res) => {
   });
 });
 
-
 router.get("/products/ac-count", (req, res) => {
   const query = `
     SELECT 
@@ -380,7 +441,10 @@ router.get("/products/ac-count", (req, res) => {
     const counts = result[0] || { air_5_ton: 0, air_10_ton: 0, air_20_ton: 0 };
 
     // คำนวณค่า capacity รวมทั้งหมด
-    const totalCapacity = (counts.air_5_ton || 0) + (counts.air_10_ton || 0) + (counts.air_20_ton || 0);
+    const totalCapacity =
+      (counts.air_5_ton || 0) +
+      (counts.air_10_ton || 0) +
+      (counts.air_20_ton || 0);
 
     // อัปเดตตาราง warehouses (สมมติว่า warehouse_id = 1)
     const updateQuery = `
@@ -389,20 +453,186 @@ router.get("/products/ac-count", (req, res) => {
       WHERE warehouse_id = 1
     `;
 
-    db.query(updateQuery, [counts.air_5_ton, counts.air_10_ton, counts.air_20_ton, totalCapacity], (updateErr) => {
-      if (updateErr) {
-        console.error("Error updating warehouse AC count:", updateErr);
-        return res.status(500).json({ error: "Failed to update warehouse AC counts" });
+    db.query(
+      updateQuery,
+      [counts.air_5_ton, counts.air_10_ton, counts.air_20_ton, totalCapacity],
+      (updateErr) => {
+        if (updateErr) {
+          console.error("Error updating warehouse AC count:", updateErr);
+          return res
+            .status(500)
+            .json({ error: "Failed to update warehouse AC counts" });
+        }
+
+        res.status(200).json({
+          message: "AC counts and capacity updated successfully",
+          air_5_ton: counts.air_5_ton || 0,
+          air_10_ton: counts.air_10_ton || 0,
+          air_20_ton: counts.air_20_ton || 0,
+          capacity: totalCapacity,
+        });
+      }
+    );
+  });
+});
+
+router.post("/product-attributes", (req, res) => {
+  const { product_id, attribute_id, value } = req.body;
+
+  const query = `
+    INSERT INTO productattributes (product_id, attribute_id, value)
+    VALUES (?, ?, ?)
+  `;
+
+  db.query(query, [product_id, attribute_id, value], (err, result) => {
+    if (err) {
+      console.error("Error creating product attribute: " + err);
+      return res
+        .status(500)
+        .json({ error: "Failed to create product attribute" });
+    }
+
+    res.status(201).json({
+      message: "Product attribute created successfully",
+      product_attribute_id: result.insertId,
+    });
+  });
+});
+
+router.get("/product-attributes", (req, res) => {
+  // Get page and limit from query parameters, default to 1 and 10 if not provided
+  const page = parseInt(req.query.page) || 1;
+  const limit = parseInt(req.query.limit) || 10;
+  const offset = (page - 1) * limit; // Calculate the offset for the query
+
+  // SQL query to fetch paginated product attributes along with product name
+  const query = `
+    SELECT pa.product_attribute_id, pa.product_id, pa.attribute_id, pa.value, p.name,atb.name as attribute_name
+    FROM productattributes pa
+    JOIN products p ON pa.product_id = p.product_id
+    JOIN attributes atb ON pa.attribute_id = atb.attribute_id
+    LIMIT ${limit} OFFSET ${offset}
+  `;
+
+  db.query(query, (err, result) => {
+    if (err) {
+      console.error("Error fetching product attributes: " + err);
+      return res
+        .status(500)
+        .json({ error: "Failed to fetch product attributes" });
+    }
+
+    if (result.length === 0) {
+      return res.status(404).json({ error: "No product attributes found" });
+    }
+
+    // Get the total count of product attributes for pagination
+    const countQuery = `
+      SELECT COUNT(*) AS total
+      FROM productattributes pa
+      JOIN products p ON pa.product_id = p.product_id
+    `;
+
+    db.query(countQuery, (countErr, countResult) => {
+      if (countErr) {
+        console.error(
+          "Error fetching total count of product attributes: " + countErr
+        );
+        return res.status(500).json({ error: "Failed to fetch total count" });
       }
 
-      res.status(200).json({
-        message: "AC counts and capacity updated successfully",
-        air_5_ton: counts.air_5_ton || 0,
-        air_10_ton: counts.air_10_ton || 0,
-        air_20_ton: counts.air_20_ton || 0,
-        capacity: totalCapacity
+      const total = countResult[0].total; // Total number of product attributes
+      const totalPages = Math.ceil(total / limit); // Calculate the total number of pages
+
+      // Send the response with product attributes, product name, and pagination info
+      res.json({
+        product_attributes: result,
+        pagination: {
+          currentPage: page,
+          totalPages: totalPages,
+          totalItems: total,
+          itemsPerPage: limit,
+        },
       });
     });
+  });
+});
+
+router.get("/product-attributes/:id", (req, res) => {
+  const productId = req.params.id;
+
+  const query = `
+    SELECT * FROM productattributes
+    WHERE product_attribute_id = ?
+  `;
+
+  db.query(query, [productId], (err, result) => {
+    if (err) {
+      console.error("Error fetching product attributes: " + err);
+      return res
+        .status(500)
+        .json({ error: "Failed to fetch product attributes" });
+    }
+
+    if (result.length === 0) {
+      return res.status(404).json({ error: "No product attributes found" });
+    }
+
+    res.json({ product_attributes: result });
+  });
+});
+
+router.put("/product-attributes/:id", (req, res) => {
+  const productAttributeId = req.params.id;
+  const { product_id, attribute_id, value } = req.body;
+
+  const query = `
+    UPDATE productattributes
+    SET product_id = ?, attribute_id = ?, value = ?
+    WHERE product_attribute_id = ?
+  `;
+
+  db.query(
+    query,
+    [product_id, attribute_id, value, productAttributeId],
+    (err, result) => {
+      if (err) {
+        console.error("Error updating product attribute: " + err);
+        return res
+          .status(500)
+          .json({ error: "Failed to update product attribute" });
+      }
+
+      if (result.affectedRows === 0) {
+        return res.status(404).json({ error: "Product attribute not found" });
+      }
+
+      res.json({ message: "Product attribute updated successfully" });
+    }
+  );
+});
+
+router.delete("/product-attributes/:id", (req, res) => {
+  const productAttributeId = req.params.id;
+
+  const query = `
+    DELETE FROM productattributes
+    WHERE product_attribute_id = ?
+  `;
+
+  db.query(query, [productAttributeId], (err, result) => {
+    if (err) {
+      console.error("Error deleting product attribute: " + err);
+      return res
+        .status(500)
+        .json({ error: "Failed to delete product attribute" });
+    }
+
+    if (result.affectedRows === 0) {
+      return res.status(404).json({ error: "Product attribute not found" });
+    }
+
+    res.json({ message: "Product attribute deleted successfully" });
   });
 });
 

@@ -57,21 +57,21 @@ router.get("/task-paging", (req, res) => {
     });
   });
 });
-
 router.get("/task-paging/:id", (req, res) => {
   const userId = req.params.id;
   const limit = parseInt(req.query.limit) || 10; // Default to 10 if no limit is specified
   const page = parseInt(req.query.page) || 1; // Default to page 1 if no page is specified
   const offset = (page - 1) * limit; // Calculate the offset based on page and limit
 
-  // Main query to get tasks with pagination and filter by task_type_id = 1
+  // Main query to get tasks with pagination, filter by task_type_id, and order by latest created_at
   let query = `
-    SELECT t.*, tt.type_name, st.status_name ,us.firstname,us.lastname
+    SELECT t.*, tt.type_name, st.status_name, us.firstname, us.lastname
     FROM tasks t 
     JOIN status st ON t.status_id = st.status_id  
     JOIN tasktypes tt ON t.task_type_id = tt.task_type_id 
     JOIN users us ON t.user_id = us.user_id
     WHERE t.user_id = ? AND (t.task_type_id = 1 OR t.task_type_id = 12) AND t.isActive = 1 
+    ORDER BY t.created_at DESC 
     LIMIT ? OFFSET ?
   `;
 
@@ -84,11 +84,11 @@ router.get("/task-paging/:id", (req, res) => {
       return res.status(500).json({ error: "Failed to fetch tasks" });
     }
 
-    // Count query to get the total number of tasks for the user with task_type_id = 1
+    // Count query to get the total number of tasks for the user with task_type_id = 1 or 12
     const countQuery = `
       SELECT COUNT(*) AS total 
       FROM tasks 
-      WHERE user_id = ? AND task_type_id = 1
+      WHERE user_id = ? AND (task_type_id = 1 OR task_type_id = 12) AND isActive = 1
     `;
 
     db.query(countQuery, [userId], (err, countResult) => {
@@ -107,6 +107,7 @@ router.get("/task-paging/:id", (req, res) => {
     });
   });
 });
+
 
 
 router.get("/tasks/paged", (req, res) => {
@@ -709,8 +710,6 @@ router.post('/rental', (req, res) => {
   });
 });
 
-
-
 // rental/return endpoint สำหรับคืนทรัพยากร
 router.put('/rental/return/:taskId', async (req, res) => {
   const taskId = req.params.taskId;
@@ -790,7 +789,6 @@ router.put('/rental/return/:taskId', async (req, res) => {
     res.status(500).json({ message: 'Failed to process return' });
   }
 });
-
 
 // Add an API endpoint to check the quantity of items in the rental table
 router.get('/rental/quantity/:taskId', async (req, res) => {
@@ -1209,6 +1207,36 @@ router.get("/rentals", (req, res) => {
       rentalData: result
     });
   });
+});
+
+router.put("/v2/tasks/complete/:taskId", async (req, res) => {
+  const taskId = req.params.taskId;
+
+  try {
+    // อัปเดตสถานะของ task ในตาราง tasks เป็น 'complete' (สมมติว่า status_id = 5 คือสถานะ "เสร็จสมบูรณ์")
+    const completeTaskQuery = `
+      UPDATE tasks
+      SET status_id = 2
+      WHERE task_id = ?
+    `;
+
+    db.query(completeTaskQuery, [taskId], (err, result) => {
+      if (err) {
+        console.error("Error completing task:", err);
+        return res.status(500).json({ error: "Error completing task" });
+      }
+
+      if (result.affectedRows === 0) {
+        return res.status(404).json({ error: "Task not found" });
+      }
+
+      // ส่งข้อความตอบกลับว่า task ถูกเปลี่ยนสถานะเป็นเสร็จสมบูรณ์แล้ว
+      res.status(200).json({ message: "Task status updated to complete" });
+    });
+  } catch (error) {
+    console.error("Server error:", error);
+    res.status(500).json({ error: "Server error" });
+  }
 });
 
 module.exports = router;

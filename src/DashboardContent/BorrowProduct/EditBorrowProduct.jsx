@@ -18,7 +18,7 @@ const EditBorrowProduct = () => {
   const [productsList, setProductsList] = useState([]);
   const [technicians, setTechnicians] = useState([]);
 
-  const language = localStorage.getItem("language") || "en";
+  const language = localStorage.getItem("language") || "th";
   const translation = language === "th" ? {
     tech_id: "รหัสช่าง",
     select_product: "เลือกรายการอุปกรณ์",

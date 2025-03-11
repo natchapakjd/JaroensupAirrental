@@ -26,6 +26,7 @@ const translations = {
     next: "Next",
     page: "Page",
     of: "of",
+    addProductAttribute: "Product Attribute List"
   },
   th: {
     title: "คุณลักษณะ",
@@ -47,6 +48,8 @@ const translations = {
     next: "ถัดไป",
     page: "หน้า",
     of: "จาก",
+    addProductAttribute: "รายการคุณลักษณะบนสินค้า"
+
   },
 };
 
@@ -148,11 +151,18 @@ const AttributeContent = () => {
           <h1 className="text-2xl font-semibold">
             {translations[language].title}
           </h1>
-          <Link to="/dashboard/attributes/add">
-            <button className="btn bg-blue text-white hover:bg-blue">
-              {translations[language].addAttribute}
-            </button>
-          </Link>
+          <div className="flex justify-between gap-2">
+            <Link to="/dashboard/attributes/products">
+              <button className="btn btn-primary text-white ">
+                {translations[language].addProductAttribute}
+              </button>
+            </Link>
+            <Link to="/dashboard/attributes/add">
+              <button className="btn bg-blue text-white hover:bg-blue">
+                {translations[language].addAttribute}
+              </button>
+            </Link>
+          </div>
         </div>
 
         {/* Search Box */}

@@ -25,8 +25,8 @@ const translations = {
     additional_image: "Additional Documents",
     addData: "Add Data",
     AddOutsourceTech: "Add Technician Outsource",
-
-    // Add other translations here
+    missingFiles: "Missing Required Files",
+    missingFilesText: "Please upload ID Card, Driver License, and Criminal Record.",
   },
   th: {
     title: "สมัครเป็นช่าง",
@@ -48,8 +48,8 @@ const translations = {
     additional_image: "เอกสารเพิ่มเติม",
     AddOutsourceTech: "เพิ่มช่างภายนอก",
     addData: "เพิ่มข้อมูล",
-
-    // Add other translations here
+    missingFiles: "ไฟล์ที่จำเป็นขาดหาย",
+    missingFilesText: "กรุณาอัปโหลดสำเนาบัตรประชาชน, ใบขับขี่ และประวัติอาชญากรรม",
   },
 };
 
@@ -59,7 +59,7 @@ const RegisterToTech = () => {
     address: "",
     email: "",
     phone_number: "",
-    position_applied: "ช่างซ่อมบำรุง", // Default value
+    position_applied: "ช่างซ่อมบำรุง",
     notes: "",
     id_card_image: null,
     driver_license_image: null,
@@ -89,7 +89,7 @@ const RegisterToTech = () => {
   };
 
   const isValidPhoneNumber = (phone) => {
-    const phoneRegex = /^[0-9]{10}$/; // Example for a 10-digit number
+    const phoneRegex = /^[0-9]{10}$/;
     return phoneRegex.test(phone);
   };
 
@@ -98,7 +98,7 @@ const RegisterToTech = () => {
     if (files) {
       setFormData({
         ...formData,
-        [name]: files[0], // Handle file uploads
+        [name]: files[0],
       });
     } else {
       setFormData({
@@ -110,6 +110,16 @@ const RegisterToTech = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+
+    // Check for required files
+    if (!formData.id_card_image || !formData.driver_license_image || !formData.criminal_record_image) {
+      Swal.fire({
+        title: translations[language].missingFiles,
+        text: translations[language].missingFilesText,
+        icon: "error",
+      });
+      return;
+    }
 
     if (!isValidDateOfBirth(formData.date_of_birth)) {
       Swal.fire({
@@ -166,7 +176,6 @@ const RegisterToTech = () => {
   };
 
   const isDashboard = location.pathname.startsWith("/dashboard");
-
   return (
     <>
       {!isDashboard && <Navbar />}
@@ -216,7 +225,7 @@ const RegisterToTech = () => {
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div className="mb-4">
                 <label className="block text-gray-700" htmlFor="date_of_birth">
-                  {translations.birthDateLabel}
+                  {translations[language].birthDateLabel}
                 </label>
                 <input
                   type="date"

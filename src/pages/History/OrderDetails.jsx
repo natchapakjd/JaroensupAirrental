@@ -5,6 +5,7 @@ import Swal from 'sweetalert2';
 import Navbar from '../../components/Navbar';
 import Footer from '../../components/Footer';
 import Loading from '../../components/Loading';
+import BackButtonEdit from '../../components/BackButtonEdit';
 
 // 🔥 แปลภาษา
 const translations = {
@@ -82,7 +83,12 @@ const OrderDetails = () => {
       <Navbar />
       <div className="p-8 rounded-lg shadow-lg w-full mx-auto font-prompt h-full font-prompt">
         <div className="flex justify-between items-center">
-          <h2 className="text-xl font-semibold">{translations[language].orderDetails}</h2>
+          <div className="flex w-full my-2">
+            <BackButtonEdit />
+            <h1 className="text-2xl font-semibold mx-2">
+              {translations[language].orderDetails}
+            </h1>
+          </div>
           <button
             onClick={fetchOrderDetails}
             className="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600 transition"
@@ -98,7 +104,8 @@ const OrderDetails = () => {
                 {translations[language].orderId}: {order.order_id}
               </h3>
               <p>
-                {translations[language].orderDate}: {new Date(order.created_at).toLocaleString()}
+                {translations[language].orderDate}:{" "}
+                {new Date(order.created_at).toLocaleString()}
               </p>
             </div>
 
@@ -106,19 +113,35 @@ const OrderDetails = () => {
             <table className="w-full border-collapse border border-gray-300">
               <thead>
                 <tr>
-                  <th className="border border-gray-300 p-2">{translations[language].productId}</th>
-                  <th className="border border-gray-300 p-2">{translations[language].productName}</th>
-                  <th className="border border-gray-300 p-2">{translations[language].quantity}</th>
-                  <th className="border border-gray-300 p-2">{translations[language].totalPrice}</th>
+                  <th className="border border-gray-300 p-2">
+                    {translations[language].productId}
+                  </th>
+                  <th className="border border-gray-300 p-2">
+                    {translations[language].productName}
+                  </th>
+                  <th className="border border-gray-300 p-2">
+                    {translations[language].quantity}
+                  </th>
+                  <th className="border border-gray-300 p-2">
+                    {translations[language].totalPrice}
+                  </th>
                 </tr>
               </thead>
-              <tbody className='text-center'>
-                {order.items.map((item) => (
-                  <tr key={item.product_id}>
-                    <td className="border border-gray-300 p-2">{item.product_id}</td>
-                    <td className="border border-gray-300 p-2">{item.product_name}</td>
-                    <td className="border border-gray-300 p-2">{item.quantity}</td>
-                    <td className="border border-gray-300 p-2">{item.total_price}</td>
+              <tbody className="text-center">
+                {order.items.map((item,index) => (
+                  <tr key={index}>
+                    <td className="border border-gray-300 p-2">
+                      {index+1}
+                    </td>
+                    <td className="border border-gray-300 p-2">
+                      {item.product_name}
+                    </td>
+                    <td className="border border-gray-300 p-2">
+                      {item.quantity}
+                    </td>
+                    <td className="border border-gray-300 p-2">
+                      {item.total_price}
+                    </td>
                   </tr>
                 ))}
               </tbody>

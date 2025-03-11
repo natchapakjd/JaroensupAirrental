@@ -8,12 +8,14 @@ import BackButton from "../../components/BackButton";
 
 const ProductContent = () => {
   const [products, setProducts] = useState([]);
+  const [productTypes, setProductTypes] = useState([]);
   const [filteredProducts, setFilteredProducts] = useState([]);
   const [categories, setCategories] = useState([]);
   const [brands, setBrands] = useState([]);
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedCategory, setSelectedCategory] = useState("");
   const [selectedBrand, setSelectedBrand] = useState("");
+  const [selectedTypeName, setSelectedTypeName] = useState("");
   const [currentPage, setCurrentPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
   const [rowsPerPage] = useState(10); // Set the rows per page
@@ -59,6 +61,10 @@ const ProductContent = () => {
       delete: "delete",
       noImage: "No image",
       borrowProduct: "Borrow Product",
+      notForSale: "Not for sale",
+      allTypeName: "Product Type",
+      details: "Product details",
+      noAttributes: "noAttributes",
     },
     th: {
       productList: "รายการสินค้า",
@@ -93,22 +99,39 @@ const ProductContent = () => {
       delete: "ลบสินค้า",
       noImage: "ไม่มีรูปภาพ",
       borrowProduct: "สร้างรายการยืม",
+      notForSale: "ไม่จำหน่าย",
+      allTypeName: "ชนิดสินค้า",
+      details: "รายละเอียดสินค้า",
+      noAttributes: "ไม่มีคุณสมบัติ",
     },
   };
 
   const [currentLanguage, setCurrentLanguage] = useState(
-    localStorage.getItem("language", "th")
+    localStorage.getItem("language") || "th"
   ); // default language
 
   useEffect(() => {
     fetchProducts();
     fetchCategories();
     fetchBrands();
+    fetchTypeName();
   }, [currentPage]);
 
   useEffect(() => {
     filterProducts();
-  }, [products, searchTerm, selectedCategory, selectedBrand]);
+  }, [products, searchTerm, selectedCategory, selectedBrand, selectedTypeName]);
+
+  const fetchTypeName = async () => {
+    try {
+      const response = await axios.get(
+        `${import.meta.env.VITE_SERVER_URL}/product-types`
+      );
+      setProductTypes(response.data);
+      console.log(response.data);
+    } catch (error) {
+      console.log(error);
+    }
+  };
 
   const fetchProducts = async () => {
     try {
@@ -182,6 +205,12 @@ const ProductContent = () => {
     if (selectedBrand) {
       filtered = filtered.filter(
         (product) => product.brand_name === selectedBrand
+      );
+    }
+
+    if (selectedTypeName) {
+      filtered = filtered.filter(
+        (product) => product.product_type_name === selectedTypeName
       );
     }
 
@@ -263,6 +292,92 @@ const ProductContent = () => {
     });
   };
 
+  const openProductDetailsPopup = async (productId) => {
+    try {
+      const response = await axios.get(
+        `${import.meta.env.VITE_SERVER_URL}/v4/product/${productId}`
+      );
+      const productDetails = response.data;
+      console.log(productDetails);
+
+      if (productDetails) {
+        const product = productDetails.product;
+        const attributes = productDetails.product.attributes || [];
+
+        Swal.fire({
+          title: product.name,
+          html: `
+            <div class="container mx-auto">
+              <div>
+                <strong class="text-lg text-gray-700">${
+                  translation[currentLanguage].productImage
+                }:</strong>
+                <div class="flex justify-center mt-2">
+                  <img src="${product.image_url}" alt="${
+                    product.name
+                  }" class="w-48 h-48 object-cover rounded-lg shadow-md"/>
+                </div>
+              </div>
+              <div class="mt-4">
+                <p class="text-left"><strong class="text-lg text-gray-700">${
+                  translation[currentLanguage].description
+                }:</strong> ${product.description}</p>
+                <p class="text-left"><strong class="text-lg text-gray-700">${
+                  translation[currentLanguage].stockQuantity
+                }:</strong> ${product.stock_quantity}</p>
+                <p class="text-left"><strong class="text-lg text-gray-700">${
+                  translation[currentLanguage].brand
+                }:</strong> ${product.brand_name}</p>
+                <p class="text-left"><strong class="text-lg text-gray-700">${
+                  translation[currentLanguage].category
+                }:</strong> ${product.category_name}</p>
+                <p class="text-left"><strong class="text-lg text-gray-700">${
+                  translation[currentLanguage].warehouse
+                }:</strong> ${product.location}</p>
+              </div>
+  
+              <div class="mt-4">
+                <ul class="list-disc pl-6">
+                  <h3 class="text-xl font-semibold text-gray-800">${
+                    translation[currentLanguage].details
+                  }:</h3>
+  
+                  ${
+                    Array.isArray(attributes) && attributes.length > 0
+                      ? attributes
+                          .map(
+                            (attr) => `
+                        <li class="text-gray-600 text-left"><strong>${attr.attribute_name}:</strong> ${attr.value}</li>
+                      `
+                          )
+                          .join("")
+                      : `<li class="text-gray-600">${translation[currentLanguage].noAttributes}</li>`
+                  }
+                </ul>
+              </div>
+            </div>
+          `,
+          showCloseButton: true,
+          showConfirmButton: false,
+          width: "30%",
+          customClass: {
+            popup: "bg-white p-8 rounded-lg shadow-lg",
+            title: "text-2xl font-bold text-gray-800",
+            htmlContainer: "text-base text-gray-700",
+          },
+          padding: "20px",
+        });
+      }
+    } catch (error) {
+      console.error("Error fetching product details:", error);
+      Swal.fire({
+        title: translation[currentLanguage].error,
+        text: "Failed to fetch product details.",
+        icon: "error",
+      });
+    }
+  };
+
   return (
     <div className="container mx-auto p-8">
       <div className="p-8 rounded-lg shadow-lg w-full mx-auto font-prompt h-full">
@@ -323,13 +438,25 @@ const ProductContent = () => {
               </option>
             ))}
           </select>
+
+          <select
+            value={selectedTypeName}
+            onChange={(e) => setSelectedTypeName(e.target.value)}
+            className="select select-bordered w-full md:w-1/3"
+          >
+            <option value="">{translation[currentLanguage].allTypeName}</option>
+            {productTypes.map((type, index) => (
+              <option key={index} value={type.product_type_name}>
+                {type.product_type_name}
+              </option>
+            ))}
+          </select>
         </div>
 
         <div className="overflow-x-auto">
           <table className="table w-full border-collapse border border-gray-300 font-prompt">
             <thead className="sticky top-0 bg-gray-200">
               <tr>
-                
                 <th className="border p-2 text-center"></th>
                 <th className="border p-2 text-center">
                   {translation[currentLanguage].id}
@@ -347,16 +474,10 @@ const ProductContent = () => {
                   {translation[currentLanguage].stockQuantity}
                 </th>
                 <th className="border p-2 text-center">
-                  {translation[currentLanguage].brand}
-                </th>
-                <th className="border p-2 text-center">
-                  {translation[currentLanguage].category}
-                </th>
-                <th className="border p-2 text-center">
-                  {translation[currentLanguage].warehouse}
-                </th>
-                <th className="border p-2 text-center">
                   {translation[currentLanguage].productImage}
+                </th>
+                <th className="border p-2 text-center">
+                  {translation[currentLanguage].details}
                 </th>
                 {role === 3 && (
                   <th className="border p-2 text-center">
@@ -370,32 +491,32 @@ const ProductContent = () => {
                 filteredProducts.map((product, index) => (
                   <tr key={index + 1}>
                     <td className="border p-2 text-center">
-                      <input
-                        type="checkbox"
-                        checked={selectedProducts.includes(product.product_id)}
-                        onChange={() =>
-                          handleCheckboxChange(product.product_id)
-                        }
-                      />
+                      {product.product_type_id === 2 && (
+                        <input
+                          type="checkbox"
+                          checked={selectedProducts.includes(
+                            product.product_id
+                          )}
+                          onChange={() =>
+                            handleCheckboxChange(product.product_id)
+                          }
+                        />
+                      )}
                     </td>
                     <td className="border p-2 text-center">{index + 1}</td>
                     <td className="border p-2 text-center">{product.name}</td>
                     <td className="border p-2 text-center">
                       {product.description}
                     </td>
-                    <td className="border p-2 text-center">{product.price}</td>
+                    <td className="border p-2 text-center">
+                      {product.price !== 0
+                        ? product.price
+                        : translation[currentLanguage].notForSale}
+                    </td>
                     <td className="border p-2 text-center">
                       {product.stock_quantity}
                     </td>
-                    <td className="border p-2 text-center">
-                      {product.brand_name}
-                    </td>
-                    <td className="border p-2 text-center">
-                      {product.category_name}
-                    </td>
-                    <td className="border p-2 text-center">
-                      {product.location}
-                    </td>
+
                     <td>
                       {product.image_url ? (
                         <img
@@ -431,11 +552,21 @@ const ProductContent = () => {
                         </div>
                       </td>
                     )}
+                    <td className="border p-2 text-center underline">
+                      <p
+                        onClick={() =>
+                          openProductDetailsPopup(product.product_id)
+                        }
+                        className="text-center cursor-pointer"
+                      >
+                        {translation[currentLanguage].details}
+                      </p>
+                    </td>
                   </tr>
                 ))
               ) : (
                 <tr>
-                  <td colSpan="11" className="border border-gray-300 p-4">
+                  <td colSpan="12" className="border border-gray-300 p-4">
                     {translation[currentLanguage].noProducts}
                   </td>
                 </tr>

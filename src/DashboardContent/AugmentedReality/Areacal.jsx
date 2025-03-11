@@ -119,7 +119,7 @@ const Areacal = () => {
   };
 
   const navigate = useNavigate();
-
+  const [airCount,setAirCount] = useState(1);
   let acCount = 1; // ตัวแปรที่เก็บจำนวนแอร์ที่เพิ่มเข้ามาแล้ว
   let originalBox = null;
   let isDragging = false; // สถานะการลาก
@@ -787,7 +787,7 @@ const Areacal = () => {
   }
 
   const handleAddAC = () => {
-    if (acCount >= 4) {
+    if (airCount >= 4) {
       Swal.fire({
         title: "จำกัดการเพิ่มแอร์",
         text: "คุณสามารถเพิ่มแอร์ได้สูงสุด 4 ชนิด",
@@ -796,7 +796,8 @@ const Areacal = () => {
       });
       return;
     }
-
+    setAirCount(prevCount => prevCount + 1);  // ใช้ prevCount เพื่อเพิ่มทีละ 1
+    console.log(airCount)
     // สร้าง div ใหม่สำหรับแอร์
     const acDiv = document.createElement("div");
     acDiv.classList.add("ac-selection");

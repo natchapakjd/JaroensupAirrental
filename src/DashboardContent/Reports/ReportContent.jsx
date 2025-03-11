@@ -18,12 +18,17 @@ import Loading from "../../components/Loading"; // ใช้คอมโพเ�
 const ReportContent = () => {
   const [taskCounts, setTaskCounts] = useState([]);
   const [incomeData, setIncomeData] = useState([]);
-  const [userCounts, setUserCounts] = useState({ technicians: 0, customers: 0 });
+  const [userCounts, setUserCounts] = useState({
+    technicians: 0,
+    customers: 0,
+  });
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
   const api_url = import.meta.env.VITE_SERVER_URL;
-  const [language, setLanguage] = useState(localStorage.getItem('language') || 'th');
+  const [language, setLanguage] = useState(
+    localStorage.getItem("language") || "th"
+  );
 
   // Translation variables for Thai and English
   const translations = {
@@ -76,12 +81,15 @@ const ReportContent = () => {
   }, [api_url]);
 
   if (loading) return <Loading />;
-  if (error) return <div className="text-red-500 text-center py-8">{error}</div>;
+  if (error)
+    return <div className="text-red-500 text-center py-8">{error}</div>;
 
   return (
     <div className="p-6 space-y-6 font-prompt bg-gray-50 min-h-screen">
       <div className="flex justify-between items-center">
-        <h1 className="text-2xl font-bold text-gray-800">{translations[language].reportTitle}</h1>
+        <h1 className="text-2xl font-bold text-gray-800">
+          {translations[language].reportTitle}
+        </h1>
         <CSVLink
           data={taskCounts}
           filename={"report-data.csv"}
@@ -93,7 +101,9 @@ const ReportContent = () => {
       </div>
 
       <div className="bg-white p-6 rounded-lg shadow-md">
-        <h2 className="text-xl font-semibold mb-4 text-gray-700">{translations[language].summaryTitle}</h2>
+        <h2 className="text-xl font-semibold mb-4 text-gray-700">
+          {translations[language].summaryTitle}
+        </h2>
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
           <div className="bg-gray-100 p-4 rounded-lg">
             <p className="text-gray-700">
@@ -116,20 +126,25 @@ const ReportContent = () => {
           <div className="bg-gray-100 p-4 rounded-lg">
             <p className="text-gray-700">
               <strong>{translations[language].totalIncome}:</strong>{" "}
-              {taskCounts.reduce((sum, item) => sum + item.income, 0).toLocaleString()} บาท
+              {taskCounts
+                .reduce((sum, item) => sum + item.income, 0)
+                .toLocaleString()}{" "}
+              บาท
             </p>
           </div>
 
           {/* User and Technician Counts */}
           <div className="bg-gray-100 p-4 rounded-lg">
             <p className="text-gray-700">
-              <strong>{translations[language].totalUsers}:</strong> {userCounts.customers}
+              <strong>{translations[language].totalUsers}:</strong>{" "}
+              {userCounts.customers}
             </p>
           </div>
 
           <div className="bg-gray-100 p-4 rounded-lg">
             <p className="text-gray-700">
-              <strong>{translations[language].totalTechnicians}:</strong> {userCounts.technicians}
+              <strong>{translations[language].totalTechnicians}:</strong>{" "}
+              {userCounts.technicians}
             </p>
           </div>
         </div>
@@ -149,7 +164,11 @@ const ReportContent = () => {
               <Legend />
               <Bar dataKey="task_count" fill="#8884d8" name="Task Count" />
               <Bar dataKey="order_count" fill="#82ca9d" name="Order Count" />
-              <Bar dataKey="payment_count" fill="#82cacd" name="Payment Count" />
+              <Bar
+                dataKey="payment_count"
+                fill="#82cacd"
+                name="Payment Count"
+              />
             </BarChart>
           </ResponsiveContainer>
         </div>
@@ -161,13 +180,16 @@ const ReportContent = () => {
         </h2>
         <div className="h-96">
           <ResponsiveContainer width="100%" height="100%">
-            <LineChart data={incomeData} margin={{ top: 5, right: 30, left: 20, bottom: 5 }}>
+            <LineChart
+              data={incomeData}
+              margin={{ top: 5, right: 30, left: 20, bottom: 5 }}
+            >
               <CartesianGrid strokeDasharray="3 3" />
               <XAxis dataKey="month" />
               <YAxis />
               <Tooltip />
               <Legend />
-              <Line type="monotone" dataKey="income" stroke="#8884d8"  />
+              <Line type="monotone" dataKey="income" stroke="#8884d8" />
             </LineChart>
           </ResponsiveContainer>
         </div>
@@ -190,7 +212,12 @@ const ReportContent = () => {
               <YAxis />
               <Tooltip />
               <Legend />
-              <Bar dataKey="count" fill="#82ca9d" name="User Counts" barSize={30} />
+              <Bar
+                dataKey="count"
+                fill="#82ca9d"
+                name="User Counts"
+                barSize={30}
+              />
             </BarChart>
           </ResponsiveContainer>
         </div>

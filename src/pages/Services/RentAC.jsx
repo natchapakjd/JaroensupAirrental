@@ -37,6 +37,7 @@ const translations = {
     hideMap: "ซ่อนแผนที่ ❌",
     submit: "ส่งข้อมูล",
     loading: "กำลังโหลด...",
+    file: "รูปแบบสถานที่ (ตัวเลือก)",
   },
   en: {
     title: "Service Request Form",
@@ -50,6 +51,7 @@ const translations = {
     hideMap: "Hide Map ❌",
     submit: "Submit",
     loading: "Loading...",
+    file: "Location format (optional)",
   },
 };
 
@@ -81,6 +83,7 @@ const RentAC = () => {
   const token = cookies.get("authToken");
   const decodedToken = jwtDecode(token);
   const userId = decodedToken.id;
+  const [isSubmitting, setIsSubmitting] = useState(false); // Add a state for submission status
 
   useEffect(() => {
     const interval = setInterval(() => {
@@ -215,9 +218,13 @@ const RentAC = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
 
+    if (isSubmitting) return; // Prevent submission if already submitting
+
+    setIsSubmitting(true); // Set submitting state to true
+
     try {
       const rentalStartDate = formData.appointment_date.split("T")[0];
-      const data = new FormData(); // ✅ Create a new FormData instance
+      const data = new FormData();
 
       Object.keys(formData).forEach((key) => {
         if (formData[key] && !Array.isArray(formData[key])) {
@@ -229,7 +236,6 @@ const RentAC = () => {
         data.append("images", file); // Add images to the form data
       });
 
-      // Add custom fields that are not part of formData directly
       data.append("quantity_used", 0);
       data.append("rental_start_date", rentalStartDate);
 
@@ -242,7 +248,7 @@ const RentAC = () => {
       const response = await axios.post(
         `${import.meta.env.VITE_SERVER_URL}/v2/tasks`,
         data,
-        { headers: { "Content-Type": "multipart/form-data" } } // Important when using FormData
+        { headers: { "Content-Type": "multipart/form-data" } }
       );
 
       const taskId = response.data.task_id;
@@ -281,84 +287,28 @@ const RentAC = () => {
         text: "ไม่สามารถส่งแบบฟอร์มได้ กรุณาลองใหม่อีกครั้ง",
         icon: "error",
       });
+    } finally {
+      setIsSubmitting(false); // Reset the submitting state
     }
   };
-
-  // const handleSubmit = async (e) => {
-  //   e.preventDefault();
-
-  //   try {
-  //     const rentalStartDate = formData.appointment_date.split("T")[0];
-  //     selectedFiles.forEach((file) => {
-  //       formData.append("images", file);
-  //     });
-
-  //     const response = await axios.post(
-  //       `${import.meta.env.VITE_SERVER_URL}/v2/tasks`,
-  //       {
-  //         ...formData,
-  //         rental_start_date: rentalStartDate,
-  //         user_id: userId,
-  //         latitude: selectedLocation ? formData.latitude : null, // ✅ ถ้าไม่ได้เลือกแผนที่จะไม่ส่งค่า
-  //         longitude: selectedLocation ? formData.longitude : null,
-  //       }
-  //     );
-
-  //     const taskId = response.data.task_id; // รับค่า task_id จาก response
-  //     // 🔥 เก็บ log ว่าผู้ใช้สร้าง task
-  //     await axios.post(`${import.meta.env.VITE_SERVER_URL}/task-log`, {
-  //       task_id: taskId,
-  //       user_id: userId,
-  //       action: "สั่งงานเช่า",
-  //     });
-
-  //     Swal.fire({
-  //       title: "สำเร็จ!",
-  //       text: "แบบฟอร์มถูกส่งเรียบร้อยแล้ว",
-  //       icon: "success",
-  //       timer: 2000,
-  //       showConfirmButton: false,
-  //     }).then(() => {
-  //       setFormData({
-  //         user_id: "",
-  //         description: "",
-  //         task_type_id: taskTypeId || "",
-  //         address: "",
-  //         appointment_date: "",
-  //         rental_end_date: "",
-  //       });
-  //       setSelectedLocation(null);
-  //       setShowMap(false);
-  //       navigate("/history");
-  //     });
-  //   } catch (error) {
-  //     console.error("Error creating task:", error);
-  //     Swal.fire({
-  //       title: "เกิดข้อผิดพลาด!",
-  //       text: "ไม่สามารถส่งแบบฟอร์มได้ กรุณาลองใหม่อีกครั้ง",
-  //       icon: "error",
-  //     });
-  //   }
-  // };
 
   function getCurrentDateTimeInThailand() {
     const now = new Date();
 
     // Convert to Thailand time (UTC+7)
     const thailandTime = new Date(
-        now.toLocaleString("en-US", { timeZone: "Asia/Bangkok" })
+      now.toLocaleString("en-US", { timeZone: "Asia/Bangkok" })
     );
 
     // Add one day to the Thailand time
     thailandTime.setDate(thailandTime.getDate() + 1);
 
-    // ปรับเวลาให้เป็นเลขถ้วนๆ (ชั่วโมงเต็ม)  
+    // ปรับเวลาให้เป็นเลขถ้วนๆ (ชั่วโมงเต็ม)
     thailandTime.setMinutes(0, 0, 0);
 
     // Format as a string for datetime-local input (yyyy-mm-ddThh:mm)
     return thailandTime.toISOString().slice(0, 16);
-}
-
+  }
 
   return (
     <>
@@ -421,40 +371,40 @@ const RentAC = () => {
                 required
                 className="textarea textarea-bordered w-full "
               ></textarea>
-             
             </div>
-
-            <div className="mb-4">
-              <label className="block text-gray-700">
-                {translations[language].startDate}
-              </label>
-              <input
-                type="datetime-local"
-                name="appointment_date"
-                value={formData.appointment_date}
-                onChange={handleChange}
-                min={getCurrentDateTimeInThailand()}
-                required
-                className="input input-bordered w-full"
-              />
-            </div>
-            <div className="mb-4">
-              <label className="block text-gray-700">
-                {translations[language].endDate}
-              </label>
-              <input
-                type="date"
-                name="rental_end_date"
-                value={formData.rental_end_date}
-                onChange={handleChange}
-                min={
-                  formData.appointment_date
-                    ? formData.appointment_date.slice(0, 10)
-                    : new Date().toISOString().slice(0, 10)
-                } // Ensure end date is >= start date
-                required
-                className="input input-bordered w-full"
-              />
+            <div className="mb-4 flex space-x-4">
+              <div className="flex-1">
+                <label className="block text-gray-700">
+                  {translations[language].startDate}
+                </label>
+                <input
+                  type="datetime-local"
+                  name="appointment_date"
+                  value={formData.appointment_date}
+                  onChange={handleChange}
+                  min={getCurrentDateTimeInThailand()}
+                  required
+                  className="input input-bordered w-full"
+                />
+              </div>
+              <div className="flex-1">
+                <label className="block text-gray-700">
+                  {translations[language].endDate}
+                </label>
+                <input
+                  type="date"
+                  name="rental_end_date"
+                  value={formData.rental_end_date}
+                  onChange={handleChange}
+                  min={
+                    formData.appointment_date
+                      ? formData.appointment_date.slice(0, 10)
+                      : new Date().toISOString().slice(0, 10)
+                  }
+                  required
+                  className="input input-bordered w-full"
+                />
+              </div>
             </div>
 
             {/* 🔥 ปุ่มเลือกแผนที่ */}
@@ -464,7 +414,9 @@ const RentAC = () => {
                 onClick={() => setShowMap(!showMap)}
                 className="cursor-pointer underline text-right"
               >
-                {showMap ? "ซ่อนแผนที่ ❌" : "เลือกตำแหน่งบนแผนที่"}
+                {showMap
+                  ? `${translations[language].description} ❌`
+                  : `${translations[language].chooseLocation}`}
               </p>
             </div>
 
@@ -491,6 +443,9 @@ const RentAC = () => {
                 </div>
               </MapContainer>
             )}
+            <label className="block text-gray-700">
+              {translations[language].file}
+            </label>
             <input
               type="file"
               multiple

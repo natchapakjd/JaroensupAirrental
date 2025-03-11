@@ -65,7 +65,7 @@ const Setting = () => {
       </div>
   
       <button
-        onClick={() => navigate("/")}
+        onClick={() => navigate("/dashboard/home")}
         className="mt-10 bg-blue-600 text-black text-xl font-semibold px-8 py-3 rounded-xl shadow-lg  transition duration-200"
       >
         🔙 {language === "th" ? "กลับหน้าหลัก" : "Back to Home"}

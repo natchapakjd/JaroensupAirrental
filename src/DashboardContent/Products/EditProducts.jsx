@@ -176,11 +176,11 @@ const EditProduct = () => {
           </h1>
         </div>
 
-        <form onSubmit={handleSubmit} className="text-sm font-medium">
+        <form onSubmit={handleSubmit} className="text-md ">
           <div className="mb-4">
             <label
               htmlFor="name"
-              className="block text-gray-700 font-medium mb-2"
+              className="block text-gray-700  mb-2"
             >
               {translation[currentLanguage].name}:
             </label>
@@ -198,7 +198,7 @@ const EditProduct = () => {
           <div className="mb-4">
             <label
               htmlFor="description"
-              className="block text-gray-700 font-medium mb-2"
+              className="block text-gray-700  mb-2"
             >
               {translation[currentLanguage].description}:
             </label>
@@ -216,7 +216,7 @@ const EditProduct = () => {
           <div className="mb-4">
             <label
               htmlFor="price"
-              className="block text-gray-700 font-medium mb-2"
+              className="block text-gray-700  mb-2"
             >
               {translation[currentLanguage].price}:
             </label>
@@ -235,7 +235,7 @@ const EditProduct = () => {
           <div className="mb-4">
             <label
               htmlFor="stock_quantity"
-              className="block text-gray-700 font-medium mb-2"
+              className="block text-gray-700  mb-2"
             >
               {translation[currentLanguage].stock_quantity}:
             </label>
@@ -253,7 +253,7 @@ const EditProduct = () => {
           <div className="mb-4">
             <label
               htmlFor="brand_id"
-              className="block text-gray-700 font-medium mb-2"
+              className="block text-gray-700  mb-2"
             >
               {translation[currentLanguage].brand}:
             </label>
@@ -279,7 +279,7 @@ const EditProduct = () => {
           <div className="mb-4">
             <label
               htmlFor="category_id"
-              className="block text-gray-700 font-medium mb-2"
+              className="block text-gray-700  mb-2"
             >
               {translation[currentLanguage].category}:
             </label>
@@ -305,7 +305,7 @@ const EditProduct = () => {
           <div className="mb-4">
             <label
               htmlFor="warehouse_id"
-              className="block text-gray-700 font-medium mb-2"
+              className="block text-gray-700  mb-2"
             >
               {translation[currentLanguage].warehouse}:
             </label>
@@ -334,7 +334,7 @@ const EditProduct = () => {
           <div className="mb-4">
             <label
               htmlFor="product_type_id"
-              className="block text-gray-700 font-medium mb-2"
+              className="block text-gray-700  mb-2"
             >
               {translation[currentLanguage].product_type}:
             </label>
@@ -360,7 +360,7 @@ const EditProduct = () => {
           <div className="mb-4">
             <label
               htmlFor="product_image"
-              className="block text-gray-700 font-medium mb-2"
+              className="block text-gray-700  mb-2"
             >
               {translation[currentLanguage].product_image}:
             </label>
@@ -375,7 +375,7 @@ const EditProduct = () => {
 
           <button
             type="submit"
-            className="text-white bg-blue hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm w-full sm:w-auto px-5 py-2.5 text-center"
+            className="text-white bg-blue hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300  rounded-lg text-sm w-full sm:w-auto px-5 py-2.5 text-center"
           >
             {translation[currentLanguage].submit}
           </button>

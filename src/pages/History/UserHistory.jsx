@@ -30,6 +30,7 @@ const translations = {
     attachSlip: "แนบสลิป",
     noSlip: "ไม่มีสลิปแนบ",
     cancelTask: "ยกเลิกงาน",
+    cancelOrder: "ยกเลิกออเดอร์",
     markDone: "เสร็จสิ้น",
     noTask: "ไม่พบประวัติแจ้งงาน",
     orderId: "รหัสคำสั่งซื้อ",
@@ -44,6 +45,12 @@ const translations = {
     completeTaskConfirm:
       "คุณแน่ใจหรือไม่ว่าต้องการทำเครื่องหมายว่างานนี้เสร็จสมบูรณ์?",
     deleteTaskConfirm: "คุณแน่ใจหรือไม่ว่าต้องการลบงานนี้?",
+    statusAll: "สถานะทั้งหมด",
+    statusPending: "รอดำเนินการ",
+    statusActive: "กำลังดำเนินการ",
+    statusApproved: "อนุมัติแล้ว",
+    statusCompleted: "เสร็จสิ้น",
+    name : "ชื่อ-สกุล"
   },
   en: {
     userHistory: "User Task and Order History",
@@ -63,6 +70,7 @@ const translations = {
     attachSlip: "Attach Slip",
     noSlip: "No slip attached",
     cancelTask: "Cancel Task",
+    cancelOrder: "Cancel Order",
     markDone: "Mark as Done",
     noTask: "No task history found.",
     orderId: "Order ID",
@@ -77,6 +85,13 @@ const translations = {
       "Are you sure you want to mark this task as completed?",
     deleteTaskConfirm: "Are you sure you want to delete this task?",
     file: "File",
+    statusAll: "All Status",
+    statusPending: "Pending",
+    statusActive: "Active",
+    statusApproved: "Approved",
+    statusCompleted: "Completed",
+    name : "Name"
+
   },
 };
 
@@ -95,7 +110,7 @@ const UserHistory = () => {
   const [reviewFilter, setReviewFilter] = useState("");
   const [orderSearchTerm, setOrderSearchTerm] = useState(""); // New search term for orders
   const [appointmentData, setAppointmentData] = useState();
-  const [rentals,setRentals] = useState();
+  const [rentals, setRentals] = useState();
   const navigate = useNavigate();
   const cookies = new Cookies();
   const token = cookies.get("authToken");
@@ -114,7 +129,7 @@ const UserHistory = () => {
     window.addEventListener("storage", handleStorageChange);
     return () => window.removeEventListener("storage", handleStorageChange);
   }, []);
-  
+
   const filteredTasks = taskHistory.filter((task) => {
     return (
       task.description.toLowerCase().includes(searchTerm.toLowerCase()) &&
@@ -137,27 +152,33 @@ const UserHistory = () => {
     try {
       // Fetch task history
       const taskResponse = await axios.get(
-        `${import.meta.env.VITE_SERVER_URL}/task-paging/${user_id}?page=${taskPage}&limit=5`
+        `${
+          import.meta.env.VITE_SERVER_URL
+        }/task-paging/${user_id}?page=${taskPage}&limit=10`
       );
       const filteredTasks = taskResponse.data.tasks.filter(
         (task) => task.task_type_id === 1 || task.task_type_id === 12
       );
       setTaskHistory(filteredTasks);
-      setTotalTasks(taskResponse.data.totalTasks)
+      setTotalTasks(taskResponse.data.totalTasks);
+      console.log(taskResponse.data);
       // Fetch order history
       const orderResponse = await axios.get(
-        `${import.meta.env.VITE_SERVER_URL}/v1/orders/${user_id}?page=${orderPage}&limit=5`
+        `${
+          import.meta.env.VITE_SERVER_URL
+        }/v1/orders/${user_id}?page=${orderPage}&limit=10`
       );
-     
-      const orders = orderResponse.data.orders.map(order => {
-        return {
-          ...order,
-          items: order.items || [] // Ensure 'items' exists, even if it's empty
-        };
-      });
+
+      const orders = orderResponse.data.orders.map((order) => ({
+        ...order,
+        items: order.items || [],
+      }));
+
       setOrderHistory(orders);
-      setTotalOrders(orderResponse.data.totalCount);
-  
+      console.log(orderResponse.data);
+
+      setTotalOrders(orderResponse.data.totalOrders);
+
       // Fetch payment history
       const paymentResponse = await axios.get(
         `${import.meta.env.VITE_SERVER_URL}/payments/${user_id}`
@@ -167,24 +188,28 @@ const UserHistory = () => {
         return acc;
       }, {});
       setPaymentHistory(payments);
-  
+
       // Fetch rentals data
-      const rentalResponse = await axios.get(`${import.meta.env.VITE_SERVER_URL}/rentals`);
-  
+      const rentalResponse = await axios.get(
+        `${import.meta.env.VITE_SERVER_URL}/rentals`
+      );
+
       // Access rentalData array
       const rentalData = rentalResponse.data.rentalData;
-  
+
       if (Array.isArray(rentalData)) {
         // If rentalData is an array, we can safely use .filter() to get all rentals for a task
         setRentals(rentalData);
-  
+
         // Combine rentals with tasks based on task_id
         const tasksWithRentals = filteredTasks.map((task) => {
           // Filter all rentals related to the task_id
-          const rentalsForTask = rentalData.filter(rental => rental.task_id === task.task_id);
+          const rentalsForTask = rentalData.filter(
+            (rental) => rental.task_id === task.task_id
+          );
           return {
             ...task,
-            rentalDetails: rentalsForTask.length > 0 ? rentalsForTask : null // Add all rentals for this task or null if no rentals found
+            rentalDetails: rentalsForTask.length > 0 ? rentalsForTask : null, // Add all rentals for this task or null if no rentals found
           };
         });
         setTaskHistory(tasksWithRentals);
@@ -193,7 +218,7 @@ const UserHistory = () => {
         // Handle case where rentalData is not an array
         console.error("Rental data is not in expected format:", rentalData);
       }
-  
+
       // Fetch appointment data
       const appointmentResponse = await axios.get(
         `${import.meta.env.VITE_SERVER_URL}/appointments`
@@ -265,7 +290,6 @@ const UserHistory = () => {
           `${import.meta.env.VITE_SERVER_URL}/task/update-status/${taskId}`
         );
         // After updating the task, fetch user data again to refresh the task list
-        console.log(result);
         fetchUserData(taskPage, orderPage);
 
         // Display success message with Swal
@@ -331,6 +355,44 @@ const UserHistory = () => {
     }
   };
 
+  const handleDeleteOrder = async (orderId) => {
+    try {
+      // Show confirmation dialog before proceeding
+      const confirmation = await Swal.fire({
+        title: "คุณแน่ใจหรือไม่?",
+        text: "ออเดอร์นี้จะถูกลบถาวรและไม่สามารถกู้คืนได้!",
+        icon: "warning",
+        showCancelButton: true,
+        confirmButtonText: "ใช่, ลบเลย!",
+        cancelButtonText: "ยกเลิก",
+      });
+
+      if (confirmation.isConfirmed) {
+        const result = await axios.delete(
+          `${import.meta.env.VITE_SERVER_URL}/v1/orders/${orderId}`
+        );
+
+        // After deleting, fetch user data again to refresh the task list
+        fetchUserData(taskPage, orderPage);
+
+        // Display success message with Swal
+        Swal.fire({
+          title: "ลบออเดอร์สำเร็จ!",
+          icon: "success",
+          confirmButtonText: "ตกลง",
+        });
+      }
+    } catch (error) {
+      console.error("Error deleting task:", error);
+
+      // Display error message with Swal
+      Swal.fire({
+        title: "ไม่สามารถลบงานได้",
+        icon: "error",
+        confirmButtonText: "ตกลง",
+      });
+    }
+  };
   if (loading) {
     return <Loading />;
   }
@@ -359,10 +421,19 @@ const UserHistory = () => {
               onChange={(e) => setStatusFilter(e.target.value)}
               className="border p-2 rounded"
             >
-              <option value="">สถานะทั้งหมด</option>
-              <option value="pending">รอดำเนินการ</option>
-              <option value="active">กำลังเดินเนินการ</option>
-              <option value="completed">เสร็จสิ้น</option>
+              <option value="">{translations[language].statusAll}</option>
+              <option value="pending">
+                {translations[language].statusPending}
+              </option>
+              <option value="active">
+                {translations[language].statusActive}
+              </option>
+              <option value="approve">
+                {translations[language].statusApproved}
+              </option>
+              <option value="completed">
+                {translations[language].statusCompleted}
+              </option>
             </select>
             {/* <select
           value={reviewFilter}
@@ -379,8 +450,9 @@ const UserHistory = () => {
               <thead>
                 <tr>
                   <th>{translations[language].taskId}</th>
+                  <th>{translations[language].name}</th>
                   <th>{translations[language].taskType}</th>
-                  <th>{translations[language].description}</th>
+                  {/* <th>{translations[language].description}</th> */}
                   <th>{translations[language].address}</th>
                   <th>{translations[language].status}</th>
                   <th>{translations[language].appointmentDate}</th>
@@ -394,11 +466,27 @@ const UserHistory = () => {
                 {filteredTasks.length > 0 ? (
                   filteredTasks.map((task, index) => (
                     <tr key={index + 1}>
-                      <td>{index + 1}</td>
+                      <td>{(taskPage - 1) * 10 + index+1}</td>{" "}
+                      <td>{task.firstname} {task.lastname}</td>
                       <td>{task.type_name}</td>
-                      <td>{task.description}</td>
                       <td>{task.address}</td>
-                      <td>{task.status_name}</td>
+                      <td>
+                        <span
+                          className={`px-2 py-1 rounded ${
+                            task.status_name === "pending"
+                              ? "bg-yellow-100 text-yellow-800"
+                              : task.status_name === "active"
+                                ? "bg-blue-100 text-blue-800"
+                                : task.status_name === "approve"
+                                  ? "bg-green-100 text-green-800"
+                                  : task.status_name === "completed"
+                                    ? "bg-gray-100 text-gray-800"
+                                    : "bg-gray-200 text-gray-600"
+                          }`}
+                        >
+                          {task.status_name}
+                        </span>
+                      </td>
                       <td>
                         {new Date(task.appointment_date).toLocaleString()}
                       </td>
@@ -457,16 +545,12 @@ const UserHistory = () => {
                           >
                             {translations[language].markDone}
                           </button>
-                          
                         )}
-                       
                       </td>
                       <td>
-                      {
-                          task.status_id !== 1 && task.task_type_id === 1 && (
-                            <BookingPdf task = {task}/>
-                          )
-                        }
+                        {task.status_id !== 1 && task.task_type_id === 1 && (
+                          <BookingPdf task={task} />
+                        )}
                       </td>
                     </tr>
                   ))
@@ -489,7 +573,8 @@ const UserHistory = () => {
             {translations[language].previous}
           </button>
           <span>
-            {translations[language].page} {taskPage} {translations[language].of} {Math.ceil(totalTasks / 10)}
+            {translations[language].page} {taskPage} {translations[language].of}{" "}
+            {Math.ceil(totalTasks / 10)}
           </span>
           <button
             onClick={() => handleTaskPageChange(1)}
@@ -517,9 +602,13 @@ const UserHistory = () => {
               onChange={(e) => setStatusFilterOrder(e.target.value)}
               className="border p-2 rounded"
             >
-              <option value="">สถานะทั้งหมด</option>
-              <option value="pending">รอดำเนินการ</option>
-              <option value="completed">เสร็จสิ้น</option>
+              <option value=""> {translations[language].statusAll}</option>
+              <option value="pending">
+                {translations[language].statusPending}
+              </option>
+              <option value="completed">
+                {translations[language].statusCompleted}
+              </option>{" "}
             </select>
           </div>
           <div className="overflow-x-auto">
@@ -527,21 +616,38 @@ const UserHistory = () => {
               <thead>
                 <tr>
                   <th>{translations[language].orderId}</th>
-                  <th>{translations[language].totalPrice}</th>
+                  {/* <th>{translations[language].totalPrice}</th> */}
                   <th>{translations[language].orderDate}</th>
                   <th>{translations[language].status}</th>
                   <th>{translations[language].details}</th>
                   <th>{translations[language].actions}</th>
+                  <th>{translations[language].file}</th>
                 </tr>
               </thead>
               <tbody>
                 {filteredOrders.length > 0 ? (
                   filteredOrders.map((order, index) => (
                     <tr key={index + 1}>
-                      <td>{index + 1}</td>
-                      <td>{order.total_price.toFixed(2)}</td>
+                      <td>{(orderPage - 1) * 10 + index + 1}</td>
+                      {/* <td>{order.total_price.toFixed(2)}</td> */}
                       <td>{new Date(order.created_at).toLocaleString()}</td>
-                      <td>{order.status_name}</td>
+                      <td>
+                        <span
+                          className={`px-2 py-1 rounded ${
+                            order.status_name === "pending"
+                              ? "bg-yellow-100 text-yellow-800"
+                              : order.status_name === "active"
+                                ? "bg-blue-100 text-blue-800"
+                                : order.status_name === "approve"
+                                  ? "bg-green-100 text-green-800"
+                                  : order.status_name === "completed"
+                                    ? "bg-gray-100 text-gray-800"
+                                    : "bg-gray-200 text-gray-600"
+                          }`}
+                        >
+                          {order.status_name}
+                        </span>
+                      </td>
                       <td>
                         <button
                           onClick={() => handleOrderDetail(order.order_id)}
@@ -565,14 +671,22 @@ const UserHistory = () => {
                             {translations[language].noSlip}
                           </span>
                         )}
+                        {order.status_id === 1 && (
+                          <button
+                            onClick={() => handleDeleteOrder(order.order_id)} // Add delete button
+                            className="ml-5 text-red-600"
+                          >
+                            {translations[language].cancelOrder}
+                          </button>
+                        )}
                       </td>
-                      {
-                          order.status_id !== 1 && (
-                            <OrderReceipt order = {order}/>
-                          )
-                        }
+                      <td>
+                        {" "}
+                        {order.status_id !== 1 && (
+                          <OrderReceipt order={order} />
+                        )}
+                      </td>
                     </tr>
-                    
                   ))
                 ) : (
                   <tr>
@@ -584,24 +698,23 @@ const UserHistory = () => {
               </tbody>
             </table>
           </div>
-
           <div className="flex justify-between mt-4">
-            <p
+            <button
               onClick={() => handleOrderPageChange(-1)}
               disabled={orderPage === 1}
             >
               {translations[language].previous}
-            </p>
+            </button>
             <span>
               {translations[language].page} {orderPage}{" "}
               {translations[language].of} {Math.ceil(totalOrders / 10)}
             </span>
-            <p
+            <button
               onClick={() => handleOrderPageChange(1)}
               disabled={orderPage >= Math.ceil(totalOrders / 10)}
             >
               {translations[language].next}
-            </p>
+            </button>
           </div>
         </div>
       </div>

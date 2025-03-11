@@ -95,32 +95,48 @@ router.post("/area_cal", (req, res) => {
     grid_pattern 
   } = req.body;
 
-  const query = `
-    INSERT INTO area_calculation_history 
-    (assignment_id, location_name, width, height, air_conditioners_needed, room_type_id, air_5ton_used, air_10ton_used, air_20ton_used, grid_pattern) 
-    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-  `;
+  // ตรวจสอบว่ามี assignment_id อยู่แล้วหรือไม่
+  const checkQuery = `SELECT COUNT(*) AS count FROM area_calculation_history WHERE assignment_id = ?`;
 
-  db.query(query, [
-    assignment_id, 
-    location_name, 
-    width, 
-    height, 
-    air_conditioners_needed, 
-    room_type_id, 
-    air_5ton_used, 
-    air_10ton_used, 
-    air_20ton_used, 
-    JSON.stringify(grid_pattern)
-  ], (err, result) => {
+  db.query(checkQuery, [assignment_id], (err, result) => {
     if (err) {
-      console.error("Error creating area_calculation_history: " + err);
-      res.status(500).json({ error: "Failed to create area_calculation_history" });
-    } else {
-      res.status(201).json({ message: "Area calculation created successfully", id: result.insertId });
+      console.error("Error checking assignment_id: " + err);
+      return res.status(500).json({ error: "Failed to check assignment_id" });
     }
+
+    if (result[0].count > 0) {
+      return res.status(400).json({ error: "assignment_id already exists" });
+    }
+
+    // ถ้ายังไม่มี assignment_id ให้ทำการ INSERT
+    const insertQuery = `
+      INSERT INTO area_calculation_history 
+      (assignment_id, location_name, width, height, air_conditioners_needed, room_type_id, air_5ton_used, air_10ton_used, air_20ton_used, grid_pattern) 
+      VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+    `;
+
+    db.query(insertQuery, [
+      assignment_id, 
+      location_name, 
+      width, 
+      height, 
+      air_conditioners_needed, 
+      room_type_id, 
+      air_5ton_used, 
+      air_10ton_used, 
+      air_20ton_used, 
+      JSON.stringify(grid_pattern)
+    ], (err, result) => {
+      if (err) {
+        console.error("Error creating area_calculation_history: " + err);
+        return res.status(500).json({ error: "Failed to create area_calculation_history" });
+      }
+
+      res.status(201).json({ message: "Area calculation created successfully", id: result.insertId });
+    });
   });
 });
+
 
 router.put("/v2/area_cal/:id", (req, res) => {
   const id = req.params.id;

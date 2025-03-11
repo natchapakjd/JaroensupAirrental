@@ -66,6 +66,10 @@ import BorrowProductDetails from '../DashboardContent/BorrowProduct/BorrowProduc
 import OrderDetailsLog from '../DashboardContent/Orders/OrderDetailsLog'
 import AddTaskImages from '../DashboardContent/Tasks/AddTaskImages'
 import BorrowPage from '../DashboardContent/BorrowProduct/BorrowPage'
+import AddProductAttribute from '../DashboardContent/Attributes/AddProductAttribute'
+import ProductAttributeContent from '../DashboardContent/Attributes/ProductAttributeContent'
+import ProductAttributeEdit from '../DashboardContent/Attributes/ProductAttributeEdit'
+
 const DashboardRoute = () => {
   return (
       <div className='flex'>
@@ -137,7 +141,9 @@ const DashboardRoute = () => {
             <Route path="borrows/edit/:borrowingId" element={<EditBorrowProduct />} /> 
             <Route path="area-cal/details/:area_calculation_id" element={<AreacalDetails />} />
             <Route path="borrows/new" element={<BorrowPage />} />
-
+            <Route path="attributes/products" element={<ProductAttributeContent />} />
+            <Route path="attributes/products/add" element={<AddProductAttribute />} />
+            <Route path="attributes/products/edit/:id" element={<ProductAttributeEdit />} />
           </Routes>
         </div>
       </div>

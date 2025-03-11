@@ -73,7 +73,7 @@ const UserContent = () => {
   const [totalPages, setTotalPages] = useState(1);
   const [loading, setLoading] = useState(true);
   const [language, setLanguage] = useState(
-    localStorage.getItem("language" || "th")
+    localStorage.getItem("language") || "th"
   );
   const cookies = new Cookies();
   const token = cookies.get("authToken");

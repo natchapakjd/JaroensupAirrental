@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { Link } from "react-router-dom"; 
+import { Link } from "react-router-dom";
 import Navbar from "../../components/Navbar";
 import Footer from "../../components/Footer";
 import axios from "axios";
@@ -14,7 +14,8 @@ const translations = {
   },
   en: {
     ourProducts: "Our Products",
-    exploreProducts: "Explore our wide range of products designed to meet your needs.",
+    exploreProducts:
+      "Explore our wide range of products designed to meet your needs.",
     viewDetails: "View Details",
     noImage: "No Image",
   },
@@ -23,12 +24,16 @@ const translations = {
 const Product = () => {
   const [products, setProducts] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [language, setLanguage] = useState(localStorage.getItem("language") || "th");
+  const [language, setLanguage] = useState(
+    localStorage.getItem("language") || "th"
+  );
 
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const response = await axios.get(`${import.meta.env.VITE_SERVER_URL}/products`);
+        const response = await axios.get(
+          `${import.meta.env.VITE_SERVER_URL}/products`
+        );
         setProducts(response.data);
         setLoading(false);
       } catch (error) {
@@ -56,7 +61,7 @@ const Product = () => {
   }
 
   const filteredProducts = products.filter(
-    (product) => product.product_type_id === 1
+    (product) => product.product_type_id === 3
   );
 
   return (
@@ -74,7 +79,7 @@ const Product = () => {
               </p>
             </div>
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-              {filteredProducts.map(product => (
+              {filteredProducts.map((product) => (
                 <div
                   key={product.product_id}
                   className="bg-white shadow-lg rounded-lg overflow-hidden"
@@ -95,11 +100,12 @@ const Product = () => {
                       {product.name}
                     </h2>
                     <p className="text-gray-600 mb-4">
-                      {product.description || "A brief description of the product goes here."}
+                      {product.description ||
+                        "A brief description of the product goes here."}
                     </p>
                     <div className="flex justify-end mt-4">
                       <Link
-                        to={`/product/${product.product_id}`} 
+                        to={`/product/${product.product_id}`}
                         className="bg-blue text-white py-2 px-4 rounded hover:bg-blue"
                       >
                         {translations[language].viewDetails}

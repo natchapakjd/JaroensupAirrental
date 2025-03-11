@@ -21,7 +21,7 @@ router.get("/v1/orders", (req, res) => {
           oi.product_name, 
           oi.quantity, 
           oi.price,
-          oi.total_price,
+          o.total_price,
           u.firstname,
           u.lastname
       FROM orders o
@@ -121,7 +121,7 @@ router.get("/v1/orders/:id", (req, res) => {
           oi.product_name, 
           oi.quantity, 
           oi.price,
-          oi.total_price,
+          o.total_price,
           u.firstname,
           u.lastname
       FROM orders o
@@ -148,8 +148,8 @@ router.get("/v1/orders/:id", (req, res) => {
         return res.status(500).json({ error: "Failed to fetch order count" });
       }
 
-      const totalCount = countResult[0].total;
-      const totalPages = Math.ceil(totalCount / limit);
+      const totalOrders = countResult[0].total;
+      const totalPages = Math.ceil(totalOrders / limit);
 
       // จัดกลุ่ม orders พร้อมรวมข้อมูล order_items
       const orders = result.reduce((acc, row) => {
@@ -162,11 +162,11 @@ router.get("/v1/orders/:id", (req, res) => {
             status_id: row.status_id,
             task_id: row.task_id,
             task_type_id: row.task_type_id,
-            total_price:row.total_price,
+            total_price: row.total_price,
             status_name: row.status_name,
             firstname: row.firstname,
-            lastname:row.lastname,
-            items: []
+            lastname: row.lastname,
+            items: [],
           };
         }
 
@@ -176,7 +176,6 @@ router.get("/v1/orders/:id", (req, res) => {
             product_name: row.product_name,
             quantity: row.quantity,
             price: row.price,
-            total_price: row.total_price
           });
         }
 
@@ -184,7 +183,7 @@ router.get("/v1/orders/:id", (req, res) => {
       }, {});
 
       res.status(200).json({
-        totalCount,
+        totalOrders,
         totalPages,
         currentPage: page,
         orders: Object.values(orders),
@@ -192,6 +191,7 @@ router.get("/v1/orders/:id", (req, res) => {
     });
   });
 });
+
 
 
 
@@ -692,6 +692,68 @@ router.get("/v2/orders/count", (req, res) => {
     }
   });
   
+  router.put("/v2/orders/approve/:orderId", async (req, res) => {
+    const orderId = req.params.orderId;
   
+    try {
+      // ดึงข้อมูลรายการสินค้าในออเดอร์
+      const getOrderDetailsQuery = `
+        SELECT oi.product_id, oi.quantity
+        FROM order_items oi
+        WHERE oi.order_id = ?
+      `;
+  
+      db.query(getOrderDetailsQuery, [orderId], (err, detailsResult) => {
+        if (err) {
+          console.error("Error retrieving order details:", err);
+          return res.status(500).json({ error: "Error retrieving order details" });
+        }
+  
+        if (detailsResult.length === 0) {
+          return res.status(404).json({ error: "Order details not found" });
+        }
+  
+        // อัปเดตสถานะของออเดอร์ในตาราง tasks (สมมติว่า status_id = 4 คือสถานะ "อนุมัติ")
+        const approveQuery = `
+          UPDATE tasks
+          SET status_id = 4
+          WHERE task_id = (
+            SELECT task_id
+            FROM orders
+            WHERE id = ?
+          )
+        `;
+  
+        db.query(approveQuery, [orderId], (error, results) => {
+          if (error) {
+            console.error("Error approving order:", error);
+            return res.status(500).json({ error: "Error approving order" });
+          }
+  
+          // ลดจำนวนสินค้าในสต็อกตามจำนวนที่สั่งซื้อในออเดอร์
+          detailsResult.forEach((detail) => {
+            const decreaseQuantityQuery = `
+              UPDATE products
+              SET stock_quantity = stock_quantity - ?
+              WHERE product_id = ?
+            `;
+  
+            db.query(decreaseQuantityQuery, [detail.quantity, detail.product_id], (err) => {
+              if (err) {
+                console.error("Error decreasing product quantity:", err);
+                return res.status(500).json({ error: "Error decreasing product quantity" });
+              }
+            });
+          });
+  
+          // ส่งข้อความตอบกลับว่าออเดอร์ถูกอนุมัติและสต็อกถูกอัปเดตแล้ว
+          res.status(200).json({ message: "Order approved and stock updated" });
+        });
+      });
+    } catch (error) {
+      console.error("Server error:", error);
+      res.status(500).json({ error: "Server error" });
+    }
+});
 
 module.exports = router;

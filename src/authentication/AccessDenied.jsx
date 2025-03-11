@@ -14,7 +14,7 @@ const translations = {
 };
 
 const AccessDenied = () => {
-  const [language, setLanguage] = useState(localStorage.getItem("language") || "th");
+  const [language, setLanguage] = useState(localStorage.getItem("language")|| "th");
 
   useEffect(() => {
     const handleLanguageChange = () => {

@@ -174,7 +174,22 @@ const TaskDetails = () => {
           )}
           {task.status_id && (
             <p>
-              <strong>{t.status}:</strong> {task.status_name}
+              <strong>{t.status}:</strong>{" "}
+              <span
+                className={`px-2 py-1 rounded ${
+                  task.status_name === "pending"
+                    ? "bg-yellow-100 text-yellow-800"
+                    : task.status_name === "active"
+                      ? "bg-blue-100 text-blue-800"
+                      : task.status_name === "approve"
+                        ? "bg-green-100 text-green-800"
+                        : task.status_name === "hiring"
+                          ? "bg-gray-100 text-gray-800"
+                          : "bg-gray-200 text-gray-600"
+                }`}
+              >
+                {task.status_name}
+              </span>
             </p>
           )}
           {task.appointment_date && (

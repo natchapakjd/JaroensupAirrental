@@ -4,6 +4,7 @@ import Navbar from "../../components/Navbar";
 import Footer from "../../components/Footer";
 import axios from "axios";
 import Loading from "../../components/Loading";
+import BackButtonEdit from "../../components/BackButtonEdit";
 
 const ProductDetails = () => {
   const { id } = useParams();
@@ -56,9 +57,13 @@ const ProductDetails = () => {
               )}
             </div>
             <div className="flex-grow w-full md:w-1/2 text-left mb-12 md:pl-6">
-              <h1 className="text-4xl font-bold text-gray-800 mb-4">
-                {product.name}
-              </h1>
+              <div className="flex w-full my-2">
+                <BackButtonEdit />
+                <h1 className="text-4xl font-bold text-gray-800 mx-1">
+                  {product.name}
+                </h1>
+              </div>
+
               <p className="text-lg text-gray-600 mb-4">
                 {product.description}
               </p>

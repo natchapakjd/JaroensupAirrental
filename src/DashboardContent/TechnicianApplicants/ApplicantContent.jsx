@@ -61,7 +61,7 @@ const ApplicantContent = () => {
       searchPlaceholder: "ค้นหาตามชื่อหรือนามสกุล",
       filterStatus: "กรองตามสถานะ",
       filterPending: "รอดำเนินการ",
-      filterHiring: "กำลังพิจารณา",
+      filterHiring: "อนุมัติแล้ว",
       noApplicantsFound: "ไม่พบผู้สมัคร",
       accept: "ยอมรับ",
       sendEmail: "ส่งอีเมล",
@@ -310,7 +310,21 @@ const ApplicantContent = () => {
                         {applicant.position_applied}
                       </td>
                       <td className="border p-2 text-center">
+                      <span
+                        className={`px-2 py-1 rounded ${
+                          applicant.status_name === "pending"
+                            ? "bg-yellow-100 text-yellow-800"
+                            : applicant.status_name === "active"
+                              ? "bg-blue-100 text-blue-800"
+                              : applicant.status_name === "approve"
+                                ? "bg-green-100 text-green-800"
+                                : applicant.status_name === "hiring"
+                                  ? "bg-gray-100 text-gray-800"
+                                  : "bg-gray-200 text-gray-600"
+                        }`}
+                      >
                         {applicant.status_name}
+                      </span>
                       </td>
                       <td className="border p-2 text-center">
                         {new Date(
