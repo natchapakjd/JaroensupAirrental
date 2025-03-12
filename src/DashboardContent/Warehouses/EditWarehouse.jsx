@@ -100,25 +100,25 @@ const EditWarehouse = () => {
         {loading ? (
           <Loading />
         ) : (
-          <form onSubmit={handleSubmit} className="text-sm font-medium">
+          <form onSubmit={handleSubmit} className="text-md ">
             <div className="mb-4">
-              <label className="block text-sm font-medium text-gray-700">{translations[language].location}</label>
+              <label className="block text-md  text-gray-700">{translations[language].location}</label>
               <input type="text" value={location} onChange={(e) => setLocation(e.target.value)} className="input input-bordered w-full" required />
             </div>
             <div className="mb-4">
-              <label className="block text-sm font-medium text-gray-700">{translations[language].air5Ton}</label>
+              <label className="block text-md  text-gray-700">{translations[language].air5Ton}</label>
               <input type="number" value={air5Ton} onChange={(e) => setAir5Ton(parseInt(e.target.value) || 0)} className="input input-bordered w-full" required min="0" />
             </div>
             <div className="mb-4">
-              <label className="block text-sm font-medium text-gray-700">{translations[language].air10Ton}</label>
+              <label className="block text-md  text-gray-700">{translations[language].air10Ton}</label>
               <input type="number" value={air10Ton} onChange={(e) => setAir10Ton(parseInt(e.target.value) || 0)} className="input input-bordered w-full" required min="0" />
             </div>
             <div className="mb-4">
-              <label className="block text-sm font-medium text-gray-700">{translations[language].air20Ton}</label>
+              <label className="block text-md  text-gray-700">{translations[language].air20Ton}</label>
               <input type="number" value={air20Ton} onChange={(e) => setAir20Ton(parseInt(e.target.value) || 0)} className="input input-bordered w-full" required min="0" />
             </div>
             <div className="mb-4">
-              <label className="block text-sm font-medium text-gray-700">{translations[language].capacity}</label>
+              <label className="block text-md  text-gray-700">{translations[language].capacity}</label>
               <input type="number" value={capacity} readOnly className="input input-bordered w-full bg-gray-100" />
             </div>
             <button type="submit" className="btn bg-blue text-white hover:bg-blue" disabled={loading}>

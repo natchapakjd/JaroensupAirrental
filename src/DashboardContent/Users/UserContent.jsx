@@ -132,9 +132,7 @@ const UserContent = () => {
     if (result.isConfirmed) {
       try {
         const response = await axios.delete(
-          `${import.meta.env.VITE_SERVER_URL}/user/${userId}`,
-          { withCredentials: true }
-        );
+          `${import.meta.env.VITE_SERVER_URL}/user/${userId}`);
         if (response.status === 200) {
           axios.post(`${import.meta.env.VITE_SERVER_URL}/adminLog`, {
             admin_id: user_id,
@@ -270,7 +268,23 @@ const UserContent = () => {
                     </td>
                     <td>{user.username}</td>
                     <td>{user.email}</td>
-                    <td>{user.role_name}</td>
+                    <td>
+                      <span
+                        className={`px-2 py-1 rounded ${
+                          user.role_name === "customer"
+                            ? "bg-yellow-100 text-yellow-800"
+                            : user.role_name === "technician"
+                              ? "bg-red-100 text-red-800"
+                              : user.role_name === "admin"
+                                ? "bg-green-100 text-green-800"
+                                : user.role_name === "technician-outsource"
+                                  ? "bg-gray-100 text-gray-800"
+                                  : "bg-gray-200 text-gray-600"
+                        }`}
+                      >
+                        {user.role_name}
+                      </span>
+                    </td>
                     <td>{format(new Date(user.created_at), "MM/dd/yyyy")}</td>
                     <td>
                       <div className="flex gap-2">

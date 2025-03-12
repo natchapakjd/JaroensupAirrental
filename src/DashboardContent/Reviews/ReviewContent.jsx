@@ -240,7 +240,7 @@ const ReviewContent = () => {
               {filteredReviews.length > 0 ? (
                 filteredReviews.map((review, index) => (
                   <tr key={index + 1}>
-                    <td className="border p-2 text-center">{index + 1}</td>
+                    <td className="border p-2 text-center">{(currentPage - 1) * 10 + index + 1}</td>
                     <td className="border p-2 text-center">
                       {review.member_firstname} {review.member_lastname}
                     </td>

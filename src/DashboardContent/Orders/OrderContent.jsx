@@ -97,7 +97,7 @@ const OrderContent = () => {
         },
       });
       setOrders(response.data.orders);
-      console.log(response.data.orders)
+      console.log(response.data.orders);
       setTotalPages(response.data.totalPages); // Set total pages
     } catch (err) {
       setError(err.message);
@@ -312,12 +312,14 @@ const OrderContent = () => {
               {orders.length > 0 ? (
                 orders.map((order, index) => (
                   <tr key={index + 1}>
-                    <td className="border p-2 text-center">{index + 1}</td>
+                    <td className="border p-2 text-center">
+                      {(page - 1) * 10 + index + 1}
+                    </td>{" "}
                     <td className="border p-2 text-center">
                       {order.firstname} {order.lastname}
                     </td>
                     <td className="border p-2 text-center">
-                    <span
+                      <span
                         className={`px-2 py-1 rounded ${
                           order.status_name === "pending"
                             ? "bg-yellow-100 text-yellow-800"
@@ -338,7 +340,7 @@ const OrderContent = () => {
                     </td>
                     <td className="border p-2 text-center">
                       <div className="flex justify-center gap-2">
-                        {(order.status_name !== "completed") && (
+                        {order.status_name !== "completed" && (
                           <button
                             onClick={() =>
                               handleChangeStatus(order.task_id, "Completed")
@@ -348,7 +350,7 @@ const OrderContent = () => {
                             Complete
                           </button>
                         )}
-                        {(order.status_id !== 4 && order.status_id !== 2) && (
+                        {order.status_id !== 4 && order.status_id !== 2 && (
                           <button
                             onClick={() => handleApprove(order.order_id)} // Approve button
                             className="btn btn-primary text-white"

@@ -161,7 +161,6 @@ const UserHistory = () => {
       );
       setTaskHistory(filteredTasks);
       setTotalTasks(taskResponse.data.totalTasks);
-      console.log(taskResponse.data);
       // Fetch order history
       const orderResponse = await axios.get(
         `${
@@ -175,7 +174,6 @@ const UserHistory = () => {
       }));
 
       setOrderHistory(orders);
-      console.log(orderResponse.data);
 
       setTotalOrders(orderResponse.data.totalOrders);
 

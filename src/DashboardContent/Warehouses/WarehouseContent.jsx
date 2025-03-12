@@ -197,7 +197,7 @@ const WarehouseContent = () => {
               <tbody>
                 {filteredWarehouses.map((warehouse, index) => (
                   <tr key={index + 1}>
-                    <td className="border p-2 text-center">{index + 1}</td>
+                    <td className="border p-2 text-center">{(currentPage - 1) * rowsPerPage + index + 1}</td>
                     <td className="border p-2 text-center">
                       {warehouse.location}
                     </td>

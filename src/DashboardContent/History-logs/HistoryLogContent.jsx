@@ -207,7 +207,9 @@ const HistoryLogContent = () => {
                   {filteredAdminLogsTable.length > 0 ? (
                     filteredAdminLogsTable.map((log, index) => (
                       <tr key={index + 1}>
-                        <td className="border p-2">{index + 1}</td>
+                        <td className="border p-2">
+                          {(adminCurrentPage - 1) * logsPerPage + index + 1}
+                        </td>
                         <td className="border p-2">
                           {log.firstname} {log.lastname}
                         </td>
@@ -321,7 +323,9 @@ const HistoryLogContent = () => {
               {filteredAdminLogs.length > 0 ? (
                 filteredAdminLogs.map((log, index) => (
                   <tr key={index + 1}>
-                    <td className="border p-2">{index + 1}</td>
+                    <td className="border p-2">
+                      {(taskCurrentPage - 1) * logsPerPage + index + 1}
+                    </td>
                     <td className="border p-2">
                       {log.firstname} {log.lastname}
                     </td>

@@ -190,7 +190,7 @@ const AreacalContent = () => {
         <tbody className="text-center">
           {areaCalculations.map((calculation,index) => (
             <tr key={index+1}>
-              <td className="border p-2 text-center">{index+1}</td>
+              <td className="border p-2 text-center">{(currentPage - 1) * pageSize + index + 1}</td>
               <td className="border p-2 text-center">{calculation.assignment_id}</td>
               <td className="border p-2 text-center">{calculation.location_name}</td>
               <td className="border p-2 text-center">{calculation.width}</td>

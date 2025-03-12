@@ -219,7 +219,7 @@ const AddUser = () => {
             </div>
             {/* Password */}
             <div>
-              <label className="block text-sm font-medium text-gray-700">
+              <label className="block text-md  text-gray-700">
                 {translations[language].password}:
               </label>
               <input
@@ -233,7 +233,7 @@ const AddUser = () => {
             </div>
             {/* First Name */}
             <div>
-              <label className="block text-sm font-medium text-gray-700">
+              <label className="block text-md  text-gray-700">
                 {translations[language].firstname}:
               </label>
               <input
@@ -246,7 +246,7 @@ const AddUser = () => {
             </div>
             {/* Last Name */}
             <div>
-              <label className="block text-sm font-medium text-gray-700">
+              <label className="block text-md  text-gray-700">
                 {translations[language].lastname}:
               </label>
               <input
@@ -259,7 +259,7 @@ const AddUser = () => {
             </div>
             {/* Email */}
             <div>
-              <label className="block text-sm font-medium text-gray-700">
+              <label className="block text-md  text-gray-700">
                 {translations[language].email}:
               </label>
               <input
@@ -272,7 +272,7 @@ const AddUser = () => {
             </div>
             {/* Phone */}
             <div>
-              <label className="block text-sm font-medium text-gray-700">
+              <label className="block text-md  text-gray-700">
                 {translations[language].phone}:
               </label>
               <input
@@ -286,7 +286,7 @@ const AddUser = () => {
             </div>
             {/* Age */}
             <div>
-              <label className="block text-sm font-medium text-gray-700">
+              <label className="block text-md  text-gray-700">
                 {translations[language].age}:
               </label>
               <input
@@ -303,7 +303,7 @@ const AddUser = () => {
 
             {/* Gender */}
             <div>
-              <label className="block text-sm font-medium text-gray-700">
+              <label className="block text-md  text-gray-700">
                 {translations[language].gender}:
               </label>
               <select
@@ -323,7 +323,7 @@ const AddUser = () => {
 
             {/* Date of Birth */}
             <div>
-              <label className="block text-sm font-medium text-gray-700">
+              <label className="block text-md  text-gray-700">
                 {translations[language].date_of_birth}:
               </label>
               <input
@@ -345,7 +345,7 @@ const AddUser = () => {
 
             {/* Role */}
             <div>
-              <label className="block text-sm font-medium text-gray-700">
+              <label className="block text-md  text-gray-700">
                 {translations[language].role}:
               </label>
               <select
@@ -366,7 +366,7 @@ const AddUser = () => {
 
             {/* Address */}
             <div className="col-span-2">
-              <label className="block text-sm font-medium text-gray-700">
+              <label className="block text-md  text-gray-700">
                 {translations[language].address}:
               </label>
               <textarea
@@ -379,7 +379,7 @@ const AddUser = () => {
 
             {/* Profile Image */}
             <div>
-              <label className="block text-sm font-medium text-gray-700">
+              <label className="block text-md  text-gray-700">
                 {translations[language].profile_image}:
               </label>
               <input

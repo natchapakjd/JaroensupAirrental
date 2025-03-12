@@ -296,7 +296,7 @@ const PaymentContent = () => {
               {filteredPayments.length > 0 ? (
                 filteredPayments.map((payment, index) => (
                   <tr key={index + 1}>
-                    <td className="border p-2 text-center">{index + 1}</td>
+                    <td className="border p-2 text-center">{(currentPage - 1) * 10 + index + 1}</td>
                     <td className="border p-2 text-center">
                       {payment.firstname} {payment.lastname}
                     </td>

@@ -35,7 +35,7 @@ router.get("/task-paging", (req, res) => {
   const limit = parseInt(req.query.limit) || 10;
   const offset = (page - 1) * limit;
 
-  const query = "SELECT t.*,tt.type_name ,st.status_name,st.status_id FROM tasks t JOIN status st ON t.status_id = st.status_id JOIN tasktypes tt ON t.task_type_id = tt.task_type_id LIMIT ? OFFSET ?";
+  const query = "SELECT t.*,tt.type_name ,st.status_name,st.status_id,us.firstname,us.lastname,us.phone FROM tasks t JOIN status st ON t.status_id = st.status_id JOIN tasktypes tt ON t.task_type_id = tt.task_type_id JOIN users us ON t.user_id = us.user_id LIMIT ? OFFSET ?";
 
   db.query(query, [limit, offset], (err, result) => {
     if (err) {
@@ -57,6 +57,7 @@ router.get("/task-paging", (req, res) => {
     });
   });
 });
+
 router.get("/task-paging/:id", (req, res) => {
   const userId = req.params.id;
   const limit = parseInt(req.query.limit) || 10; // Default to 10 if no limit is specified
@@ -65,7 +66,7 @@ router.get("/task-paging/:id", (req, res) => {
 
   // Main query to get tasks with pagination, filter by task_type_id, and order by latest created_at
   let query = `
-    SELECT t.*, tt.type_name, st.status_name, us.firstname, us.lastname
+    SELECT t.*, tt.type_name, st.status_name, us.firstname, us.lastname,us.phone
     FROM tasks t 
     JOIN status st ON t.status_id = st.status_id  
     JOIN tasktypes tt ON t.task_type_id = tt.task_type_id 
@@ -120,6 +121,7 @@ router.get("/tasks/paged", (req, res) => {
       users.username,
       users.firstname,
       users.lastname,
+      users.phone,
       tasktypes.type_name,
       status.status_name
     FROM 

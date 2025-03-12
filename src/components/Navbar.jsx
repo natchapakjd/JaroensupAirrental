@@ -18,6 +18,7 @@ const translations = {
     notification: "การแจ้งเตือน",
     logout: "ออกจากระบบ",
     login: "สมัครสมาชิก/เข้าสู่ระบบ",
+    gotoDashboard : "ไปยังแดชบอร์ด"
   },
   en: {
     home: "Home",
@@ -33,6 +34,7 @@ const translations = {
     notification: "Notifications",
     logout: "Logout",
     login: "Sign Up / Login",
+    gotoDashboard : "Go to dashboard"
   },
 };
 
@@ -43,7 +45,7 @@ const Navbar = () => {
   const [image, setImage] = useState(null);
   const token = cookies.get("authToken");
   const navigate = useNavigate();
-
+  const [role,setRole] = useState();
   const [language, setLanguage] = useState(
     localStorage.getItem("language") || "th"
   );
@@ -63,6 +65,7 @@ const Navbar = () => {
     if (token) {
       const decodedToken = jwtDecode(token);
       setUserId(decodedToken.id);
+      setRole(decodedToken.role)
       fetchUserByID(decodedToken.id);
     }
   }, [token]);
@@ -141,10 +144,14 @@ const Navbar = () => {
                   <Link to="/services">{translations[language].services}</Link>
                 </li>
                 <li>
-                  <Link to="/experience">{translations[language].experience}</Link>
+                  <Link to="/experience">
+                    {translations[language].experience}
+                  </Link>
                 </li>
                 <li>
-                  <Link to="/register-tech">{translations[language].registerTech}</Link>
+                  <Link to="/register-tech">
+                    {translations[language].registerTech}
+                  </Link>
                 </li>
                 <li>
                   <Link to="/contact">{translations[language].contact}</Link>
@@ -159,31 +166,33 @@ const Navbar = () => {
         </div>
         <div className="navbar-center hidden lg:flex">
           <ul className="menu menu-horizontal px-1">
-           <li>
-                  <Link to="/">{translations[language].home}</Link>
-                </li>
-                <li>
-                  <Link to="/product">{translations[language].product}</Link>
-                </li>
-                <li>
-                  <Link to="/services">{translations[language].services}</Link>
-                </li>
-                <li>
-                  <Link to="/experience">{translations[language].experience}</Link>
-                </li>
-                <li>
-                    <Link to="/register-tech">{translations[language].registerTech}</Link>
-                </li>
-                <li>
-                  <Link to="/contact">{translations[language].contact}</Link>
-                </li>
-                {/* <li>
+            <li>
+              <Link to="/">{translations[language].home}</Link>
+            </li>
+            <li>
+              <Link to="/product">{translations[language].product}</Link>
+            </li>
+            <li>
+              <Link to="/services">{translations[language].services}</Link>
+            </li>
+            <li>
+              <Link to="/experience">{translations[language].experience}</Link>
+            </li>
+            <li>
+              <Link to="/register-tech">
+                {translations[language].registerTech}
+              </Link>
+            </li>
+            <li>
+              <Link to="/contact">{translations[language].contact}</Link>
+            </li>
+            {/* <li>
                   <Link to="/test-xr-gallary">{translations[language].arFeature}</Link>
                 </li> */}
           </ul>
         </div>
         <div className="navbar-end ">
-        <button
+          <button
             onClick={toggleLanguage}
             className="badge badge-outline cursor-pointer p-4 text-sm mx-2"
           >
@@ -222,7 +231,7 @@ const Navbar = () => {
                 >
                   <li>
                     <a className="justify-between" href="/profile-setting">
-                    {translations[language].profile}
+                      {translations[language].profile}
                       <span className="badge">New</span>
                     </a>
                   </li>
@@ -230,13 +239,27 @@ const Navbar = () => {
                     <a href="/history">{translations[language].history}</a>
                   </li>
                   <li>
-                    <a href="/change-password">{translations[language].changePassword}</a>
+                    <a href="/change-password">
+                      {translations[language].changePassword}
+                    </a>
+                  </li>
+                  {role !== 1 && (
+                    <li>
+                      <a href="/dashboard/home">
+                        {translations[language].gotoDashboard}
+                      </a>
+                    </li>
+                  )}
+
+                  <li>
+                    <a href="/settings">
+                      {translations[language].notification}
+                    </a>
                   </li>
                   <li>
-                    <a href="/settings">{translations[language].notification}</a>
-                  </li>
-                  <li>
-                    <a onClick={handleLogout}>{translations[language].logout}</a>
+                    <a onClick={handleLogout}>
+                      {translations[language].logout}
+                    </a>
                   </li>
                 </ul>
               )}

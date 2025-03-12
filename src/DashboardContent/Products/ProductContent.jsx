@@ -503,7 +503,7 @@ const ProductContent = () => {
                         />
                       )}
                     </td>
-                    <td className="border p-2 text-center">{index + 1}</td>
+                    <td className="border p-2 text-center">{(currentPage - 1) * rowsPerPage + index + 1}</td>
                     <td className="border p-2 text-center">{product.name}</td>
                     <td className="border p-2 text-center">
                       {product.description}
