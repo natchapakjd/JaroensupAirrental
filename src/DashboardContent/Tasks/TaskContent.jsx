@@ -51,6 +51,7 @@ const TaskContent = () => {
       of: "of",
       page: "page",
       file: "file",
+      name : "name"
     },
     th: {
       taskList: "รายการงาน",
@@ -76,6 +77,7 @@ const TaskContent = () => {
       of: "จาก",
       page: "หน้า",
       file: "ไฟล์",
+      name : "ชื่อ-สกุล"
     },
   };
 
@@ -308,6 +310,7 @@ const TaskContent = () => {
             <thead className="sticky top-0 bg-gray-200">
               <tr>
                 <th className="border p-2 text-center">{currentLang.id}</th>
+                <th className="border p-2 text-center">{currentLang.name}</th>
                 <th className="border p-2 text-center">{currentLang.type}</th>
                 <th className="border p-2 text-center">
                   {currentLang.description}
@@ -329,7 +332,10 @@ const TaskContent = () => {
               {filteredTasks.length > 0 ? (
                 filteredTasks.map((task, index) => (
                   <tr key={index + 1} className="hover:bg-gray-100">
-                    <td className="border p-2 text-center">{index + 1}</td>
+                    <td className="border p-2 text-center">
+                      {(currentPage - 1) * tasksPerPage + index + 1}{" "}
+                    </td>
+                    <td className="border p-2 text-center">{task.firstname} {task.lastname}</td>
                     <td className="border p-2 text-center">{task.type_name}</td>
                     <td className="border p-2 text-center">
                       {task.description}

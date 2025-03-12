@@ -291,7 +291,7 @@ const ApplicantContent = () => {
                   .slice((currentPage - 1) * pageSize, currentPage * pageSize)
                   .map((applicant, index) => (
                     <tr key={index + 1}>
-                      <td className="border p-2 text-center">{index + 1}</td>
+                      <td className="border p-2 text-center">{(currentPage - 1) * pageSize + index + 1}</td>
                       <td className="border p-2 text-center">
                         {applicant.first_name}
                       </td>
@@ -315,11 +315,11 @@ const ApplicantContent = () => {
                           applicant.status_name === "pending"
                             ? "bg-yellow-100 text-yellow-800"
                             : applicant.status_name === "active"
-                              ? "bg-blue-100 text-blue-800"
+                              ? "bg-green-100 text-green-800"
                               : applicant.status_name === "approve"
                                 ? "bg-green-100 text-green-800"
                                 : applicant.status_name === "hiring"
-                                  ? "bg-gray-100 text-gray-800"
+                                  ? "bg-green-100 text-green-800"
                                   : "bg-gray-200 text-gray-600"
                         }`}
                       >
@@ -373,7 +373,7 @@ const ApplicantContent = () => {
                   ))
               ) : (
                 <tr>
-                  <td colSpan="9" className="border border-gray-300 p-4">
+                  <td colSpan="11" className="border border-gray-300 p-4">
                     {t.noApplicantsFound}
                   </td>
                 </tr>

@@ -60,7 +60,8 @@ const AddReview = () => {
         ]);
         setTasks(tasksResponse.data);
         setTechnicians(techniciansResponse.data);
-        setUsers(usersResponse.data);
+        const filterUser = usersResponse.data.filter((user)=>user.role_id === 1)
+        setUsers(filterUser);
       } catch (error) {
         Swal.fire({
           title: 'Error',
@@ -127,9 +128,9 @@ const AddReview = () => {
             className="select select-bordered w-full"
           >
             <option value="">{translations[language].taskLabel}</option>
-            {tasks.map((task) => (
+            {tasks.map((task,index) => (
               <option key={task.task_id} value={task.task_id}>
-                {task.task_id} {task.description}
+                {index+1}. {task.firstname} {task.lastname}: {task.description}
               </option>
             ))}
           </select>
@@ -147,9 +148,9 @@ const AddReview = () => {
             className="select select-bordered w-full"
           >
             <option value="">{translations[language].techLabel}</option>
-            {technicians.map((tech) => (
+            {technicians.map((tech,index) => (
               <option key={tech.tech_id} value={tech.tech_id}>
-                {tech.tech_id}
+                {index+1}. {tech.firstname} {tech.lastname}
               </option>
             ))}
           </select>
@@ -167,9 +168,9 @@ const AddReview = () => {
             className="select select-bordered w-full"
           >
             <option value="">{translations[language].userLabel}</option>
-            {users.map((user) => (
+            {users.map((user,index) => (
               <option key={user.user_id} value={user.user_id}>
-                {user.user_id}
+                {index+1}. {user.firstname} {user.lastname}
               </option>
             ))}
           </select>

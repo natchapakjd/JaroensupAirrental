@@ -13,6 +13,7 @@ const translations = {
     changePassword: "เปลี่ยนรหัสผ่าน",
     notification: "การแจ้งเตือน",
     setting: "การตั้งค่า",
+    gotoDashboard : "ไปยังหน้าหลัก(มุมผู้เช่า)",
     logout: "ออกจากระบบ",
   },
   en: {
@@ -22,6 +23,7 @@ const translations = {
     changePassword: "Change password",
     notification: "Notification",
     setting: "Settings",
+    gotoDashboard : "Go to homepage(User aspect)",
     logout: "Logout",
   },
 };
@@ -37,10 +39,12 @@ const Header = () => {
   const [windowWidth, setWindowWidth] = useState(window.innerWidth);
   const token = cookies.get("authToken");
   let id = null;
+  let role = null;
 
   try {
     const decodeToken = jwtDecode(token);
     id = decodeToken.id;
+    role = decodeToken.role
   } catch (err) {
     console.error("Error decoding token:", err);
   }
@@ -159,6 +163,11 @@ const Header = () => {
                   className="hover:bg-gray-100 p-2 rounded"
                 >
                   {translations[language].changePassword}
+                </a>
+              </li>
+              <li>
+                <a href="/" className="hover:bg-gray-100 p-2 rounded">
+                  {translations[language].gotoDashboard}
                 </a>
               </li>
               <li>

@@ -1,4 +1,7 @@
+import { jwtDecode } from "jwt-decode";
 import React, { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom"; // เพิ่ม useNavigate
+import Cookies from "universal-cookie";
 
 const translations = {
   th: {
@@ -15,6 +18,11 @@ const translations = {
 
 const PageNotFound = () => {
   const [language, setLanguage] = useState(localStorage.getItem("language") || "th");
+  const navigate = useNavigate();
+  const cookies = new Cookies();
+  const token = cookies.get("authToken");
+  const decodeToken = jwtDecode(token);
+  const role = decodeToken.role;
 
   useEffect(() => {
     const handleLanguageChange = () => {
@@ -27,6 +35,15 @@ const PageNotFound = () => {
     };
   }, []);
 
+  // ฟังก์ชันสำหรับจัดการการคลิกปุ่ม
+  const handleGoHome = () => {
+    if (role === 2 || role === 3) {
+      navigate("/dashboard/home");
+    } else {
+      navigate("/");
+    }
+  };
+
   return (
     <div className="flex items-center justify-center min-h-screen bg-white font-prompt">
       <div className="text-center p-6 bg-white shadow-md rounded-lg w-full max-w-md">
@@ -35,12 +52,12 @@ const PageNotFound = () => {
           {translations[language].notFound}
         </div>
         <div className="text-gray-600 mb-6">{translations[language].message}</div>
-        <a
-          href="/"
+        <button
+          onClick={handleGoHome} // เปลี่ยนจาก <a> เป็น <button> และใช้ onClick
           className="bg-blue text-white px-4 py-2 rounded-md shadow-md hover:bg-blue transition"
         >
           {translations[language].goHome}
-        </a>
+        </button>
       </div>
     </div>
   );

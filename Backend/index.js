@@ -37,6 +37,8 @@ const corsOptions = {
   origin: [
     "https://jaroensup.com",
     "https://www.jaroensup.com",
+    "http://jaroensup.com",
+    "http://www.jaroensup.com",
     "http://localhost:5173"
   ],
   credentials: true
@@ -47,9 +49,9 @@ app.use(cors(corsOptions));
 //   origin: 'https://jaroensup-airrental-frontend.vercel.app', 
 //   credentials: true, 
 // }));
+
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
-// app.use(cors({credentials:true}))
 
 app.use(cookieParser()); // Correct placement
 

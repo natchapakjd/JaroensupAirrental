@@ -4,6 +4,7 @@ import Swal from "sweetalert2";
 import { Link } from "react-router-dom";
 import { jwtDecode } from "jwt-decode";
 import Cookies from "universal-cookie";
+import Loading from "../../components/Loading";
 // Translation object for multiple languages
 const translations = {
   en: {
@@ -26,7 +27,7 @@ const translations = {
     next: "Next",
     page: "Page",
     of: "of",
-    addProductAttribute: "Product Attribute List"
+    addProductAttribute: "Product Attribute List",
   },
   th: {
     title: "คุณลักษณะ",
@@ -48,8 +49,7 @@ const translations = {
     next: "ถัดไป",
     page: "หน้า",
     of: "จาก",
-    addProductAttribute: "รายการคุณลักษณะบนสินค้า"
-
+    addProductAttribute: "รายการคุณลักษณะบนสินค้า",
   },
 };
 
@@ -141,7 +141,7 @@ const AttributeContent = () => {
     );
   };
 
-  if (loading) return <p>{translations[language].loadError}</p>;
+  if (loading) return <Loading/>;
   if (error) return <p>{error}</p>;
 
   return (
@@ -198,7 +198,9 @@ const AttributeContent = () => {
                 <tbody>
                   {filteredAttributes.map((attribute, index) => (
                     <tr key={index + 1}>
-                      <td className="border p-2 text-center">{index + 1}</td>
+                      <td className="border p-2 text-center">
+                        {(currentPage - 1) * rowsPerPage + index + 1}
+                      </td>
                       <td className="border p-2 text-center">
                         {attribute.name}
                       </td>

@@ -93,7 +93,7 @@ const EditReview = () => {
         title: translations[language].successUpdate,
         text: response.data.message,
       });
-      navigate("/reviews");
+      navigate("/dashboard/reviews");
     } catch (err) {
       console.error("Error updating review:", err);
       await Swal.fire({
@@ -122,9 +122,9 @@ const EditReview = () => {
       >
         
         <div className="mb-4">
-          <label className="block mb-2" htmlFor="task_id">
+          {/* <label className="block mb-2" htmlFor="task_id">
             {translations[language].taskLabel}
-          </label>
+          </label> */}
           <input
             type="text"
             id="task_id"
@@ -133,13 +133,14 @@ const EditReview = () => {
             onChange={handleChange}
             required
             disabled
+            hidden
             className="input input-bordered w-full"
           />
         </div>
         <div className="mb-4">
-          <label className="block mb-2" htmlFor="tech_id">
+          {/* <label className="block mb-2" htmlFor="tech_id">
             {translations[language].techLabel}
-          </label>
+          </label> */}
           <input
             type="text"
             id="tech_id"
@@ -149,6 +150,7 @@ const EditReview = () => {
             required
             disabled
             className="input input-bordered w-full"
+            hidden
           />
         </div>
         <div className="mb-4">
@@ -182,7 +184,7 @@ const EditReview = () => {
         </div>
         <button
           type="submit"
-          className="btn bg-blue text-white hover:bg-blue-600"
+          className="btn bg-blue text-white hover:bg-blue"
         >
           {translations[language].updateButton}
         </button>

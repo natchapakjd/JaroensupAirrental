@@ -109,91 +109,88 @@ router.get("/v1/orders/:id", (req, res) => {
   const offset = (page - 1) * limit; // การคำนวณ offset
   const userId = req.params.id; // รับ user_id จาก URL parameters
 
+  // Query สำหรับดึงข้อมูลออเดอร์
   let query = `
-      SELECT 
-          o.id AS order_id, 
-          o.created_at, 
-          t.task_id, 
-          t.task_type_id, 
-          st.status_id,
-          st.status_name, 
-          oi.product_id, 
-          oi.product_name, 
-          oi.quantity, 
-          oi.price,
-          o.total_price,
-          u.firstname,
-          u.lastname
-      FROM orders o
-      JOIN tasks t ON t.task_id = o.task_id
-      JOIN status st ON st.status_id = t.status_id
-      JOIN users u ON o.user_id = u.user_id
-      LEFT JOIN order_items oi ON o.id = oi.order_id
-      WHERE o.user_id = ?
-      LIMIT ? OFFSET ?
+    SELECT 
+        o.id AS order_id, 
+        o.created_at, 
+        t.task_id, 
+        t.task_type_id, 
+        st.status_id,
+        st.status_name, 
+        o.total_price,
+        u.firstname,
+        u.lastname
+    FROM orders o
+    JOIN tasks t ON t.task_id = o.task_id
+    JOIN status st ON st.status_id = t.status_id
+    JOIN users u ON o.user_id = u.user_id
+    WHERE o.user_id = ?
+    LIMIT ? OFFSET ?
   `;
-  
-  db.query(query, [userId, limit, offset], (err, result) => {
+
+  // Query สำหรับดึงรายการสินค้า
+  const itemsQuery = `
+    SELECT 
+        oi.order_id, 
+        oi.product_id, 
+        oi.product_name, 
+        oi.quantity, 
+        oi.price
+    FROM order_items oi
+    WHERE oi.order_id IN (?)
+  `;
+
+  // Query สำหรับนับจำนวนออเดอร์ทั้งหมด
+  const countQuery = `
+    SELECT COUNT(DISTINCT o.id) AS total 
+    FROM orders o 
+    WHERE o.user_id = ?
+  `;
+
+  // ดึงข้อมูลออเดอร์
+  db.query(query, [userId, limit, offset], (err, ordersResult) => {
     if (err) {
       console.error("Error fetching orders: ", err);
       return res.status(500).json({ error: "Failed to fetch orders" });
     }
 
-    // นับจำนวนรายการทั้งหมด
-    const countQuery = "SELECT COUNT(*) AS total FROM orders WHERE user_id = ?";
-    
-    db.query(countQuery, [userId], (err, countResult) => {
+    // ดึง order_ids จาก ordersResult
+    const orderIds = ordersResult.map((order) => order.order_id);
+
+    // ดึงรายการสินค้าสำหรับออเดอร์เหล่านี้
+    db.query(itemsQuery, [orderIds], (err, itemsResult) => {
       if (err) {
-        console.error("Error fetching order count: ", err);
-        return res.status(500).json({ error: "Failed to fetch order count" });
+        console.error("Error fetching order items: ", err);
+        return res.status(500).json({ error: "Failed to fetch order items" });
       }
 
-      const totalOrders = countResult[0].total;
-      const totalPages = Math.ceil(totalOrders / limit);
+      // รวมข้อมูลออเดอร์และรายการสินค้า
+      const orders = ordersResult.map((order) => {
+        order.items = itemsResult.filter((item) => item.order_id === order.order_id);
+        return order;
+      });
 
-      // จัดกลุ่ม orders พร้อมรวมข้อมูล order_items
-      const orders = result.reduce((acc, row) => {
-        const orderId = row.order_id;
-
-        if (!acc[orderId]) {
-          acc[orderId] = {
-            order_id: orderId,
-            created_at: row.created_at,
-            status_id: row.status_id,
-            task_id: row.task_id,
-            task_type_id: row.task_type_id,
-            total_price: row.total_price,
-            status_name: row.status_name,
-            firstname: row.firstname,
-            lastname: row.lastname,
-            items: [],
-          };
+      // นับจำนวนออเดอร์ทั้งหมด
+      db.query(countQuery, [userId], (err, countResult) => {
+        if (err) {
+          console.error("Error fetching order count: ", err);
+          return res.status(500).json({ error: "Failed to fetch order count" });
         }
 
-        if (row.product_id) {
-          acc[orderId].items.push({
-            product_id: row.product_id,
-            product_name: row.product_name,
-            quantity: row.quantity,
-            price: row.price,
-          });
-        }
+        const totalOrders = countResult[0].total;
+        const totalPages = Math.ceil(totalOrders / limit);
 
-        return acc;
-      }, {});
-
-      res.status(200).json({
-        totalOrders,
-        totalPages,
-        currentPage: page,
-        orders: Object.values(orders),
+        res.status(200).json({
+          totalOrders,
+          totalPages,
+          currentPage: page,
+          orders,
+        });
       });
     });
   });
 });
-
-
-
 
 router.delete("/v1/orders/:id", (req, res) => {
     const orderId = req.params.id;
@@ -208,7 +205,6 @@ router.delete("/v1/orders/:id", (req, res) => {
     });
   });
   
-
 router.get("/v2/orders/count", (req, res) => {
     const query = "SELECT COUNT(*) AS total_orders FROM orders";
   
@@ -223,7 +219,7 @@ router.get("/v2/orders/count", (req, res) => {
     });
   });
   
-  router.post("/v2/orders", (req, res) => {
+router.post("/v2/orders", (req, res) => {
     const { user_id, items, total_price } = req.body; 
   
     if (!items || items.length === 0) {
@@ -289,7 +285,6 @@ router.get("/v2/orders/count", (req, res) => {
       }
     );
   });
-  
   
   router.get("/v2/orders/:id", (req, res) => {
     const user_id = req.params.id;
@@ -600,7 +595,6 @@ router.get("/v2/orders/count", (req, res) => {
     });
   });
   
-
   router.get("/v4/orders", (req, res) => {
     const taskId = req.query.taskId; // Receive taskId as query parameter
     const page = parseInt(req.query.page) || 1; // Pagination - Default page 1
