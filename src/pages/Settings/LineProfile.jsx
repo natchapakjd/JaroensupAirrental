@@ -41,25 +41,20 @@ const LineProfile = () => {
     JSON.parse(localStorage.getItem("notificationsEnabled")) || false
   );
   const [userId, setUserId] = useState(null);
-  const [language, setLanguage] = useState(localStorage.getItem("language") ||'th');
+  const [language, setLanguage] = useState(localStorage.getItem("language") || "th");
 
   const navigate = useNavigate();
 
   useEffect(() => {
     setUserId(id);
     login();
-    // ✅ โหลดค่าภาษาเมื่อเข้าเว็บ
-    const savedLanguage = localStorage.getItem("language") || "th";
-    setLanguage(savedLanguage);
   }, []);
 
   useEffect(() => {
-    // ✅ ฟัง `localStorage` event ถ้ามีการเปลี่ยนค่าก็อัปเดต `notificationsEnabled` และภาษา
     const handleStorageChange = () => {
       setNotificationsEnabled(
         JSON.parse(localStorage.getItem("notificationsEnabled")) || false
       );
-      setLanguage(localStorage.getItem("language") || "th");
     };
 
     window.addEventListener("storage", handleStorageChange);
@@ -96,7 +91,6 @@ const LineProfile = () => {
     const newStatus = !notificationsEnabled;
     setNotificationsEnabled(newStatus);
     localStorage.setItem("notificationsEnabled", JSON.stringify(newStatus));
-
     const lineToken = profile.userId;
     await updateLineToken(userId, newStatus ? lineToken : null);
   };
