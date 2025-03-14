@@ -157,7 +157,7 @@ const Navbar = () => {
                   <Link to="/contact">{translations[language].contact}</Link>
                 </li>
                 {/* <li>
-                 <Link to="/test-xr-gallary">{translations[language].arFeature}</Link>
+                 <Link to="/augmented-reality">{translations[language].arFeature}</Link>
                 </li> */}
               </ul>
             )}
@@ -187,7 +187,7 @@ const Navbar = () => {
               <Link to="/contact">{translations[language].contact}</Link>
             </li>
             {/* <li>
-                  <Link to="/test-xr-gallary">{translations[language].arFeature}</Link>
+                  <Link to="/augmented-reality">{translations[language].arFeature}</Link>
                 </li> */}
           </ul>
         </div>

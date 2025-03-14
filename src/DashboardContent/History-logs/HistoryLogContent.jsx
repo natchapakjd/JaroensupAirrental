@@ -5,6 +5,7 @@ import Loading from "../../components/Loading";
 import { useNavigate } from "react-router-dom";
 import Cookies from "universal-cookie";
 import { jwtDecode } from "jwt-decode";
+
 const translations = {
   th: {
     adminLogs: "บันทึกการทำงานของแอดมิน",
@@ -23,6 +24,8 @@ const translations = {
     of: "จาก",
     details: "รายละเอียดงาน",
     task_type: "ประเภทงาน",
+    role: "บทบาท",
+    allRoles: "ทุกบทบาท",
   },
   en: {
     adminLogs: "Admin Logs",
@@ -41,6 +44,8 @@ const translations = {
     of: "of",
     details: "details",
     task_type: "task type",
+    role: "Role",
+    allRoles: "All Roles",
   },
 };
 
@@ -52,9 +57,11 @@ const HistoryLogContent = () => {
   const [adminCurrentPage, setAdminCurrentPage] = useState(1);
   const [taskCurrentPage, setTaskCurrentPage] = useState(1);
   const [loading, setLoading] = useState(true);
-  const [searchTerm, setSearchTerm] = useState("");
-  const [statusFilter, setStatusFilter] = useState("");
-  const [searchTermTable, setSearchTermTable] = useState("");
+  const [searchTerm, setSearchTerm] = useState(""); // ค้นหาใน Task Logs
+  const [statusFilter, setStatusFilter] = useState(""); // กรองประเภทงานใน Task Logs
+  const [roleFilterTask, setRoleFilterTask] = useState(""); // กรอง role ใน Task Logs
+  const [searchTermTable, setSearchTermTable] = useState(""); // ค้นหาใน Admin Logs
+  const [roleFilterAdmin, setRoleFilterAdmin] = useState(""); // กรอง role ใน Admin Logs
   const [error, setError] = useState(null);
   const [language, setLanguage] = useState(
     localStorage.getItem("language") || "en"
@@ -96,32 +103,18 @@ const HistoryLogContent = () => {
     }
   };
 
-  const filteredAdminLogs = taskLogs.filter((tl) => {
-    const searchTermLower = searchTerm.toLowerCase();
-    return (
-      (tl.firstname.toLowerCase().includes(searchTermLower) ||
-        tl.lastname.toLowerCase().includes(searchTermLower) ||
-        tl.type_name.toLowerCase().includes(searchTermLower)) &&
-      (statusFilter ? tl.type_name === statusFilter : true)
-    );
-  });
-
   const fetchTaskLogs = async (page) => {
     try {
       let response;
-
       if (role === 2) {
-        // ถ้า role เป็น 2 ให้ใช้ API ที่ส่ง techId
         response = await axios.get(`${apiUrl}/v2/task-log-paging/${techId}`, {
           params: { page, limit: logsPerPage },
         });
       } else {
-        // ถ้า role อื่น ๆ ใช้ API ปกติ
         response = await axios.get(`${apiUrl}/task-log-paging`, {
           params: { page, limit: logsPerPage },
         });
       }
-
       setTaskLogs(response.data.taskLogs);
       setTaskTotalPages(Math.ceil(response.data.total / logsPerPage));
     } catch (err) {
@@ -134,12 +127,32 @@ const HistoryLogContent = () => {
     }
   };
 
+  // การกรอง Admin Logs
   const filteredAdminLogsTable = adminLogs.filter((log) => {
     const searchTermLower = searchTermTable.toLowerCase();
-    return (
-      log.firstname.toLowerCase().includes(searchTermLower) ||
-      log.lastname.toLowerCase().includes(searchTermLower)
-    );
+    const matchesSearch =
+      (log.firstname?.toLowerCase().includes(searchTermLower) || "") ||
+      (log.lastname?.toLowerCase().includes(searchTermLower) || "");
+    const matchesRole = roleFilterAdmin
+      ? log.role_name?.toLowerCase() === roleFilterAdmin.toLowerCase()
+      : true;
+
+    return matchesSearch && matchesRole;
+  });
+
+  // การกรอง Task Logs
+  const filteredTaskLogs = taskLogs.filter((tl) => {
+    const searchTermLower = searchTerm.toLowerCase();
+    const matchesSearch =
+      (tl.firstname?.toLowerCase().includes(searchTermLower) || "") ||
+      (tl.lastname?.toLowerCase().includes(searchTermLower) || "") ||
+      (tl.type_name?.toLowerCase().includes(searchTermLower) || "");
+    const matchesStatus = statusFilter ? tl.type_name === statusFilter : true;
+    const matchesRole = roleFilterTask
+      ? tl.role_name?.toLowerCase() === roleFilterTask.toLowerCase()
+      : true;
+
+    return matchesSearch && matchesStatus && matchesRole;
   });
 
   useEffect(() => {
@@ -176,16 +189,26 @@ const HistoryLogContent = () => {
             <h2 className="text-xl font-semibold mb-4">
               {translations[language].adminLogs}
             </h2>
+            <div className="flex space-x-4 mb-4">
+              <input
+                type="text"
+                placeholder="Search by firstname or lastname"
+                value={searchTermTable}
+                onChange={(e) => setSearchTermTable(e.target.value)}
+                className="border p-2 rounded w-full"
+              />
+              <select
+                value={roleFilterAdmin}
+                onChange={(e) => setRoleFilterAdmin(e.target.value)}
+                className="border p-2 rounded"
+              >
+                <option value="">{translations[language].allRoles}</option>
+                <option value="admin">Admin</option>
+                <option value="customer">Customer</option>
+                <option value="technician">Technician</option>
+              </select>
+            </div>
             <div className="overflow-x-auto">
-              <div className="my-4">
-                <input
-                  type="text"
-                  placeholder="Search by firstname or lastname"
-                  value={searchTermTable}
-                  onChange={(e) => setSearchTermTable(e.target.value)}
-                  className="border p-2 rounded w-full"
-                />
-              </div>
               <table className="table w-full border-collapse border border-gray-300 mb-4">
                 <thead className="bg-gray-200">
                   <tr>
@@ -194,6 +217,9 @@ const HistoryLogContent = () => {
                     </th>
                     <th className="border p-2 text-center">
                       {translations[language].adminId}
+                    </th>
+                    <th className="border p-2 text-center">
+                      {translations[language].role}
                     </th>
                     <th className="border p-2 text-center">
                       {translations[language].action}
@@ -213,6 +239,9 @@ const HistoryLogContent = () => {
                         <td className="border p-2">
                           {log.firstname} {log.lastname}
                         </td>
+                        <td className="border p-2">
+                          {log.role_name || "N/A"}
+                        </td>
                         <td className="border p-2">{log.action}</td>
                         <td className="border p-2">
                           {new Date(log.timestamp).toLocaleString("th-TH", {
@@ -223,7 +252,7 @@ const HistoryLogContent = () => {
                     ))
                   ) : (
                     <tr>
-                      <td colSpan="4" className="border p-4">
+                      <td colSpan="5" className="border p-4">
                         {translations[language].noLogs}
                       </td>
                     </tr>
@@ -294,6 +323,16 @@ const HistoryLogContent = () => {
             <option value="ขายสินค้า">งานขาย</option>
             <option value="ยืมอุปกรณ์">งานยืมอุปกรณ์</option>
           </select>
+          <select
+            value={roleFilterTask}
+            onChange={(e) => setRoleFilterTask(e.target.value)}
+            className="border p-2 rounded"
+          >
+            <option value="">{translations[language].allRoles}</option>
+            <option value="admin">Admin</option>
+            <option value="customer">Customer</option>
+            <option value="technician">Technician</option>
+          </select>
         </div>
         <div className="overflow-x-auto">
           <table className="table w-full border-collapse border border-gray-300">
@@ -304,6 +343,9 @@ const HistoryLogContent = () => {
                 </th>
                 <th className="border p-2 text-center">
                   {translations[language].userId}
+                </th>
+                <th className="border p-2 text-center">
+                  {translations[language].role}
                 </th>
                 <th className="border p-2 text-center">
                   {translations[language].task_type}
@@ -320,14 +362,17 @@ const HistoryLogContent = () => {
               </tr>
             </thead>
             <tbody className="text-center">
-              {filteredAdminLogs.length > 0 ? (
-                filteredAdminLogs.map((log, index) => (
+              {filteredTaskLogs.length > 0 ? (
+                filteredTaskLogs.map((log, index) => (
                   <tr key={index + 1}>
                     <td className="border p-2">
                       {(taskCurrentPage - 1) * logsPerPage + index + 1}
                     </td>
                     <td className="border p-2">
                       {log.firstname} {log.lastname}
+                    </td>
+                    <td className="border p-2">
+                      {log.role_name || "N/A"}
                     </td>
                     <td className="border p-2">{log.type_name}</td>
                     <td className="border p-2">{log.action}</td>
@@ -336,7 +381,6 @@ const HistoryLogContent = () => {
                         timeZone: "Asia/Bangkok",
                       })}
                     </td>
-
                     <td className="border p-2">
                       <button
                         onClick={() =>
@@ -351,7 +395,7 @@ const HistoryLogContent = () => {
                 ))
               ) : (
                 <tr>
-                  <td colSpan="6" className="border p-4">
+                  <td colSpan="7" className="border p-4">
                     {translations[language].noLogs}
                   </td>
                 </tr>

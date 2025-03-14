@@ -155,6 +155,27 @@ router.get("/v1/orders/:id", (req, res) => {
       return res.status(500).json({ error: "Failed to fetch orders" });
     }
 
+    // ถ้าไม่มี order เลย ส่ง response กลับทันที
+    if (ordersResult.length === 0) {
+      db.query(countQuery, [userId], (err, countResult) => {
+        if (err) {
+          console.error("Error fetching order count: ", err);
+          return res.status(500).json({ error: "Failed to fetch order count" });
+        }
+
+        const totalOrders = countResult[0].total;
+        const totalPages = Math.ceil(totalOrders / limit);
+
+        return res.status(200).json({
+          totalOrders,
+          totalPages,
+          currentPage: page,
+          orders: [],
+        });
+      });
+      return; // หยุดการทำงานที่นี่
+    }
+
     // ดึง order_ids จาก ordersResult
     const orderIds = ordersResult.map((order) => order.order_id);
 

@@ -41,6 +41,7 @@ const Areacal = () => {
   const token = cookies.get("authToken");
   const decodedToken = jwtDecode(token);
   const user_id = decodedToken.id;
+  const [isMobile, setIsMobile] = useState(false);
   const translations = {
     en: {
       title: "Area Calculations",
@@ -117,31 +118,17 @@ const Areacal = () => {
       saveRepeat: "บันทึกจากพื้นที่เดิม",
     },
   };
-
+  const [selectedBox, setSelectedBox] = useState(null); // เปลี่ยนจาก originalBox เป็น selectedBox
   const navigate = useNavigate();
-  const [airCount,setAirCount] = useState(1);
+  const [airCount, setAirCount] = useState(1);
   let acCount = 1; // ตัวแปรที่เก็บจำนวนแอร์ที่เพิ่มเข้ามาแล้ว
-  let originalBox = null;
-  let isDragging = false; // สถานะการลาก
-  let isDraggingMode = false;
+  const [isDragging, setIsDragging] = useState(false);
+  const [isDraggingMode, setIsDraggingMode] = useState(false);
+  let isDraggingV1 = false;
+  let isDraggingModeV1 = false;
+  let originalBoxV1 = null;
   let assignmentId = null;
 
-  // useEffect(() => {
-  //   const container = containerRef.current;
-
-  //   const handleZoom = (e) => {
-  //     e.preventDefault(); // ป้องกันการเลื่อนเพจ
-  //     let newScale = scale + e.deltaY * -0.001;
-  //     newScale = Math.min(Math.max(newScale, 0.5), 3);
-  //     setScale(newScale);
-  //   };
-
-  //   container.addEventListener("wheel", handleZoom, { passive: false }); // ปิด passive mode
-
-  //   return () => {
-  //     container.removeEventListener("wheel", handleZoom);
-  //   };
-  // }, [scale]);
   useEffect(() => {
     const fetchAreaCalData = async () => {
       try {
@@ -157,6 +144,53 @@ const Areacal = () => {
 
     fetchAreaCalData();
   }, []);
+
+  useEffect(() => {
+    const checkMobile = () => {
+      // ตรวจสอบเฉพาะ Mobile จริงๆ ไม่รวม iPad
+      const isMobileDevice = /Mobi|Android|iPhone/i.test(navigator.userAgent) && !/iPad/i.test(navigator.userAgent);
+      setIsMobile(isMobileDevice);
+    };
+
+    // เรียกครั้งแรกเมื่อโหลด
+    checkMobile();
+
+    // อัปเดตเมื่อหน้าจอเปลี่ยนขนาด (ยังคงไว้เพื่อความสมบูรณ์ แต่ไม่ใช้ innerWidth)
+    window.addEventListener("resize", checkMobile);
+    return () => window.removeEventListener("resize", checkMobile);
+  }, []);
+
+  useEffect(() => {
+    const toolboxItems = document.querySelectorAll(".toolbox .box");
+    const grid = document.getElementById("grid");
+
+    // เพิ่ม event listener สำหรับเลือกกล่องใน toolbox
+    toolboxItems.forEach((item) => {
+      item.removeEventListener("click", selectBox); // ลบก่อนเพื่อป้องกันซ้ำ
+      if (isDraggingMode) {
+        item.addEventListener("click", selectBox);
+      }
+    });
+
+    // เพิ่ม event listener สำหรับการลากใน grid
+    if (isDraggingMode && selectedBox) {
+      grid.removeEventListener("mousedown", startDragCopy);
+      grid.removeEventListener("mousemove", dragCopy);
+      grid.removeEventListener("mouseup", stopDragCopy);
+      grid.addEventListener("mousedown", startDragCopy);
+      grid.addEventListener("mousemove", dragCopy);
+      grid.addEventListener("mouseup", stopDragCopy);
+    }
+
+    return () => {
+      toolboxItems.forEach((item) => {
+        item.removeEventListener("click", selectBox);
+      });
+      grid.removeEventListener("mousedown", startDragCopy);
+      grid.removeEventListener("mousemove", dragCopy);
+      grid.removeEventListener("mouseup", stopDragCopy);
+    };
+  }, [isDraggingMode, selectedBox, isDragging]);
 
   useEffect(() => {
     const storedLanguage = localStorage.getItem("language") || "en";
@@ -448,19 +482,17 @@ const Areacal = () => {
       );
     }
   };
-
-  function handleDraggingMode(event) {
-    if (event.target.checked) {
-      isDraggingMode = true;
+  const handleDraggingMode = (event) => {
+    const checked = event.target.checked;
+    setIsDraggingMode(checked);
+    if (checked) {
       enableDragCopyMode();
       console.log("เปิดโหมดลากค้างและคัดลอก");
     } else {
-      isDraggingMode = false;
       disableDragCopyMode();
       console.log("ปิดโหมดลากค้างและคัดลอก");
     }
-  }
-
+  };
   function handleEraserButton() {
     setIsEraserMode(!isEraserMode);
     if (!isEraserMode) {
@@ -623,67 +655,58 @@ const Areacal = () => {
     });
   }
 
-  function enableDragCopyMode() {
-    if (!isDraggingMode) return; // ⛔ หยุดทำงานถ้ายังไม่ได้เปิดโหมดลากค้าง
-
-    const toolboxItems = document.querySelectorAll(".toolbox .box");
-    if (toolboxItems.length === 0) return; // ⛔ ป้องกัน error ถ้าไม่มี box ใน toolbox
-
-    toolboxItems.forEach((item) => {
-      item.addEventListener("mousedown", startDragCopy);
-    });
-
+  // เปิดโหมดลากค้าง
+  const enableDragCopyMode = () => {
+    setIsDraggingMode(true);
     console.log("✅ Drag copy mode enabled!");
-  }
+  };
 
   // ปิดโหมดลากค้าง
-  function disableDragCopyMode() {
-    const toolboxItems = document.querySelectorAll(".toolbox .box");
-    if (toolboxItems.length === 0) return; // ⛔ ป้องกัน error ถ้าไม่มี box ใน toolbox
-
-    toolboxItems.forEach((item) => {
-      item.removeEventListener("mousedown", startDragCopy);
-    });
-
+  const disableDragCopyMode = () => {
+    setIsDraggingMode(false);
     console.log("⛔ Drag copy mode disabled!");
-  }
+  };
 
-  // ฟังก์ชันเริ่มลากค้าง
-  function startDragCopy(event) {
-    event.preventDefault(); // ป้องกัน Default behavior
-    originalBox = event.target; // เก็บกล่องต้นฉบับที่ถูกลากค้าง
-    if (!originalBox.classList.contains("box")) return;
+  const selectBox = (event) => {
+    if (!isDraggingMode) return; // ต้องอยู่ในโหมดลากค้างถึงเลือกได้
+    const target = event.target;
+    if (!target.classList.contains("box")) return;
 
-    isDragging = true; // เริ่มสถานะลากค้าง
+    setSelectedBox(target);
+    console.log("Selected box:", target);
+  };
+  // เริ่มลากค้าง
+  const startDragCopy = (event) => {
+    if (!isDraggingMode || !selectedBox) return; // ต้องเลือกกล่องก่อน
+    event.preventDefault();
+    setIsDragging(true);
+    console.log("Start dragging with selected box:", selectedBox);
+  };
 
-    // ตรวจจับการลากเมาส์ผ่าน grid
-    const grid = document.getElementById("grid");
-    grid.addEventListener("mousemove", dragCopy); // คัดลอกเมื่อเมาส์ลากผ่าน
-    grid.addEventListener("mouseup", stopDragCopy); // หยุดเมื่อปล่อยเมาส์
-  }
-  // ฟังก์ชันคัดลอก box element
-  function dragCopy(event) {
-    if (!isDragging || !originalBox || !isDraggingMode) return;
+  // หยุดลาก
+  const stopDragCopy = () => {
+    setIsDragging(false);
+  };
+
+  // คัดลอกกล่องเมื่อลาก
+  const dragCopy = (event) => {
+    if (!isDragging || !selectedBox || !isDraggingMode) return;
 
     const cell = event.target;
     if (!cell.classList.contains("cell")) return;
     if (cell.querySelector(".box")) return;
 
-    // ✅ Copy the original box
-    const newBox = createBoxCopy(originalBox);
-    console.log("สร้าง box ใหม่:", newBox);
-
-    // ✅ Adjust size and place in the grid
+    const newBox = createBoxCopy(selectedBox);
     adjustBoxSize(newBox, cell);
-    cell.appendChild(newBox);
-    console.log("เพิ่ม box ลงใน cell:", cell);
 
-    // ✅ Extract position details
     const index = parseInt(cell.getAttribute("data-index"), 10);
     const row = parseInt(cell.getAttribute("data-row"), 10);
     const col = parseInt(cell.getAttribute("data-col"), 10);
 
-    // ✅ Determine AC type
+    newBox.setAttribute("data-tooltip", `Row: ${row}, Col: ${col}`);
+
+    cell.appendChild(newBox);
+
     const boxType = newBox.classList.contains("oneton")
       ? "oneton"
       : newBox.classList.contains("fiveton")
@@ -700,10 +723,8 @@ const Areacal = () => {
 
     console.log("AC Type:", boxType);
 
-    // ✅ Get rotation (default to 0)
     const rotation = parseInt(newBox.getAttribute("data-rotation"), 10) || 0;
 
-    // ✅ Update state with new AC placement
     setAcPlacements((prev) => {
       const updatedPlacements = [
         ...prev,
@@ -720,7 +741,6 @@ const Areacal = () => {
       return updatedPlacements;
     });
 
-    // ✅ Spread cooling effect if applicable
     if (
       newBox.classList.contains("ac") ||
       newBox.classList.contains("oneton") ||
@@ -730,62 +750,24 @@ const Areacal = () => {
     ) {
       spreadCoolingEffect(cell, newBox);
     }
-  }
+  };
 
-  // ฟังก์ชันหยุดลากค้าง
-  function stopDragCopy() {
-    if (!isDragging) return;
-
-    isDragging = false; // ยกเลิกสถานะลากค้าง
-    originalBox = null; // รีเซ็ตกล่องต้นฉบับ
-
-    const grid = document.getElementById("grid");
-    grid.removeEventListener("mousemove", dragCopy); // ยกเลิก Event Listener
-    grid.removeEventListener("mouseup", stopDragCopy); // ยกเลิก Event Listener
-  }
-
-  // ฟังก์ชันสร้างสำเนาของกล่อง
-  function createBoxCopy(originalBox) {
-    const newBox = originalBox.cloneNode(true); // คัดลอกกล่องพร้อมเนื้อหา
-    newBox.id = `box-${Date.now()}`; // กำหนด ID ใหม่
-
-    console.log("สร้าง box ใหม่:", newBox);
-
-    // เพิ่มฟังก์ชันการทำงานเดิมทั้งหมด
+  // สร้างสำเนาของกล่อง
+  const createBoxCopy = (originalBox) => {
+    const newBox = originalBox.cloneNode(true);
+    newBox.id = `box-${Date.now()}`;
     addFunctionalityToBox(newBox);
-
+    console.log("สร้าง box ใหม่:", newBox);
     return newBox;
-  }
+  };
 
-  // เพิ่มฟังก์ชันการทำงานให้กับ box ใหม่
-  function addFunctionalityToBox(boxElement) {
-    // ✅ Check if it's NOT an obstacle before adding click event
-    if (
-      !boxElement.classList.contains("obstacle") &&
-      !boxElement.classList.contains("obstacle2")
-    ) {
-      boxElement.addEventListener("click", () => {
-        console.log("กำลังหมุน:", boxElement.id);
-        rotateAC(boxElement); // ✅ Call rotate function only if it's not an obstacle
-      });
-    } else {
-      // ✅ Ensure obstacles have rotation set to 0
-      boxElement.setAttribute("data-rotation", "0");
-      boxElement.style.transform = "rotate(0deg)";
-    }
-
-    // ✅ Drag-and-drop functionality (applies to all box types)
-    boxElement.addEventListener("dragstart", (e) => {
-      e.dataTransfer.setData("boxId", boxElement.id);
+  // เพิ่มฟังก์ชันการทำงานให้กล่อง
+  const addFunctionalityToBox = (box) => {
+    box.setAttribute("draggable", "true");
+    box.addEventListener("dragstart", (event) => {
+      event.dataTransfer.setData("boxId", box.id);
     });
-
-    // ✅ Add delete button (applies to all box types)
-    const deleteButton = createDeleteButton(boxElement);
-    boxElement.appendChild(deleteButton);
-
-    console.log("เพิ่มฟังก์ชันให้ box:", boxElement.id);
-  }
-
+  };
   const handleAddAC = () => {
     if (airCount >= 4) {
       Swal.fire({
@@ -796,8 +778,8 @@ const Areacal = () => {
       });
       return;
     }
-    setAirCount(prevCount => prevCount + 1);  // ใช้ prevCount เพื่อเพิ่มทีละ 1
-    console.log(airCount)
+    setAirCount((prevCount) => prevCount + 1); // ใช้ prevCount เพื่อเพิ่มทีละ 1
+    console.log(airCount);
     // สร้าง div ใหม่สำหรับแอร์
     const acDiv = document.createElement("div");
     acDiv.classList.add("ac-selection");
@@ -951,6 +933,7 @@ const Areacal = () => {
     setHasQuickPlacedAC(false); // รีเซ็ตสถานะเมื่อสร้าง Grid ใหม่
     calculateBTUWithMinAC();
   };
+
   function handleDrop(e) {
     e.preventDefault();
     const boxId = e.dataTransfer.getData("boxId");
@@ -1016,7 +999,7 @@ const Areacal = () => {
     const newId = `box-${Date.now()}`;
     boxElement.id = newId;
     boxElement.setAttribute("draggable", "true");
-
+    boxElement.setAttribute("data-tooltip", `Row: ${row}, Col: ${col} (m)`);
     setAcPlacements((prev) => {
       const filteredPlacements = prev.filter((ac) => ac.id !== boxId);
 
@@ -1580,6 +1563,7 @@ const Areacal = () => {
         // ✅ 9. ปรับขนาดให้ตรงกับเซลล์
         adjustBoxSize(boxElement, targetCell);
         boxElement.style.transform = `rotate(${rotation}deg)`;
+        boxElement.setAttribute("data-tooltip", `Row: ${row}, Col: ${col}`);
 
         // ✅ 10. เพิ่ม Event ให้แอร์
         boxElement.addEventListener("click", () => rotateAC(boxElement));
@@ -1609,7 +1593,7 @@ const Areacal = () => {
       });
 
       // ✅ 15. อัปเดต acPlacements
-      setAcPlacements((newPlacements));
+      setAcPlacements(newPlacements);
 
       Swal.fire("โหลดสำเร็จ!", "โหลดการวางแอร์เรียบร้อย", "success");
     } catch (error) {
@@ -1644,6 +1628,11 @@ const Areacal = () => {
     // ✅ อัปเดต style ของ box ให้หมุนจริง
     acBox.style.transform = `rotate(${newRotation}deg)`;
 
+    // ✅ เพิ่ม data-tooltip เพื่อแสดง row และ col
+    const row = parseInt(bestCell.getAttribute("data-row"), 10);
+    const col = parseInt(bestCell.getAttribute("data-col"), 10);
+    acBox.setAttribute("data-tooltip", `Row: ${row}, Col: ${col} (m)`);
+
     bestCell.appendChild(acBox);
     spreadCoolingEffect(bestCell, acBox, uncoveredCells, gridWidth);
     uncoveredCells.delete(parseInt(bestCell.getAttribute("data-index")));
@@ -1651,8 +1640,8 @@ const Areacal = () => {
     console.log("AC Placed:", {
       id: acBox.id,
       index: parseInt(bestCell.getAttribute("data-index"), 10),
-      row: parseInt(bestCell.getAttribute("data-row"), 10),
-      col: parseInt(bestCell.getAttribute("data-col"), 10),
+      row: row,
+      col: col,
       type: acType,
       rotation: newRotation,
     });
@@ -1660,8 +1649,8 @@ const Areacal = () => {
     return {
       id: acBox.id,
       index: parseInt(bestCell.getAttribute("data-index"), 10),
-      row: parseInt(bestCell.getAttribute("data-row"), 10),
-      col: parseInt(bestCell.getAttribute("data-col"), 10),
+      row: row,
+      col: col,
       type: acType,
       rotation: newRotation,
     };
@@ -1915,7 +1904,7 @@ const Areacal = () => {
   };
 
   const handleSaveRepeat = async (data) => {
-    console.log(acPlacements)
+    console.log(acPlacements);
 
     const acUsage = updateACUsageInGrid();
     const newData = {
@@ -1950,8 +1939,156 @@ const Areacal = () => {
   };
 
   const handleNavigateToAR = () => {
-    navigate("/test-xr-gallary");
+    navigate("/augmented-reality");
   };
+
+  function handleDraggingModeV1(event) {
+    if (event.target.checked) {
+      isDraggingModeV1 = true;
+      enableDragCopyModeV1();
+      console.log("เปิดโหมดลากค้างและคัดลอก");
+    } else {
+      isDraggingModeV1 = false;
+      disableDragCopyModeV1();
+      console.log("ปิดโหมดลากค้างและคัดลอก");
+    }
+  }
+  function enableDragCopyModeV1() {
+    if (!isDraggingModeV1) return; // ⛔ หยุดทำงานถ้ายังไม่ได้เปิดโหมดลากค้าง
+
+    const toolboxItems = document.querySelectorAll(".toolbox .box");
+    if (toolboxItems.length === 0) return; // ⛔ ป้องกัน error ถ้าไม่มี box ใน toolbox
+
+    toolboxItems.forEach((item) => {
+      item.addEventListener("mousedown", startDragCopyV1);
+    });
+
+    console.log("✅ Drag copy mode enabled!");
+  }
+
+  // ปิดโหมดลากค้าง
+  function disableDragCopyModeV1() {
+    const toolboxItems = document.querySelectorAll(".toolbox .box");
+    if (toolboxItems.length === 0) return; // ⛔ ป้องกัน error ถ้าไม่มี box ใน toolbox
+
+    toolboxItems.forEach((item) => {
+      item.removeEventListener("mousedown", startDragCopyV1);
+    });
+
+    console.log("⛔ Drag copy mode disabled!");
+  }
+
+  // ฟังก์ชันเริ่มลากค้าง
+  function startDragCopyV1(event) {
+    event.preventDefault(); // ป้องกัน Default behavior
+    originalBoxV1 = event.target; // เก็บกล่องต้นฉบับที่ถูกลากค้าง
+    if (!originalBoxV1.classList.contains("box")) return;
+
+    isDraggingV1 = true; // เริ่มสถานะลากค้าง
+
+    // ตรวจจับการลากเมาส์ผ่าน grid
+    const grid = document.getElementById("grid");
+    grid.addEventListener("mousemove", dragCopyV1); // คัดลอกเมื่อเมาส์ลากผ่าน
+    grid.addEventListener("mouseup", stopDragCopyV1); // หยุดเมื่อปล่อยเมาส์
+  }
+  // ฟังก์ชันคัดลอก box element
+  function dragCopyV1(event) {
+    if (!isDraggingV1 || !originalBoxV1 || !isDraggingModeV1) return;
+
+    const cell = event.target;
+    if (!cell.classList.contains("cell")) return;
+    if (cell.querySelector(".box")) return;
+
+    // ✅ Copy the original box
+    const newBox = createBoxCopyV1(originalBoxV1);
+    console.log("สร้าง box ใหม่:", newBox);
+
+    // ✅ Adjust size and place in the grid
+    adjustBoxSize(newBox, cell);
+
+    // ✅ Extract position details
+    const index = parseInt(cell.getAttribute("data-index"), 10);
+    const row = parseInt(cell.getAttribute("data-row"), 10);
+    const col = parseInt(cell.getAttribute("data-col"), 10);
+
+    // ✅ เพิ่ม data-tooltip เพื่อแสดง row และ col เมื่อ hover
+    newBox.setAttribute("data-tooltip", `Row: ${row}, Col: ${col}`);
+
+    cell.appendChild(newBox);
+    console.log("เพิ่ม box ลงใน cell:", cell);
+
+    // ✅ Determine AC type
+    const boxType = newBox.classList.contains("oneton")
+      ? "oneton"
+      : newBox.classList.contains("fiveton")
+        ? "fiveton"
+        : newBox.classList.contains("tenton")
+          ? "tenton"
+          : newBox.classList.contains("twentyton")
+            ? "twentyton"
+            : newBox.classList.contains("obstacle2")
+              ? "obstacle2"
+              : newBox.classList.contains("obstacle")
+                ? "obstacle"
+                : "ac";
+
+    console.log("AC Type:", boxType);
+
+    // ✅ Get rotation (default to 0)
+    const rotation = parseInt(newBox.getAttribute("data-rotation"), 10) || 0;
+
+    // ✅ Update state with new AC placement
+    setAcPlacements((prev) => {
+      const updatedPlacements = [
+        ...prev,
+        {
+          id: newBox.id,
+          index,
+          row,
+          col,
+          type: boxType,
+          rotation,
+        },
+      ];
+      console.log("Updated AC Placements inside setState:", updatedPlacements);
+      return updatedPlacements;
+    });
+
+    // ✅ Spread cooling effect if applicable
+    if (
+      newBox.classList.contains("ac") ||
+      newBox.classList.contains("oneton") ||
+      newBox.classList.contains("fiveton") ||
+      newBox.classList.contains("tenton") ||
+      newBox.classList.contains("twentyton")
+    ) {
+      spreadCoolingEffect(cell, newBox);
+    }
+  }
+  // ฟังก์ชันหยุดลากค้าง
+  function stopDragCopyV1() {
+    if (!isDraggingV1) return;
+
+    isDraggingV1 = false; // ยกเลิกสถานะลากค้าง
+    originalBoxV1 = null; // รีเซ็ตกล่องต้นฉบับ
+
+    const grid = document.getElementById("grid");
+    grid.removeEventListener("mousemove", dragCopy); // ยกเลิก Event Listener
+    grid.removeEventListener("mouseup", stopDragCopy); // ยกเลิก Event Listener
+  }
+
+  // ฟังก์ชันสร้างสำเนาของกล่อง
+  function createBoxCopyV1(originalBoxV1) {
+    const newBox = originalBoxV1.cloneNode(true); // คัดลอกกล่องพร้อมเนื้อหา
+    newBox.id = `box-${Date.now()}`; // กำหนด ID ใหม่
+
+    console.log("สร้าง box ใหม่:", newBox);
+
+    // เพิ่มฟังก์ชันการทำงานเดิมทั้งหมด
+    addFunctionalityToBox(newBox);
+
+    return newBox;
+  }
   return (
     <>
       <div className="container mx-auto p-8"></div>
@@ -2169,17 +2306,32 @@ const Areacal = () => {
             </div>
           </div>
 
-          <div className="drag-mode-container">
-            <input
-              type="checkbox"
-              id="dragModeToggle"
-              onChange={handleDraggingMode}
-              className="input-air"
-            />
-            <label htmlFor="dragModeToggle">
-              {" "}
-              {translations[currentLanguage].drag}
-            </label>
+          <div>
+            {isMobile ? (
+              <div className="drag-mode-container">
+                <input
+                  type="checkbox"
+                  id="dragModeToggleMobile"
+                  onChange={handleDraggingModeV1}
+                  className="input-air"
+                />
+                <label htmlFor="dragModeToggleMobile">
+                  {translations[currentLanguage].drag}
+                </label>
+              </div>
+            ) : (
+              <div className="drag-mode-container">
+                <input
+                  type="checkbox"
+                  id="dragModeToggleDesktop"
+                  onChange={handleDraggingMode}
+                  className="input-air"
+                />
+                <label htmlFor="dragModeToggleDesktop">
+                  {translations[currentLanguage].drag}
+                </label>
+              </div>
+            )}
           </div>
           <div
             className="eraser-button"

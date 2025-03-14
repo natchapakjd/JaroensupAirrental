@@ -15,6 +15,7 @@ router.get('/task-log-paging', (req, res) => {
     JOIN tasks t ON tl.task_id  = t.task_id
     JOIN tasktypes tt ON t.task_type_id  =  tt.task_type_id
     JOIN users u ON t.user_id = u.user_id
+    JOIN roles r ON u.role_id  = r.role_id
     LIMIT ? OFFSET ?
   `;
 
@@ -106,6 +107,7 @@ router.get('/adminLogs-paging', (req, res) => {
     SELECT * 
     FROM adminlogs am
     JOIN users u ON am.admin_id = u.user_id
+    JOIN roles r ON u.role_id = r.role_id
     LIMIT ? OFFSET ?
   `;
 

@@ -41,7 +41,7 @@ const LineProfile = () => {
     JSON.parse(localStorage.getItem("notificationsEnabled")) || false
   );
   const [userId, setUserId] = useState(null);
-  const [language, setLanguage] = useState("th");
+  const [language, setLanguage] = useState(localStorage.getItem("language") ||'th');
 
   const navigate = useNavigate();
 

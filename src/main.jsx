@@ -143,7 +143,7 @@ const router = createBrowserRouter([
     element: <Payment />,
   },
   {
-    path: "/test-xr-gallary",
+    path: "/augmented-reality",
     element: <XrGallaryContainer />,
   },
   {
