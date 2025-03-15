@@ -20,6 +20,7 @@ const translations = {
     selectUser: "Select User",
     showMap: "Show Map 📍",
     hideMap: "Hide Map ❌",
+    organizationName: "Organization Name", 
     addTaskButton: "Add Task",
   },
   th: {
@@ -36,6 +37,7 @@ const translations = {
     showMap: "เลือกตำแหน่งบนแผนที่ 📍",
     hideMap: "ซ่อนแผนที่ ❌",
     addTaskButton: "เพิ่มงาน",
+    organizationName: "ชื่อองค์กร", 
   },
 };
 
@@ -54,7 +56,7 @@ const AddTask = () => {
   const [taskTypeId, setTaskTypeId] = useState("");
   const [description, setDescription] = useState("");
   const [appointmentDate, setAppointmentDate] = useState("");
-  const [rentalEndDate, setRentalEndDate] = useState(""); // New state
+  const [rentalEndDate, setRentalEndDate] = useState(""); 
   const [address, setAddress] = useState("");
   const [quantityUsed, setQuantityUsed] = useState("");
   const [userId, setUserId] = useState("");
@@ -65,9 +67,9 @@ const AddTask = () => {
   const [users, setUsers] = useState([]);
   const [rentalStartDate, setRentalStartDate] = useState("");
   const [showMap, setShowMap] = useState(false);
-
+  const [organizationName, setOrganizationName] = useState(""); 
   const navigate = useNavigate();
-  const apiUrl = import.meta.env.VITE_SERVER_URL; // Use the environment variable
+  const apiUrl = import.meta.env.VITE_SERVER_URL; 
   const currentLanguage = localStorage.getItem("language") || "en";
   const t = translations[currentLanguage];
 
@@ -105,7 +107,8 @@ const AddTask = () => {
     const fetchUsers = async () => {
       try {
         const response = await axios.get(`${apiUrl}/users`);
-        setUsers(response.data);
+        const filterUser = response.data.filter((user)=>user.role_id === 1)
+        setUsers(filterUser);
       } catch (error) {
         console.error("Error fetching users:", error);
       }
@@ -139,13 +142,14 @@ const AddTask = () => {
         task_type_id: taskTypeId,
         description,
         appointment_date: appointmentDate,
-        rental_start_date: rentalStartDate, // Include rental_start_date
+        rental_start_date: rentalStartDate, 
         rental_end_date: rentalEndDate,
         address,
         quantity_used: quantityUsed,
         user_id: userId,
-        latitude: latitude ? latitude : null, // ✅ ถ้าไม่เลือกแผนที่จะให้เป็น ""
+        latitude: latitude ? latitude : null, 
         longitude: longitude ? longitude : null,
+        organization_name: organizationName, 
       });
 
       if (response.status === 201) {
@@ -170,6 +174,15 @@ const AddTask = () => {
           <h1 className="text-2xl font-semibold mx-2">{t.addTaskTitle}</h1>
         </div>
         <form onSubmit={handleSubmit} className="space-y-4 text-md">
+        <div>
+            <label className="block mb-2">{t.organizationName}</label> {/* ✅ เพิ่ม */}
+            <input
+              type="text"
+              value={organizationName}
+              onChange={(e) => setOrganizationName(e.target.value)}
+              className="border p-2 w-full"
+            />
+          </div>
           <div>
             <label className="block mb-2">{t.taskType}</label>
             <select

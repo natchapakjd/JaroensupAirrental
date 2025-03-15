@@ -768,6 +768,7 @@ const Areacal = () => {
       event.dataTransfer.setData("boxId", box.id);
     });
   };
+
   const handleAddAC = () => {
     if (airCount >= 4) {
       Swal.fire({
@@ -989,7 +990,10 @@ const Areacal = () => {
         newTwentytonBox: "twentyton",
       };
 
-      boxType = typeMap[boxId] || "ac"; // กำหนดค่า `type`
+      boxType = typeMap[boxId] || "ac";
+      if (boxType === "ac") {
+        return; 
+      }
       boxElement.className = `box ${boxType}`;
       boxElement.textContent = getACLabel(boxType);
       boxElement.setAttribute("data-rotation", "0");
@@ -2076,7 +2080,34 @@ const Areacal = () => {
     grid.removeEventListener("mousemove", dragCopy); // ยกเลิก Event Listener
     grid.removeEventListener("mouseup", stopDragCopy); // ยกเลิก Event Listener
   }
+  
+  function addFunctionalityToBoxV1(boxElement) {
+    // ✅ Check if it's NOT an obstacle before adding click event
+    if (
+      !boxElement.classList.contains("obstacle") &&
+      !boxElement.classList.contains("obstacle2")
+    ) {
+      boxElement.addEventListener("click", () => {
+        console.log("กำลังหมุน:", boxElement.id);
+        rotateAC(boxElement); // ✅ Call rotate function only if it's not an obstacle
+      });
+    } else {
+      // ✅ Ensure obstacles have rotation set to 0
+      boxElement.setAttribute("data-rotation", "0");
+      boxElement.style.transform = "rotate(0deg)";
+    }
 
+    // ✅ Drag-and-drop functionality (applies to all box types)
+    boxElement.addEventListener("dragstart", (e) => {
+      e.dataTransfer.setData("boxId", boxElement.id);
+    });
+
+    // ✅ Add delete button (applies to all box types)
+    const deleteButton = createDeleteButton(boxElement);
+    boxElement.appendChild(deleteButton);
+
+    console.log("เพิ่มฟังก์ชันให้ box:", boxElement.id);
+  }
   // ฟังก์ชันสร้างสำเนาของกล่อง
   function createBoxCopyV1(originalBoxV1) {
     const newBox = originalBoxV1.cloneNode(true); // คัดลอกกล่องพร้อมเนื้อหา
@@ -2085,7 +2116,7 @@ const Areacal = () => {
     console.log("สร้าง box ใหม่:", newBox);
 
     // เพิ่มฟังก์ชันการทำงานเดิมทั้งหมด
-    addFunctionalityToBox(newBox);
+    addFunctionalityToBoxV1(newBox);
 
     return newBox;
   }

@@ -141,8 +141,15 @@ const ProductContent = () => {
           params: { page: currentPage, pageSize: rowsPerPage },
         }
       );
-      setProducts(response.data.data);
-      setFilteredProducts(response.data.data);
+      let filterBorrowingProduct;
+      if(role === 2){
+        filterBorrowingProduct = response.data.data.filter((product)=>product.product_type_id === 2)
+        setProducts(filterBorrowingProduct);
+        setFilteredProducts(filterBorrowingProduct);
+      }else{
+        setProducts(response.data.data);
+        setFilteredProducts(response.data.data);
+      }
       setTotalPages(response.data.totalPages); // Set total pages from response
     } catch (error) {
       console.error("Error fetching products:", error);

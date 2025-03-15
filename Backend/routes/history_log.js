@@ -68,11 +68,12 @@ router.get('/v2/task-log-paging/:id', async (req, res) => {
     const totalLogs = countResult[0].total;
 
     const dataQuery = `
-      SELECT tl.*, t.*, tt.*, u.firstname, u.lastname 
+      SELECT tl.*, t.*, tt.*, u.firstname, u.lastname ,r.*
       FROM task_log tl
       JOIN tasks t ON tl.task_id = t.task_id
       JOIN tasktypes tt ON t.task_type_id = tt.task_type_id
       JOIN users u ON t.user_id = u.user_id
+      JOIN roles r ON u.role_id  = r.role_id
       WHERE t.user_id = ?
       LIMIT ? OFFSET ?
     `;

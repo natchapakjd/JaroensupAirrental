@@ -12,7 +12,8 @@ import BackButtonEdit from "../../components/BackButtonEdit";
 const translations = {
   th: {
     checkoutTitle: "ตรวจสอบรายการสินค้า",
-    addressWarning: "⚠️ โปรดตรวจสอบและกรอกที่อยู่ให้ถูกต้อง เนื่องจากบริการจัดส่งของเราจะดำเนินการตามข้อมูลที่อยู่ในโปรไฟล์ของคุณ",
+    addressWarning:
+      "⚠️ โปรดตรวจสอบและกรอกที่อยู่ให้ถูกต้อง เนื่องจากบริการจัดส่งของเราจะดำเนินการตามข้อมูลที่อยู่ในโปรไฟล์ของคุณ",
     paymentMethod: "วิธีการชำระเงิน",
     selectPaymentMethod: "เลือกวิธีการชำระเงิน",
     total: "รวม:",
@@ -28,10 +29,13 @@ const translations = {
     errorText: "ไม่สามารถดำเนินการชำระเงินได้ กรุณาลองใหม่อีกครั้ง",
     outOfStockTitle: "สินค้าเกินจำนวนที่มีในสต็อก!",
     outOfStockText: "สินค้าต่อไปนี้มีจำนวนไม่พอ:\n{message}",
+    profileIncomplete: "กรุณากรอกชื่อและนามสกุลในโปรไฟล์ก่อนดำเนินการ",
+    goToProfile: "ไปที่การตั้งค่าโปรไฟล์",
   },
   en: {
     checkoutTitle: "Checkout",
-    addressWarning: "⚠️ Please verify and fill in your address correctly as our delivery service will proceed based on the information in your profile.",
+    addressWarning:
+      "⚠️ Please verify and fill in your address correctly as our delivery service will proceed based on the information in your profile.",
     paymentMethod: "Payment Method",
     selectPaymentMethod: "Select Payment Method",
     total: "Total:",
@@ -47,6 +51,8 @@ const translations = {
     errorText: "Unable to process the payment. Please try again.",
     outOfStockTitle: "Out of Stock!",
     outOfStockText: "The following items are out of stock:\n{message}",
+    profileIncomplete: "Please fill in your first name and last name in your profile before proceeding",
+    goToProfile: "Go to Profile Settings",
   },
 };
 
@@ -62,16 +68,16 @@ const Checkout = () => {
   const { cartItems, removeFromCart } = useContext(CartContext);
   const [language, setLanguage] = useState(localStorage.getItem("language") || "th");
 
-   useEffect(() => {
-      const interval = setInterval(() => {
-        const currentLanguage = localStorage.getItem("language") || "th";
-        if (currentLanguage !== language) {
-          setLanguage(currentLanguage);
-        }
-      }, 100);
-  
-      return () => clearInterval(interval);
-    }, [language]);
+  useEffect(() => {
+    const interval = setInterval(() => {
+      const currentLanguage = localStorage.getItem("language") || "th";
+      if (currentLanguage !== language) {
+        setLanguage(currentLanguage);
+      }
+    }, 100);
+
+    return () => clearInterval(interval);
+  }, [language]);
 
   const t = (key, params = {}) => {
     let translation = translations[language][key] || key;
@@ -88,22 +94,19 @@ const Checkout = () => {
 
   const fetchProfile = async () => {
     try {
-      const response = await axios.get(
-        `${import.meta.env.VITE_SERVER_URL}/user/${userId}`
-      );
+      const response = await axios.get(`${import.meta.env.VITE_SERVER_URL}/user/${userId}`);
       if (response.status === 200) {
         setProfile(response.data);
       }
     } catch (err) {
       console.log(err);
+      setProfile(null); // Set to null on error
     }
   };
 
   const fetchPaymentMethods = async () => {
     try {
-      const response = await axios.get(
-        `${import.meta.env.VITE_SERVER_URL}/payment-methods`
-      );
+      const response = await axios.get(`${import.meta.env.VITE_SERVER_URL}/payment-methods`);
       if (response.status === 200) {
         setPaymentMethods(response.data);
       }
@@ -113,21 +116,30 @@ const Checkout = () => {
   };
 
   const handleCheckout = async () => {
-    const outOfStockItems = cartItems.filter(
-      (item) => item.quantity > item.stock_quantity
-    );
+    // Check if profile is loaded and firstname/lastname are present
+    if (!profile || !profile.firstname || !profile.lastname || !profile.address) {
+      Swal.fire({
+        title: "ข้อมูลไม่ครบถ้วน",
+        text: t("profileIncomplete"),
+        icon: "warning",
+        confirmButtonText: t("goToProfile"),
+      }).then(() => {
+        navigate("/profile-setting");
+      });
+      return;
+    }
+
+    const outOfStockItems = cartItems.filter((item) => item.quantity > item.stock_quantity);
 
     if (outOfStockItems.length > 0) {
       const message = outOfStockItems
-        .map((item) => `${item.name}: มีเพียง ${item.stock_quantity} ชิ้น`)
+        .map((item) => `${item.name}: Only ${item.stock_quantity} available`)
         .join("\n");
-
       Swal.fire({
         title: t("outOfStockTitle"),
         text: t("outOfStockText", { message }),
         icon: "warning",
       });
-
       return;
     }
 
@@ -159,16 +171,11 @@ const Checkout = () => {
     };
 
     try {
-      const orderResponse = await fetch(
-        `${import.meta.env.VITE_SERVER_URL}/v2/orders`,
-        {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify(orderDetails),
-        }
-      );
+      const orderResponse = await fetch(`${import.meta.env.VITE_SERVER_URL}/v2/orders`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(orderDetails),
+      });
 
       if (!orderResponse.ok) throw new Error("Failed to create order");
 
@@ -184,16 +191,11 @@ const Checkout = () => {
         task_id: orderResult.taskId || null,
       };
 
-      const paymentResponse = await fetch(
-        `${import.meta.env.VITE_SERVER_URL}/payments`,
-        {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify(paymentDetails),
-        }
-      );
+      const paymentResponse = await fetch(`${import.meta.env.VITE_SERVER_URL}/payments`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(paymentDetails),
+      });
 
       if (!paymentResponse.ok) throw new Error("Failed to create payment");
 
@@ -224,11 +226,6 @@ const Checkout = () => {
     navigate("/product");
   };
 
-  const itemCounts = cartItems.reduce((acc, item) => {
-    acc[item.name] = (acc[item.name] || 0) + item.quantity;
-    return acc;
-  }, {});
-
   const totalPrice = cartItems
     .reduce((acc, item) => acc + item.price * item.quantity, 0)
     .toFixed(2);
@@ -247,36 +244,26 @@ const Checkout = () => {
             </div>
 
             <div className="bg-white shadow-md rounded-lg p-6">
-              {Object.entries(itemCounts).map(([name, quantity]) => {
-                const item = cartItems.find((i) => i.name === name);
-                return (
-                  <div
-                    key={name}
-                    className="flex justify-between mb-4 border-b pb-2"
-                  >
-                    <div>
-                      <h2 className="text-lg font-semibold">{name}</h2>
-                      <p className="text-gray-600">
-                        Price: ${item.price.toFixed(2)}
-                      </p>
-                      <p className="text-gray-500">
-                        Stock: {item.stock_quantity}
-                      </p>
-                    </div>
-                    <div className="self-center flex items-center">
-                      <span className="text-lg font-bold text-gray-900">
-                        Quantity: {quantity}
-                      </span>
-                      <button
-                        onClick={() => handleRemoveItem(item.product_id)}
-                        className="ml-4 text-red-600 hover:text-red-800 transition duration-200"
-                      >
-                        Remove
-                      </button>
-                    </div>
+              {cartItems.map((item) => (
+                <div key={item.product_id} className="flex justify-between mb-4 border-b pb-2">
+                  <div>
+                    <h2 className="text-lg font-semibold">{item.name}</h2>
+                    <p className="text-gray-600">Price: ${item.price.toFixed(2)}</p>
+                    <p className="text-gray-500">Stock: {item.stock_quantity}</p>
                   </div>
-                );
-              })}
+                  <div className="self-center flex items-center">
+                    <span className="text-lg font-bold text-gray-900">
+                      Quantity: {item.quantity}
+                    </span>
+                    <button
+                      onClick={() => handleRemoveItem(item.product_id)}
+                      className="ml-4 text-red-600 hover:text-red-800 transition duration-200"
+                    >
+                      Remove
+                    </button>
+                  </div>
+                </div>
+              ))}
 
               <div className="p-4 bg-yellow-100 border-l-4 border-yellow-500 text-yellow-800 rounded-md mb-4">
                 {t("addressWarning")}
@@ -292,7 +279,7 @@ const Checkout = () => {
                 <select
                   id="paymentMethod"
                   className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-1 focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
-                  value={selectedPaymentMethod}
+                  value={selectedPaymentMethod || ""}
                   onChange={(e) => setSelectedPaymentMethod(e.target.value)}
                 >
                   <option value="">{t("selectPaymentMethod")}</option>
@@ -320,6 +307,7 @@ const Checkout = () => {
                   <button
                     onClick={handleCheckout}
                     className="bg-blue text-white px-4 py-2 rounded-md hover:bg-blue transition duration-200"
+                    disabled={!selectedPaymentMethod || cartItems.length === 0}
                   >
                     {t("checkout")}
                   </button>

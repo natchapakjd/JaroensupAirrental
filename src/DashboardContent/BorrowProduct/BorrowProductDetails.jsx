@@ -3,6 +3,10 @@ import { useParams } from "react-router-dom";
 import axios from "axios";
 import BackButton from "../../components/BackButton";
 import Loading from "../../components/Loading";
+import Swal from "sweetalert2";
+import Cookies from "universal-cookie";
+import { jwtDecode } from "jwt-decode";
+
 const translations = {
   en: {
     borrowingDetails: "Borrowing Details",
@@ -26,6 +30,11 @@ const translations = {
     taskIdMissing: "Task ID is missing. Please check again.",
     completeTaskConfirm: "Are you sure you want to mark this task as completed?",
     deleteTaskConfirm: "Are you sure you want to delete this task?",
+    image: "Images",
+    editImage: "Edit Image",
+    uploadNewImage: "Upload New Image",
+    save: "Save",
+    cancel: "Cancel",
   },
   th: {
     borrowingDetails: "รายละเอียดการยืม",
@@ -49,15 +58,26 @@ const translations = {
     taskIdMissing: "รหัสงานหายไป กรุณาตรวจสอบอีกครั้ง",
     completeTaskConfirm: "คุณแน่ใจหรือไม่ว่าต้องการทำเครื่องหมายว่างานนี้เสร็จสมบูรณ์?",
     deleteTaskConfirm: "คุณแน่ใจหรือไม่ว่าต้องการลบงานนี้?",
+    image: "รูปภาพแนบ",
+    editImage: "แก้ไขรูปภาพ",
+    uploadNewImage: "อัปโหลดรูปภาพใหม่",
+    save: "บันทึก",
+    cancel: "ยกเลิก",
   },
-  // Add more languages if necessary
 };
+
 const BorrowProductDetails = () => {
   const { task_id } = useParams();
   const [borrowingData, setBorrowingData] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-  const [language,setLanguage] = useState(localStorage.getItem('language')||'th')
+  const [language, setLanguage] = useState(localStorage.getItem("language") || "th");
+  const cookies = new Cookies();
+  const token = cookies.get("authToken");
+  const decodedToken = jwtDecode(token);
+  const techId = decodedToken.id;
+  const role = decodedToken.role;
+
   useEffect(() => {
     if (task_id) {
       fetchBorrowingDetails();
@@ -66,6 +86,36 @@ const BorrowProductDetails = () => {
       setLoading(false);
     }
   }, [task_id]);
+
+  const updateIdCardImage = async (taskId, newImageFile) => {
+    const formData = new FormData();
+    formData.append("id_card_image", newImageFile);
+
+    try {
+      const response = await axios.put(
+        `${import.meta.env.VITE_SERVER_URL}/v2/equipment-borrowing/update-image/${taskId}`,
+        formData,
+        { headers: { "Content-Type": "multipart/form-data" } }
+      );
+      console.log("Image updated:", response.data);
+      setBorrowingData((prev) => ({
+        ...prev,
+        image_url: response.data.image_url,
+      }));
+      Swal.fire({
+        title: "Success",
+        text: translations[language].uploadNewImage + " completed",
+        icon: "success",
+      });
+    } catch (error) {
+      console.error("Error updating image:", error.response?.data || error);
+      Swal.fire({
+        title: "Error",
+        text: translations[language].uploadNewImage + " failed",
+        icon: "error",
+      });
+    }
+  };
 
   const fetchBorrowingDetails = async () => {
     try {
@@ -82,6 +132,35 @@ const BorrowProductDetails = () => {
       setError(translations[language].taskNotFound);
       setLoading(false);
     }
+  };
+
+  const handleImageClick = () => {
+    if (role !== 3) {
+      return; // Do nothing if role is not 3
+    }
+
+    Swal.fire({
+      title: translations[language].editImage,
+      html: `
+        <input type="file" id="newImage" accept="image/*" class="file-input file-input-bordered w-full h-10"/>
+      `,
+      showCancelButton: true,
+      confirmButtonText: translations[language].save,
+      cancelButtonText: translations[language].cancel,
+      preConfirm: () => {
+        const fileInput = document.getElementById("newImage");
+        const file = fileInput.files[0];
+        if (!file) {
+          Swal.showValidationMessage("Please select an image file");
+          return false;
+        }
+        return file;
+      },
+    }).then((result) => {
+      if (result.isConfirmed) {
+        updateIdCardImage(task_id, result.value);
+      }
+    });
   };
 
   if (loading) return <Loading />;
@@ -115,7 +194,8 @@ const BorrowProductDetails = () => {
               <strong>{translations[language].userId}:</strong> {borrowingData.user_id}
             </p>
             <p className="text-gray-700">
-              <strong>{translations[language].name}:</strong> {borrowingData.firstname} {borrowingData.lastname}
+              <strong>{translations[language].name}:</strong> {borrowingData.firstname}{" "}
+              {borrowingData.lastname}
             </p>
           </div>
 
@@ -162,8 +242,22 @@ const BorrowProductDetails = () => {
               {translations[language].additionalInformation}
             </h2>
             <p className="text-gray-700">
-              <strong>{translations[language].remarks}:</strong> {borrowingData.remarks || "N/A"}
+              <strong>{translations[language].image}</strong>
             </p>
+            {borrowingData.image_url && (
+              <div className="mt-2">
+                <img
+                  src={borrowingData.image_url}
+                  alt="Borrowing Remark Image"
+                  className={`max-w-full h-auto rounded-lg shadow-md ${role === 3 ? "cursor-pointer" : ""}`}
+                  onError={(e) => {
+                    e.target.onerror = null;
+                    e.target.src = "/placeholder-image.jpg"; // Optional fallback image
+                  }}
+                  onClick={role === 3 ? handleImageClick : null} // Only enable click for role 3
+                />
+              </div>
+            )}
           </div>
 
           <div className="bg-gray-100 p-4 rounded-lg">

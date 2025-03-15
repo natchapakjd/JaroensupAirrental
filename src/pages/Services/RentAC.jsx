@@ -38,6 +38,9 @@ const translations = {
     submit: "ส่งข้อมูล",
     loading: "กำลังโหลด...",
     file: "รูปแบบสถานที่ (ตัวเลือก)",
+    profileIncomplete: "กรุณากรอกชื่อและนามสกุลในโปรไฟล์ก่อนดำเนินการ",
+    goToProfile: "ไปที่การตั้งค่าโปรไฟล์",
+    organizationName: "ชื่อองค์กร", // ✅ เพิ่ม
   },
   en: {
     title: "Service Request Form",
@@ -52,6 +55,9 @@ const translations = {
     submit: "Submit",
     loading: "Loading...",
     file: "Location format (optional)",
+    profileIncomplete: "Please fill in your first name and last name in your profile before proceeding",
+    goToProfile: "Go to Profile Settings",
+    organizationName: "Organization Name", // ✅ เพิ่ม
   },
 };
 
@@ -69,6 +75,7 @@ const RentAC = () => {
     longitude: "",
     rental_start_date: "",
     rental_end_date: "",
+    organization_name: "", // ✅ เพิ่ม
   });
   const [products, setProducts] = useState([]);
   const [taskTypes, setTaskTypes] = useState([]);
@@ -221,8 +228,20 @@ const RentAC = () => {
     if (isSubmitting) return; // Prevent submission if already submitting
 
     setIsSubmitting(true); // Set submitting state to true
-
-    try {
+    // Check if firstname or lastname is empty
+    if (!profile || !profile.firstname || !profile.lastname) {
+      Swal.fire({
+        title: "ข้อมูลไม่ครบถ้วน",
+        text: translations[language].profileIncomplete,
+        icon: "warning",
+        confirmButtonText: translations[language].goToProfile,
+      }).then(() => {
+        navigate("/profile-setting");
+      });
+      setIsSubmitting(false);
+      return;
+    }
+        try {
       const rentalStartDate = formData.appointment_date.split("T")[0];
       const data = new FormData();
 
@@ -275,6 +294,7 @@ const RentAC = () => {
           address: "",
           appointment_date: "",
           rental_end_date: "",
+          organization_name: "", // ✅ รีเซ็ต
         });
         setSelectedLocation(null);
         setShowMap(false);
@@ -324,6 +344,18 @@ const RentAC = () => {
             onSubmit={handleSubmit}
             className="bg-white p-6 rounded-lg shadow-md"
           >
+            <div className="mb-4">
+              <label className="block text-gray-700">
+                {translations[language].organizationName}
+              </label> {/* ✅ เพิ่ม */}
+              <input
+                type="text"
+                name="organization_name"
+                value={formData.organization_name}
+                onChange={handleChange}
+                className="input input-bordered w-full"
+              />
+            </div>
             <div className="mb-4">
               <label className="block text-gray-700">
                 {translations[language].taskType}

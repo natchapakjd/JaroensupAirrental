@@ -8,7 +8,6 @@ import axios from "axios";
 import { useLocation } from "react-router-dom";
 import Loading from "../../components/Loading";
 
-// 📌 ระบบแปลภาษา
 const translations = {
   th: {
     profileSettings: "ตั้งค่าข้อมูลส่วนตัว",
@@ -25,6 +24,7 @@ const translations = {
     successTitle: "สำเร็จ!",
     successMessage: "ข้อมูลถูกอัปเดตเรียบร้อย!",
     errorTitle: "เกิดข้อผิดพลาด!",
+    ageError: "คุณต้องมีอายุอย่างน้อย 18 ปี!",
   },
   en: {
     profileSettings: "Profile Settings",
@@ -41,6 +41,7 @@ const translations = {
     successTitle: "Success!",
     successMessage: "Profile updated successfully!",
     errorTitle: "Error!",
+    ageError: "You must be at least 18 years old!",
   },
 };
 
@@ -53,9 +54,7 @@ const ProfileSetting = () => {
   const userId = decodedToken.id;
   const location = useLocation();
 
-  const [language, setLanguage] = useState(
-    localStorage.getItem("language") || "th"
-  );
+  const [language, setLanguage] = useState(localStorage.getItem("language") || "th");
 
   useEffect(() => {
     const handleLanguageChange = () => {
@@ -86,9 +85,7 @@ const ProfileSetting = () => {
 
   const fetchProfile = async () => {
     try {
-      const response = await axios.get(
-        `${import.meta.env.VITE_SERVER_URL}/user/${userId}`
-      );
+      const response = await axios.get(`${import.meta.env.VITE_SERVER_URL}/user/${userId}`);
       if (response.status === 200) {
         const data = response.data;
         setProfile(data);
@@ -110,7 +107,20 @@ const ProfileSetting = () => {
 
   const handleChange = (e) => {
     const { name, value } = e.target;
-    setFormData({ ...formData, [name]: value });
+    setFormData((prev) => {
+      const newData = { ...prev, [name]: value };
+      if (name === "date_of_birth" && value) {
+        const birthDate = new Date(value);
+        const today = new Date();
+        let age = today.getFullYear() - birthDate.getFullYear();
+        const monthDiff = today.getMonth() - birthDate.getMonth();
+        if (monthDiff < 0 || (monthDiff === 0 && today.getDate() < birthDate.getDate())) {
+          age--;
+        }
+        newData.age = age.toString();
+      }
+      return newData;
+    });
   };
 
   const handleFileChange = (e) => {
@@ -119,8 +129,8 @@ const ProfileSetting = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-  
-    // คำนวณอายุจากวันเกิด
+
+    // Calculate age from date_of_birth
     const birthDate = new Date(formData.date_of_birth);
     const today = new Date();
     let age = today.getFullYear() - birthDate.getFullYear();
@@ -128,38 +138,36 @@ const ProfileSetting = () => {
     if (monthDiff < 0 || (monthDiff === 0 && today.getDate() < birthDate.getDate())) {
       age--;
     }
-  
-    // เช็คอายุขั้นต่ำ 18 ปี
-    if (age < 18) {
+
+    // Check minimum age of 18
+    if (age < 18 || isNaN(age)) {
       Swal.fire({
         title: translations[language].errorTitle,
-        text: "คุณต้องมีอายุอย่างน้อย 18 ปี!",
+        text: translations[language].ageError,
         icon: "error",
         confirmButtonText: "OK",
       });
       return;
     }
-  
-    // ตรวจสอบว่ามีการอัปโหลดรูปภาพหรือไม่
-    if (!formData.profile_image) {
-      Swal.fire({
-        title: translations[language].errorTitle,
-        text: "กรุณาเพิ่มรูปโปรไฟล์ก่อนบันทึกข้อมูล!",
-        icon: "error",
-        confirmButtonText: "OK",
-      });
-      return;
-    }
-  
+
     const formDataToSend = new FormData();
-    for (const key in formData) {
-      formDataToSend.append(key, formData[key]);
+    formDataToSend.append("firstname", formData.firstname);
+    formDataToSend.append("lastname", formData.lastname);
+    formDataToSend.append("email", formData.email);
+    formDataToSend.append("phone", formData.phone);
+    formDataToSend.append("age", age.toString());
+    formDataToSend.append("address", formData.address);
+    formDataToSend.append("gender_id", formData.gender_id);
+    formDataToSend.append("date_of_birth", formData.date_of_birth);
+    if (formData.profile_image) {
+      formDataToSend.append("profile_image", formData.profile_image);
     }
-  
+
     try {
       const response = await axios.put(
         `${import.meta.env.VITE_SERVER_URL}/user/${userId}`,
-        formDataToSend
+        formDataToSend,
+        { headers: { "Content-Type": "multipart/form-data" } }
       );
       if (response.status === 200) {
         const updatedProfile = response.data;
@@ -181,7 +189,7 @@ const ProfileSetting = () => {
       });
     }
   };
-  
+
   const isDashboard = location.pathname.startsWith("/dashboard");
 
   return (
@@ -199,34 +207,32 @@ const ProfileSetting = () => {
             </h2>
             <div className="flex items-center mb-4">
               <img
-                src={`${profile.image_url}`}
-                alt={profile.firstname}
+                src={profile.image_url || "/placeholder-image.jpg"}
+                alt={profile.firstname || "Profile"}
                 className="w-24 h-24 rounded-xl mr-4"
               />
             </div>
             <form onSubmit={handleSubmit}>
               <div>
-                <label className="label">
-                  {translations[language].firstName}
-                </label>
+                <label className="label">{translations[language].firstName}</label>
                 <input
                   type="text"
                   name="firstname"
                   value={formData.firstname}
                   onChange={handleChange}
                   className="input input-bordered w-full mt-2"
+                  required
                 />
               </div>
               <div>
-                <label className="label">
-                  {translations[language].lastName}
-                </label>
+                <label className="label">{translations[language].lastName}</label>
                 <input
                   type="text"
                   name="lastname"
                   value={formData.lastname}
                   onChange={handleChange}
                   className="input input-bordered w-full mt-2"
+                  required
                 />
               </div>
               <div>
@@ -240,18 +246,16 @@ const ProfileSetting = () => {
                 />
               </div>
               <div>
-                <label className="label">
-                  {translations[language].dateOfBirth}
-                </label>
+                <label className="label">{translations[language].dateOfBirth}</label>
                 <input
                   type="date"
                   name="date_of_birth"
                   value={formData.date_of_birth}
                   onChange={handleChange}
                   className="input input-bordered w-full mt-2"
+                  required
                 />
               </div>
-
               <div>
                 <label className="label">{translations[language].phone}</label>
                 <input
@@ -265,7 +269,7 @@ const ProfileSetting = () => {
               <div>
                 <label className="label">{translations[language].gender}</label>
                 <select
-                  name="gender"
+                  name="gender_id"
                   value={formData.gender_id}
                   onChange={handleChange}
                   className="select select-bordered w-full mt-2"
@@ -275,9 +279,16 @@ const ProfileSetting = () => {
                 </select>
               </div>
               <div>
-                <label className="label">
-                  {translations[language].profileImage}
-                </label>
+                <label className="label">{translations[language].address}</label>
+                <textarea
+                  name="address"
+                  value={formData.address}
+                  onChange={handleChange}
+                  className="textarea textarea-bordered w-full mt-2"
+                />
+              </div>
+              <div>
+                <label className="label">{translations[language].profileImage}</label>
                 <input
                   type="file"
                   name="profile_image"

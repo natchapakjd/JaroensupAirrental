@@ -96,12 +96,14 @@ const BookingInvoice = ({ task }) => {
         <View style={styles.section}>
           <Text style={styles.header}>ใบสรุปงานเช่า/ล้าง</Text>
           <Text>รหัสงาน: {task.task_id}</Text>
+          <Text>ชื่อองค์กร: {task.organization_name}</Text>
           <Text>ประเภทงาน: {task.type_name}</Text>
           <Text>
             ชื่อ-สกุล: {task.firstname} {task.lastname}
           </Text>
           <Text>เบอร์โทรศัพท์: {task.phone}</Text>
           <Text>สถานที่: {task.address}</Text>
+          
           <Text>
             วันที่ออกใบเสร็จ: {formatDateWithMonthNameAndTime(new Date())}
           </Text>

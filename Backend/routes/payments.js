@@ -243,7 +243,13 @@ router.delete("/payment/:id", (req, res) => {
 });
 
 router.get("/payments-sum/total", (req, res) => {
-  const query = "SELECT SUM(amount) AS total_amount FROM payments";
+  const query = `
+    SELECT 
+      SUM(p.amount + t.total) AS total_amount 
+    FROM payments p
+    INNER JOIN tasks t ON p.task_id = t.task_id
+    WHERE p.status_id = 2 AND t.status_id = 2
+  `;
 
   db.query(query, (err, result) => {
     if (err) {
@@ -253,7 +259,6 @@ router.get("/payments-sum/total", (req, res) => {
     res.status(200).json(result[0]);
   });
 });
-
 
 router.get('/payment-methods', (req, res) => {
   const query = 'SELECT * FROM payment_methods';

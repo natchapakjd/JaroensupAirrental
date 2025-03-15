@@ -25,6 +25,9 @@ const translations = {
     noTask: "ไม่พบรายการงาน",
     type_name: "ประเภทงาน",
     images: "รูปภาพ",
+    phone: "เบอร์ติดต่อ",
+    price: "ราคารวม",
+    organization_name: "ชื่อองค์กร",
   },
   en: {
     taskDetails: "Task Details",
@@ -37,8 +40,11 @@ const translations = {
     quantityUsed: "Air Conditioners Used",
     orderedBy: "Ordered By",
     noTask: "No task found.",
-    type_name : "Task Type",
+    type_name: "Task Type",
     images: "Images",
+    phone: "Phone",
+    price: "Price",
+    organization_name: "Organization Name",
   },
 };
 
@@ -109,7 +115,6 @@ const TaskDetails = () => {
     }
   };
 
-  
   // Close the modal
   const closeModal = () => {
     setSelectedImage(null);
@@ -143,6 +148,22 @@ const TaskDetails = () => {
                 <strong>{translations[language].taskId}:</strong> {task.task_id}
               </p>
             )}
+            {task.organization_name && (
+              <p>
+                <strong>{translations[language].organization_name}:</strong> {task.organization_name}
+              </p>
+            )}
+            {task.user_id && (
+              <p>
+                <strong>{translations[language].orderedBy}:</strong>{" "}
+                {task.firstname} {task.lastname}
+              </p>
+            )}
+            {task.phone && (
+              <p>
+                <strong>{translations[language].phone}:</strong> {task.phone}
+              </p>
+            )}
             {task.description && (
               <p>
                 <strong>{translations[language].description}:</strong>{" "}
@@ -155,7 +176,7 @@ const TaskDetails = () => {
                 {task.type_name}
               </p>
             )}
-            
+
             {task.status_id && (
               <p>
                 <strong>{translations[language].status}:</strong>{" "}
@@ -180,10 +201,9 @@ const TaskDetails = () => {
                 {task.address}
               </p>
             )}
-            {task.user_id && (
+            {task.total !== 0 && (
               <p>
-                <strong>{translations[language].orderedBy}:</strong>{" "}
-                {task.firstname} {task.lastname}
+                <strong>{translations[language].price}:</strong> {task.price}
               </p>
             )}
           </div>

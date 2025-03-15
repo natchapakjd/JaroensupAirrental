@@ -206,7 +206,7 @@ router.post("/change-password", (req, res) => {
   });
 });
 
-router.put("/user/:id",upload.single("profile_image"), async (req, res) => {
+router.put("/user/:id", upload.single("profile_image"), async (req, res) => {
   const id = req.params.id;
   const {
     firstname,
@@ -222,49 +222,52 @@ router.put("/user/:id",upload.single("profile_image"), async (req, res) => {
   let imageUrl = null;
 
   try {
+    // Check if a new profile image is uploaded
     if (req.file) {
       const profileImage = req.file.path;
-
       const result = await cloudinary.uploader.upload(profileImage, {
         folder: "image/user-image",
       });
-
       imageUrl = result.secure_url;
     }
 
-    const query = `
+    // Build the query dynamically to only update image_url if a new image is provided
+    let query = `
       UPDATE users
-      SET firstname = ?, lastname = ?, email = ?, phone = ?, age = ?, address = ?, gender_id = ?, image_url = ?, date_of_birth = ?
-      WHERE user_id = ?
+      SET firstname = ?, lastname = ?, email = ?, phone = ?, age = ?, address = ?, gender_id = ?, date_of_birth = ?
     `;
+    const values = [
+      firstname || null,
+      lastname || null,
+      email || null,
+      phone || null,
+      age || null,
+      address || null,
+      gender_id || null,
+      date_of_birth || null,
+    ];
 
-    db.query(
-      query,
-      [
-        firstname,
-        lastname,
-        email,
-        phone,
-        age,
-        address,
-        gender_id,
-        imageUrl || null,
-        date_of_birth,
-        id,
-      ],
-      (err, result) => {
-        if (err) {
-          console.error("Error updating user: " + err);
-          return res.status(500).json({ error: "Failed to update user" });
-        }
+    // If a new image is uploaded, include image_url in the update
+    if (imageUrl) {
+      query += `, image_url = ?`;
+      values.push(imageUrl);
+    }
 
-        if (result.affectedRows === 0) {
-          return res.status(404).json({ error: "User not found" });
-        }
+    query += ` WHERE user_id = ?`;
+    values.push(id);
 
-        res.json({ message: "User updated successfully" });
+    db.query(query, values, (err, result) => {
+      if (err) {
+        console.error("Error updating user: " + err);
+        return res.status(500).json({ error: "Failed to update user" });
       }
-    );
+
+      if (result.affectedRows === 0) {
+        return res.status(404).json({ error: "User not found" });
+      }
+
+      res.json({ message: "User updated successfully" });
+    });
   } catch (err) {
     console.error("Error processing user update:", err);
     res.status(500).json({ error: "Failed to process user update." });
