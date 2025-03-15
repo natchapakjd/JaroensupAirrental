@@ -33,6 +33,7 @@ const translations = {
     file: "file",
     approve: "approve",
     status: "status",
+    orderApproved: "Order was approved"
   },
   th: {
     orders: "คำสั่งซื้อ",
@@ -60,6 +61,7 @@ const translations = {
     file: "ไฟล์",
     approve: "อนมุัติ",
     status: "สถานะ",
+    orderApproved: "อนมุัติออเดอร์เสร็จสิ้น"
   },
 };
 
@@ -262,7 +264,7 @@ const OrderContent = () => {
 
   return (
     <div className="container mx-auto p-8">
-      <div className="table p-8 rounded-lg shadow-lg w-full mx-auto font-prompt h-full">
+      <div className="p-8 rounded-lg shadow-lg w-full mx-auto font-prompt h-full">
         <div className="flex justify-between items-center mb-4">
           <h2 className="text-xl font-semibold">
             {translations[language].orders}
@@ -285,8 +287,8 @@ const OrderContent = () => {
           />
         </div>
         <div className="overflow-x-auto">
-          <table className="w-full border-collapse border border-gray-300">
-            <thead className="sticky-top bg-gray-200">
+        <table className="table w-full border-collapse border border-gray-300">
+        <thead className="sticky-top bg-gray-200">
               <tr>
                 <th className="border p-2 text-center">
                   {translations[language].orderId}

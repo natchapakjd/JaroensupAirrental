@@ -109,8 +109,6 @@ router.get("/task-paging/:id", (req, res) => {
   });
 });
 
-
-
 router.get("/tasks/paged", (req, res) => {
   const { page = 1, limit = 10 } = req.query; // Default to page 1, 10 items per page
   const offset = (page - 1) * limit;
@@ -241,7 +239,8 @@ router.get("/task/:id", (req, res) => {
       status.*,
       rental.*,
       users.firstname,
-      users.lastname
+      users.lastname,
+      users.phone
     FROM 
       tasks
     INNER JOIN 
@@ -302,7 +301,6 @@ router.get("/tasks", (req, res) => {
   });
 });
 
-
 router.post("/tasks", (req, res) => {
   const {
     user_id,
@@ -313,11 +311,16 @@ router.post("/tasks", (req, res) => {
     appointment_date,
     latitude,
     longitude,
-    rental_start_date, 
-    rental_end_date,   
+    rental_start_date,
+    rental_end_date,
+    organization_name, // ✅ เพิ่ม organization_name
   } = req.body;
-  const query =
-    "INSERT INTO tasks (user_id, description, task_type_id, quantity_used, address, appointment_date, latitude,longitude,isActive) VALUES (?, ?, ?, ?, ?, ?, ?,?,?)";
+
+  const query = `
+    INSERT INTO tasks 
+    (user_id, description, task_type_id, quantity_used, address, appointment_date, latitude, longitude, isActive, organization_name) 
+    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+  `;
 
   db.query(
     query,
@@ -330,7 +333,8 @@ router.post("/tasks", (req, res) => {
       appointment_date,
       latitude,
       longitude,
-      1
+      1,
+      organization_name || null, // ✅ เพิ่ม organization_name (อนุญาตให้เป็น null ได้)
     ],
     (err, result) => {
       if (err) {
@@ -340,37 +344,35 @@ router.post("/tasks", (req, res) => {
 
       const taskId = result.insertId;
 
-      const rentalQuery =
-        "INSERT INTO rental (task_id, rental_start_date, rental_end_date) VALUES (?, ?, ?)";
+      const rentalQuery = `
+        INSERT INTO rental (task_id, rental_start_date, rental_end_date) 
+        VALUES (?, ?, ?)
+      `;
 
-      db.query(
-        rentalQuery,
-        [taskId, rental_start_date, rental_end_date],
-        (err) => {
-          if (err) {
-            console.error("Error creating rental record: " + err);
-            return res.status(500).json({ error: "Failed to create rental record" });
-          }
-
-          res.status(201).json({
-            task_id: taskId,
-            user_id,
-            description,
-            task_type_id,
-            quantity_used,
-            address,
-            appointment_date,
-            latitude,
-            longitude,
-            rental_start_date,
-            rental_end_date,
-          });
+      db.query(rentalQuery, [taskId, rental_start_date, rental_end_date], (err) => {
+        if (err) {
+          console.error("Error creating rental record: " + err);
+          return res.status(500).json({ error: "Failed to create rental record" });
         }
-      );
+
+        res.status(201).json({
+          task_id: taskId,
+          user_id,
+          description,
+          task_type_id,
+          quantity_used,
+          address,
+          appointment_date,
+          latitude,
+          longitude,
+          rental_start_date,
+          rental_end_date,
+          organization_name, // ✅ เพิ่มใน response
+        });
+      });
     }
   );
 });
-
 
 router.put("/task/:id", (req, res) => {
   const id = req.params.id;
@@ -544,8 +546,6 @@ router.delete("/v2/task/:id", (req, res) => {
     }
   });
 });
-
-
 
 router.get("/tasks/assigned/:techId", (req, res) => {
   const techId = req.params.techId;
@@ -930,38 +930,40 @@ router.post("/v2/tasks", upload.array("images", 10), async (req, res) => {
     user_id,
     description,
     task_type_id,
-    quantity_used = 0, 
+    quantity_used = 0,
     address,
     appointment_date,
     latitude,
     longitude,
     rental_start_date,
     rental_end_date,
+    organization_name, // ✅ เพิ่ม organization_name
   } = req.body;
-  
-  // ✅ ตรวจสอบค่า required
+
+  // ✅ ตรวจสอบค่า required (ถ้าต้องการให้ organization_name เป็น required ให้เพิ่มในเงื่อนไข)
   if (!user_id || !task_type_id || !address || !appointment_date) {
     return res.status(400).json({ error: "Missing required fields." });
   }
 
   const query = `
     INSERT INTO tasks 
-    (user_id, description, task_type_id, quantity_used, address, appointment_date, latitude, longitude, isActive) 
-    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
+    (user_id, description, task_type_id, quantity_used, address, appointment_date, latitude, longitude, isActive, organization_name) 
+    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
   `;
 
   db.query(
     query,
     [
       user_id,
-      description || "", // ✅ ป้องกัน NULL
+      description || "",
       task_type_id,
       quantity_used,
       address,
-      appointment_date, 
+      appointment_date,
       latitude || null,
       longitude || null,
       1,
+      organization_name || null, // ✅ เพิ่ม organization_name (อนุญาตให้เป็น null ได้)
     ],
     async (err, result) => {
       if (err) {
@@ -971,7 +973,6 @@ router.post("/v2/tasks", upload.array("images", 10), async (req, res) => {
 
       const taskId = result.insertId;
 
-      // ✅ ตรวจสอบก่อน insert rental
       if (rental_start_date && rental_end_date) {
         const rentalQuery = `
           INSERT INTO rental (task_id, rental_start_date, rental_end_date) 
@@ -987,7 +988,6 @@ router.post("/v2/tasks", upload.array("images", 10), async (req, res) => {
       }
 
       try {
-        // ✅ อัปโหลดรูปไป Cloudinary
         const imageUrls = [];
         for (const file of req.files) {
           const result = await cloudinary.uploader.upload(file.path, { folder: "task_images" });
@@ -995,7 +995,6 @@ router.post("/v2/tasks", upload.array("images", 10), async (req, res) => {
           fs.unlinkSync(file.path);
         }
 
-        // ✅ บันทึก URL ลงตาราง task_images
         if (imageUrls.length > 0) {
           const imageQuery = "INSERT INTO task_images (task_id, image_url, uploaded_at) VALUES ?";
           const imageValues = imageUrls.map((url) => [taskId, url, new Date()]);
@@ -1008,7 +1007,6 @@ router.post("/v2/tasks", upload.array("images", 10), async (req, res) => {
           });
         }
 
-        // ✅ ส่ง response กลับ
         res.status(201).json({
           task_id: taskId,
           user_id,
@@ -1021,9 +1019,9 @@ router.post("/v2/tasks", upload.array("images", 10), async (req, res) => {
           longitude,
           rental_start_date,
           rental_end_date,
+          organization_name, // ✅ เพิ่มใน response
           images: imageUrls,
         });
-
       } catch (uploadError) {
         console.error("Error uploading images:", uploadError);
         return res.status(500).json({ error: "Failed to upload images." });
@@ -1114,7 +1112,6 @@ router.put("/task_images/:image_id", (req, res) => {
     }
   );
 });
-
 
 router.delete("/task_images/:image_id", (req, res) => {
   const { image_id } = req.params;

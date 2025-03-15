@@ -95,10 +95,12 @@ const AddPayment = () => {
           axios.get(`${apiUrl}/statuses`),
           axios.get(`${apiUrl}/payment-methods`),
         ]);
-        setUsers(usersResponse.data);
+        const filterUser = usersResponse.data.filter((user)=>user.role_id === 1)
+        const filterStatus = statusesResponse.data.filter((status)=>status.status_id === 1 || status.status_id === 2 || status.status_id === 4)
+        setUsers(filterUser);
         setTasks(tasksResponse.data);
         setOrders(ordersResponse.data);
-        setStatuses(statusesResponse.data);
+        setStatuses(filterStatus);
         setPaymentMethods(paymentMethodsResponse.data);
       } catch (error) {
         Swal.fire({

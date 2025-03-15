@@ -17,6 +17,7 @@ router.get("/api/counts", (req, res) => {
             SELECT MONTH(created_at) AS month, COUNT(*) AS count 
             FROM tasks 
             WHERE YEAR(created_at) = YEAR(CURDATE()) 
+            AND task_type_id IN (1, 12)
             GROUP BY MONTH(created_at)
         ) AS task_count ON months.month = task_count.month
         LEFT JOIN (
@@ -32,10 +33,14 @@ router.get("/api/counts", (req, res) => {
             GROUP BY MONTH(created_at)
         ) AS payment_count ON months.month = payment_count.month
         LEFT JOIN (
-            SELECT MONTH(created_at) AS month, SUM(amount) AS amount 
-            FROM payments 
-            WHERE YEAR(created_at) = YEAR(CURDATE()) 
-            GROUP BY MONTH(created_at)
+            SELECT 
+                MONTH(t.created_at) AS month,
+                SUM(COALESCE(t.total, 0) + COALESCE(p.amount, 0)) AS amount 
+            FROM tasks t
+            LEFT JOIN payments p ON t.task_id = p.task_id AND p.status_id = 2
+            WHERE t.status_id = 2
+            AND YEAR(t.created_at) = YEAR(CURDATE())
+            GROUP BY MONTH(t.created_at)
         ) AS income ON months.month = income.month
         ORDER BY months.month
     `;

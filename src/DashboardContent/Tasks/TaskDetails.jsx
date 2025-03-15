@@ -69,6 +69,9 @@ const TaskDetails = () => {
       failedToLoad: "Failed to load task details.",
       images: "Images",
       type_name: "Task type",
+      price : "Total Price",
+      phone : "Phone",
+      organizationName: "Organization Name"
     },
     th: {
       taskDetails: "รายละเอียดงาน",
@@ -79,11 +82,14 @@ const TaskDetails = () => {
       finishDate: "วันที่สิ้นสุด",
       address: "ที่อยู่",
       quantityUsed: "จำนวนที่ใช้",
-      name: "ชื่อ",
+      name: "ชื่อผู้สั่งงาน",
       noTaskFound: "ไม่พบงาน",
       failedToLoad: "ไม่สามารถโหลดรายละเอียดงานได้",
       images: "รูปภาพ",
       type_name: "ประเภทงาน",
+      price : "ราคารวม",
+      phone : "เบอร์ติดต่อ",
+      organizationName: "ชื่อองค์กร"
     },
   };
 
@@ -162,6 +168,22 @@ const TaskDetails = () => {
               <strong>{t.id}:</strong> {task.task_id}
             </p>
           )}
+           {task.organization_name && (
+            <p>
+              <strong>{t.organization_name}:</strong> {task.organization_name}
+            </p>
+          )}
+           {task.user_id && (
+            <p>
+              <strong>{t.name}:</strong> {task.firstname} {task.lastname}
+            </p>
+          )}
+           {task.phone && (
+              <p>
+                <strong>{t.phone}:</strong>{" "}
+                {task.phone}
+              </p>
+            )}
           {task.description && (
             <p>
               <strong>{t.description}:</strong> {task.description}
@@ -218,11 +240,12 @@ const TaskDetails = () => {
               <strong>{t.address}:</strong> {task.address}
             </p>
           )}
-          {task.user_id && (
-            <p>
-              <strong>{t.name}:</strong> {task.firstname} {task.lastname}
-            </p>
-          )}
+           {task.total !== 0 && (
+              <p>
+                <strong>{translations[language].price}:</strong>{" "}
+                {task.price}
+              </p>
+            )}
         </div>
         {/* Rental Details Table */}
         {task.rentalDetails && task.rentalDetails.length > 0 && (

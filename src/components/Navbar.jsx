@@ -3,6 +3,8 @@ import { Link, useNavigate } from "react-router-dom";
 import Cookies from "universal-cookie";
 import { jwtDecode } from "jwt-decode";
 import axios from "axios";
+import { MdOutlineShoppingCart } from "react-icons/md";
+
 const translations = {
   th: {
     home: "หน้าหลัก",
@@ -192,6 +194,7 @@ const Navbar = () => {
           </ul>
         </div>
         <div className="navbar-end ">
+          <Link  to="/checkout"><MdOutlineShoppingCart className="text-xl cursor-pointer"/></Link>
           <button
             onClick={toggleLanguage}
             className="badge badge-outline cursor-pointer p-4 text-sm mx-2"

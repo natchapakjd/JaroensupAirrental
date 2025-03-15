@@ -19,6 +19,7 @@ const translations = {
     totalPrice: "ราคารวม",
     noOrder: "ไม่มีรายละเอียดคำสั่งซื้อ",
     refresh: "รีเฟรช",
+    paymentSlip: "สลิปการชำระเงิน:", // Added payment slip translation
   },
   en: {
     orderDetails: "Order Details",
@@ -30,6 +31,7 @@ const translations = {
     totalPrice: "Total Price",
     noOrder: "No order details available.",
     refresh: "Refresh",
+    paymentSlip: "Payment Slip:", // Added payment slip translation
   },
 };
 
@@ -108,7 +110,22 @@ const OrderDetails = () => {
                 {new Date(order.created_at).toLocaleString()}
               </p>
             </div>
-
+            {order.image_url && (
+                <div className="mt-4">
+                  <h4 className="font-semibold">
+                    {translations[language].paymentSlip}
+                  </h4>
+                  <img
+                    src={order.image_url}
+                    alt="Payment Slip"
+                    className="max-w-xs mt-2 rounded-lg shadow-md"
+                    onError={(e) => {
+                      e.target.onerror = null;
+                      e.target.src = "/placeholder-image.jpg"; // Optional: fallback image
+                    }}
+                  />
+                </div>
+              )}
             <h4 className="font-semibold mb-2">Items:</h4>
             <table className="w-full border-collapse border border-gray-300">
               <thead>

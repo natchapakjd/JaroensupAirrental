@@ -5,6 +5,7 @@ import Navbar from "../../components/Navbar";
 import Footer from "../../components/Footer";
 import Swal from "sweetalert2";
 import BackButtonEdit from "../../components/BackButtonEdit";
+
 const translations = {
   th: {
     addToCart: "เพิ่มลงตะกร้า",
@@ -15,11 +16,9 @@ const translations = {
     confirmButton: "ยืนยันการเพิ่ม",
     errorNoProduct: "ไม่พบข้อมูลสินค้า",
     warningQuantity: "กรุณาเลือกจำนวนสินค้าที่ต้องการเพิ่ม",
-    warningStock:
-      "คุณสามารถเพิ่มสินค้าได้สูงสุด {stockQuantity} ชิ้นเท่านั้น (ในตะกร้ามีแล้ว {cartQuantity} ชิ้น)",
+    warningStock: "คุณสามารถเพิ่มสินค้าได้สูงสุด {remainingStock} ชิ้น (ในตะกร้ามีแล้ว {cartQuantity} ชิ้น)",
     confirmTitle: "ยืนยันการเพิ่มสินค้า",
-    confirmText:
-      "คุณต้องการเพิ่ม {productName} จำนวน {quantity} ชิ้น ลงในตะกร้าหรือไม่?",
+    confirmText: "คุณต้องการเพิ่ม {productName} จำนวน {quantity} ชิ้น ลงในตะกร้าหรือไม่?",
     confirmYes: "ใช่, เพิ่ม!",
     confirmCancel: "ยกเลิก",
   },
@@ -32,15 +31,14 @@ const translations = {
     confirmButton: "Confirm Add",
     errorNoProduct: "No product found",
     warningQuantity: "Please select the quantity you want to add",
-    warningStock:
-      "You can add up to {stockQuantity} items (already {cartQuantity} in cart)",
+    warningStock: "You can add up to {remainingStock} items (already {cartQuantity} in cart)",
     confirmTitle: "Confirm Add to Cart",
-    confirmText:
-      "Do you want to add {productName} with quantity {quantity} to your cart?",
+    confirmText: "Do you want to add {productName} with quantity {quantity} to your cart?",
     confirmYes: "Yes, add!",
     confirmCancel: "Cancel",
   },
 };
+
 const AddToCart = () => {
   const location = useLocation();
   const navigate = useNavigate();
@@ -48,9 +46,7 @@ const AddToCart = () => {
   const product = location.state?.product;
   const [quantity, setQuantity] = useState(1);
   const stockQuantity = product?.stock_quantity || 0;
-  const [language, setLanguage] = useState(
-    localStorage.getItem("language") || "th"
-  );
+  const [language, setLanguage] = useState(localStorage.getItem("language") || "th");
 
   useEffect(() => {
     const interval = setInterval(() => {
@@ -62,6 +58,7 @@ const AddToCart = () => {
 
     return () => clearInterval(interval);
   }, [language]);
+
   const t = (key, params = {}) => {
     let translation = translations[language][key] || key;
     Object.keys(params).forEach((param) => {
@@ -69,6 +66,10 @@ const AddToCart = () => {
     });
     return translation;
   };
+
+  const existingItem = cartItems.find((item) => item.product_id === product?.product_id);
+  const cartQuantity = existingItem ? existingItem.quantity : 0;
+  const remainingStock = stockQuantity - cartQuantity;
 
   const handleConfirm = () => {
     if (!product) {
@@ -81,16 +82,9 @@ const AddToCart = () => {
       return;
     }
 
-    const existingItem = cartItems.find((item) => item.id === product.id);
-    const totalQuantityInCart =
-      (existingItem ? existingItem.quantity : 0) + quantity;
-
-    if (totalQuantityInCart > stockQuantity) {
+    if (quantity > remainingStock) {
       Swal.fire(
-        t("warningStock", {
-          stockQuantity,
-          cartQuantity: existingItem ? existingItem.quantity : 0,
-        }),
+        t("warningStock", { remainingStock, cartQuantity }),
         "",
         "warning"
       );
@@ -121,10 +115,11 @@ const AddToCart = () => {
 
   const handleQuantityChange = (e) => {
     const value = Number(e.target.value);
-    if (value > 0 && value <= stockQuantity) {
+    if (value >= 1 && value <= remainingStock) {
       setQuantity(value);
     }
   };
+
   return (
     <>
       <Navbar />
@@ -155,24 +150,22 @@ const AddToCart = () => {
                 id="quantity"
                 value={quantity}
                 min="1"
-                max={stockQuantity}
+                max={remainingStock}
                 onChange={handleQuantityChange}
                 className="border rounded p-2 w-20 text-center"
               />
               <p className="text-red-500 mt-2">
-                {quantity > stockQuantity &&
-                  t("warningStock", { stockQuantity, cartQuantity: 0 })}
+                {quantity > remainingStock &&
+                  t("warningStock", { remainingStock, cartQuantity })}
               </p>
             </div>
             <div className="flex justify-center mt-6">
               <button
                 onClick={handleConfirm}
                 className={`bg-blue text-white py-2 px-4 rounded hover:bg-blue transition duration-200 ${
-                  quantity > stockQuantity
-                    ? "opacity-50 cursor-not-allowed"
-                    : ""
+                  quantity > remainingStock ? "opacity-50 cursor-not-allowed" : ""
                 }`}
-                disabled={quantity > stockQuantity}
+                disabled={quantity > remainingStock}
               >
                 {t("confirmButton")}
               </button>

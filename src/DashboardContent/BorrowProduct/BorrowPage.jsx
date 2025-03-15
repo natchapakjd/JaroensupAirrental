@@ -141,12 +141,12 @@ const BorrowPage = () => {
       Swal.fire({ title: "Error", text: translation.error_fill_fields, icon: "error" });
       return;
     }
-
+  
     if (!isConsentChecked) {
       Swal.fire({ title: "Error", text: translation.error_pdpa_consent, icon: "error" });
       return;
     }
-
+  
     for (const product of filteredProducts.filter((p) => selectedProductIds.has(p.product_id))) {
       const qty = quantities[product.product_id] || 1;
       if (qty > product.stock_quantity) {
@@ -160,7 +160,7 @@ const BorrowPage = () => {
         return;
       }
     }
-
+  
     const formData = new FormData();
     formData.append("tech_id", selectedTechId ? selectedTechId : techId);
     formData.append("borrow_date", borrowDate);
@@ -177,20 +177,21 @@ const BorrowPage = () => {
           }))
       )
     );
-
+  
+    // Append the idCardImage to FormData
     if (!idCardImage) {
       Swal.fire({ title: "Error", text: `${translation.image_card}`, icon: "error" });
       return;
     }
-    
-
+    formData.append("id_card_image", idCardImage); // Assuming idCardImage is a file or blob
+  
     try {
       const response = await axios.post(
         `${import.meta.env.VITE_SERVER_URL}/v2/equipment-borrowing`,
         formData,
         { headers: { "Content-Type": "multipart/form-data" } }
       );
-
+  
       if (response.status === 200) {
         const taskLogResponse = await axios.post(
           `${import.meta.env.VITE_SERVER_URL}/task-log`,
@@ -200,7 +201,7 @@ const BorrowPage = () => {
             action: language === "th" ? "ยืมอุปกรณ์" : "Borrow Equipment",
           }
         );
-
+  
         Swal.fire({ title: "Success", text: translation.success_message, icon: "success" });
         if (taskLogResponse.status === 201) {
           navigate("/dashboard/borrows");

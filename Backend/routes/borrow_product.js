@@ -23,6 +23,7 @@ router.post("/v2/equipment-borrowing", upload.single("id_card_image"), async (re
   const { tech_id, borrow_date, return_date, user_id, products } = req.body;
   let imageUrl = null;
 
+
   console.log("Received body:", req.body);
 
   try {
@@ -724,4 +725,51 @@ router.get('/user-borrowing-counts/:user_id?', (req, res) => {
   });
 });
 
+router.put(
+  "/v2/equipment-borrowing/update-image/:taskId",
+  upload.single("id_card_image"),
+  async (req, res) => {
+    const { taskId } = req.params;
+
+    if (!req.file) {
+      return res.status(400).json({ error: "No image file provided" });
+    }
+
+    try {
+      // Upload the new image to Cloudinary
+      const idCardImage = req.file.path;
+      const result = await cloudinary.uploader.upload(idCardImage, {
+        folder: "image/borrowed-equipment",
+      });
+      const newImageUrl = result.secure_url;
+
+      // Update the image_url in the equipment_borrowing table
+      const updateImageQuery = `
+        UPDATE equipment_borrowing 
+        SET image_url = ?
+        WHERE task_id = ?
+      `;
+      db.query(updateImageQuery, [newImageUrl, taskId], (updateErr, updateResult) => {
+        if (updateErr) {
+          console.error("Error updating image URL:", updateErr);
+          return res.status(500).json({ error: "Failed to update image URL", details: updateErr.message });
+        }
+
+        if (updateResult.affectedRows === 0) {
+          return res.status(404).json({ error: "Borrowing record not found for this task ID" });
+        }
+
+        // Optionally, delete the old file from local storage (if not using Cloudinary deletion)
+        fs.unlink(idCardImage, (err) => {
+          if (err) console.error("Error deleting temp file:", err);
+        });
+
+        res.status(200).json({ message: "ID card image updated successfully", image_url: newImageUrl });
+      });
+    } catch (error) {
+      console.error("Error uploading image to Cloudinary:", error);
+      res.status(500).json({ error: "Failed to upload image", details: error.message });
+    }
+  }
+);
 module.exports = router;

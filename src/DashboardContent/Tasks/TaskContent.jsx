@@ -51,7 +51,7 @@ const TaskContent = () => {
       of: "of",
       page: "page",
       file: "file",
-      name : "name"
+      name: "name",
     },
     th: {
       taskList: "รายการงาน",
@@ -77,7 +77,7 @@ const TaskContent = () => {
       of: "จาก",
       page: "หน้า",
       file: "ไฟล์",
-      name : "ชื่อ-สกุล"
+      name: "ชื่อ-สกุล",
     },
   };
 
@@ -325,7 +325,9 @@ const TaskContent = () => {
                 <th className="border p-2 text-center">
                   {currentLang.actions}
                 </th>
-                <th className="border p-2 text-center">{currentLang.file}</th>
+                {role !== 2 && (
+                  <th className="border p-2 text-center">{currentLang.file}</th>
+                )}
               </tr>
             </thead>
             <tbody>
@@ -335,7 +337,9 @@ const TaskContent = () => {
                     <td className="border p-2 text-center">
                       {(currentPage - 1) * tasksPerPage + index + 1}{" "}
                     </td>
-                    <td className="border p-2 text-center">{task.firstname} {task.lastname}</td>
+                    <td className="border p-2 text-center">
+                      {task.firstname} {task.lastname}
+                    </td>
                     <td className="border p-2 text-center">{task.type_name}</td>
                     <td className="border p-2 text-center">
                       {task.description}
@@ -421,16 +425,18 @@ const TaskContent = () => {
                         </button>
                       </div>
                     </td>
-                    <td className="flex justify-center">
-                      {task.status_id !== 1 && task.task_type_id === 1 && (
-                        <BookingPDF task={task} />
-                      )}
-                    </td>
+                    {role !== 2 && (
+                      <td className="flex justify-center">
+                        {task.status_id !== 1 && task.task_type_id === 1 && (
+                          <BookingPDF task={task} />
+                        )}
+                      </td>
+                    )}
                   </tr>
                 ))
               ) : (
                 <tr>
-                  <td colSpan="8" className="border p-4 text-center">
+                  <td colSpan="9" className="border p-4 text-center">
                     {currentLang.noTasksFound}
                   </td>
                 </tr>
