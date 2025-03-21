@@ -1180,31 +1180,28 @@ router.get("/rental/:taskId", (req, res) => {
 });
 
 router.get("/rentals", (req, res) => {
-  // SQL query to get rental and product data for all tasks
   const query = `
     SELECT 
       r.task_id,
-      p.product_id,
-      p.name AS product_name,
+      r.product_id,
+      COALESCE(p.name, 'Unknown Product') AS product_name,
       SUM(r.quantity) AS total_quantity_used,
-      r.rental_start_date,
-      r.rental_end_date
+      MIN(r.rental_start_date) AS rental_start_date,
+      MAX(r.rental_end_date) AS rental_end_date
     FROM rental r
-    JOIN products p ON r.product_id = p.product_id
-    GROUP BY r.task_id, r.product_id, p.name;
+    LEFT JOIN products p ON r.product_id = p.product_id
+    GROUP BY r.task_id, r.product_id;
   `;
 
-  // Query execution
   db.query(query, (err, result) => {
     if (err) {
       console.error("Error fetching rental data: ", err);
       return res.status(500).json({ error: "Failed to fetch rental data" });
     }
-
-    // Return the result
-    res.status(200).json({
-      rentalData: result
-    });
+    if (result.length === 0) {
+      return res.status(404).json({ message: "No rental data found" });
+    }
+    res.status(200).json({ rentalData: result });
   });
 });
 
