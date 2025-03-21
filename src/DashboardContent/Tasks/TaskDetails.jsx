@@ -69,9 +69,9 @@ const TaskDetails = () => {
       failedToLoad: "Failed to load task details.",
       images: "Images",
       type_name: "Task type",
-      price : "Total Price",
-      phone : "Phone",
-      organizationName: "Organization Name"
+      price: "Total Price",
+      phone: "Phone",
+      organizationName: "Organization Name",
     },
     th: {
       taskDetails: "รายละเอียดงาน",
@@ -87,9 +87,9 @@ const TaskDetails = () => {
       failedToLoad: "ไม่สามารถโหลดรายละเอียดงานได้",
       images: "รูปภาพ",
       type_name: "ประเภทงาน",
-      price : "ราคารวม",
-      phone : "เบอร์ติดต่อ",
-      organizationName: "ชื่อองค์กร"
+      price: "ราคารวม",
+      phone: "เบอร์ติดต่อ",
+      organizationName: "ชื่อองค์กร",
     },
   };
 
@@ -168,22 +168,21 @@ const TaskDetails = () => {
               <strong>{t.id}:</strong> {task.task_id}
             </p>
           )}
-           {task.organization_name && (
+          {task.organization_name && (
             <p>
-              <strong>{t.organization_name}:</strong> {task.organization_name}
+              <strong>{t.organizationName}:</strong> {task.organization_name}
             </p>
           )}
-           {task.user_id && (
+          {task.user_id && (
             <p>
               <strong>{t.name}:</strong> {task.firstname} {task.lastname}
             </p>
           )}
-           {task.phone && (
-              <p>
-                <strong>{t.phone}:</strong>{" "}
-                {task.phone}
-              </p>
-            )}
+          {task.phone && (
+            <p>
+              <strong>{t.phone}:</strong> {task.phone}
+            </p>
+          )}
           {task.description && (
             <p>
               <strong>{t.description}:</strong> {task.description}
@@ -240,15 +239,14 @@ const TaskDetails = () => {
               <strong>{t.address}:</strong> {task.address}
             </p>
           )}
-           {task.total !== 0 && (
-              <p>
-                <strong>{translations[language].price}:</strong>{" "}
-                {task.price}
-              </p>
-            )}
+          {task.total !== 0 && (
+            <p>
+              <strong>{translations[language].price}:</strong> {task.price}
+            </p>
+          )}
         </div>
         {/* Rental Details Table */}
-        {task.rentalDetails && task.rentalDetails.length > 0 && (
+        {task.rentalDetails && task.rentalDetails.length > 1 && (
           <div className="mt-8">
             <h3 className="text-lg mb-4 font-semibold">รายละเอียดการเช่า</h3>
             <div className="overflow-x-auto">
@@ -263,34 +261,44 @@ const TaskDetails = () => {
                   </tr>
                 </thead>
                 <tbody>
-                  {task.rentalDetails.map((rental, index) => (
-                    <tr
-                      key={index}
-                      className="border-b border-gray-200 hover:bg-gray-100 "
-                    >
-                      <td className="py-3 px-6 text-center">{index + 1}</td>
-                      <td className="py-3 px-6">
-                        {rental.product_name || "-"}
-                      </td>
-                      <td className="py-3 px-6">
-                        {rental.total_quantity_used}
-                      </td>
-                      <td className="py-3 px-6">
-                        {rental.rental_start_date
-                          ? new Date(
-                              rental.rental_start_date
-                            ).toLocaleDateString()
-                          : "-"}
-                      </td>
-                      <td className="py-3 px-6">
-                        {rental.rental_end_date
-                          ? new Date(
-                              rental.rental_end_date
-                            ).toLocaleDateString()
-                          : "-"}
-                      </td>
-                    </tr>
-                  ))}
+                  {task.rentalDetails.map((rental, index) => {
+                    // ตรวจสอบเงื่อนไข: ถ้า product_name เป็น "Unknown Product" และ total_quantity_used เป็น 0 หรือ 1 ให้ข้ามการแสดงผล
+                    if (
+                      rental.product_name === "Unknown Product" &&
+                      (rental.total_quantity_used === 0)
+                    ) {
+                      return null; // ไม่แสดงแถวนี้
+                    }
+
+                    return (
+                      <tr
+                        key={index}
+                        className="border-b border-gray-200 hover:bg-gray-100"
+                      >
+                        <td className="py-3 px-6 text-center">{rental.product_id}</td>
+                        <td className="py-3 px-6">
+                          {rental.product_name || "-"}
+                        </td>
+                        <td className="py-3 px-6">
+                          {rental.total_quantity_used}
+                        </td>
+                        <td className="py-3 px-6">
+                          {rental.rental_start_date
+                            ? new Date(
+                                rental.rental_start_date
+                              ).toLocaleDateString()
+                            : "-"}
+                        </td>
+                        <td className="py-3 px-6">
+                          {rental.rental_end_date
+                            ? new Date(
+                                rental.rental_end_date
+                              ).toLocaleDateString()
+                            : "-"}
+                        </td>
+                      </tr>
+                    );
+                  })}
                 </tbody>
               </table>
             </div>
@@ -313,7 +321,7 @@ const TaskDetails = () => {
               attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
             />
             <Marker position={[task.latitude, task.longitude]}>
-              <Popup>{task.title}</Popup>
+              <Popup>{task.description}</Popup>
             </Marker>
           </MapContainer>
         )}

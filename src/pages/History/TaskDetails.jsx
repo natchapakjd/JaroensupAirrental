@@ -91,11 +91,32 @@ const TaskDetails = () => {
     fetchTaskImages();
   }, [taskId]);
 
-  // Fetch task details
+  // Fetch task details including rentals
   const fetchTaskDetails = async () => {
     try {
+      // Fetch task details
       const response = await axios.get(`${apiUrl}/task/${taskId}`);
-      setTask(response.data);
+      let taskData = response.data;
+
+      // Fetch rentals data
+      const rentalResponse = await axios.get(`${apiUrl}/rentals`);
+      const rentalData = rentalResponse.data.rentalData;
+
+      if (Array.isArray(rentalData)) {
+        // รวม rentals เข้าไปใน taskData โดย task_id ต้องตรงกัน
+        taskData = {
+          ...taskData,
+          rentalDetails: rentalData.filter(
+            (rental) => rental.task_id === taskData.task_id
+          ),
+        };
+      } else {
+        console.error("Rental data is not in expected format:", rentalData);
+      }
+
+      // Set updated task data
+      setTask(taskData);
+      console.log(taskData);
     } catch (error) {
       console.error("Error fetching task details:", error);
       setError("Failed to load task details.");
@@ -150,7 +171,8 @@ const TaskDetails = () => {
             )}
             {task.organization_name && (
               <p>
-                <strong>{translations[language].organization_name}:</strong> {task.organization_name}
+                <strong>{translations[language].organization_name}:</strong>{" "}
+                {task.organization_name}
               </p>
             )}
             {task.user_id && (
@@ -176,13 +198,26 @@ const TaskDetails = () => {
                 {task.type_name}
               </p>
             )}
-
             {task.status_id && (
-              <p>
-                <strong>{translations[language].status}:</strong>{" "}
+            <p>
+              <strong>{translations[language].status}:</strong>{" "}
+              <span
+                className={`px-2 py-1 rounded ${
+                  task.status_name === "pending"
+                    ? "bg-yellow-100 text-yellow-800"
+                    : task.status_name === "active"
+                      ? "bg-blue-100 text-blue-800"
+                      : task.status_name === "approve"
+                        ? "bg-green-100 text-green-800"
+                        : task.status_name === "hiring"
+                          ? "bg-gray-100 text-gray-800"
+                          : "bg-gray-200 text-gray-600"
+                }`}
+              >
                 {task.status_name}
-              </p>
-            )}
+              </span>
+            </p>
+          )}
             {task.appointment_date && (
               <p>
                 <strong>{translations[language].startDate}:</strong>{" "}
@@ -208,6 +243,69 @@ const TaskDetails = () => {
             )}
           </div>
 
+          {/* Rental Details Table */}
+          {task.rentalDetails && task.rentalDetails.length > 1 && (
+            <div className="mt-8">
+              <h3 className="text-lg mb-4 font-semibold">รายละเอียดการเช่า</h3>
+              <div className="overflow-x-auto">
+                <table className="min-w-full bg-white border border-gray-200 shadow-md rounded-lg mb-4">
+                  <thead>
+                    <tr className="bg-gray-200 text-gray-700 uppercase text-sm leading-normal">
+                      <th className="py-3 px-6 text-left">รหัสสินค้า</th>
+                      <th className="py-3 px-6 text-left">ชื่ออุปกรณ์</th>
+                      <th className="py-3 px-6 text-left">จำนวน</th>
+                      <th className="py-3 px-6 text-left">วันที่เริ่มต้น</th>
+                      <th className="py-3 px-6 text-left">วันที่สิ้นสุด</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {task.rentalDetails.map((rental, index) => {
+                      // ตรวจสอบเงื่อนไข: ถ้า product_name เป็น "Unknown Product" และ total_quantity_used เป็น 0 หรือ 1 ให้ข้ามการแสดงผล
+                      if (
+                        rental.product_name === "Unknown Product" &&
+                        (rental.total_quantity_used === 0 ||
+                          rental.total_quantity_used === 1)
+                      ) {
+                        return null; // ไม่แสดงแถวนี้
+                      }
+
+                      return (
+                        <tr
+                          key={index}
+                          className="border-b border-gray-200 hover:bg-gray-100"
+                        >
+                          <td className="py-3 px-6 text-center">
+                            {rental.product_id}
+                          </td>
+                          <td className="py-3 px-6">
+                            {rental.product_name || "-"}
+                          </td>
+                          <td className="py-3 px-6">
+                            {rental.total_quantity_used}
+                          </td>
+                          <td className="py-3 px-6">
+                            {rental.rental_start_date
+                              ? new Date(
+                                  rental.rental_start_date
+                                ).toLocaleDateString()
+                              : "-"}
+                          </td>
+                          <td className="py-3 px-6">
+                            {rental.rental_end_date
+                              ? new Date(
+                                  rental.rental_end_date
+                                ).toLocaleDateString()
+                              : "-"}
+                          </td>
+                        </tr>
+                      );
+                    })}
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          )}
+
           {task.latitude && task.longitude && (
             <MapContainer
               center={[task.latitude, task.longitude]}
@@ -216,10 +314,10 @@ const TaskDetails = () => {
             >
               <TileLayer
                 url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
-                attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+                attribution='© <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
               />
               <Marker position={[task.latitude, task.longitude]}>
-                <Popup>{task.title}</Popup>
+                <Popup>{task.description}</Popup>
               </Marker>
             </MapContainer>
           )}
@@ -253,7 +351,6 @@ const TaskDetails = () => {
           )}
         </div>
       </div>
-
       <Footer />
     </>
   );
