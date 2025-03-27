@@ -80,7 +80,8 @@ const AddTechnician = () => {
         const response = await axios.get(
           `${import.meta.env.VITE_SERVER_URL}/users`
         );
-        setUsers(response.data);
+        const filterUsers = response.data.filter((user)=> user.role_id === 2)
+        setUsers(filterUsers);
       } catch (error) {
         console.error("Error fetching users:", error);
       }
