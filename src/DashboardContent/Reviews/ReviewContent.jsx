@@ -184,7 +184,7 @@ const ReviewContent = () => {
       {" "}
       <div className="p-8 rounded-lg shadow-lg w-full mx-auto h-full">
         <div className="flex justify-between items-center mb-6">
-          <h1 className="text-2xl font-semibold">
+          <h1 className="text-xl font-semibold">
             {translations[language].title}
           </h1>
           {role !== 2 && (

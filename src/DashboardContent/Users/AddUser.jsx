@@ -332,7 +332,7 @@ const AddUser = () => {
                 value={formData.date_of_birth}
                 min={
                   new Date(
-                    new Date().setFullYear(new Date().getFullYear() - 25)
+                    new Date().setFullYear(new Date().getFullYear() - 60)
                   )
                     .toISOString()
                     .split("T")[0]
