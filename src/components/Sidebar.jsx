@@ -357,7 +357,7 @@ const Sidebar = () => {
                       {translations[currentLanguage].attributes}
                     </a>
                   </li>
-                  <li
+                  {/* <li
                     className={`mb-5 hover:rounded-lg hover:py-3 hover:px-4 transition-all duration-300 hover:mx-5 ${
                       isActive("/dashboard/warehouses")
                         ? "bg-blue text-white mx-5 px-4 py-3 rounded-lg"
@@ -371,7 +371,7 @@ const Sidebar = () => {
                       <MdWarehouse className="mt-1" />{" "}
                       {translations[currentLanguage].warehouses}
                     </a>
-                  </li>
+                  </li> */}
                   <li
                     className={`mb-5 hover:rounded-lg hover:py-3 hover:px-4 transition-all duration-300 hover:mx-5 ${
                       isActive("/dashboard/reviews")

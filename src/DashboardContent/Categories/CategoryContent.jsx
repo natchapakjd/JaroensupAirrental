@@ -142,7 +142,7 @@ const CategoryContent = () => {
     <div className="container mx-auto p-8">
       <div className="p-8 rounded-lg shadow-lg w-full mx-auto  font-prompt">
         <div className="flex justify-between items-center mb-6">
-          <h1 className="text-2xl font-semibold">{t.heading}</h1>
+          <h1 className="text-xl font-semibold">{t.heading}</h1>
           <Link to="/dashboard/categories/add">
             <button className="btn bg-blue text-white hover:bg-blue">
               {t.addButton}

@@ -62,15 +62,6 @@ const XrGallary = () => {
       {xrPresenting &&
         models.map(({ position, id, modelName, rotation }) => (
           <Interactive key={id} onSelect={() => setSelectedModel(id)}>
-            {modelName === "air5ton" && (
-              <Air5Ton position={position} rotation={[0, rotation, 0]} />
-            )}
-            {modelName === "air10ton" && (
-              <Air10Ton position={position} rotation={[0, rotation, 0]} />
-            )}
-            {modelName === "air20ton" && (
-              <Air20Ton position={position} rotation={[0, rotation, 0]} />
-            )}
             {modelName === "air5tonCC" && (
               <Air5tonCC position={position} rotation={[0, rotation, 0]} />
             )}

@@ -274,19 +274,58 @@ router.put("/user/:id", upload.single("profile_image"), async (req, res) => {
   }
 });
 
-router.delete("/user/:id",(req, res) => {
+router.delete("/user/:id", (req, res) => {
   const id = req.params.id;
-  const query = "DELETE FROM users WHERE user_id = ?";
+  const queryTechnicians = "DELETE FROM technicians WHERE user_id = ?";
+  const queryUsers = "DELETE FROM users WHERE user_id = ?";
 
-  db.query(query, [id], (err, result) => {
+  // เริ่ม transaction
+  db.beginTransaction((err) => {
     if (err) {
-      console.error("Error deleting user: " + err);
-      res.status(500).json({ error: "Failed to delete user" });
-    } else if (result.affectedRows === 0) {
-      res.status(404).json({ error: "User not found" });
-    } else {
-      res.status(200).json({ message: "User deleted successfully" });
+      console.error("Error starting transaction: " + err);
+      return res.status(500).json({ error: "Failed to delete user" });
     }
+
+    // ลบจากตาราง technicians ก่อน
+    db.query(queryTechnicians, [id], (err, resultTech) => {
+      if (err) {
+        return db.rollback(() => {
+          console.error("Error deleting from technicians: " + err);
+          res.status(500).json({ error: "Failed to delete technician data" });
+        });
+      }
+
+      // ลบจากตาราง users
+      db.query(queryUsers, [id], (err, resultUser) => {
+        if (err) {
+          return db.rollback(() => {
+            console.error("Error deleting from users: " + err);
+            res.status(500).json({ error: "Failed to delete user" });
+          });
+        }
+
+        if (resultUser.affectedRows === 0) {
+          return db.rollback(() => {
+            res.status(404).json({ error: "User not found" });
+          });
+        }
+
+        // ถ้าทุกอย่างสำเร็จ commit transaction
+        db.commit((err) => {
+          if (err) {
+            return db.rollback(() => {
+              console.error("Error committing transaction: " + err);
+              res.status(500).json({ error: "Failed to complete deletion" });
+            });
+          }
+          res.status(200).json({ 
+            message: "User and technician data deleted successfully",
+            techniciansDeleted: resultTech.affectedRows,
+            usersDeleted: resultUser.affectedRows 
+          });
+        });
+      });
+    });
   });
 });
 
