@@ -4,7 +4,7 @@ import axios from "axios";
 import Swal from "sweetalert2";
 import Loading from "../../components/Loading";
 import { Link } from "react-router-dom";
-
+import BackButtonEdit from "../../components/BackButtonEdit";
 const OrderDetailsLog = () => {
   const { taskId } = useParams(); // Get taskId from URL params
   const [order, setOrder] = useState(null);
@@ -71,12 +71,14 @@ const OrderDetailsLog = () => {
 
   return (
     <div className="container mx-auto p-8">
-      {" "}
       <div className="p-8 rounded-lg shadow-lg w-full mx-auto font-prompt h-full">
         <div className="flex justify-between items-center mb-4">
-          <h2 className="text-xl font-semibold mb-4">
-            {translations[language].orderDetailsTitle}
-          </h2>
+        <div className="flex w-full my-2">
+            <BackButtonEdit />
+            <h1 className="text-2xl font-semibold mx-2">
+              {translations[language].orderDetailsTitle}
+            </h1>
+          </div>
           <Link to={`/dashboard/orders/edit/${order.order_id}`}>
             <button className="btn bg-blue text-white hover:bg-blue px-6 py-2 rounded-md">
               {translations[language].editOrderButton}

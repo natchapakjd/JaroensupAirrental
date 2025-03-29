@@ -31,9 +31,11 @@ const translations = {
     deleted: "Deleted!",
     orderDeleted: "The order has been deleted.",
     file: "file",
-    approve: "approve",
+    approve: "Approve",
     status: "status",
-    orderApproved: "Order was approved"
+    orderApproved: "Order was approved",
+    complete: "Complete"
+
   },
   th: {
     orders: "คำสั่งซื้อ",
@@ -61,7 +63,8 @@ const translations = {
     file: "ไฟล์",
     approve: "อนมุัติ",
     status: "สถานะ",
-    orderApproved: "อนมุัติออเดอร์เสร็จสิ้น"
+    orderApproved: "อนมุัติออเดอร์เสร็จสิ้น",
+    complete: "จบออเดอร์"
   },
 };
 
@@ -338,7 +341,19 @@ const OrderContent = () => {
                       </span>
                     </td>
                     <td className="border p-2 text-center">
-                      {new Date(order.created_at).toLocaleString()}
+                      {new Date(
+                        new Date(order.created_at).getTime() +
+                          7 * 60 * 60 * 1000
+                      ).toLocaleString("th-TH", {
+                        timeZone: "Asia/Bangkok",
+                        year: "numeric",
+                        month: "2-digit",
+                        day: "2-digit",
+                        hour: "2-digit",
+                        minute: "2-digit",
+                        second: "2-digit",
+                        hour12: false, // ใช้รูปแบบ 24 ชั่วโมง
+                      })}
                     </td>
                     <td className="border p-2 text-center">
                       <div className="flex justify-center gap-2">
@@ -349,7 +364,7 @@ const OrderContent = () => {
                             }
                             className="btn bg-blue hover:bg-blue text-white"
                           >
-                            Complete
+                            {translations[language].complete}
                           </button>
                         )}
                         {order.status_id !== 4 && order.status_id !== 2 && (

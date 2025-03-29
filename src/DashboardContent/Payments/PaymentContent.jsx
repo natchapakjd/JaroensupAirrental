@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
 import axios from "axios";
 import Swal from "sweetalert2";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import Loading from "../../components/Loading";
 import Cookies from "universal-cookie";
 import { jwtDecode } from "jwt-decode";
@@ -18,6 +18,8 @@ const PaymentContent = () => {
   const token = cookies.get("authToken");
   const decodedToken = jwtDecode(token);
   const user_id = decodedToken.id;
+  const navigate = useNavigate();
+
   // Load translations from localStorage or default to English
   const language = localStorage.getItem("language") || "en";
   const translations = {
@@ -54,6 +56,7 @@ const PaymentContent = () => {
       next: "next",
       of: "of",
       page: "page",
+      details: "details.",
     },
     th: {
       paymentList: "รายการการชำระเงิน",
@@ -69,7 +72,7 @@ const PaymentContent = () => {
       noPayments: "ไม่มีการชำระเงินของงาน",
       paymentId: "รหัสการชำระเงิน",
       user: "ผู้ใช้",
-      task: "ภารกิจ",
+      task: "ประเภทงาน",
       amount: "จำนวนเงิน",
       paymentMethod: "วิธีการชำระเงิน",
       paymentDate: "วันเวลาในการชำระเงิน",
@@ -88,6 +91,7 @@ const PaymentContent = () => {
       next: "ถัดไป",
       of: "จาก",
       page: "หน้า",
+      details: "รายละเอียดงาน",
     },
   };
 
@@ -242,6 +246,16 @@ const PaymentContent = () => {
     });
   };
 
+  const handleTaskDetails = (task_id, task_type_id) => {
+    if (task_type_id === 11) {
+      navigate(`/dashboard/borrows/details/${task_id}`);
+    } else if (task_type_id === 9) {
+      navigate(`/dashboard/orders/detail-log/${task_id}`);
+    } else {
+      navigate(`/dashboard/tasks/${task_id}`);
+    }
+  };
+
   return (
     <div className="container mx-auto p-8">
       <div className="p-8 rounded-lg shadow-lg w-full mx-auto font-prompt h-full">
@@ -290,13 +304,16 @@ const PaymentContent = () => {
                 <th className="border p-2 text-center">{t.slipImages}</th>
                 <th className="border p-2 text-center">{t.status}</th>
                 <th className="border p-2 text-center">{t.actions}</th>
+                <th className="border p-2 text-center">{t.details}</th>
               </tr>
             </thead>
             <tbody className="text-center">
               {filteredPayments.length > 0 ? (
                 filteredPayments.map((payment, index) => (
                   <tr key={index + 1}>
-                    <td className="border p-2 text-center">{(currentPage - 1) * 10 + index + 1}</td>
+                    <td className="border p-2 text-center">
+                      {(currentPage - 1) * 10 + index + 1}
+                    </td>
                     <td className="border p-2 text-center">
                       {payment.firstname} {payment.lastname}
                     </td>
@@ -308,7 +325,19 @@ const PaymentContent = () => {
                       {payment.method_name}
                     </td>
                     <td className="border p-2 text-center">
-                      {new Date(payment.created_at).toLocaleString()}
+                      {new Date(
+                        new Date(payment.created_at).getTime() +
+                          7 * 60 * 60 * 1000
+                      ).toLocaleString("th-TH", {
+                        timeZone: "Asia/Bangkok",
+                        year: "numeric",
+                        month: "2-digit",
+                        day: "2-digit",
+                        hour: "2-digit",
+                        minute: "2-digit",
+                        second: "2-digit",
+                        hour12: false, // ใช้รูปแบบ 24 ชั่วโมง
+                      })}
                     </td>
                     <td className="border p-2 text-center">
                       {payment.image_url ? (
@@ -323,12 +352,12 @@ const PaymentContent = () => {
                       )}
                     </td>
                     <td className="border p-2 text-center">
-                    <span
+                      <span
                         className={`px-2 py-1 rounded ${
                           payment.status_name === "pending"
                             ? "bg-yellow-100 text-yellow-800"
                             : payment.status_name === "active"
-                              ? "bg-blue-100 text-blue-800"
+                              ? "bg-red-100 text-red-800"
                               : payment.status_name === "approve"
                                 ? "bg-green-100 text-green-800"
                                 : payment.status_name === "completed"
@@ -367,11 +396,22 @@ const PaymentContent = () => {
                         </button>
                       </div>
                     </td>
+                    <td className="border p-2 text-center">
+                      
+                      <button
+                        onClick={() =>
+                          handleTaskDetails(payment.task_id, payment.task_type_id)
+                        }
+                        className="underline"
+                      >
+                       {t.details}
+                      </button>
+                    </td>
                   </tr>
                 ))
               ) : (
                 <tr>
-                  <td colSpan="9" className="text-center py-4">
+                  <td colSpan="10" className="text-center py-4">
                     {t.noPayments}
                   </td>
                 </tr>

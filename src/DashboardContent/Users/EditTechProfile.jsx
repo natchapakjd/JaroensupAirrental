@@ -3,7 +3,7 @@ import axios from "axios";
 import { useParams } from "react-router-dom";
 import Loading from "../../components/Loading";
 import BackButtonEdit from "../../components/BackButtonEdit";
-
+import Swal from "sweetalert2";
 const translations = {
   en: {
     editTechProfile: "Edit Technician Profile",
@@ -105,9 +105,21 @@ const EditTechProfile = () => {
         `${import.meta.env.VITE_SERVER_URL}/technician/${techId}`,
         formData
       );
-      alert("Technician updated successfully");
+      // ใช้ SweetAlert2 แทน alert สำหรับแจ้งเตือนความสำเร็จ
+      Swal.fire({
+        icon: "success",
+        title: translations[language].technicianUpdated,
+        showConfirmButton: false,
+        timer: 1500,
+      });
     } catch (error) {
       console.error("Error updating technician:", error);
+      // ใช้ SweetAlert2 แทน alert สำหรับแจ้งเตือนข้อผิดพลาด
+      Swal.fire({
+        icon: "error",
+        title: translations[language].error,
+        text: error.message || "Something went wrong!",
+      });
     }
   };
 

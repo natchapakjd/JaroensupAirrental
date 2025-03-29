@@ -55,6 +55,7 @@ const translations = {
     goToProfile: "Go to Profile Settings",
   },
 };
+const ADMIN_LINE_ID = "U9cb564155dddeaa549d97a8747eed534"; 
 
 const Checkout = () => {
   const navigate = useNavigate();
@@ -100,7 +101,7 @@ const Checkout = () => {
       }
     } catch (err) {
       console.log(err);
-      setProfile(null); // Set to null on error
+      setProfile(null);
     }
   };
 
@@ -115,8 +116,26 @@ const Checkout = () => {
     }
   };
 
+  const sendLineNotification = async (adminId, customerName, items, totalPrice) => {
+    try {
+      const itemList = items.map(item => `${item.name} - ${item.quantity} ชิ้น (฿${(item.price * item.quantity).toFixed(2)})`).join("\n");
+      const message = language === "th" 
+        ? `แจ้งเตือนจากระบบ:มีคำสั่งซื้อใหม่ในระบบ!\nผู้สั่ง: ${customerName}\nรายการสินค้า:\n${itemList}\nยอดรวม: ฿${totalPrice}`
+        : `แจ้งเตือนจากระบบ:มีคำสั่งซื้อใหม่ในระบบ!\nผู้สั่ง: ${customerName}\nรายการสินค้า:\n${itemList}\nยอดรวม: ฿${totalPrice}`;
+
+      const body = {
+        userId: adminId, // ส่งไปยังแอดมิน
+        message,
+      };
+
+      await axios.post(`${import.meta.env.VITE_SERVER_URL}/send-message`, body);
+      console.log("Line notification sent to admin successfully");
+    } catch (error) {
+      console.error("Error sending Line notification to admin:", error);
+    }
+  };
+
   const handleCheckout = async () => {
-    // Check if profile is loaded and firstname/lastname are present
     if (!profile || !profile.firstname || !profile.lastname || !profile.address) {
       Swal.fire({
         title: "ข้อมูลไม่ครบถ้วน",
@@ -199,6 +218,10 @@ const Checkout = () => {
 
       if (!paymentResponse.ok) throw new Error("Failed to create payment");
 
+      // ส่ง Line Notification ไปยังแอดมิน
+      const customerName = `${profile.firstname} ${profile.lastname}`;
+      await sendLineNotification(ADMIN_LINE_ID, customerName, cartItems, totalPrice);
+
       Swal.fire({
         title: t("successTitle"),
         text: t("successText"),
@@ -248,7 +271,7 @@ const Checkout = () => {
                 <div key={item.product_id} className="flex justify-between mb-4 border-b pb-2">
                   <div>
                     <h2 className="text-lg font-semibold">{item.name}</h2>
-                    <p className="text-gray-600">Price: ${item.price.toFixed(2)}</p>
+                    <p className="text-gray-600">Price: {item.price.toFixed(2)} บาท</p>
                     <p className="text-gray-500">Stock: {item.stock_quantity}</p>
                   </div>
                   <div className="self-center flex items-center">

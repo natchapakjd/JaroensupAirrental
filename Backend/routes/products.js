@@ -426,8 +426,8 @@ router.get("/product-type", (req, res) => {
 router.get("/products/ac-count", (req, res) => {
   const query = `
     SELECT 
-      SUM(CASE WHEN pd.name = "แอร์ 60000BTU" THEN pd.stock_quantity ELSE 0 END) AS air_5_ton,
-      SUM(CASE WHEN pd.name = "แอร์ 120000BTU" THEN pd.stock_quantity ELSE 0 END) AS air_10_ton,
+      SUM(CASE WHEN pd.name = "แอร์ 5ตัน" THEN pd.stock_quantity ELSE 0 END) AS air_5_ton,
+      SUM(CASE WHEN pd.name = "แอร์ 10ตัน" THEN pd.stock_quantity ELSE 0 END) AS air_10_ton,
       SUM(CASE WHEN pd.name = "แอร์ 20ตัน" THEN pd.stock_quantity ELSE 0 END) AS air_20_ton
     FROM products pd
   `;

@@ -20,7 +20,8 @@ router.get("/v1/orders", (req, res) => {
           oi.product_name, 
           oi.quantity, 
           oi.price,
-          o.total_price,
+          oi.total_price,
+          o.total_price as total_price_od,
           u.firstname,
           u.lastname
       FROM orders o
@@ -59,7 +60,7 @@ router.get("/v1/orders", (req, res) => {
             status_id: row.status_id,
             task_id: row.task_id,
             task_type_id: row.task_type_id,
-            total_price: row.total_price,
+            total_price: row.total_price_od,
             status_name: row.status_name,
             firstname: row.firstname,
             lastname: row.lastname,

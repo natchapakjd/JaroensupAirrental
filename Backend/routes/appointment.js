@@ -214,18 +214,84 @@ router.put("/appointment/:id", (req, res) => {
 
 router.delete("/appointment/:id", (req, res) => {
   const id = req.params.id;
-  const query = "DELETE FROM taskassignments WHERE assignment_id = ?";
 
-  db.query(query, [id], (err, result) => {
+  const getCalculationId = "SELECT calculation_id FROM area_calculation_history WHERE assignment_id = ?";
+  const deleteAreaImages = "DELETE FROM area_images WHERE area_calculation_id = ?";
+  const deleteAreaHistory = "DELETE FROM area_calculation_history WHERE assignment_id = ?";
+  const deleteTaskAssignment = "DELETE FROM taskassignments WHERE assignment_id = ?";
+
+  db.beginTransaction((err) => {
     if (err) {
-      console.error("Error deleting appointment: " + err);
-      res.status(500).json({ error: "Failed to delete appointment" });
-    } else if (result.affectedRows === 0) {
-      res.status(404).json({ error: "Appointment not found" });
-    } else {
-      res.status(200).send();
+      console.error("Transaction error: " + err);
+      return res.status(500).json({ error: "Transaction failed" });
     }
+
+    // ดึง calculation_id จาก area_calculation_history
+    db.query(getCalculationId, [id], (err, results) => {
+      if (err) {
+        return db.rollback(() => {
+          console.error("Error fetching calculation_id: " + err);
+          res.status(500).json({ error: "Failed to fetch calculation_id" });
+        });
+      }
+
+      if (results.length === 0) {
+        return db.rollback(() => {
+          res.status(404).json({ error: "No calculation_id found for this assignment" });
+        });
+      }
+
+      const calculationId = results[0].calculation_id;
+
+      // ลบข้อมูลจาก area_images ที่มี calculation_id ที่ได้มา
+      db.query(deleteAreaImages, [calculationId], (err) => {
+        if (err) {
+          return db.rollback(() => {
+            console.error("Error deleting area_images: " + err);
+            res.status(500).json({ error: "Failed to delete area images" });
+          });
+        }
+
+        // ลบ area_calculation_history
+        db.query(deleteAreaHistory, [id], (err) => {
+          if (err) {
+            return db.rollback(() => {
+              console.error("Error deleting area_calculation_history: " + err);
+              res.status(500).json({ error: "Failed to delete area history" });
+            });
+          }
+
+          // ลบ taskassignments
+          db.query(deleteTaskAssignment, [id], (err, result) => {
+            if (err) {
+              return db.rollback(() => {
+                console.error("Error deleting task assignment: " + err);
+                res.status(500).json({ error: "Failed to delete task assignment" });
+              });
+            }
+
+            if (result.affectedRows === 0) {
+              return db.rollback(() => {
+                res.status(404).json({ error: "Appointment not found" });
+              });
+            }
+
+            db.commit((err) => {
+              if (err) {
+                return db.rollback(() => {
+                  console.error("Transaction commit error: " + err);
+                  res.status(500).json({ error: "Transaction commit failed" });
+                });
+              }
+              res.status(200).send();
+            });
+          });
+        });
+      });
+    });
   });
 });
+
+
 
 module.exports = router;

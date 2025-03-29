@@ -8,7 +8,7 @@ import { jwtDecode } from "jwt-decode";
 
 const translations = {
   th: {
-    adminLogs: "บันทึกการทำงานของแอดมิน",
+    adminLogs: "บันทึกการทำงานของระบบโดยรวม",
     taskLogs: "บันทึกการทำงานของงาน",
     logId: "รหัสบันทึก",
     adminId: "ชื่อแอดมิน",
@@ -28,7 +28,7 @@ const translations = {
     allRoles: "ทุกบทบาท",
   },
   en: {
-    adminLogs: "Admin Logs",
+    adminLogs: "System Logs Overall",
     taskLogs: "Task Logs",
     logId: "Log ID",
     adminId: "Admin Name",
@@ -244,10 +244,20 @@ const HistoryLogContent = () => {
                         </td>
                         <td className="border p-2">{log.action}</td>
                         <td className="border p-2">
-                          {new Date(log.timestamp).toLocaleString("th-TH", {
-                            timeZone: "Asia/Bangkok",
-                          })}
-                        </td>
+                      {new Date(
+                        new Date(log.timestamp).getTime() +
+                          7 * 60 * 60 * 1000
+                      ).toLocaleString("th-TH", {
+                        timeZone: "Asia/Bangkok",
+                        year: "numeric",
+                        month: "2-digit",
+                        day: "2-digit",
+                        hour: "2-digit",
+                        minute: "2-digit",
+                        second: "2-digit",
+                        hour12: false, // ใช้รูปแบบ 24 ชั่วโมง
+                      })}
+                    </td>
                       </tr>
                     ))
                   ) : (
@@ -376,9 +386,19 @@ const HistoryLogContent = () => {
                     </td>
                     <td className="border p-2">{log.type_name}</td>
                     <td className="border p-2">{log.action}</td>
-                    <td className="border p-2">
-                      {new Date(log.created_at).toLocaleString("th-TH", {
+                    <td className="border p-2 text-center">
+                      {new Date(
+                        new Date(log.created_at).getTime() +
+                          7 * 60 * 60 * 1000
+                      ).toLocaleString("th-TH", {
                         timeZone: "Asia/Bangkok",
+                        year: "numeric",
+                        month: "2-digit",
+                        day: "2-digit",
+                        hour: "2-digit",
+                        minute: "2-digit",
+                        second: "2-digit",
+                        hour12: false, // ใช้รูปแบบ 24 ชั่วโมง
                       })}
                     </td>
                     <td className="border p-2">

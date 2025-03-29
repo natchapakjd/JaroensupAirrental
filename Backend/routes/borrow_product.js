@@ -19,87 +19,125 @@ const storage = multer.diskStorage({
 
 const upload = multer({ storage: storage });
 
-router.post("/v2/equipment-borrowing", upload.single("id_card_image"), async (req, res) => {
-  const { tech_id, borrow_date, return_date, user_id, products } = req.body;
-  let imageUrl = null;
+router.post(
+  "/v2/equipment-borrowing",
+  upload.single("id_card_image"),
+  async (req, res) => {
+    const { tech_id, borrow_date, return_date, user_id, products } = req.body;
+    let imageUrl = null;
 
+    console.log("Received body:", req.body);
 
-  console.log("Received body:", req.body);
-
-  try {
-    if (req.file) {
-      try {
-        const idCardImage = req.file.path;
-        const result = await cloudinary.uploader.upload(idCardImage, {
-          folder: "image/borrowed-equipment",
-        });
-        imageUrl = result.secure_url;
-      } catch (uploadError) {
-        console.error("Cloudinary Upload Error:", uploadError);
-        return res.status(500).json({ error: "Failed to upload image", details: uploadError.message });
+    try {
+      if (req.file) {
+        try {
+          const idCardImage = req.file.path;
+          const result = await cloudinary.uploader.upload(idCardImage, {
+            folder: "image/borrowed-equipment",
+          });
+          imageUrl = result.secure_url;
+        } catch (uploadError) {
+          console.error("Cloudinary Upload Error:", uploadError);
+          return res
+            .status(500)
+            .json({
+              error: "Failed to upload image",
+              details: uploadError.message,
+            });
+        }
       }
-    }
 
-    const taskQuery = `
+      const taskQuery = `
       INSERT INTO tasks (task_type_id, description, isActive, user_id)
       VALUES (?, ?, ?, ?)
     `;
-    const taskValues = [11, "ยืมอุปกรณ์", 1, user_id];
+      const taskValues = [11, "ยืมอุปกรณ์", 1, user_id];
 
-    db.query(taskQuery, taskValues, (taskError, taskResults) => {
-      if (taskError) {
-        console.error("Task Query Error:", taskError);
-        return res.status(500).json({ error: "Error creating task", details: taskError.message });
-      }
-      const task_id = taskResults.insertId;
+      db.query(taskQuery, taskValues, (taskError, taskResults) => {
+        if (taskError) {
+          console.error("Task Query Error:", taskError);
+          return res
+            .status(500)
+            .json({ error: "Error creating task", details: taskError.message });
+        }
+        const task_id = taskResults.insertId;
 
-      const formattedBorrowDate = new Date(borrow_date).toISOString().slice(0, 19).replace("T", " ");
-      const formattedReturnDate = new Date(return_date).toISOString().slice(0, 19).replace("T", " ");
-      const borrowingQuery = `
+        const formattedBorrowDate = new Date(borrow_date)
+          .toISOString()
+          .slice(0, 19)
+          .replace("T", " ");
+        const formattedReturnDate = new Date(return_date)
+          .toISOString()
+          .slice(0, 19)
+          .replace("T", " ");
+        const borrowingQuery = `
         INSERT INTO equipment_borrowing (tech_id, borrow_date, return_date, task_id, image_url)
         VALUES (?, ?, ?, ?, ?)
       `;
-      const borrowingValues = [tech_id, formattedBorrowDate, formattedReturnDate, task_id, imageUrl];
+        const borrowingValues = [
+          tech_id,
+          formattedBorrowDate,
+          formattedReturnDate,
+          task_id,
+          imageUrl,
+        ];
 
-      db.query(borrowingQuery, borrowingValues, (borrowingError, borrowingResults) => {
-        if (borrowingError) {
-          console.error("Borrowing Query Error:", borrowingError);
-          return res.status(500).json({ error: "Error borrowing equipment", details: borrowingError.message });
-        }
+        db.query(
+          borrowingQuery,
+          borrowingValues,
+          (borrowingError, borrowingResults) => {
+            if (borrowingError) {
+              console.error("Borrowing Query Error:", borrowingError);
+              return res
+                .status(500)
+                .json({
+                  error: "Error borrowing equipment",
+                  details: borrowingError.message,
+                });
+            }
 
-        const borrowing_id = borrowingResults.insertId;
+            const borrowing_id = borrowingResults.insertId;
 
-        let parsedProducts = products;
-        if (typeof parsedProducts === "string") {
-          parsedProducts = JSON.parse(parsedProducts);
-        }
-        console.log("Parsed Products:", parsedProducts);
+            let parsedProducts = products;
+            if (typeof parsedProducts === "string") {
+              parsedProducts = JSON.parse(parsedProducts);
+            }
+            console.log("Parsed Products:", parsedProducts);
 
-        const detailsQuery = `
+            const detailsQuery = `
           INSERT INTO borrowing_details (borrowing_id, product_id, quantity)
           VALUES ?
         `;
-        const detailsValues = parsedProducts.map((product) => [
-          borrowing_id,
-          product.product_id,
-          product.quantity,
-        ]);
+            const detailsValues = parsedProducts.map((product) => [
+              borrowing_id,
+              product.product_id,
+              product.quantity,
+            ]);
 
-        db.query(detailsQuery, [detailsValues], (detailsError) => {
-          if (detailsError) {
-            console.error("Details Query Error:", detailsError);
-            return res.status(500).json({ error: "Error saving borrowing details", details: detailsError.message });
+            db.query(detailsQuery, [detailsValues], (detailsError) => {
+              if (detailsError) {
+                console.error("Details Query Error:", detailsError);
+                return res
+                  .status(500)
+                  .json({
+                    error: "Error saving borrowing details",
+                    details: detailsError.message,
+                  });
+              }
+
+              res
+                .status(200)
+                .json({ message: "Equipment borrowed successfully", task_id });
+            });
           }
-
-          res.status(200).json({ message: "Equipment borrowed successfully", task_id });
-        });
+        );
       });
-    });
-  } catch (error) {
-    console.error("Server Error:", error);
-    res.status(500).json({ error: "Server error", details: error.message });
+    } catch (error) {
+      console.error("Server Error:", error);
+      res.status(500).json({ error: "Server error", details: error.message });
+    }
   }
-});
+);
 
 router.get("/v2/equipment-borrowings-paging", (req, res) => {
   const { page = 1, limit = 10 } = req.query;
@@ -148,7 +186,12 @@ router.get("/v2/equipment-borrowings-paging", (req, res) => {
   db.query(countQuery, (countErr, countResult) => {
     if (countErr) {
       console.error("Error fetching total count:", countErr);
-      return res.status(500).json({ error: "Failed to fetch total count", details: countErr.message });
+      return res
+        .status(500)
+        .json({
+          error: "Failed to fetch total count",
+          details: countErr.message,
+        });
     }
 
     const total = countResult[0].total;
@@ -156,7 +199,12 @@ router.get("/v2/equipment-borrowings-paging", (req, res) => {
     db.query(query, [limitNum, offset], (queryErr, result) => {
       if (queryErr) {
         console.error("Error fetching equipment borrowing:", queryErr);
-        return res.status(500).json({ error: "Failed to fetch equipment borrowing", details: queryErr.message });
+        return res
+          .status(500)
+          .json({
+            error: "Failed to fetch equipment borrowing",
+            details: queryErr.message,
+          });
       }
 
       res.json({ data: result, total, page: pageNum, limit: limitNum });
@@ -217,7 +265,12 @@ router.get("/v2/equipment-borrowing-paging/:techId", (req, res) => {
   db.query(countQuery, [techId], (countErr, countResult) => {
     if (countErr) {
       console.error("Error fetching total count:", countErr);
-      return res.status(500).json({ error: "Failed to fetch total count", details: countErr.message });
+      return res
+        .status(500)
+        .json({
+          error: "Failed to fetch total count",
+          details: countErr.message,
+        });
     }
 
     const total = countResult[0].total;
@@ -226,7 +279,12 @@ router.get("/v2/equipment-borrowing-paging/:techId", (req, res) => {
     db.query(query, [techId, limitNum, offset], (queryErr, result) => {
       if (queryErr) {
         console.error("Error fetching equipment borrowing:", queryErr);
-        return res.status(500).json({ error: "Failed to fetch equipment borrowing", details: queryErr.message });
+        return res
+          .status(500)
+          .json({
+            error: "Failed to fetch equipment borrowing",
+            details: queryErr.message,
+          });
       }
 
       res.json({ data: result, total, page: pageNum, limit: limitNum });
@@ -249,7 +307,9 @@ router.put("/v2/equipment-borrowing/approve/:taskId", async (req, res) => {
     db.query(getBorrowingDetailsQuery, [taskId], (err, detailsResult) => {
       if (err) {
         console.error("Error retrieving borrowing details:", err);
-        return res.status(500).json({ error: "Error retrieving borrowing details" });
+        return res
+          .status(500)
+          .json({ error: "Error retrieving borrowing details" });
       }
 
       if (detailsResult.length === 0) {
@@ -277,15 +337,23 @@ router.put("/v2/equipment-borrowing/approve/:taskId", async (req, res) => {
             WHERE product_id = ?
           `;
 
-          db.query(decreaseQuantityQuery, [detail.quantity, detail.product_id], (err) => {
-            if (err) {
-              console.error("Error decreasing product quantity:", err);
-              return res.status(500).json({ error: "Error decreasing product quantity" });
+          db.query(
+            decreaseQuantityQuery,
+            [detail.quantity, detail.product_id],
+            (err) => {
+              if (err) {
+                console.error("Error decreasing product quantity:", err);
+                return res
+                  .status(500)
+                  .json({ error: "Error decreasing product quantity" });
+              }
             }
-          });
+          );
         });
 
-        res.status(200).json({ message: "Borrowing approved and stock updated" });
+        res
+          .status(200)
+          .json({ message: "Borrowing approved and stock updated" });
       });
     });
   } catch (error) {
@@ -327,7 +395,9 @@ router.put("/v2/equipment-borrowing/return/:taskId", async (req, res) => {
     db.query(getBorrowingDetailsQuery, [taskId], (err, detailsResult) => {
       if (err) {
         console.error("Error retrieving borrowing details:", err);
-        return res.status(500).json({ error: "Error retrieving borrowing details" });
+        return res
+          .status(500)
+          .json({ error: "Error retrieving borrowing details" });
       }
 
       if (detailsResult.length === 0) {
@@ -355,15 +425,23 @@ router.put("/v2/equipment-borrowing/return/:taskId", async (req, res) => {
             WHERE product_id = ?
           `;
 
-          db.query(increaseQuantityQuery, [detail.quantity, detail.product_id], (err) => {
-            if (err) {
-              console.error("Error increasing product quantity:", err);
-              return res.status(500).json({ error: "Error increasing product quantity" });
+          db.query(
+            increaseQuantityQuery,
+            [detail.quantity, detail.product_id],
+            (err) => {
+              if (err) {
+                console.error("Error increasing product quantity:", err);
+                return res
+                  .status(500)
+                  .json({ error: "Error increasing product quantity" });
+              }
             }
-          });
+          );
         });
 
-        res.status(200).json({ message: "Equipment returned and stock updated" });
+        res
+          .status(200)
+          .json({ message: "Equipment returned and stock updated" });
       });
     });
   } catch (error) {
@@ -411,7 +489,9 @@ router.get("/v3/equipment-borrowing/id/:borrowingId", (req, res) => {
   db.query(query, [borrowingId], (err, result) => {
     if (err) {
       console.error("Error fetching borrowing record:", err);
-      return res.status(500).json({ error: "Failed to fetch borrowing record" });
+      return res
+        .status(500)
+        .json({ error: "Failed to fetch borrowing record" });
     }
 
     if (result.length === 0) {
@@ -428,43 +508,47 @@ router.get("/v3/equipment-borrowing/id/:borrowingId", (req, res) => {
 router.get("/v4/equipment-borrowing/id/:taskId", (req, res) => {
   const { taskId } = req.params;
 
-  const query = `
-    SELECT 
-      eb.*, 
-      t.user_id, 
-      t.description AS task_desc,
-      t.status_id,
-      st.status_name,
-      u.firstname, 
-      u.lastname,
-      GROUP_CONCAT(
-        JSON_OBJECT(
-          'product_id', bd.product_id,
-          'product_name', p.name,
-          'quantity', bd.quantity
-        )
-      ) AS products
-    FROM 
-      equipment_borrowing eb
-    JOIN 
-      tasks t ON eb.task_id = t.task_id
-    JOIN 
-      users u ON t.user_id = u.user_id
-    JOIN 
-      borrowing_details bd ON eb.borrowing_id = bd.borrowing_id
-    JOIN 
-      products p ON bd.product_id = p.product_id
-    JOIN 
-      status st ON t.status_id = st.status_id
-    WHERE 
-      eb.task_id = ?
-    GROUP BY eb.task_id
-  `;
+    const query = `
+      SELECT 
+    eb.*,
+    t.user_id, 
+    t.description AS task_desc,
+    t.status_id,
+    st.status_name,
+    u.firstname, 
+    u.lastname,
+    JSON_ARRAYAGG(
+      JSON_OBJECT(
+        'product_id', bd.product_id,
+        'product_name', p.name,
+        'quantity', bd.quantity
+      )
+    ) AS products
+  FROM 
+    equipment_borrowing eb
+  JOIN 
+    tasks t ON eb.task_id = t.task_id
+  JOIN 
+    users u ON t.user_id = u.user_id
+  JOIN 
+    borrowing_details bd ON eb.borrowing_id = bd.borrowing_id
+  JOIN 
+    products p ON bd.product_id = p.product_id
+  JOIN 
+    status st ON t.status_id = st.status_id
+  WHERE 
+    eb.task_id = ?
+  GROUP BY 
+    eb.borrowing_id
+
+    `;
 
   db.query(query, [taskId], (err, result) => {
     if (err) {
       console.error("Error fetching borrowing record:", err);
-      return res.status(500).json({ error: "Failed to fetch borrowing record" });
+      return res
+        .status(500)
+        .json({ error: "Failed to fetch borrowing record" });
     }
 
     if (result.length === 0) {
@@ -533,7 +617,12 @@ router.delete("/v2/equipment-borrowing/:borrowingId", (req, res) => {
       if (detailsErr) {
         return db.rollback(() => {
           console.error("Error deleting borrowing details:", detailsErr);
-          res.status(500).json({ error: "Failed to delete borrowing details", details: detailsErr.message });
+          res
+            .status(500)
+            .json({
+              error: "Failed to delete borrowing details",
+              details: detailsErr.message,
+            });
         });
       }
 
@@ -542,46 +631,65 @@ router.delete("/v2/equipment-borrowing/:borrowingId", (req, res) => {
         DELETE FROM equipment_borrowing 
         WHERE borrowing_id = ?
       `;
-      db.query(deleteBorrowingQuery, [borrowingId], (borrowingErr, borrowingResult) => {
-        if (borrowingErr) {
-          return db.rollback(() => {
-            console.error("Error deleting equipment borrowing:", borrowingErr);
-            res.status(500).json({ error: "Failed to delete equipment borrowing", details: borrowingErr.message });
-          });
-        }
-
-        if (borrowingResult.affectedRows === 0) {
-          return db.rollback(() => {
-            res.status(404).json({ error: "Borrowing record not found" });
-          });
-        }
-
-        // (可选) 3. ลบข้อมูลจาก tasks ถ้าต้องการ (ถ้า task_id ไม่ใช้ซ้ำใน record อื่น)
-        // ถ้าไม่ต้องการลบ tasks ให้ comment ส่วนนี้ออก
-        const deleteTaskQuery = `
-          DELETE FROM tasks 
-          WHERE task_id = (SELECT task_id FROM equipment_borrowing WHERE borrowing_id = ?)
-        `;
-        db.query(deleteTaskQuery, [borrowingId], (taskErr, taskResult) => {
-          if (taskErr) {
+      db.query(
+        deleteBorrowingQuery,
+        [borrowingId],
+        (borrowingErr, borrowingResult) => {
+          if (borrowingErr) {
             return db.rollback(() => {
-              console.error("Error deleting task:", taskErr);
-              res.status(500).json({ error: "Failed to delete task", details: taskErr.message });
+              console.error(
+                "Error deleting equipment borrowing:",
+                borrowingErr
+              );
+              res
+                .status(500)
+                .json({
+                  error: "Failed to delete equipment borrowing",
+                  details: borrowingErr.message,
+                });
             });
           }
 
-          // Commit transaction ถ้าทุกอย่างสำเร็จ
-          db.commit((commitErr) => {
-            if (commitErr) {
+          if (borrowingResult.affectedRows === 0) {
+            return db.rollback(() => {
+              res.status(404).json({ error: "Borrowing record not found" });
+            });
+          }
+
+          // (可选) 3. ลบข้อมูลจาก tasks ถ้าต้องการ (ถ้า task_id ไม่ใช้ซ้ำใน record อื่น)
+          // ถ้าไม่ต้องการลบ tasks ให้ comment ส่วนนี้ออก
+          const deleteTaskQuery = `
+          DELETE FROM tasks 
+          WHERE task_id = (SELECT task_id FROM equipment_borrowing WHERE borrowing_id = ?)
+        `;
+          db.query(deleteTaskQuery, [borrowingId], (taskErr, taskResult) => {
+            if (taskErr) {
               return db.rollback(() => {
-                console.error("Error committing transaction:", commitErr);
-                res.status(500).json({ error: "Failed to commit transaction" });
+                console.error("Error deleting task:", taskErr);
+                res
+                  .status(500)
+                  .json({
+                    error: "Failed to delete task",
+                    details: taskErr.message,
+                  });
               });
             }
-            res.json({ message: "Equipment borrowing deleted successfully" });
+
+            // Commit transaction ถ้าทุกอย่างสำเร็จ
+            db.commit((commitErr) => {
+              if (commitErr) {
+                return db.rollback(() => {
+                  console.error("Error committing transaction:", commitErr);
+                  res
+                    .status(500)
+                    .json({ error: "Failed to commit transaction" });
+                });
+              }
+              res.json({ message: "Equipment borrowing deleted successfully" });
+            });
           });
-        });
-      });
+        }
+      );
     });
   });
 });
@@ -591,8 +699,16 @@ router.put("/v4/equipment-borrowing/id/:borrowingId", (req, res) => {
   const { tech_id, borrow_date, return_date, products } = req.body;
 
   // ตรวจสอบข้อมูลที่จำเป็น
-  if (!tech_id || !borrow_date || !return_date || !products || !Array.isArray(products)) {
-    return res.status(400).json({ error: "Missing or invalid required fields" });
+  if (
+    !tech_id ||
+    !borrow_date ||
+    !return_date ||
+    !products ||
+    !Array.isArray(products)
+  ) {
+    return res
+      .status(400)
+      .json({ error: "Missing or invalid required fields" });
   }
 
   // เริ่ม transaction เพื่อให้การอัปเดตสมบูรณ์ทั้งหมด
@@ -608,93 +724,138 @@ router.put("/v4/equipment-borrowing/id/:borrowingId", (req, res) => {
       SET tech_id = ?, borrow_date = ?, return_date = ?
       WHERE borrowing_id = ?
     `;
-    db.query(updateBorrowingQuery, [tech_id, borrow_date, return_date, borrowingId], (updateErr, updateResult) => {
-      if (updateErr) {
-        return db.rollback(() => {
-          console.error("Error updating equipment borrowing:", updateErr);
-          res.status(500).json({ error: "Failed to update equipment borrowing", details: updateErr.message });
-        });
-      }
-
-      if (updateResult.affectedRows === 0) {
-        return db.rollback(() => {
-          res.status(404).json({ error: "Borrowing record not found" });
-        });
-      }
-
-      // 2. ดึง task_id จาก borrowing_id เพื่อใช้ในตาราง tasks
-      const getTaskIdQuery = `
-        SELECT task_id FROM equipment_borrowing WHERE borrowing_id = ?
-      `;
-      db.query(getTaskIdQuery, [borrowingId], (taskErr, taskResult) => {
-        if (taskErr || taskResult.length === 0) {
+    db.query(
+      updateBorrowingQuery,
+      [tech_id, borrow_date, return_date, borrowingId],
+      (updateErr, updateResult) => {
+        if (updateErr) {
           return db.rollback(() => {
-            console.error("Error fetching task_id:", taskErr);
-            res.status(500).json({ error: "Failed to fetch task_id" });
+            console.error("Error updating equipment borrowing:", updateErr);
+            res
+              .status(500)
+              .json({
+                error: "Failed to update equipment borrowing",
+                details: updateErr.message,
+              });
           });
         }
 
-        const taskId = taskResult[0].task_id;
+        if (updateResult.affectedRows === 0) {
+          return db.rollback(() => {
+            res.status(404).json({ error: "Borrowing record not found" });
+          });
+        }
 
-        // 3. อัปเดต user_id ในตาราง tasks
-        const updateTaskQuery = `
+        // 2. ดึง task_id จาก borrowing_id เพื่อใช้ในตาราง tasks
+        const getTaskIdQuery = `
+        SELECT task_id FROM equipment_borrowing WHERE borrowing_id = ?
+      `;
+        db.query(getTaskIdQuery, [borrowingId], (taskErr, taskResult) => {
+          if (taskErr || taskResult.length === 0) {
+            return db.rollback(() => {
+              console.error("Error fetching task_id:", taskErr);
+              res.status(500).json({ error: "Failed to fetch task_id" });
+            });
+          }
+
+          const taskId = taskResult[0].task_id;
+
+          // 3. อัปเดต user_id ในตาราง tasks
+          const updateTaskQuery = `
           UPDATE tasks 
           SET user_id = ?
           WHERE task_id = ?
         `;
-        db.query(updateTaskQuery, [tech_id, taskId], (taskUpdateErr, taskUpdateResult) => {
-          if (taskUpdateErr) {
-            return db.rollback(() => {
-              console.error("Error updating tasks:", taskUpdateErr);
-              res.status(500).json({ error: "Failed to update tasks", details: taskUpdateErr.message });
-            });
-          }
-
-          // 4. ลบข้อมูลเก่าจาก borrowing_details
-          const deleteDetailsQuery = `
-            DELETE FROM borrowing_details 
-            WHERE borrowing_id = ?
-          `;
-          db.query(deleteDetailsQuery, [borrowingId], (deleteErr) => {
-            if (deleteErr) {
-              return db.rollback(() => {
-                console.error("Error deleting borrowing details:", deleteErr);
-                res.status(500).json({ error: "Failed to delete borrowing details", details: deleteErr.message });
-              });
-            }
-
-            // 5. เพิ่มข้อมูลใหม่ใน borrowing_details
-            const insertDetailsQuery = `
-              INSERT INTO borrowing_details (borrowing_id, product_id, quantity) 
-              VALUES ?
-            `;
-            const values = products.map((product) => [borrowingId, product.product_id, product.quantity]);
-            db.query(insertDetailsQuery, [values], (insertErr) => {
-              if (insertErr) {
+          db.query(
+            updateTaskQuery,
+            [tech_id, taskId],
+            (taskUpdateErr, taskUpdateResult) => {
+              if (taskUpdateErr) {
                 return db.rollback(() => {
-                  console.error("Error inserting borrowing details:", insertErr);
-                  res.status(500).json({ error: "Failed to insert borrowing details", details: insertErr.message });
+                  console.error("Error updating tasks:", taskUpdateErr);
+                  res
+                    .status(500)
+                    .json({
+                      error: "Failed to update tasks",
+                      details: taskUpdateErr.message,
+                    });
                 });
               }
 
-              // Commit transaction ถ้าทุกอย่างสำเร็จ
-              db.commit((commitErr) => {
-                if (commitErr) {
+              // 4. ลบข้อมูลเก่าจาก borrowing_details
+              const deleteDetailsQuery = `
+            DELETE FROM borrowing_details 
+            WHERE borrowing_id = ?
+          `;
+              db.query(deleteDetailsQuery, [borrowingId], (deleteErr) => {
+                if (deleteErr) {
                   return db.rollback(() => {
-                    console.error("Error committing transaction:", commitErr);
-                    res.status(500).json({ error: "Failed to commit transaction" });
+                    console.error(
+                      "Error deleting borrowing details:",
+                      deleteErr
+                    );
+                    res
+                      .status(500)
+                      .json({
+                        error: "Failed to delete borrowing details",
+                        details: deleteErr.message,
+                      });
                   });
                 }
-                res.json({ message: "Equipment borrowing updated successfully" });
+
+                // 5. เพิ่มข้อมูลใหม่ใน borrowing_details
+                const insertDetailsQuery = `
+              INSERT INTO borrowing_details (borrowing_id, product_id, quantity) 
+              VALUES ?
+            `;
+                const values = products.map((product) => [
+                  borrowingId,
+                  product.product_id,
+                  product.quantity,
+                ]);
+                db.query(insertDetailsQuery, [values], (insertErr) => {
+                  if (insertErr) {
+                    return db.rollback(() => {
+                      console.error(
+                        "Error inserting borrowing details:",
+                        insertErr
+                      );
+                      res
+                        .status(500)
+                        .json({
+                          error: "Failed to insert borrowing details",
+                          details: insertErr.message,
+                        });
+                    });
+                  }
+
+                  // Commit transaction ถ้าทุกอย่างสำเร็จ
+                  db.commit((commitErr) => {
+                    if (commitErr) {
+                      return db.rollback(() => {
+                        console.error(
+                          "Error committing transaction:",
+                          commitErr
+                        );
+                        res
+                          .status(500)
+                          .json({ error: "Failed to commit transaction" });
+                      });
+                    }
+                    res.json({
+                      message: "Equipment borrowing updated successfully",
+                    });
+                  });
+                });
               });
-            });
-          });
+            }
+          );
         });
-      });
-    });
+      }
+    );
   });
 });
-router.get('/user-borrowing-counts/:user_id?', (req, res) => {
+router.get("/user-borrowing-counts/:user_id?", (req, res) => {
   const { user_id } = req.params;
 
   let query = `
@@ -713,12 +874,12 @@ router.get('/user-borrowing-counts/:user_id?', (req, res) => {
 
   db.query(query, params, (error, results) => {
     if (error) {
-      console.error('Error fetching borrowing counts:', error);
-      return res.status(500).json({ message: 'Internal Server Error' });
+      console.error("Error fetching borrowing counts:", error);
+      return res.status(500).json({ message: "Internal Server Error" });
     }
 
     if (results.length === 0) {
-      return res.status(404).json({ message: 'No borrowing records found.' });
+      return res.status(404).json({ message: "No borrowing records found." });
     }
 
     res.json(user_id ? results[0] : results);
@@ -749,26 +910,44 @@ router.put(
         SET image_url = ?
         WHERE task_id = ?
       `;
-      db.query(updateImageQuery, [newImageUrl, taskId], (updateErr, updateResult) => {
-        if (updateErr) {
-          console.error("Error updating image URL:", updateErr);
-          return res.status(500).json({ error: "Failed to update image URL", details: updateErr.message });
+      db.query(
+        updateImageQuery,
+        [newImageUrl, taskId],
+        (updateErr, updateResult) => {
+          if (updateErr) {
+            console.error("Error updating image URL:", updateErr);
+            return res
+              .status(500)
+              .json({
+                error: "Failed to update image URL",
+                details: updateErr.message,
+              });
+          }
+
+          if (updateResult.affectedRows === 0) {
+            return res
+              .status(404)
+              .json({ error: "Borrowing record not found for this task ID" });
+          }
+
+          // Optionally, delete the old file from local storage (if not using Cloudinary deletion)
+          fs.unlink(idCardImage, (err) => {
+            if (err) console.error("Error deleting temp file:", err);
+          });
+
+          res
+            .status(200)
+            .json({
+              message: "ID card image updated successfully",
+              image_url: newImageUrl,
+            });
         }
-
-        if (updateResult.affectedRows === 0) {
-          return res.status(404).json({ error: "Borrowing record not found for this task ID" });
-        }
-
-        // Optionally, delete the old file from local storage (if not using Cloudinary deletion)
-        fs.unlink(idCardImage, (err) => {
-          if (err) console.error("Error deleting temp file:", err);
-        });
-
-        res.status(200).json({ message: "ID card image updated successfully", image_url: newImageUrl });
-      });
+      );
     } catch (error) {
       console.error("Error uploading image to Cloudinary:", error);
-      res.status(500).json({ error: "Failed to upload image", details: error.message });
+      res
+        .status(500)
+        .json({ error: "Failed to upload image", details: error.message });
     }
   }
 );

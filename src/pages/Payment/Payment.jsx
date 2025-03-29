@@ -52,7 +52,7 @@ const Payment = () => {
   const [selectedOrder, setSelectedOrder] = useState(null); // Store selected order
   const [newSlipImage, setNewSlipImage] = useState(null); // Store new slip image
   const [language, setLanguage] = useState(
-    localStorage.getItem("language" || "th")
+    localStorage.getItem("language")|| "th"
   );
   const t = translations[language];
 

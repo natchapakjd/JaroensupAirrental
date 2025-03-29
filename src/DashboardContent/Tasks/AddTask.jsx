@@ -145,7 +145,7 @@ const AddTask = () => {
         rental_start_date: rentalStartDate, 
         rental_end_date: rentalEndDate,
         address,
-        quantity_used: quantityUsed,
+        // quantity_used: quantityUsed,
         user_id: userId,
         latitude: latitude ? latitude : null, 
         longitude: longitude ? longitude : null,
@@ -180,7 +180,7 @@ const AddTask = () => {
               type="text"
               value={organizationName}
               onChange={(e) => setOrganizationName(e.target.value)}
-              className="border p-2 w-full"
+              className="input input-bordered p-2 w-full"
             />
           </div>
           <div>
@@ -188,7 +188,7 @@ const AddTask = () => {
             <select
               value={taskTypeId}
               onChange={(e) => setTaskTypeId(e.target.value)}
-              className="border p-2 w-full"
+              className="input input-bordered p-2 w-full"
               required
             >
               <option value="">{t.selectTaskType}</option>
@@ -204,7 +204,7 @@ const AddTask = () => {
             <select
               value={userId}
               onChange={(e) => setUserId(e.target.value)}
-              className="border p-2 w-full"
+              className="input input-bordered p-2 w-full"
             >
               <option value="">{t.selectUser}</option>
               {users.map((user, index) => (
@@ -219,7 +219,7 @@ const AddTask = () => {
             <textarea
               value={description}
               onChange={(e) => setDescription(e.target.value)}
-              className="border p-2 w-full"
+              className="input input-bordered p-2 w-full"
               required
             />
           </div>
@@ -234,7 +234,6 @@ const AddTask = () => {
                 setAppointmentDate(fullDate);
                 setRentalStartDate(fullDate.split("T")[0]); // แยกเอาแค่วันที่
               }}
-              min={new Date().toISOString().slice(0, 16)}
               required
               className="input input-bordered w-full"
             />
@@ -258,10 +257,10 @@ const AddTask = () => {
               type="text"
               value={address}
               onChange={(e) => setAddress(e.target.value)}
-              className="border p-2 w-full"
+              className="input  input-bordered p-2 w-full"
             />
           </div>
-          <div>
+          {/* <div>
             <label className="block mb-2">{t.quantityUsed}</label>
             <input
               type="number"
@@ -269,7 +268,7 @@ const AddTask = () => {
               onChange={(e) => setQuantityUsed(e.target.value)}
               className="border p-2 w-full"
             />
-          </div>
+          </div> */}
           <div className="mb-4">
             <p
               type="button"
