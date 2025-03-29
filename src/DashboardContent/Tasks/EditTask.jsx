@@ -124,7 +124,8 @@ const EditTask = () => {
     const fetchStatuses = async () => {
       try {
         const response = await axios.get(`${apiUrl}/statuses`); // Assuming this endpoint provides statuses
-        setStatuses(response.data);
+        const statusFilter = response.data.filter((status)=>status.status_id === 1 || status.status_id === 2 || status.status_id === 4 || status.status_id === 5)
+        setStatuses(statusFilter);
       } catch (error) {
         console.error("Error fetching statuses:", error);
       }

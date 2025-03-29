@@ -1,9 +1,10 @@
 import React, { useState, useEffect } from "react";
 import axios from "axios";
-import { useParams } from "react-router-dom";
+import { useParams, useNavigate } from "react-router-dom"; // เพิ่ม useNavigate
 import Loading from "../../components/Loading";
 import BackButtonEdit from "../../components/BackButtonEdit";
 import Swal from "sweetalert2";
+
 const translations = {
   en: {
     editTechProfile: "Edit Technician Profile",
@@ -47,6 +48,7 @@ const translations = {
 
 const EditTechProfile = () => {
   const { techId } = useParams();
+  const navigate = useNavigate(); // เพิ่ม useNavigate
   const [loading, setLoading] = useState(true);
   const [formData, setFormData] = useState({
     nationality: "",
@@ -64,8 +66,8 @@ const EditTechProfile = () => {
   });
   const [language, setLanguage] = useState(
     localStorage.getItem("language") || "th"
-  ); // Default language is English
-  const [statuses, setStatuses] = useState([]); // State for storing statuses
+  );
+  const [statuses, setStatuses] = useState([]);
 
   useEffect(() => {
     const fetchData = async () => {
@@ -74,7 +76,23 @@ const EditTechProfile = () => {
         const techResponse = await axios.get(
           `${import.meta.env.VITE_SERVER_URL}/technician/${techId}`
         );
-        setFormData(techResponse.data[0]);
+        const techData = techResponse.data[0];
+
+        // แปลงค่า null หรือ undefined เป็นค่าเริ่มต้นที่เหมาะสม
+        setFormData({
+          nationality: techData.nationality ?? "",
+          isOutsource: techData.isOutsource ?? false,
+          work_experience: techData.work_experience ?? "",
+          special_skills: techData.special_skills ?? "",
+          background_check_status: techData.background_check_status ?? "",
+          bank_account_number: techData.bank_account_number ?? "",
+          start_date: techData.start_date ? techData.start_date.split("T")[0] : "",
+          status_id: techData.status_id ?? "",
+          id_card_image_url: techData.id_card_image_url ?? "",
+          driver_license_image_url: techData.driver_license_image_url ?? "",
+          criminal_record_image_url: techData.criminal_record_image_url ?? "",
+          additional_image_url: techData.additional_image_url ?? "",
+        });
 
         // Fetch statuses for dropdown
         const statusResponse = await axios.get(
@@ -84,11 +102,20 @@ const EditTechProfile = () => {
         setLoading(false);
       } catch (error) {
         console.error("Error fetching technician or statuses:", error);
+        Swal.fire({
+          icon: "error",
+          title: translations[language].error,
+          text: "กรุณาเพิ่มข้อมูลช่างให้เสร็จสิ้นก่อนเริ่มการแก้ไข",
+          confirmButtonText: "ตกลง",
+        }).then(() => {
+          // Redirect กลับไปหน้าเดิม (ย้อนกลับ 1 หน้า)
+          navigate(-1);
+        });
       }
     };
 
     fetchData();
-  }, [techId]);
+  }, [techId, language, navigate]); // เพิ่ม navigate ใน dependencies
 
   const handleChange = (e) => {
     const { name, value, type, checked } = e.target;
@@ -101,11 +128,27 @@ const EditTechProfile = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
+      // ตรวจสอบและแปลงค่า null หรือ undefined ก่อนส่ง
+      const dataToSubmit = {
+        nationality: formData.nationality || null,
+        isOutsource: formData.isOutsource ?? false,
+        work_experience: formData.work_experience || null,
+        special_skills: formData.special_skills || null,
+        background_check_status: formData.background_check_status || null,
+        bank_account_number: formData.bank_account_number || null,
+        start_date: formData.start_date || null,
+        status_id: formData.status_id || null,
+        id_card_image_url: formData.id_card_image_url || null,
+        driver_license_image_url: formData.driver_license_image_url || null,
+        criminal_record_image_url: formData.criminal_record_image_url || null,
+        additional_image_url: formData.additional_image_url || null,
+      };
+
       await axios.put(
         `${import.meta.env.VITE_SERVER_URL}/technician/${techId}`,
-        formData
+        dataToSubmit
       );
-      // ใช้ SweetAlert2 แทน alert สำหรับแจ้งเตือนความสำเร็จ
+
       Swal.fire({
         icon: "success",
         title: translations[language].technicianUpdated,
@@ -114,11 +157,10 @@ const EditTechProfile = () => {
       });
     } catch (error) {
       console.error("Error updating technician:", error);
-      // ใช้ SweetAlert2 แทน alert สำหรับแจ้งเตือนข้อผิดพลาด
       Swal.fire({
         icon: "error",
         title: translations[language].error,
-        text: error.message || "Something went wrong!",
+        text: error.response?.data?.error || error.message || "Something went wrong!",
       });
     }
   };
@@ -128,10 +170,9 @@ const EditTechProfile = () => {
   }
 
   return (
-    <div className="container mx-auto p-8 ">
+    <div className="container mx-auto p-8">
       <div className="mx-auto p-6 bg-white rounded-lg shadow-md h-screen">
-        {" "}
-        <div className="flex  w-full my-2">
+        <div className="flex w-full my-2">
           <BackButtonEdit />
           <h1 className="text-2xl font-semibold mx-2">
             {translations[language].editTechProfile}

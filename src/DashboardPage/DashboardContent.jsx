@@ -19,6 +19,7 @@ const DashboardContent = () => {
   const token = cookies.get("authToken");
   const decodeToken = jwtDecode(token);
   const id = decodeToken.id;
+  const tech_id = decodeToken.technicianId;
   const role = decodeToken.role;
 
   // Translation object
@@ -90,7 +91,7 @@ const DashboardContent = () => {
         if (role === 2) {
           try {
             const taskResponse = await axios.get(
-              `${import.meta.env.VITE_SERVER_URL}/tasks/count/${id}`
+              `${import.meta.env.VITE_SERVER_URL}/tasks/count/${tech_id}`
             );
             setTotalTasks(taskResponse.data.total_tasks || 0);
           } catch (error) {

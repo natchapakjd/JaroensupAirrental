@@ -33,7 +33,7 @@ const AddPayment = () => {
     en: {
       title: "Add Payment",
       selectMode: "Select Mode",
-      task: "Task",
+      task: "Renting and Cleaning Task",
       order: "Order",
       taskId: "Task ID",
       orderId: "Order ID",
@@ -55,7 +55,7 @@ const AddPayment = () => {
     th: {
       title: "เพิ่มการชำระเงิน",
       selectMode: "เลือกโหมด",
-      task: "งานเช่า",
+      task: "งานเช่า/ล้าง",
       order: "คำสั่งซื้อ",
       taskId: "รหัสงาน",
       orderId: "รหัสคำสั่งซื้อ",

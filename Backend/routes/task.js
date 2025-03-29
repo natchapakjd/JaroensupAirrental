@@ -522,12 +522,16 @@ router.put("/task/:id", (req, res) => {
   );
 });
 
-
 router.delete("/task/:id", (req, res) => {
   const id = req.params.id;
 
   // คำสั่ง SQL
+  const getAssignmentId = "SELECT assignment_id FROM taskassignments WHERE task_id = ?";
+  const getCalculationId = "SELECT calculation_id FROM area_calculation_history WHERE assignment_id = ?";
+  const deleteAreaImages = "DELETE FROM area_images WHERE area_calculation_id = ?";
   const deletePayments = "DELETE FROM payments WHERE task_id = ?";
+  const deleteAreaCalcHistory = "DELETE FROM area_calculation_history WHERE assignment_id = ?";
+  const deleteTaskAssignments = "DELETE FROM taskassignments WHERE task_id = ?";
   const updateTask = "UPDATE tasks SET isActive = 0, status_id = 3 WHERE task_id = ?";
 
   db.beginTransaction((err) => {
@@ -536,46 +540,123 @@ router.delete("/task/:id", (req, res) => {
       return res.status(500).json({ error: "Transaction failed" });
     }
 
-    // ลบข้อมูล payments ที่เกี่ยวข้องกับ task_id
-    db.query(deletePayments, [id], (err) => {
+    // ดึง assignment_id จาก taskassignments
+    db.query(getAssignmentId, [id], (err, assignmentResults) => {
       if (err) {
         return db.rollback(() => {
-          console.error("Error deleting payments: " + err);
-          res.status(500).json({ error: "Failed to delete payments" });
+          console.error("Error fetching assignment_id: " + err);
+          res.status(500).json({ error: "Failed to fetch assignment_id" });
         });
       }
 
-      // อัปเดต tasks ให้ isActive = 0 และ status_id = 3
-      db.query(updateTask, [id], (err, result) => {
-        if (err) {
-          return db.rollback(() => {
-            console.error("Error updating task: " + err);
-            res.status(500).json({ error: "Failed to update task status" });
-          });
-        }
+      // ถ้ามี assignment_id ให้เก็บไว้ ถ้าไม่มีก็ข้ามไป
+      const assignmentId = assignmentResults.length > 0 ? assignmentResults[0].assignment_id : null;
 
-        if (result.affectedRows === 0) {
-          return db.rollback(() => {
-            res.status(404).json({ error: "Task not found" });
+      // ดึง calculation_id จาก area_calculation_history โดยใช้ assignment_id
+      const fetchCalculationId = (callback) => {
+        if (assignmentId) {
+          db.query(getCalculationId, [assignmentId], (err, calcResults) => {
+            if (err) {
+              return db.rollback(() => {
+                console.error("Error fetching calculation_id: " + err);
+                res.status(500).json({ error: "Failed to fetch calculation_id" });
+              });
+            }
+            const calculationId = calcResults.length > 0 ? calcResults[0].calculation_id : null;
+            callback(calculationId);
           });
+        } else {
+          callback(null); // ถ้าไม่มี assignment_id ให้ส่ง calculationId เป็น null
         }
+      };
 
-        // Commit transaction
-        db.commit((err) => {
-          if (err) {
-            return db.rollback(() => {
-              console.error("Transaction commit error: " + err);
-              res.status(500).json({ error: "Transaction commit failed" });
+      fetchCalculationId((calculationId) => {
+        // ฟังก์ชันสำหรับดำเนินการลบต่อ
+        const proceedWithDeletion = () => {
+          // ลบ payments
+          db.query(deletePayments, [id], (err) => {
+            if (err) {
+              return db.rollback(() => {
+                console.error("Error deleting payments: " + err);
+                res.status(500).json({ error: "Failed to delete payments" });
+              });
+            }
+
+            // ลบ area_calculation_history (ถ้ามี assignmentId)
+            if (assignmentId) {
+              db.query(deleteAreaCalcHistory, [assignmentId], (err) => {
+                if (err) {
+                  return db.rollback(() => {
+                    console.error("Error deleting area_calculation_history: " + err);
+                    res.status(500).json({ error: "Failed to delete area calculation history" });
+                  });
+                }
+                continueDeletion();
+              });
+            } else {
+              continueDeletion();
+            }
+          });
+        };
+
+        // ฟังก์ชันสำหรับดำเนินการลบตารางที่เหลือ
+        const continueDeletion = () => {
+          // ลบ taskassignments
+          db.query(deleteTaskAssignments, [id], (err) => {
+            if (err) {
+              return db.rollback(() => {
+                console.error("Error deleting taskassignments: " + err);
+                res.status(500).json({ error: "Failed to delete task assignments" });
+              });
+            }
+
+            // อัปเดต tasks
+            db.query(updateTask, [id], (err, result) => {
+              if (err) {
+                return db.rollback(() => {
+                  console.error("Error updating task: " + err);
+                  res.status(500).json({ error: "Failed to update task status" });
+                });
+              }
+
+              if (result.affectedRows === 0) {
+                return db.rollback(() => {
+                  res.status(404).json({ error: "Task not found" });
+                });
+              }
+
+              db.commit((err) => {
+                if (err) {
+                  return db.rollback(() => {
+                    console.error("Transaction commit error: " + err);
+                    res.status(500).json({ error: "Transaction commit failed" });
+                  });
+                }
+                res.status(204).send();
+              });
             });
-          }
-          res.status(204).send();
-        });
+          });
+        };
+
+        // ถ้ามี calculationId ให้ลบ area_images ก่อน
+        if (calculationId) {
+          db.query(deleteAreaImages, [calculationId], (err) => {
+            if (err) {
+              return db.rollback(() => {
+                console.error("Error deleting area_images: " + err);
+                res.status(500).json({ error: "Failed to delete area images" });
+              });
+            }
+            proceedWithDeletion();
+          });
+        } else {
+          // ถ้าไม่มี calculationId ให้ดำเนินการลบตารางอื่นต่อเลย
+          proceedWithDeletion();
+        }
       });
     });
   });
 });
-
-
 
 router.delete("/v2/task/:id", (req, res) => {
   const id = req.params.id;
@@ -617,7 +698,6 @@ router.get("/tasks/assigned/:techId", (req, res) => {
     });
   });
 });
-
 
 router.put("/task-tech/:id", (req, res) => {
   const id = req.params.id;
@@ -1023,33 +1103,50 @@ router.get('/rental/quantity/:taskId', async (req, res) => {
   }
 });
 
-router.get("/tasks/count/:user_id", (req, res) => {
-  const { user_id } = req.params;
+router.get("/tasks/count/:tech_id", (req, res) => {
+  const tech_id = parseInt(req.params.tech_id);
+
+  // ตรวจสอบ tech_id
+  if (!tech_id || isNaN(tech_id)) {
+    return res.status(400).json({ message: "Invalid tech_id" });
+  }
 
   const query = `
-    SELECT user_id, COUNT(*) AS total_tasks
-    FROM tasks
-    WHERE user_id = ?
-    GROUP BY user_id
+    SELECT 
+      taskassignments.tech_id, 
+      COUNT(DISTINCT taskassignments.task_id) AS total_tasks
+    FROM 
+      taskassignments
+    INNER JOIN 
+      tasks ON taskassignments.task_id = tasks.task_id
+    WHERE 
+      taskassignments.tech_id = ? 
+      AND tasks.status_id IN (2, 4, 5) 
+      AND tasks.task_type_id IN (1, 12)
+    GROUP BY 
+      taskassignments.tech_id
   `;
 
-  db.query(query, [user_id], (error, results) => {
+  db.query(query, [tech_id], (error, results) => {
     if (error) {
-      console.error("Error fetching task count:", error);
+      console.error("Error fetching task count:", error.message, error.stack);
       return res.status(500).json({ message: "Internal Server Error" });
     }
 
+    // ถ้าไม่มี task ให้ return 0 แทน 404
     if (results.length === 0) {
-      return res.status(404).json({ message: "No tasks found for this user." });
+      return res.json({
+        tech_id: tech_id,
+        total_tasks: 0,
+      });
     }
 
     res.json({
-      user_id: results[0].user_id,
+      tech_id: results[0].tech_id,
       total_tasks: results[0].total_tasks,
     });
   });
 });
-
 router.put("/task/update-status/:id", (req, res) => {
   const taskId = req.params.id;
   const newStatusId = 2; // Set the new status_id to 2
@@ -1437,6 +1534,76 @@ router.put("/v2/tasks/complete/:taskId", async (req, res) => {
     console.error("Server error:", error);
     res.status(500).json({ error: "Server error" });
   }
+});
+
+
+
+router.get("/v3/tasks/paged", (req, res) => {
+  const { page = 1, limit = 10 } = req.query; // Default to page 1, 10 items per page
+  const offset = (page - 1) * limit;
+
+  const query = `
+    SELECT 
+      tasks.*, 
+      users.username,
+      users.firstname,
+      users.lastname,
+      users.phone,
+      tasktypes.type_name,
+      status.status_name,
+      GROUP_CONCAT(DISTINCT rental.product_id ORDER BY rental.product_id ASC) AS rental_product_ids,
+      GROUP_CONCAT(DISTINCT rental.rental_start_date ORDER BY rental.product_id ASC) AS rental_start_dates,
+      GROUP_CONCAT(DISTINCT rental.rental_end_date ORDER BY rental.product_id ASC) AS rental_end_dates,
+      GROUP_CONCAT(DISTINCT taskassignments.tech_id ORDER BY taskassignments.tech_id ASC) AS tech_ids
+    FROM 
+      tasks 
+    INNER JOIN 
+      users ON tasks.user_id = users.user_id
+    INNER JOIN 
+      status ON tasks.status_id = status.status_id
+    INNER JOIN 
+      tasktypes ON tasks.task_type_id = tasktypes.task_type_id
+    LEFT JOIN 
+      rental ON tasks.task_id = rental.task_id
+    LEFT JOIN 
+      taskassignments ON tasks.task_id = taskassignments.task_id
+    WHERE 
+      tasks.isActive = 1 
+      AND (tasks.task_type_id = 1 OR tasks.task_type_id = 12)
+    GROUP BY 
+      tasks.task_id
+    LIMIT ? OFFSET ?;
+  `;
+
+  const countQuery = `
+    SELECT COUNT(DISTINCT tasks.task_id) AS total 
+    FROM tasks 
+    WHERE tasks.isActive = 1 
+      AND (tasks.task_type_id = 1 OR tasks.task_type_id = 12)
+  `;
+
+  db.query(countQuery, (err, countResult) => {
+    if (err) {
+      console.error("Error counting tasks: ", err);
+      return res.status(500).json({ error: "Failed to fetch tasks count" });
+    }
+
+    const total = countResult[0].total;
+
+    db.query(query, [parseInt(limit), parseInt(offset)], (err, result) => {
+      if (err) {
+        console.error("Error fetching paged tasks: ", err);
+        return res.status(500).json({ error: "Failed to fetch tasks" });
+      }
+
+      res.status(200).json({
+        total,
+        page: parseInt(page),
+        limit: parseInt(limit),
+        tasks: result,
+      });
+    });
+  });
 });
 
 module.exports = router;
