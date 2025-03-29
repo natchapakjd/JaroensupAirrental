@@ -76,7 +76,8 @@ const AssignTask = () => {
     const fetchTasks = async () => {
       try {
         const response = await axios.get(`${apiUrl}/tasks`);
-        setTasks(response.data);
+        const taskFilter = response.data.filter((task)=>task.status_id === 4 || task.task_type_id === 12)
+        setTasks(taskFilter);
       } catch (error) {
         console.error("Error fetching tasks:", error);
       }

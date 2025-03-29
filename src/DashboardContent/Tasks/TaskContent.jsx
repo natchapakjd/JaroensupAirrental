@@ -99,7 +99,7 @@ const TaskContent = () => {
   const fetchTasks = async () => {
     try {
       const response = await axios.get(
-        `${import.meta.env.VITE_SERVER_URL}/tasks/paged`,
+        `${import.meta.env.VITE_SERVER_URL}/v3/tasks/paged`, 
         {
           params: {
             page: currentPage,
@@ -108,7 +108,19 @@ const TaskContent = () => {
         }
       );
 
-      const { tasks, total } = response.data;
+      let { tasks, total } = response.data;
+
+      tasks = tasks.map((task) => ({
+        ...task,
+        tech_ids: task.tech_ids ? task.tech_ids.split(',').map(Number) : [], 
+      }));
+
+      console.log(tasks)
+      if (role === 2) {
+        tasks = tasks.filter((task) =>
+          task.tech_ids.includes(techId)
+        );
+      }
 
       // Filter relevant tasks
       const filteredTasks = tasks.filter(

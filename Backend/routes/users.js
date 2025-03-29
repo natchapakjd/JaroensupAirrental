@@ -172,7 +172,6 @@ router.get("/user/:id", (req, res) => {
   });
 });
 
-
 router.post("/change-password", (req, res) => {
   const newPassword = req.body.newPassword;
   const user_id = req.body.user_id; // Expecting user_id instead of username
@@ -222,51 +221,85 @@ router.put("/user/:id", upload.single("profile_image"), async (req, res) => {
   let imageUrl = null;
 
   try {
-    // Check if a new profile image is uploaded
-    if (req.file) {
-      const profileImage = req.file.path;
-      const result = await cloudinary.uploader.upload(profileImage, {
-        folder: "image/user-image",
-      });
-      imageUrl = result.secure_url;
-    }
-
-    // Build the query dynamically to only update image_url if a new image is provided
-    let query = `
-      UPDATE users
-      SET firstname = ?, lastname = ?, email = ?, phone = ?, age = ?, address = ?, gender_id = ?, date_of_birth = ?
+    // ดึง date_of_birth ปัจจุบันจากฐานข้อมูล
+    const getCurrentUserQuery = `
+      SELECT date_of_birth 
+      FROM users 
+      WHERE user_id = ?
     `;
-    const values = [
-      firstname || null,
-      lastname || null,
-      email || null,
-      phone || null,
-      age || null,
-      address || null,
-      gender_id || null,
-      date_of_birth || null,
-    ];
 
-    // If a new image is uploaded, include image_url in the update
-    if (imageUrl) {
-      query += `, image_url = ?`;
-      values.push(imageUrl);
-    }
-
-    query += ` WHERE user_id = ?`;
-    values.push(id);
-
-    db.query(query, values, (err, result) => {
+    db.query(getCurrentUserQuery, [id], async (err, results) => {
       if (err) {
-        console.error("Error updating user: " + err);
-        return res.status(500).json({ error: "Failed to update user" });
+        console.error("Error fetching current user data: " + err);
+        return res.status(500).json({ error: "Failed to fetch user data" });
       }
 
-      if (result.affectedRows === 0) {
+      if (results.length === 0) {
         return res.status(404).json({ error: "User not found" });
       }
 
-      res.json({ message: "User updated successfully" });
+      // เก็บ date_of_birth เดิม
+      const currentDateOfBirth = results[0].date_of_birth;
+
+      // แปลง date_of_birth ให้อยู่ในรูปแบบ YYYY-MM-DD
+      let finalDateOfBirth;
+      if (date_of_birth !== undefined && date_of_birth !== null && date_of_birth !== "") {
+        const parsedDate = new Date(date_of_birth);
+        if (isNaN(parsedDate)) {
+          return res.status(400).json({ error: "Invalid date_of_birth format" });
+        }
+        // แปลงเป็นรูปแบบ YYYY-MM-DD
+        finalDateOfBirth = parsedDate.toISOString().split("T")[0];
+      } else {
+        finalDateOfBirth = currentDateOfBirth; // ใช้ค่าเดิมถ้าไม่ส่งมา
+      }
+
+      // Check if a new profile image is uploaded
+      if (req.file) {
+        const profileImage = req.file.path;
+        const result = await cloudinary.uploader.upload(profileImage, {
+          folder: "image/user-image",
+        });
+        imageUrl = result.secure_url;
+      }
+
+      // Build the query dynamically to only update image_url if a new image is provided
+      let query = `
+        UPDATE users
+        SET firstname = ?, lastname = ?, email = ?, phone = ?, age = ?, address = ?, gender_id = ?, date_of_birth = ?
+      `;
+      const values = [
+        firstname || null,
+        lastname || null,
+        email || null,
+        phone || null,
+        age || null,
+        address || null,
+        gender_id || null,
+        finalDateOfBirth, // ใช้ finalDateOfBirth ที่แปลงแล้ว
+      ];
+
+      // If a new image is uploaded, include image_url in the update
+      if (imageUrl) {
+        query += `, image_url = ?`;
+        values.push(imageUrl);
+      }
+
+      query += ` WHERE user_id = ?`;
+      values.push(id);
+
+      db.query(query, values, (err, result) => {
+        if (err) {
+          console.error("Error updating user: " + err);
+          return res.status(500).json({ error: "Failed to update user" });
+        }
+
+        if (result.affectedRows === 0) {
+          return res.status(404).json({ error: "User not found" });
+        }
+
+        res.json({ message: "User updated successfully" });
+      });
     });
   } catch (err) {
     console.error("Error processing user update:", err);

@@ -25,6 +25,7 @@ const translations = {
     age_error: "You must be at least 1 years old and not over 100 years.",
     invalid_dob: "Invalid Date of Birth",
     edit_user: "Edit user",
+    select_gender: "Select gender"
   },
   th: {
     username: "ชื่อผู้ใช้",
@@ -42,6 +43,7 @@ const translations = {
     age_error: "คุณต้องมีอายุอย่างน้อย 1 ปี และไม่น้อยกว่า 100 ปี",
     invalid_dob: "วันเกิดไม่ถูกต้อง",
     edit_user: "แก้ไขผู้ใช้งาน",
+    select_gender: "เลือกเพศ"
   },
 };
 
@@ -142,10 +144,20 @@ const EditUser = () => {
     setSubmitLoading(true);
 
     // ตรวจสอบวันเกิดและอายุ
-    if (!isValidDateOfBirth(user.date_of_birth)) {
+    // if (!isValidDateOfBirth(user.date_of_birth)) {
+    //   Swal.fire({
+    //     title: translations[language].invalid_dob,
+    //     text: translations[language].age_error,
+    //     icon: "error",
+    //   });
+    //   setSubmitLoading(false);
+    //   return;
+    // }
+
+    if (!user.gender_id || user.gender_id === "") {
       Swal.fire({
-        title: translations[language].invalid_dob,
-        text: translations[language].age_error,
+        title: translations[language].invalid_gender || "กรุณาเลือกเพศ",
+        text: translations[language].gender_error || "โปรดเลือกเพศก่อนดำเนินการต่อ",
         icon: "error",
       });
       setSubmitLoading(false);

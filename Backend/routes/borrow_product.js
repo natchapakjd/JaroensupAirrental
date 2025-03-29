@@ -855,9 +855,10 @@ router.put("/v4/equipment-borrowing/id/:borrowingId", (req, res) => {
     );
   });
 });
+
 router.get("/user-borrowing-counts/:user_id?", (req, res) => {
   const { user_id } = req.params;
-
+  console.log(user_id)
   let query = `
     SELECT tech_id, COUNT(*) AS borrow_count
     FROM equipment_borrowing

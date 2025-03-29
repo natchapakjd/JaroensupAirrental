@@ -235,23 +235,11 @@ router.delete("/appointment/:id", (req, res) => {
         });
       }
 
-      if (results.length === 0) {
-        return db.rollback(() => {
-          res.status(404).json({ error: "No calculation_id found for this assignment" });
-        });
-      }
+      // เก็บ calculation_id ถ้ามี ไม่มีก็ข้ามไป
+      const calculationId = results.length > 0 ? results[0].calculation_id : null;
 
-      const calculationId = results[0].calculation_id;
-
-      // ลบข้อมูลจาก area_images ที่มี calculation_id ที่ได้มา
-      db.query(deleteAreaImages, [calculationId], (err) => {
-        if (err) {
-          return db.rollback(() => {
-            console.error("Error deleting area_images: " + err);
-            res.status(500).json({ error: "Failed to delete area images" });
-          });
-        }
-
+      // ฟังก์ชันสำหรับดำเนินการลบต่อ
+      const proceedWithDeletion = () => {
         // ลบ area_calculation_history
         db.query(deleteAreaHistory, [id], (err) => {
           if (err) {
@@ -287,11 +275,25 @@ router.delete("/appointment/:id", (req, res) => {
             });
           });
         });
-      });
+      };
+
+      // ถ้ามี calculationId ให้ลบ area_images ก่อน
+      if (calculationId) {
+        db.query(deleteAreaImages, [calculationId], (err) => {
+          if (err) {
+            return db.rollback(() => {
+              console.error("Error deleting area_images: " + err);
+              res.status(500).json({ error: "Failed to delete area images" });
+            });
+          }
+          proceedWithDeletion();
+        });
+      } else {
+        // ถ้าไม่มี calculationId ให้ดำเนินการลบตารางอื่นต่อเลย
+        proceedWithDeletion();
+      }
     });
   });
 });
-
-
 
 module.exports = router;
