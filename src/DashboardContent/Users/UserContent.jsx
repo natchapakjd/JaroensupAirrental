@@ -9,7 +9,7 @@ import { jwtDecode } from "jwt-decode";
 const translations = {
   en: {
     userList: "User List",
-    addTechnician: "Add Technician",
+    addTechnician: "Add Technician Details",
     addUser: "Add User",
     searchUser: "Search User",
     allRoles: "All Roles",
@@ -36,7 +36,7 @@ const translations = {
   },
   th: {
     userList: "รายการผู้ใช้",
-    addTechnician: "เพิ่มช่างเทคนิค",
+    addTechnician: "เพิ่มข้อมูลช่าง",
     addUser: "เพิ่มผู้ใช้",
     searchUser: "ค้นหาผู้ใช้",
     allRoles: "ทุกบทบาท",

@@ -129,6 +129,25 @@ const AddUser = () => {
     setProfileImage(e.target.files[0]);
   };
 
+  const calculateAge = (dob) => {
+    if (!dob) return 0;
+    const birthDate = new Date(dob);
+    const today = new Date();
+    let age = today.getFullYear() - birthDate.getFullYear();
+    const m = today.getMonth() - birthDate.getMonth();
+    if (m < 0 || (m === 0 && today.getDate() < birthDate.getDate())) {
+      age--;
+    }
+    return age;
+  };
+
+  useEffect(() => {
+    const age = calculateAge(formData.date_of_birth);
+    if (age >= 1 && age <= 100) {
+      setFormData((prevData) => ({ ...prevData, age }));
+    }
+  }, [formData.date_of_birth]);
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     setLoading(true);
@@ -136,6 +155,25 @@ const AddUser = () => {
     const form = new FormData();
     Object.keys(formData).forEach((key) => form.append(key, formData[key]));
     if (profileImage) form.append("profile_image", profileImage);
+
+    const today = new Date();
+    const birthDate = new Date(formData.date_of_birth);
+    const age = today.getFullYear() - birthDate.getFullYear();
+    const month = today.getMonth() - birthDate.getMonth();
+    if (month < 0 || (month === 0 && today.getDate() < birthDate.getDate())) {
+      age--;
+    }
+  
+    // ตรวจสอบอายุ
+    if (age < 1 || age > 100) {
+      Swal.fire({
+        title: translations[language].error,
+        text: translations[language].errorMessage + " อายุต้องอยู่ระหว่าง 1-100 ปี",
+        icon: "error",
+      });
+      setLoading(false);
+      return;
+    }
 
     try {
       const response = await axios.post(
@@ -156,7 +194,7 @@ const AddUser = () => {
           action: `เพิ่มผู้ใช้ใหม่ชื่อ ${formData.username}`,
         });
 
-        Swal.fire({
+        Swal.fire({ 
           title: translations[language].success,
           text: translations[language].successMessage,
           icon: "success",
@@ -293,7 +331,7 @@ const AddUser = () => {
                 type="number"
                 name="age"
                 value={formData.age}
-                min="18"
+                min="1"
                 max="100"
                 title="Age must be between 18 and 100."
                 onChange={handleChange}

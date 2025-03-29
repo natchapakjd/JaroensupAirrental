@@ -22,7 +22,7 @@ const translations = {
     profile_picture: "Profile Picture",
     save_changes: "Save Changes",
     edit_technician_profile: "Edit Technician Profile",
-    age_error: "You must be at least 18 years old",
+    age_error: "You must be at least 1 years old and not over 100 years.",
     invalid_dob: "Invalid Date of Birth",
     edit_user: "Edit user",
   },
@@ -39,7 +39,7 @@ const translations = {
     profile_picture: "รูปโปรไฟล์",
     save_changes: "บันทึกการเปลี่ยนแปลง",
     edit_technician_profile: "แก้ไขโปรไฟล์ช่างเทคนิค",
-    age_error: "คุณต้องมีอายุอย่างน้อย 18 ปี",
+    age_error: "คุณต้องมีอายุอย่างน้อย 1 ปี และไม่น้อยกว่า 100 ปี",
     invalid_dob: "วันเกิดไม่ถูกต้อง",
     edit_user: "แก้ไขผู้ใช้งาน",
   },
@@ -99,29 +99,49 @@ const EditUser = () => {
   }, [userId]);
 
   const isValidDateOfBirth = (dob) => {
-    const birthDate = new Date(dob);
-    const today = new Date();
-    const age = today.getFullYear() - birthDate.getFullYear();
-    const monthDiff = today.getMonth() - birthDate.getMonth();
-    return age > 18 || (age === 18 && monthDiff >= 0);
+    const age = calculateAge(dob);
+    return age >= 1 && age <= 100;  // Allow age between 1 and 100
   };
+
 
   const handleChange = (e) => {
     const { name, value } = e.target;
-    setUser((prevUser) => ({
-      ...prevUser,
-      [name]: value,
-    }));
+  
+    if (name === "date_of_birth") {
+      // คำนวณอายุใหม่ทุกครั้งเมื่อมีการเปลี่ยนแปลงวันเกิด
+      const age = calculateAge(value);
+      setUser((prevUser) => ({
+        ...prevUser,
+        [name]: value,
+        age: age,  // อัปเดต age ด้วยค่าที่คำนวณ
+      }));
+    } else {
+      setUser((prevUser) => ({
+        ...prevUser,
+        [name]: value,
+      }));
+    }
   };
-
   const handleFileChange = (e) => {
     setProfileImage(e.target.files[0]);
   };
 
+  const calculateAge = (dob) => {
+    const birthDate = new Date(dob);
+    const today = new Date();
+    let age = today.getFullYear() - birthDate.getFullYear();
+    const monthDiff = today.getMonth() - birthDate.getMonth();
+    if (monthDiff < 0 || (monthDiff === 0 && today.getDate() < birthDate.getDate())) {
+      age--;
+    }
+    return age;
+  };
+  
   const handleSubmit = async (e) => {
     e.preventDefault();
     setSubmitLoading(true);
 
+    // ตรวจสอบวันเกิดและอายุ
     if (!isValidDateOfBirth(user.date_of_birth)) {
       Swal.fire({
         title: translations[language].invalid_dob,

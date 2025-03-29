@@ -285,6 +285,7 @@ router.get("/tasks", (req, res) => {
       tasks.*, 
       users.*,
       tasktypes.description as tt_description,
+      tasktypes.type_name as task_type_name,
       status.*
     FROM 
       tasks
