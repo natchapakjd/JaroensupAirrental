@@ -294,7 +294,7 @@ const AssignTask = () => {
                 )
                 .map((task, index) => (
                   <option key={index + 1} value={task.task_id}>
-                    {index + 1}. {task.firstname} {task.lastname} รายละเอียดงาน: {task.description}
+                    {index + 1}. {task.firstname} {task.lastname} ({task.username}) รายละเอียดงาน: {task.description}
                   </option>
                 ))}
             </select>

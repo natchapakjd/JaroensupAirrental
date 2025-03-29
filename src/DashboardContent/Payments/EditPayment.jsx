@@ -239,7 +239,7 @@ const EditPayment = () => {
               <option value="">{t.selectOption}</option>
               {users.map((user, index) => (
                 <option key={index + 1} value={user.user_id}>
-                  {index + 1}. {user.firstname} {user.lastname}
+                  {index + 1}. {user.firstname} {user.lastname} ({user.username})
                 </option>
               ))}
             </select>

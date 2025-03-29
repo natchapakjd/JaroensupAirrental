@@ -33,10 +33,10 @@ const translations = {
     bankAccountNumber: "หมายเลขบัญชีธนาคาร",
     startDate: "วันที่เริ่มงาน",
     status: "สถานะ",
-    idCardImageUrl: "ลิงก์ภาพบัตรประชาชน",
-    driverLicenseImageUrl: "ลิงก์ใบขับขี่",
-    criminalRecordImageUrl: "ลิงก์ประวัติอาชญากรรม",
-    additionalImageUrl: "ลิงก์ภาพเพิ่มเติม",
+    idCardImageUrl: "URL รูปภาพบัตรประชาชน",
+    driverLicenseImageUrl: "URL รูปใบขับขี่",
+    criminalRecordImageUrl: "URL รูปประวัติอาชญากรรม",
+    additionalImageUrl: "URL รูปภาพเพิ่มเติม",
     isOutsource: "เป็นช่างภายนอก ?",
     saveChanges: "บันทึกการเปลี่ยนแปลง",
     selectStatus: "เลือกสถานะ",
@@ -63,7 +63,7 @@ const EditTechProfile = () => {
     additional_image_url: "",
   });
   const [language, setLanguage] = useState(
-    localStorage.getItem("language" || "th")
+    localStorage.getItem("language") || "th"
   ); // Default language is English
   const [statuses, setStatuses] = useState([]); // State for storing statuses
 

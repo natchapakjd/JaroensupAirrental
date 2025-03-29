@@ -97,7 +97,7 @@ const UserDetails = () => {
   return (
     <div className="p-8 bg-gray-50 min-h-screen">
       <div className="max-w-4xl mx-auto bg-white shadow-lg rounded-lg p-6">
-        <div  className="flex w-full">
+        <div className="flex w-full">
           <BackButtonEdit />
           <h1 className="text-2xl font-semibold mx-2">
             {user.username}'s {translations[language].details}
@@ -119,8 +119,12 @@ const UserDetails = () => {
             <h2 className="text-2xl font-semibold text-gray-800">
               {user.firstname} {user.lastname}
             </h2>
-            <p className="text-gray-600">{translations[language].email}: {user.email}</p>
-            <p className="text-gray-600">{translations[language].phone}: {user.phone}</p>
+            <p className="text-lg font-medium text-gray-700">
+              {translations[language].email}: {user.email}
+            </p>
+            <p className="text-lg font-medium text-gray-700">
+              {translations[language].phone}: {user.phone}
+            </p>
           </div>
         </div>
 
@@ -185,57 +189,44 @@ const UserDetails = () => {
                 "MM/dd/yyyy"
               )}
             </p>
-            
+
             {/* Display images if available */}
             <div className="mt-6">
-              {user.technician_details.id_card_image_url && (
-                <div className="mb-4">
+              {[
+                {
+                  label: translations[language].idCard,
+                  url: user.technician_details.id_card_image_url,
+                },
+                {
+                  label: translations[language].driversLicense,
+                  url: user.technician_details.driver_license_image_url,
+                },
+                {
+                  label: translations[language].criminalRecord,
+                  url: user.technician_details.criminal_record_image_url,
+                },
+                {
+                  label: translations[language].additionalDocument,
+                  url: user.technician_details.additional_image_url,
+                },
+              ].map((doc, index) => (
+                <div key={index} className="mb-4">
                   <h3 className="text-lg font-bold text-gray-700">
-                    {translations[language].idCard}:
+                    {doc.label}:
                   </h3>
-                  <img
-                    src={user.technician_details.id_card_image_url}
-                    alt="ID Card"
-                    className="w-full max-w-md rounded-lg shadow-md"
-                  />
+                  {doc.url ? (
+                    <img
+                      src={doc.url}
+                      alt={doc.label}
+                      className="w-full max-w-md rounded-lg shadow-md"
+                    />
+                  ) : (
+                    <div className="w-full max-w-md flex items-center justify-center bg-gray-200 text-gray-500 py-20 rounded-lg shadow-md">
+                      No Image Available
+                    </div>
+                  )}
                 </div>
-              )}
-              {user.technician_details.driver_license_image_url && (
-                <div className="mb-4">
-                  <h3 className="text-lg font-bold text-gray-700">
-                    {translations[language].driversLicense}:
-                  </h3>
-                  <img
-                    src={user.technician_details.driver_license_image_url}
-                    alt="Driver's License"
-                    className="w-full max-w-md rounded-lg shadow-md"
-                  />
-                </div>
-              )}
-              {user.technician_details.criminal_record_image_url && (
-                <div className="mb-4">
-                  <h3 className="text-lg font-bold text-gray-700">
-                    {translations[language].criminalRecord}:
-                  </h3>
-                  <img
-                    src={user.technician_details.criminal_record_image_url}
-                    alt="Criminal Record"
-                    className="w-full max-w-md rounded-lg shadow-md"
-                  />
-                </div>
-              )}
-              {user.technician_details.additional_image_url && (
-                <div className="mb-4">
-                  <h3 className="text-lg font-bold text-gray-700">
-                    {translations[language].additionalDocument}:
-                  </h3>
-                  <img
-                    src={user.technician_details.additional_image_url}
-                    alt="Additional Document"
-                    className="w-full max-w-md rounded-lg shadow-md"
-                  />
-                </div>
-              )}
+              ))}
             </div>
           </div>
         )}

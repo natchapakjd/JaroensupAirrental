@@ -176,8 +176,19 @@ const OrderDetails = () => {
               </h3>
               <p>
                 {translations[language].orderDate}:{" "}
-                {new Date(order.created_at).toLocaleString()}
-              </p>
+                {new Date(
+                        new Date(order.created_at).getTime() +
+                          7 * 60 * 60 * 1000
+                      ).toLocaleString("th-TH", {
+                        timeZone: "Asia/Bangkok",
+                        year: "numeric",
+                        month: "2-digit",
+                        day: "2-digit",
+                        hour: "2-digit",
+                        minute: "2-digit",
+                        second: "2-digit",
+                        hour12: false, // ใช้รูปแบบ 24 ชั่วโมง
+                      })}              </p>
             </div>
             {order.image_url && (
               <div className="mt-4">

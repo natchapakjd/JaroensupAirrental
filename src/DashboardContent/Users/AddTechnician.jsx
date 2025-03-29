@@ -18,7 +18,7 @@ const translations = {
     driverLicenseImage: "Driver License Image URL",
     additionalImage: "Additional Image URL",
     outsourceTechnician: "Outsourced Technician",
-    addTechnician: "Add Technician",
+    addTechnician: "Add Technician Details",
     successMessage: "Technician added successfully",
     errorMessage: "Error adding technician",
     pending: "Pending",
@@ -39,7 +39,7 @@ const translations = {
     driverLicenseImage: "URL รูปใบขับขี่",
     additionalImage: "URL รูปภาพเพิ่มเติม",
     outsourceTechnician: "ช่างภายนอก?",
-    addTechnician: "เพิ่มช่างเทคนิค",
+    addTechnician: "เพิ่มข้อมูลช่าง",
     successMessage: "เพิ่มช่างเทคนิคสำเร็จ",
     errorMessage: "เกิดข้อผิดพลาดในการเพิ่มช่างเทคนิค",
     pending: "รอดำเนินการ",
@@ -168,9 +168,9 @@ const AddTechnician = () => {
               <option value="">
                 -- {translations[language].selectUser} --
               </option>
-              {users.map((user) => (
-                <option key={user.user_id} value={user.user_id}>
-                  {user.firstname} {user.lastname} - {user.email}
+              {users.map((user,index) => (
+                <option key={index+1} value={user.user_id}>
+                  {index+1}. {user.firstname} {user.lastname} ({user.username})
                 </option>
               ))}
             </select>
