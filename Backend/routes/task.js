@@ -19,7 +19,7 @@ const upload = multer({ storage });
 cron.schedule("0 0 * * *", () => {
   const query = `
     DELETE FROM tasks 
-    WHERE isActive = 1 AND updatedAt < NOW() - INTERVAL 1 DAY`;
+    WHERE isActive = 0 AND updatedAt < NOW() - INTERVAL 1 DAY`;
 
   db.query(query, (err, result) => {
     if (err) {
@@ -121,22 +121,29 @@ router.get("/tasks/paged", (req, res) => {
       users.lastname,
       users.phone,
       tasktypes.type_name,
-      status.status_name
+      status.status_name,
+      GROUP_CONCAT(DISTINCT rental.product_id ORDER BY rental.product_id ASC) AS rental_product_ids,
+      GROUP_CONCAT(DISTINCT rental.rental_start_date ORDER BY rental.product_id ASC) AS rental_start_dates,
+      GROUP_CONCAT(DISTINCT rental.rental_end_date ORDER BY rental.product_id ASC) AS rental_end_dates
     FROM 
-      tasks
+      tasks 
     INNER JOIN 
       users ON tasks.user_id = users.user_id
     INNER JOIN 
       status ON tasks.status_id = status.status_id
     INNER JOIN 
       tasktypes ON tasks.task_type_id = tasktypes.task_type_id
+    LEFT JOIN 
+      rental ON tasks.task_id = rental.task_id
     WHERE 
-        tasks.isActive = 1 
-        AND (tasks.task_type_id = 1 OR tasks.task_type_id = 12)
+      tasks.isActive = 1 
+      AND (tasks.task_type_id = 1 OR tasks.task_type_id = 12)
+    GROUP BY 
+      tasks.task_id
     LIMIT ? OFFSET ?;
   `;
 
-  const countQuery = `SELECT COUNT(*) AS total FROM tasks WHERE task_type_id = 1 and isActive = 1`;
+  const countQuery = `SELECT COUNT(DISTINCT task_id) AS total FROM tasks WHERE task_type_id = 1 and isActive = 1`;
 
   db.query(countQuery, (err, countResult) => {
     if (err) {
@@ -161,6 +168,7 @@ router.get("/tasks/paged", (req, res) => {
     });
   });
 });
+
 
 router.get("/v2/tasks/paged", (req, res) => {
   const { page = 1, limit = 10, user_id } = req.query; // รับ user_id จาก query params
@@ -514,22 +522,59 @@ router.put("/task/:id", (req, res) => {
 });
 
 
-
-router.delete("/task/:id",(req, res) => {
+router.delete("/task/:id", (req, res) => {
   const id = req.params.id;
-  const query = "UPDATE tasks SET isActive = 0 WHERE task_id = ?";
 
-  db.query(query, [id], (err, result) => {
+  // คำสั่ง SQL
+  const deletePayments = "DELETE FROM payments WHERE task_id = ?";
+  const updateTask = "UPDATE tasks SET isActive = 0, status_id = 3 WHERE task_id = ?";
+
+  db.beginTransaction((err) => {
     if (err) {
-      console.error("Error updating task to deleted: " + err);
-      res.status(500).json({ error: "Failed to mark task as deleted" });
-    } else if (result.affectedRows === 0) {
-      res.status(404).json({ error: "Task not found" });
-    } else {
-      res.status(204).send();
+      console.error("Transaction error: " + err);
+      return res.status(500).json({ error: "Transaction failed" });
     }
+
+    // ลบข้อมูล payments ที่เกี่ยวข้องกับ task_id
+    db.query(deletePayments, [id], (err) => {
+      if (err) {
+        return db.rollback(() => {
+          console.error("Error deleting payments: " + err);
+          res.status(500).json({ error: "Failed to delete payments" });
+        });
+      }
+
+      // อัปเดต tasks ให้ isActive = 0 และ status_id = 3
+      db.query(updateTask, [id], (err, result) => {
+        if (err) {
+          return db.rollback(() => {
+            console.error("Error updating task: " + err);
+            res.status(500).json({ error: "Failed to update task status" });
+          });
+        }
+
+        if (result.affectedRows === 0) {
+          return db.rollback(() => {
+            res.status(404).json({ error: "Task not found" });
+          });
+        }
+
+        // Commit transaction
+        db.commit((err) => {
+          if (err) {
+            return db.rollback(() => {
+              console.error("Transaction commit error: " + err);
+              res.status(500).json({ error: "Transaction commit failed" });
+            });
+          }
+          res.status(204).send();
+        });
+      });
+    });
   });
 });
+
+
 
 router.delete("/v2/task/:id", (req, res) => {
   const id = req.params.id;
@@ -606,6 +651,162 @@ router.put("/task-tech/:id", (req, res) => {
     }
   );
 });
+
+router.post('/rental-with-price', (req, res) => {
+  const { task_id, rentals } = req.body;
+
+  if (!task_id || !rentals || rentals.length === 0) {
+    return res.status(400).json({ message: 'Invalid data' });
+  }
+
+  const queryGetDates = 'SELECT rental_start_date, rental_end_date FROM rental WHERE task_id = ? LIMIT 1';
+
+  db.query(queryGetDates, [task_id], (err, result) => {
+    if (err) {
+      console.error('Error fetching existing rental dates: ', err);
+      return res.status(500).json({ message: 'Failed to fetch existing rental dates' });
+    }
+
+    const existingRentalDates = result.length > 0 ? result[0] : {};
+    const defaultDate = new Date().toISOString().split('T')[0];
+
+    const rentalValues = rentals.map((rental) => [
+      task_id,
+      rental.product_id,
+      existingRentalDates.rental_start_date || rental.rental_start_date || defaultDate,
+      existingRentalDates.rental_end_date || rental.rental_end_date || defaultDate,
+      rental.quantity,
+      rental.price,
+      rental.amount,
+    ]);
+
+    const queryInsertRental = `
+      INSERT INTO rental (task_id, product_id, rental_start_date, rental_end_date, quantity, price, amount)
+      VALUES ?
+    `;
+
+    db.query(queryInsertRental, [rentalValues], (err, rentalResult) => {
+      if (err) {
+        console.error('Error inserting rental data: ', err);
+        return res.status(500).json({ message: 'Failed to add rental data' });
+      }
+
+      // อัพเดท stock_quantity และ capacity
+      rentals.forEach((rental) => {
+        const updateProductQuery = `
+          UPDATE products
+          SET stock_quantity = stock_quantity - ?
+          WHERE product_id = ?
+        `;
+        db.query(updateProductQuery, [rental.quantity, rental.product_id], (err) => {
+          if (err) {
+            console.error('Error updating product stock_quantity:', err);
+            return res.status(500).json({ message: 'Failed to update product stock_quantity' });
+          }
+
+          const getWarehouseQuery = `
+            SELECT warehouse_id FROM products WHERE product_id = ?
+          `;
+          db.query(getWarehouseQuery, [rental.product_id], (err, warehouseResult) => {
+            if (err || warehouseResult.length === 0) {
+              console.error('Error retrieving warehouse ID:', err);
+              return;
+            }
+
+            const warehouseId = warehouseResult[0].warehouse_id;
+            const updateWarehouseCapacityQuery = `
+              UPDATE warehouses
+              SET capacity = capacity - ?
+              WHERE warehouse_id = ?
+            `;
+            db.query(updateWarehouseCapacityQuery, [rental.quantity, warehouseId], (err) => {
+              if (err) {
+                console.error('Error updating warehouse capacity:', err);
+              }
+            });
+          });
+        });
+      });
+
+      // คำนวณ total amount
+      const totalAmount = rentals.reduce((total, r) => total + Number(r.amount), 0);
+
+      // ดึงผลรวมของ quantity จาก rental สำหรับ task_id นี้
+      const querySumQuantity = `
+        SELECT SUM(quantity) AS total_quantity_used 
+        FROM rental 
+        WHERE task_id = ?
+      `;
+      db.query(querySumQuantity, [task_id], (err, quantityResult) => {
+        if (err) {
+          console.error('Error fetching total quantity used: ', err);
+          return res.status(500).json({ message: 'Failed to fetch total quantity used' });
+        }
+
+        const totalQuantityUsed = quantityResult[0].total_quantity_used || 0;
+
+        // อัพเดท tasks ด้วย status_id = 4, quantity_used (ผลรวมทั้งหมด), และ total
+        const updateTaskQuery = `
+          UPDATE tasks 
+          SET status_id = 4, quantity_used = ?, total = total + ?
+          WHERE task_id = ?
+        `;
+        db.query(updateTaskQuery, [totalQuantityUsed, totalAmount, task_id], (err) => {
+          if (err) {
+            console.error('Error updating task status and total: ', err);
+            return res.status(500).json({ message: 'Failed to update task status and total' });
+          }
+
+          // ดึง user_id จาก tasks
+          const queryGetUserId = `
+            SELECT user_id 
+            FROM tasks 
+            WHERE task_id = ?
+          `;
+          db.query(queryGetUserId, [task_id], (err, userResult) => {
+            if (err) {
+              console.error('Error fetching user_id from tasks: ', err);
+              return res.status(500).json({ message: 'Failed to fetch user_id from tasks' });
+            }
+
+            if (userResult.length === 0) {
+              return res.status(404).json({ message: 'Task not found' });
+            }
+
+            const userId = userResult[0].user_id;
+
+            // สร้างการชำระเงินอัตโนมัติโดยใช้ user_id จาก tasks
+            const paymentQuery = `
+              INSERT INTO payments (amount, user_id, task_id, method_id, image_url, status_id)
+              VALUES (?, ?, ?, ?, ?, ?)
+            `;
+            const paymentValues = [
+              totalAmount,  // จำนวนเงินจาก totalAmount
+              userId,       // user_id จาก tasks
+              task_id,      // task_id จาก request
+              1,            // method_id (เช่น 1 = อัตโนมัติ)
+              null,         // image_url เป็น null เพราะไม่มี slip
+              1             // status_id (เช่น 1 = สำเร็จทันที)
+            ];
+
+            db.query(paymentQuery, paymentValues, (err, paymentResult) => {
+              if (err) {
+                console.error('Error creating automatic payment: ', err);
+                return res.status(500).json({ message: 'Failed to create automatic payment' });
+              }
+
+              return res.status(200).json({ 
+                message: 'Rental data added successfully, quantities, total, and payment updated',
+                payment_id: paymentResult.insertId 
+              });
+            });
+          });
+        });
+      });
+    });
+  });
+});
+
 router.post('/rental', (req, res) => {
   const { task_id, rentals } = req.body;
 
@@ -1187,7 +1388,9 @@ router.get("/rentals", (req, res) => {
       COALESCE(p.name, 'Unknown Product') AS product_name,
       SUM(r.quantity) AS total_quantity_used,
       MIN(r.rental_start_date) AS rental_start_date,
-      MAX(r.rental_end_date) AS rental_end_date
+      MAX(r.rental_end_date) AS rental_end_date,
+      AVG(r.price) AS average_price,         -- ค่าเฉลี่ยของ price
+      SUM(r.amount) AS total_amount          -- ยอดรวมของ amount
     FROM rental r
     LEFT JOIN products p ON r.product_id = p.product_id
     GROUP BY r.task_id, r.product_id;

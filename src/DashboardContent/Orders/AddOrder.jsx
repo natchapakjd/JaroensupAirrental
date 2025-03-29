@@ -73,9 +73,10 @@ const AddOrder = () => {
           axios.get(`${apiUrl}/users`),
           axios.get(`${apiUrl}/products`),
         ]);
-        setUsers(usersResponse.data);
+        const userFilter = usersResponse.data.filter((user)=>user.role_id === 1);
+        setUsers(userFilter);
         setProducts(
-          productsResponse.data.filter((p) => p.product_type_id === 1)
+          productsResponse.data.filter((p) => p.product_type_id === 3)
         ); // Filter products
       } catch (error) {
         console.error("Error fetching data:", error);

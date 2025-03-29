@@ -139,7 +139,7 @@ const EditTask = () => {
         setDescription(task.description);
         setAppointmentDate(task.appointment_date);
         setAddress(task.address);
-        setQuantityUsed(task.quantity_used);
+        // setQuantityUsed(task.quantity_used);
         // setProductId(task.product_id);
         setUserId(task.user_id);
         setLatitude(task.latitude);
@@ -147,7 +147,7 @@ const EditTask = () => {
         setStatusId(task.status_id); // Change to statusId
         setStartDate(task.rental_start_date);
         setFinishDate(task.rental_end_date);
-        setTotal(task.total)
+        // setTotal(task.total)
       } catch (error) {
         console.error("Error fetching task:", error);
       }
@@ -183,7 +183,7 @@ const EditTask = () => {
         description,
         appointment_date: appointmentDate,
         address: address,
-        quantity_used: quantityUsed,
+        // quantity_used: quantityUsed,
         // product_id: productId,
         user_id: userId,
         latitude: latitude,
@@ -191,7 +191,7 @@ const EditTask = () => {
         status_id: statusId, // Use statusId in the request
         rental_start_date: startDate,
         rental_end_date: finishDate,
-        total
+        // total
       });
 
       await axios.post(`${apiUrl}/task-log`, {
@@ -226,7 +226,7 @@ const EditTask = () => {
             <select
               value={taskTypeId}
               onChange={(e) => setTaskTypeId(e.target.value)}
-              className="border p-2 w-full"
+              className="input input-bordered p-2 w-full"
               required
             >
               <option value="">Select Task Type</option>
@@ -245,7 +245,7 @@ const EditTask = () => {
             <select
               value={userId}
               onChange={(e) => setUserId(e.target.value)}
-              className="border p-2 w-full"
+              className="input input-bordered p-2 w-full"
             >
               <option value="">Select User</option>
               {users.map((user, index) => (
@@ -262,7 +262,7 @@ const EditTask = () => {
             <textarea
               value={description}
               onChange={(e) => setDescription(e.target.value)}
-              className="border p-2 w-full"
+              className="input input-bordered p-2 w-full"
               required
             />
           </div>
@@ -274,7 +274,7 @@ const EditTask = () => {
             <select
               value={statusId}
               onChange={(e) => setStatusId(e.target.value)}
-              className="border p-2 w-full"
+              className="input input-bordered p-2 w-full"
               required
             >
               <option value="">Select Status</option>
@@ -323,10 +323,10 @@ const EditTask = () => {
               type="text"
               value={address}
               onChange={(e) => setAddress(e.target.value)}
-              className="border p-2 w-full"
+              className="input input-bordered p-2 w-full"
             />
           </div>
-          <div>
+          {/* <div>
             <label className="block mb-2">
               {translations[language].quantityUsed}
             </label>
@@ -336,17 +336,17 @@ const EditTask = () => {
               onChange={(e) => setQuantityUsed(e.target.value)}
               className="border p-2 w-full"
             />
-          </div>
+          </div> */}
 
-          <div>
+          {/* <div>
             <label className="block mb-2">Total Price</label>
             <input
               type="number"
               value={total}
               onChange={(e) => setTotal(e.target.value)}
-              className="border p-2 w-full"
+              className="input input-bordered p-2 w-full"
             />
-          </div>
+          </div> */}
           <div className="mb-4">
             <p
               type="button"

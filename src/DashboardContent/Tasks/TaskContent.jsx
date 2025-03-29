@@ -36,8 +36,8 @@ const TaskContent = () => {
       id: "ID",
       type: "Type",
       description: "Description",
-      dueDate: "Due Date",
-      dueTime: "Due Time",
+      dueDate: "Start date",
+      dueTime: "End date",
       status: "Status",
       actions: "Actions",
       approve: "Approve",
@@ -62,8 +62,8 @@ const TaskContent = () => {
       id: "รหัส",
       type: "ประเภท",
       description: "คำอธิบาย",
-      dueDate: "วันที่ครบกำหนด",
-      dueTime: "เวลาที่ครบกำหนด",
+      dueDate: "วันเริ่มงาน",
+      dueTime: "วันเสร็จงาน",
       status: "สถานะ",
       actions: "การดำเนินการ",
       approve: "อนุมัติ",
@@ -192,6 +192,13 @@ const TaskContent = () => {
         const response = await axios.delete(`${apiUrl}/task/${taskId}`, {
           withCredentials: true,
         });
+
+        await axios.post(`${apiUrl}/task-log`, {
+          task_id: taskId,
+          user_id: user_id,
+          action: "ลบงาน",
+        });
+
         if (response.status === 204) {
           Swal.fire("Deleted!", "Your task has been deleted.", "success");
           setTasks(tasks.filter((task) => task.task_id !== taskId));
@@ -346,7 +353,7 @@ const TaskContent = () => {
                       {task.description}
                     </td>
                     <td className="border p-2 text-center">
-                      {new Date(task.appointment_date).toLocaleDateString(
+                      {new Date(task.rental_start_dates).toLocaleDateString(
                         "th-TH",
                         {
                           timeZone: "Asia/Bangkok",
@@ -354,13 +361,12 @@ const TaskContent = () => {
                       )}
                     </td>
                     <td className="border p-2 text-center">
-                      {new Date(
-                        new Date(task.appointment_date).getTime() +
-                          7 * 60 * 60 * 1000
-                      ).toLocaleTimeString("th-TH", {
-                        hour: "2-digit",
-                        minute: "2-digit",
-                      })}
+                      {new Date(task.rental_end_dates).toLocaleDateString(
+                        "th-TH",
+                        {
+                          timeZone: "Asia/Bangkok",
+                        }
+                      )}
                     </td>
                     <td className="border p-2 text-center">
                       <span
@@ -368,7 +374,7 @@ const TaskContent = () => {
                           task.status_name === "pending"
                             ? "bg-yellow-100 text-yellow-800"
                             : task.status_name === "active"
-                              ? "bg-blue-100 text-blue-800"
+                              ? "bg-red-100 text-red-800"
                               : task.status_name === "approve"
                                 ? "bg-green-100 text-green-800"
                                 : task.status_name === "completed"
@@ -386,6 +392,7 @@ const TaskContent = () => {
                           <>
                             {task.status_id !== 4 &&
                               task.status_id !== 2 &&
+                              task.status_id !== 5 &&
                               task.task_type_id !== 12 && (
                                 <Link
                                   to={`/dashboard/tasks/approve/${task.task_id}`}

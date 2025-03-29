@@ -474,7 +474,7 @@ const UserHistory = () => {
                             task.status_name === "pending"
                               ? "bg-yellow-100 text-yellow-800"
                               : task.status_name === "active"
-                                ? "bg-blue-100 text-blue-800"
+                                ? "bg-red-100 text-red-800"
                                 : task.status_name === "approve"
                                   ? "bg-green-100 text-green-800"
                                   : task.status_name === "completed"
@@ -486,14 +486,37 @@ const UserHistory = () => {
                         </span>
                       </td>
                       <td>
-                        {new Date(task.appointment_date).toLocaleString()}
+                      <td>
+                      {new Date(
+                        new Date(task.appointment_date).getTime() +
+                          7 * 60 * 60 * 1000
+                      ).toLocaleString("th-TH", {
+                        timeZone: "Asia/Bangkok",
+                        year: "numeric",
+                        month: "2-digit",
+                        day: "2-digit",
+                        hour: "2-digit",
+                        minute: "2-digit",
+                        second: "2-digit",
+                        hour12: false, // ใช้รูปแบบ 24 ชั่วโมง
+                      })}
+                    </td>
                       </td>
                       <td>
-                        {new Date(
-                          new Date(task.created_at).getTime() +
-                            7 * 60 * 60 * 1000
-                        ).toLocaleString()}
-                      </td>
+                      {new Date(
+                        new Date(task.created_at).getTime() +
+                          7 * 60 * 60 * 1000
+                      ).toLocaleString("th-TH", {
+                        timeZone: "Asia/Bangkok",
+                        year: "numeric",
+                        month: "2-digit",
+                        day: "2-digit",
+                        hour: "2-digit",
+                        minute: "2-digit",
+                        second: "2-digit",
+                        hour12: false, // ใช้รูปแบบ 24 ชั่วโมง
+                      })}
+                    </td>
                       <td>
                         <button
                           onClick={() => handleTaskDetail(task.task_id)}
@@ -628,14 +651,28 @@ const UserHistory = () => {
                     <tr key={index + 1}>
                       <td>{(orderPage - 1) * 10 + index + 1}</td>
                       {/* <td>{order.total_price.toFixed(2)}</td> */}
-                      <td>{new Date(order.created_at).toLocaleString()}</td>
+                      <td>
+                      {new Date(
+                        new Date(order.created_at).getTime() +
+                          7 * 60 * 60 * 1000
+                      ).toLocaleString("th-TH", {
+                        timeZone: "Asia/Bangkok",
+                        year: "numeric",
+                        month: "2-digit",
+                        day: "2-digit",
+                        hour: "2-digit",
+                        minute: "2-digit",
+                        second: "2-digit",
+                        hour12: false, // ใช้รูปแบบ 24 ชั่วโมง
+                      })}
+                    </td>
                       <td>
                         <span
                           className={`px-2 py-1 rounded ${
                             order.status_name === "pending"
                               ? "bg-yellow-100 text-yellow-800"
                               : order.status_name === "active"
-                                ? "bg-blue-100 text-blue-800"
+                                ? "bg-red-100 text-red-800"
                                 : order.status_name === "approve"
                                   ? "bg-green-100 text-green-800"
                                   : order.status_name === "completed"

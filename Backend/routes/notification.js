@@ -11,6 +11,7 @@ const headers = {
   "Content-Type": "application/json",
   Authorization: `Bearer ${LINE_CHANNEL_ACCESS_TOKEN}`,
 };
+
 router.post("/send-message", async (req, res) => {
   const { userId, message} = req.body;
   const body = {
@@ -29,6 +30,43 @@ router.post("/send-message", async (req, res) => {
     res.json({ message: "Send message success", responseData: response.data });
   } catch (err) {
     console.log(err);
+  }
+});
+
+router.post("/send-messages-multi", async (req, res) => {
+  const { userIds, message } = req.body;
+
+  if (!Array.isArray(userIds) || userIds.length === 0) {
+    return res.status(400).json({ error: "userIds must be a non-empty array" });
+  }
+  if (!message) {
+    return res.status(400).json({ error: "message is required" });
+  }
+
+  const body = {
+    to: userIds,
+    messages: [
+      {
+        type: "text",
+        text: message,
+      },
+    ],
+  };
+
+  try {
+    const response = await axios.post(`${LINE_BOT_API}/message/multicast`, body, {
+      headers,
+    });
+    res.json({
+      message: "Send messages to multiple users success",
+      responseData: response.data,
+    });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({
+      error: "Failed to send messages",
+      details: err.message,
+    });
   }
 });
 

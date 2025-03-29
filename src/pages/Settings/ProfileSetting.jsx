@@ -24,7 +24,7 @@ const translations = {
     successTitle: "สำเร็จ!",
     successMessage: "ข้อมูลถูกอัปเดตเรียบร้อย!",
     errorTitle: "เกิดข้อผิดพลาด!",
-    ageError: "คุณต้องมีอายุอย่างน้อย 18 ปี!",
+    ageError: "อายุต้องอยู่ระหว่าง 1 - 100",
   },
   en: {
     profileSettings: "Profile Settings",
@@ -41,7 +41,7 @@ const translations = {
     successTitle: "Success!",
     successMessage: "Profile updated successfully!",
     errorTitle: "Error!",
-    ageError: "You must be at least 18 years old!",
+    ageError: "Age must between 1 - 100",
   },
 };
 
@@ -140,7 +140,7 @@ const ProfileSetting = () => {
     }
 
     // Check minimum age of 18
-    if (age < 18 || isNaN(age)) {
+    if (age < 1 || isNaN(age) || age > 100) {
       Swal.fire({
         title: translations[language].errorTitle,
         text: translations[language].ageError,

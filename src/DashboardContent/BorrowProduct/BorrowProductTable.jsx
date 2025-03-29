@@ -122,8 +122,6 @@ const BorrowProductTable = () => {
   const fetchBorrowingData = async (techId) => {
     try {
       let response;
-      let userData;
-      let techData;
       if (role === 3) {
         response = await axios.get(
           `${import.meta.env.VITE_SERVER_URL}/v2/equipment-borrowings-paging`,
@@ -131,13 +129,11 @@ const BorrowProductTable = () => {
         );
       } else if (role === 2) {
         response = await axios.get(
-          `${
-            import.meta.env.VITE_SERVER_URL
-          }/v2/equipment-borrowing-paging/${techId}`,
+          `${import.meta.env.VITE_SERVER_URL}/v2/equipment-borrowing-paging/${techId}`,
           { params: { page: currentPage, limit: rowsPerPage } }
         );
       }
-
+  
       const { data, total } = response.data;
       const today = new Date();
       const updatedData = data.map((item) => {
@@ -146,12 +142,21 @@ const BorrowProductTable = () => {
           item.return_date && // Check if return_date exists
           new Date(item.return_date) < today // Check if return_date is before today
         ) {
-          sendOverdueNotification(item.linetoken, item.borrowing_id);
           return { ...item, isOverdue: true }; // Add warning flag
         }
         return { ...item, isOverdue: false };
       });
-
+  
+      // Collect overdue technicians' linetoken values into an array
+      const overdueTokens = updatedData
+        .filter((item) => item.isOverdue && item.linetoken) // Filter overdue items with valid linetoken
+        .map((item) => item.linetoken); // Extract linetoken values
+  
+      // Send notification to all overdue technicians if there are any
+      if (overdueTokens.length > 0) {  
+        await sendOverdueNotification(overdueTokens, "อุปกรณ์บางรายการของที่คุณยืมเกินกำหนดคืนแล้ว กรุณานำสินค้ามาคืนโดยทันที");
+      }
+  
       setBorrowingData(updatedData);
       total === 0
         ? setTotalPages(1)
@@ -160,34 +165,47 @@ const BorrowProductTable = () => {
       console.error("Error fetching borrowing data:", error);
       Swal.fire({
         title: "Error",
-        text: "Failed to load borrowing data.",
+        text: currentLang.errorFetchingData,
         icon: "error",
       });
     }
   };
 
-  const sendOverdueNotification = async (technicianId, borrowingId) => {
+  const sendOverdueNotification = async (linetokenArray, message) => {
     try {
-      const today = new Date().toISOString().split("T")[0]; // รูปแบบวันที่ YYYY-MM-DD
-      const notificationKey = `notification_${technicianId}_${borrowingId}`;
-      const lastSentDate = localStorage.getItem(notificationKey);
-
-      if (lastSentDate === today) {
-        console.log("Notification already sent today.");
+      const today = new Date().toISOString().split("T")[0]; // Format: YYYY-MM-DD
+  
+      // Check if notification was already sent today for any of the tokens
+      const notificationSentToday = linetokenArray.some((token) => {
+        const notificationKey = `notification_${token}_multi`;
+        return localStorage.getItem(notificationKey) === today;
+      });
+  
+      if (notificationSentToday) {
+        console.log("Notification already sent today to some users.");
         return;
       }
-
-      const message = `อุปกรณ์สำหรับการยืม รหัสการยืม ${borrowingId} เกินวันกำหนดคืนแล้ว กรุณานำสินค้ามาคืนโดยทันที`;
+  
       const body = {
-        userId: technicianId,
-        message,
+        userIds: linetokenArray, // Array of LINE user IDs
+        message: message, // Single message to send to all users
       };
-
-      await axios.post(`${import.meta.env.VITE_SERVER_URL}/send-message`, body);
-      localStorage.setItem(notificationKey, today);
-      console.log("Notification sent successfully.");
+  
+      const response = await axios.post(
+        `${import.meta.env.VITE_SERVER_URL}/send-messages-multi`,
+        body,
+        { withCredentials: true }
+      );
+  
+      // Mark notification as sent for all tokens
+      linetokenArray.forEach((token) => {
+        const notificationKey = `notification_${token}_multi`;
+        localStorage.setItem(notificationKey, today);
+      });
+  
+      console.log("Multicast notification sent successfully:", response.data);
     } catch (error) {
-      console.error("Error sending LINE notification:", error);
+      console.error("Error sending multicast LINE notification:", error);
     }
   };
 

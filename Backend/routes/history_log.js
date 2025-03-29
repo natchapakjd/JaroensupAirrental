@@ -10,7 +10,7 @@ router.get('/task-log-paging', (req, res) => {
   const countQuery = 'SELECT COUNT(*) as total FROM task_log';
 
   const dataQuery = `
-    SELECT * 
+    SELECT u.firstname,u.lastname,t.task_id,r.*,tl.*,tt.*
     FROM task_log tl
     JOIN tasks t ON tl.task_id  = t.task_id
     JOIN tasktypes tt ON t.task_type_id  =  tt.task_type_id
@@ -68,7 +68,7 @@ router.get('/v2/task-log-paging/:id', async (req, res) => {
     const totalLogs = countResult[0].total;
 
     const dataQuery = `
-      SELECT tl.*, t.*, tt.*, u.firstname, u.lastname ,r.*
+      SELECT u.firstname,u.lastname,t.task_id,r.*,tl.*,tt.*
       FROM task_log tl
       JOIN tasks t ON tl.task_id = t.task_id
       JOIN tasktypes tt ON t.task_type_id = tt.task_type_id

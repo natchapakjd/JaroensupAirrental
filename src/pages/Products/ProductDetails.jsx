@@ -6,16 +6,44 @@ import axios from "axios";
 import Loading from "../../components/Loading";
 import BackButtonEdit from "../../components/BackButtonEdit";
 
+const translations = {
+  en: {
+    price: "Price",
+    brand: "Brand",
+    category: "Category",
+    stockQuantity: "Stock Quantity",
+    addToCart: "Add to Cart",
+  },
+  th: {
+    price: "ราคา",
+    brand: "ยี่ห้อ",
+    category: "หมวดหมู่",
+    stockQuantity: "จำนวนสินค้าในสต็อก",
+    addToCart: "เพิ่มลงตะกร้า",
+  },
+};
+
 const ProductDetails = () => {
   const { id } = useParams();
   const [product, setProduct] = useState(null);
-  const navigate = useNavigate();
   const [image, setImage] = useState();
+  const [language, setLanguage] = useState(localStorage.getItem("language") || "th");
+  const navigate = useNavigate();
 
   useEffect(() => {
     fetchProductDetails();
     fetchProductImageById();
-  }, [id]);
+
+    // Watch for language changes in localStorage
+    const interval = setInterval(() => {
+      const currentLanguage = localStorage.getItem("language") || "en";
+      if (currentLanguage !== language) {
+        setLanguage(currentLanguage);
+      }
+    }, 100);
+
+    return () => clearInterval(interval);
+  }, [id, language]);
 
   const fetchProductImageById = async () => {
     try {
@@ -35,11 +63,13 @@ const ProductDetails = () => {
     }
   };
 
-  if (!product) return <Loading/>;
+  if (!product) return <Loading />;
 
   const handleAddToCart = () => {
     navigate('/add-to-cart', { state: { product } });
   };
+
+  const t = translations[language]; // Shortcut for current translations
 
   return (
     <>
@@ -68,23 +98,23 @@ const ProductDetails = () => {
                 {product.description}
               </p>
               <p className="text-lg font-bold text-gray-900 mt-2">
-                Price: {product.price.toFixed(2)}
+                {t.price}: {product.price.toFixed(2)}
               </p>
               <p className="text-sm text-gray-500 mt-1">
-                Brand: {product.brand_name}
+                {t.brand}: {product.brand_name}
               </p>
               <p className="text-sm text-gray-500 mt-1">
-                Category: {product.category_name}
+                {t.category}: {product.category_name}
               </p>
               <p className="text-sm text-gray-500 mt-1">
-                Stock Quantity: {product.stock_quantity}
+                {t.stockQuantity}: {product.stock_quantity}
               </p>
               <div className="flex justify-center mt-6">
                 <button
                   onClick={handleAddToCart}
                   className="bg-blue text-white py-2 px-4 rounded hover:bg-blue-700 transition duration-200"
                 >
-                  เพิ่มลงตะกร้า
+                  {t.addToCart}
                 </button>
               </div>
             </div>

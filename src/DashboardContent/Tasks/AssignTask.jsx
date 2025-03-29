@@ -10,20 +10,16 @@ const AssignTask = () => {
   const [technicians, setTechnicians] = useState([]);
   const [assignedTasks, setAssignedTasks] = useState([]);
   const [selectedTaskId, setSelectedTaskId] = useState("");
-  const [selectedTechId, setSelectedTechId] = useState("");
   const [selectedTechIds, setSelectedTechIds] = useState([]);
-  const [linetoken, setLineToken] = useState("");
+  const [selectedTaskType, setSelectedTaskType] = useState("");
+  const [taskTypes, setTaskTypes] = useState([]);
+  const [currentPage, setCurrentPage] = useState(1);
+  const [totalPages, setTotalPages] = useState(1);
   const navigate = useNavigate();
   const apiUrl = import.meta.env.VITE_SERVER_URL;
-  const [selectedTaskType, setSelectedTaskType] = useState(""); // ประเภทงานที่เลือก
-  const [taskTypes, setTaskTypes] = useState([]); // เก็บประเภทงาน
-  const [currentPage, setCurrentPage] = useState(1); // ⭐ State สำหรับหน้า
-  const [totalPages, setTotalPages] = useState(1); // ⭐ State สำหรับจำนวนหน้าทั้งหมด
 
-  // Read language from localStorage (default to English)
+  // Language and translations
   const language = localStorage.getItem("language") || "en";
-
-  // Translation object
   const translations = {
     en: {
       assignTask: "Assign Task",
@@ -46,11 +42,13 @@ const AssignTask = () => {
       next: "Next",
       page: "Page",
       of: "of",
+      notificationSuccess: "Task assigned and technicians notified!",
+      notificationError: "Failed to notify technicians.",
     },
     th: {
       assignTask: "มอบหมายงาน",
       selectTask: "เลือกงาน",
-      selectTechnician: "เลือกช่างภายนอก",
+      selectTechnician: "เลือกช่าง",
       assignedTasks: "งานที่ได้รับมอบหมาย",
       appointmentId: "รหัสการนัดหมาย",
       task: "รายละเอียดงาน",
@@ -68,10 +66,11 @@ const AssignTask = () => {
       next: "ถัดไป",
       page: "หน้า",
       of: "จาก",
+      notificationSuccess: "มอบหมายงานสำเร็จและแจ้งช่างเรียบร้อย!",
+      notificationError: "ไม่สามารถแจ้งช่างได้",
     },
   };
-
-  const t = translations[language]; // Shortcut for current translations
+  const t = translations[language];
 
   useEffect(() => {
     const fetchTasks = async () => {
@@ -96,7 +95,7 @@ const AssignTask = () => {
       try {
         const response = await axios.get(
           `${apiUrl}/assignments-paging?page=${currentPage}&limit=5`
-        ); // ⭐ ดึงข้อมูลแบบแบ่งหน้า
+        );
         setAssignedTasks(response.data.data);
         setTotalPages(response.data.total.totalPages);
       } catch (error) {
@@ -107,13 +106,9 @@ const AssignTask = () => {
     const fetchTaskTypes = async () => {
       try {
         const response = await axios.get(`${apiUrl}/tasktypes`);
-
         const filteredTaskTypes = response.data.filter((type) =>
-          ["งานเช่าเครื่องปรับอากาศ", "ล้างเครื่่องปรับอากาศ"].includes(
-            type.type_name
-          )
+          ["งานเช่าเครื่องปรับอากาศ", "ล้างเครื่่องปรับอากาศ"].includes(type.type_name)
         );
-
         setTaskTypes(filteredTaskTypes);
       } catch (error) {
         console.error("Error fetching task types:", error);
@@ -129,44 +124,94 @@ const AssignTask = () => {
   const handleAssign = async (e) => {
     e.preventDefault();
   
-    // Remove duplicates and combine the tech IDs into a single array (no need for string concatenation)
-    const uniqueTechIds = [...new Set(selectedTechIds)];
-  
-    console.log("Unique Tech IDs:", uniqueTechIds);
-  
+    const uniqueTechIds = [...new Set(selectedTechIds)].map((id) => parseInt(id, 10)); // Convert strings to numbers
+    const selectedTask = tasks.find((task) => task.task_id === parseInt(selectedTaskId, 10));   
     try {
-      // Send the request with combined unique tech_ids in a single request
+      // Assign the task
       await axios.post(`${apiUrl}/v2/appointments`, {
         task_id: selectedTaskId,
-        tech_ids: uniqueTechIds, // Send unique tech IDs array
+        tech_ids: uniqueTechIds,
       });
   
-      // Optionally, you can also fetch the updated assigned tasks here
-      const updatedAssignedTasks = await axios.get(`${apiUrl}/appointments`);
-      setAssignedTasks(updatedAssignedTasks.data);
+      // Fetch updated assigned tasks
+      const updatedAssignedTasks = await axios.get(
+        `${apiUrl}/assignments-paging?page=${currentPage}&limit=5`
+      );
+      setAssignedTasks(updatedAssignedTasks.data.data);
+      setTotalPages(updatedAssignedTasks.data.total.totalPages);
   
-      // ✅ Show success notification
+      // Get linetoken of selected technicians
+      const assignedTechs = technicians.filter((tech) =>
+        uniqueTechIds.includes(tech.tech_id) // Now this should match
+      );
+      console.log("Assigned Techs:", assignedTechs);
+  
+      const linetokenArray = assignedTechs
+        .filter((tech) => tech.linetoken) // Ensure linetoken exists
+        .map((tech) => tech.linetoken);
+      console.log("Linetoken Array:", linetokenArray);
+  
+      // Send LINE notification to all assigned technicians
+      if (linetokenArray.length > 0) {
+        const message = `คุณได้รับมอบหมายงานใหม่: ${selectedTask.description}`;
+        await sendLineNotification(linetokenArray, message);
+      } else {
+        console.log("No valid linetokens found for notification.");
+      }
+  
+      // Show success notification
       await Swal.fire({
         title: "สำเร็จ!",
-        text: "มอบหมายงานเรียบร้อยแล้ว",
+        text: t.notificationSuccess,
         icon: "success",
         confirmButtonText: "ตกลง",
       });
   
-      navigate("/dashboard/tasks/assign");
+      // Reset form fields
+      setSelectedTaskId("");
+      setSelectedTechIds([]);
+      setSelectedTaskType("");
     } catch (error) {
       console.error("Error assigning task:", error);
-  
-      // ❌ Show error notification
       await Swal.fire({
-        title: "ข้อผิดพลาด!",
-        text: "ไม่สามารถมอบหมายงานได้ กรุณาลองใหม่",
+        title: t.deleteErrorTitle,
+        text: t.notificationError,
         icon: "error",
         confirmButtonText: "ตกลง",
       });
     }
   };
-  
+
+  const sendLineNotification = async (linetokenArray, message) => {
+    try {
+      const today = new Date().toISOString().split("T")[0];
+      const notificationKey = `task_assign_notification_${selectedTaskId}`;
+
+      // Check if notification was already sent today
+      if (localStorage.getItem(notificationKey) === today) {
+        console.log("Notification already sent today for this task.");
+        return;
+      }
+
+      const body = {
+        userIds: linetokenArray,
+        message: message,
+      };
+
+      const response = await axios.post(
+        `${apiUrl}/send-messages-multi`,
+        body,
+        { withCredentials: true }
+      );
+
+      // Mark notification as sent
+      localStorage.setItem(notificationKey, today);
+      console.log("Multicast notification sent successfully:", response.data);
+    } catch (error) {
+      console.error("Error sending LINE notification:", error);
+      throw error; // Re-throw to handle in handleAssign
+    }
+  };
 
   const handleDelete = async (assignmentId) => {
     const result = await Swal.fire({
@@ -181,14 +226,13 @@ const AssignTask = () => {
 
     if (result.isConfirmed) {
       try {
-        const response = await axios.delete(
-          `${apiUrl}/appointment/${assignmentId}`
-        );
+        const response = await axios.delete(`${apiUrl}/appointment/${assignmentId}`);
         if (response.status === 200) {
           const updatedAssignedTasks = await axios.get(
-            `${apiUrl}/appointments`
+            `${apiUrl}/assignments-paging?page=${currentPage}&limit=5`
           );
-          setAssignedTasks(updatedAssignedTasks.data);
+          setAssignedTasks(updatedAssignedTasks.data.data);
+          setTotalPages(updatedAssignedTasks.data.total.totalPages);
           Swal.fire(t.deleteSuccessTitle, t.deleteSuccessText, "success");
         }
       } catch (error) {
@@ -204,13 +248,15 @@ const AssignTask = () => {
 
   const unassignedTasks = tasks.filter(
     (task) =>
-      !assignedTasks.some((assigned) => assigned.task_id === task.task_id)
+      !assignedTasks.some((assigned) => assigned.task_id === task.task_id) &&
+      task.status_id !== 2 &&
+      task.status_id !== 5
   );
 
   return (
     <div className="container mx-auto p-8">
-      <div className="p-8 rounded-lg shadow-lg w-full mx-auto font-prompt h-full ">
-        <div className="flex  w-full my-2">
+      <div className="p-8 rounded-lg shadow-lg w-full mx-auto font-prompt h-full">
+        <div className="flex w-full my-2">
           <BackButtonEdit />
           <h1 className="text-2xl font-semibold mx-2">{t.assignTask}</h1>
         </div>
@@ -220,7 +266,7 @@ const AssignTask = () => {
             <select
               value={selectedTaskType}
               onChange={(e) => setSelectedTaskType(e.target.value)}
-              className="border p-2 w-full"
+              className="input input-bordered p-2 w-full"
             >
               <option value="">All Task Types</option>
               {taskTypes.map((type) => (
@@ -232,12 +278,11 @@ const AssignTask = () => {
           </div>
 
           <div>
-            {/* Dropdown แสดงเฉพาะงานที่ตรงกับประเภทที่เลือก */}
             <label className="block mb-2">{t.selectTask}</label>
             <select
               value={selectedTaskId}
               onChange={(e) => setSelectedTaskId(e.target.value)}
-              className="border p-2 w-full"
+              className="input input-bordered p-2 w-full"
               required
             >
               <option value="">{t.selectTask}</option>
@@ -249,8 +294,7 @@ const AssignTask = () => {
                 )
                 .map((task, index) => (
                   <option key={index + 1} value={task.task_id}>
-                    {index + 1}. {task.firstname} {task.lastname} รายละเอียดงาน:{" "}
-                    {task.description}
+                    {index + 1}. {task.firstname} {task.lastname} รายละเอียดงาน: {task.description}
                   </option>
                 ))}
             </select>
@@ -276,10 +320,7 @@ const AssignTask = () => {
               ))}
             </select>
           </div>
-          <button
-            type="submit"
-            className="btn bg-blue text-white hover:bg-blue"
-          >
+          <button type="submit" className="btn bg-blue text-white hover:bg-blue">
             {t.assignButton}
           </button>
         </form>
@@ -289,13 +330,9 @@ const AssignTask = () => {
           <table className="w-full border-collapse border border-gray-300">
             <thead>
               <tr>
-                <th className="border border-gray-300 p-2">
-                  {t.appointmentId}
-                </th>
+                <th className="border border-gray-300 p-2">{t.appointmentId}</th>
                 <th className="border border-gray-300 p-2">{t.task}</th>
-                <th className="border border-gray-300 p-2">
-                  {t.technicianName}
-                </th>
+                <th className="border border-gray-300 p-2">{t.technicianName}</th>
                 <th className="border border-gray-300 p-2">{t.action}</th>
               </tr>
             </thead>
@@ -304,9 +341,7 @@ const AssignTask = () => {
                 assignedTasks.map((assignment, index) => (
                   <tr key={index + 1}>
                     <td className="border border-gray-300 p-2">{index + 1}</td>
-                    <td className="border border-gray-300 p-2">
-                      {assignment.description}
-                    </td>
+                    <td className="border border-gray-300 p-2">{assignment.description}</td>
                     <td className="border border-gray-300 p-2">
                       {assignment.firstname} {assignment.lastname}
                     </td>
@@ -336,9 +371,7 @@ const AssignTask = () => {
           <div className="flex justify-between items-center mt-4">
             <p
               onClick={() => setCurrentPage((prev) => Math.max(prev - 1, 1))}
-              className={`cursor-pointer ${
-                currentPage === 1 ? "text-gray-400" : "text-black"
-              }`}
+              className={`cursor-pointer ${currentPage === 1 ? "text-gray-400" : "text-black"}`}
             >
               {t.previous}
             </p>
@@ -346,12 +379,8 @@ const AssignTask = () => {
               {t.page} {currentPage} {t.of} {totalPages}
             </span>
             <p
-              onClick={() =>
-                setCurrentPage((prev) => Math.min(prev + 1, totalPages))
-              }
-              className={`cursor-pointer ${
-                currentPage === totalPages ? "text-gray-400" : "text-black"
-              }`}
+              onClick={() => setCurrentPage((prev) => Math.min(prev + 1, totalPages))}
+              className={`cursor-pointer ${currentPage === totalPages ? "text-gray-400" : "text-black"}`}
             >
               {t.next}
             </p>

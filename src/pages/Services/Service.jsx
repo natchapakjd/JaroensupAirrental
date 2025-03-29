@@ -3,6 +3,7 @@ import { Link } from "react-router-dom";
 import Navbar from "../../components/Navbar";
 import axios from "axios";
 import Loading from "../../components/Loading";
+import Footer from "../../components/Footer";
 
 // ✅ Object สำหรับแปลภาษา
 const translations = {
@@ -128,6 +129,7 @@ const Service = () => {
           )}
         </div>
       </div>
+      <Footer/>
     </>
   );
 };

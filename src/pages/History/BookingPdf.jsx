@@ -89,6 +89,13 @@ const BookingInvoice = ({ task }) => {
     return <Text>กำลังโหลดข้อมูล...</Text>;
   }
 
+  const filteredRentals = task.rentalDetails.filter(
+    (rental) =>
+      !(
+        rental.product_name === "Unknown Product" &&
+        rental.total_quantity_used === 0
+      )
+  );
   return (
     <Document>
       <Page size="A4" style={styles.page}>
@@ -103,7 +110,7 @@ const BookingInvoice = ({ task }) => {
           </Text>
           <Text>เบอร์โทรศัพท์: {task.phone}</Text>
           <Text>สถานที่: {task.address}</Text>
-          
+
           <Text>
             วันที่ออกใบเสร็จ: {formatDateWithMonthNameAndTime(new Date())}
           </Text>
@@ -122,14 +129,19 @@ const BookingInvoice = ({ task }) => {
             <Text style={styles.cellHeader}>รหัสสินค้า</Text>
             <Text style={styles.cellHeader}>ชื่อสินค้า</Text>
             <Text style={styles.cellHeader}>จำนวน </Text>
+            <Text style={styles.cellHeader}>ราคาต่อหน่วย </Text>
+            <Text style={styles.cellHeader}>ราคารวม </Text>
+
           </View>
 
-          {/* Loop through rentalDetails and display each item */}
-          {task.rentalDetails.map((rental, index) => (
+          {filteredRentals.map((rental, index) => (
             <View style={styles.row} key={index}>
-              <Text style={styles.cell}>{index + 1}</Text>
+              <Text style={styles.cell}>{index + 1}</Text>{" "}
+              {/* เริ่มที่ 1 แทน 0 */}
               <Text style={styles.cell}>{rental.product_name}</Text>
               <Text style={styles.cell}>{rental.total_quantity_used}</Text>
+              <Text style={styles.cell}>{rental.average_price}</Text>
+              <Text style={styles.cell}>{rental.total_amount}</Text>
             </View>
           ))}
         </View>

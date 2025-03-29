@@ -38,7 +38,7 @@ router.get("/payments-paging", (req, res) => {
 
   const query = `
     SELECT pm.*, t.description as task_desc, u.firstname, u.lastname, 
-           pmt.method_name, st.status_name 
+           pmt.method_name, st.status_name ,t.task_type_id
     FROM payments pm 
     JOIN users u ON pm.user_id = u.user_id 
     JOIN tasks t ON pm.task_id = t.task_id 
@@ -241,14 +241,12 @@ router.delete("/payment/:id", (req, res) => {
     }
   });
 });
-
 router.get("/payments-sum/total", (req, res) => {
   const query = `
     SELECT 
-      SUM(p.amount + t.total) AS total_amount 
+      SUM(p.amount) AS total_amount 
     FROM payments p
-    INNER JOIN tasks t ON p.task_id = t.task_id
-    WHERE p.status_id = 2 AND t.status_id = 2
+    WHERE p.status_id = 2
   `;
 
   db.query(query, (err, result) => {

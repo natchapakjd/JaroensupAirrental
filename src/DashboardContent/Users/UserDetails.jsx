@@ -56,7 +56,7 @@ const UserDetails = () => {
       createdAt: "วันที่สร้าง",
       technicianDetails: "รายละเอียดช่างเทคนิค",
       nationality: "สัญชาติ",
-      isOutsource: "เป็นผู้รับจ้าง",
+      isOutsource: "เป็นช่างภายนอก",
       workExperience: "ประสบการณ์การทำงาน",
       specialSkills: "ทักษะพิเศษ",
       backgroundCheckStatus: "สถานะการตรวจสอบประวัติอาชญากรรม",

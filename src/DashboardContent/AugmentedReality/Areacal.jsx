@@ -196,23 +196,36 @@ const Areacal = () => {
     const storedLanguage = localStorage.getItem("language") || "en";
     setCurrentLanguage(storedLanguage);
   }, [localStorage.getItem("language")]);
-
   useEffect(() => {
-    // ดึงรายการ Assignments (สามารถเปลี่ยนเป็น API จริงได้)
     const fetchAssignments = async () => {
       try {
-        const response = await axios.get(
-          `${import.meta.env.VITE_SERVER_URL}/appointments`
+        // Fetch assignments
+        const response = await axios.get(`${import.meta.env.VITE_SERVER_URL}/appointments`);
+  
+        // Remove duplicates based on task_id
+        const uniqueAssignments = response.data.reduce((acc, current) => {
+          const existing = acc.find((item) => item.task_id === current.task_id);
+          if (!existing) {
+            acc.push(current);
+          }
+          return acc;
+        }, []);
+  
+        // Filter out assignments that are already in area_cal
+        const usedAssignmentIds = areaCalList.map((area) => area.assignment_id);
+        const filteredAssignments = uniqueAssignments.filter(
+          (assignment) => !usedAssignmentIds.includes(assignment.assignment_id)
         );
-        setAssignments(response.data);
+  
+        console.log("Filtered Assignments (Second Hook):", filteredAssignments);
+        setAssignments(filteredAssignments);
       } catch (error) {
         console.error("Error fetching assignments:", error);
       }
     };
-
+  
     fetchAssignments();
-  }, []);
-
+  }, [areaCalList]); // Depend on areaCalList
   useEffect(() => {
     // 📌 ดึงข้อมูลประเภทห้องจาก API
     const fetchRoomTypes = async () => {

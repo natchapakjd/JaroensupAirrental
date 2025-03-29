@@ -151,7 +151,7 @@ const OrderDetails = () => {
   if (error) return <div className="text-red-500 text-center">{error}</div>;
 
   return (
-    <div>
+    <div className="container mx-auto p-8">
       <div className="p-8 rounded-lg shadow-lg w-full mx-auto font-prompt h-full">
         <div className="flex justify-between items-center">
           <div className="flex w-full my-2">
