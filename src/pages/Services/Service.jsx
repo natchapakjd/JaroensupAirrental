@@ -4,8 +4,9 @@ import Navbar from "../../components/Navbar";
 import axios from "axios";
 import Loading from "../../components/Loading";
 import Footer from "../../components/Footer";
+import rentalCleanning from "../../assets/images/Logo/rental_cleaning.png";
+import stainless from "../../assets/images/Logo/stanless.png";
 
-// ✅ Object สำหรับแปลภาษา
 const translations = {
   th: {
     title: "บริการของเรา",
@@ -56,21 +57,16 @@ const Service = () => {
   }, []);
 
   const filteredTaskTypes = taskTypes
-  .filter((taskType) =>
-    taskType.type_name === "งานเช่าเครื่องปรับอากาศ" ||
-    taskType.type_name === "ขายสินค้า" ||
-    taskType.type_name === "งานซ่อมบำรุงเครื่องปรับอากาศ" ||
-    taskType.type_name === "งานเช่าและล้างเครื่องปรับอากาศ"
-  )
-  .map((taskType) => {
-    if (taskType.type_name === "งานเช่าเครื่องปรับอากาศ") {
-      taskType.type_name = "งานเช่าและล้างเครื่องปรับอากาศ";
-      taskType.description = "เช่าและล้างเครื่องปรับอากาศ พร้อมติดตั้ง";
-
-    }
-    return taskType;
-  });
-
+    .filter((taskType) =>
+      ["งานเช่าเครื่องปรับอากาศ", "ขายสินค้า", "งานซ่อมบำรุงเครื่องปรับอากาศ", "งานเช่าและล้างเครื่องปรับอากาศ"].includes(taskType.type_name)
+    )
+    .map((taskType) => {
+      if (taskType.type_name === "งานเช่าเครื่องปรับอากาศ") {
+        taskType.type_name = "งานเช่าและล้างเครื่องปรับอากาศ";
+        taskType.description = "เช่าและล้างเครื่องปรับอากาศ พร้อมติดตั้ง";
+      }
+      return taskType;
+    });
 
   return (
     <>
@@ -92,11 +88,14 @@ const Service = () => {
                   >
                     <img
                       src={
-                        taskType.image_url ||
-                        "https://inwfile.com/s-ck/woh7eq.jpg"
+                        taskType.type_name === "งานเช่าและล้างเครื่องปรับอากาศ"
+                          ? rentalCleanning
+                          : taskType.type_name === "ขายสินค้า"
+                          ? stainless
+                          : taskType.image_url || stainless
                       }
                       alt={taskType.type_name}
-                      className="w-full h-48 object-cover"
+                      className="w-full h-48"
                     />
                     <div className="p-6">
                       <h2 className="text-xl font-semibold text-gray-800 mb-2">
@@ -112,7 +111,7 @@ const Service = () => {
                               ? "/product"
                               : `/service/rental/${taskType.task_type_id}`
                           }
-                          className="bg-blue text-white py-2 px-4 rounded hover:bg-blue-700 transition duration-200"
+                          className="bg-blue text-white py-2 px-4 rounded hover:bg-blue transition duration-200"
                         >
                           {translations[language].details}
                         </Link>
@@ -129,7 +128,7 @@ const Service = () => {
           )}
         </div>
       </div>
-      <Footer/>
+      <Footer />
     </>
   );
 };

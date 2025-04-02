@@ -240,7 +240,7 @@ const BorrowPage = () => {
                       type="checkbox"
                       checked={selectedProductIds.has(product.product_id)}
                       onChange={() => handleCheckboxChange(product.product_id)}
-                      className="checkbox border-blue-500 checked:bg-blue-500 checked:border-blue-500 focus:ring-blue-400"
+                      className="checkbox border-blue-500 checked:bg-blue checked:border-blue-500 focus:ring-blue-400"
                     />
                     <span className="text-gray-800 ">
                       {product.name} (ID: {product.product_id}) - Stock: {product.stock_quantity}

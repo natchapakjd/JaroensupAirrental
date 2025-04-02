@@ -32,7 +32,8 @@ import XrGallaryContainer from "./components/AugmentedReality/XR-Gallary/XrGalla
 import WorkExperienceDetails from "./pages/common/WorkExperienceDetails";
 import TaskDetails from "./pages/History/TaskDetails";
 import TaskImages from "./pages/History/TaskImages";
-
+import ForgotPassword from "./pages/Authentication/ForgotPassword";
+import ResetPassword from "./pages/Authentication/ResetPassword";
 const router = createBrowserRouter([
   {
     path: "/",
@@ -157,6 +158,14 @@ const router = createBrowserRouter([
   {
     path: "/task/edit-img/:taskId",
     element: <TaskImages/>,
+  },
+  {
+    path: "/forgot-password",
+    element: <ForgotPassword/>,
+  },
+  {
+    path: "/reset-password/:token",
+    element: <ResetPassword/>,
   }
 ]);
 

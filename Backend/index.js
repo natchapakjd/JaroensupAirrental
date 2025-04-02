@@ -27,6 +27,7 @@ const cal_area = require('./routes/area_cal')
 const status = require("./routes/status");
 const chart = require("./routes/chart")
 const isAdmin = require("./middlewares/isAdmin");
+
 const cookieParser = require("cookie-parser");
 const shipping = require('./routes/shipping')
 const area_type = require('./routes/area_type')

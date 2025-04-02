@@ -12,6 +12,26 @@ import imgSrc8 from "../../assets/images/IMG_0893.png";
 import imgSrc9 from "../../assets/images/IMG_0894.png";
 import imgSrc10 from "../../assets/images/IMG_0895.png";
 import imgSrc11 from "../../assets/images/IMG_0896.png";
+import imgSrc12 from "../../assets/images/1.jpg";
+import imgSrc13 from "../../assets/images/2.jpg";
+import imgSrc14 from "../../assets/images/3.jpg";
+import imgSrc15 from "../../assets/images/4.jpg";
+import imgSrc16 from "../../assets/images/5.jpg";
+import imgSrc17 from "../../assets/images/6.jpg";
+import imgSrc18 from "../../assets/images/7.jpg";
+import imgSrc19 from "../../assets/images/8.jpg";
+import imgSrc20 from "../../assets/images/9.jpg";
+import imgSrc21 from "../../assets/images/10.jpg";
+import imgSrc22 from "../../assets/images/11.jpg";
+import imgSrc23 from "../../assets/images/12.jpg";
+import imgSrc24 from "../../assets/images/13.jpg";
+import imgSrc25 from "../../assets/images/14.jpg";
+import imgSrc26 from "../../assets/images/15.jpg";
+import imgSrc27 from "../../assets/images/16.jpg";
+import imgSrc28 from "../../assets/images/17.jpg";
+import imgSrc29 from "../../assets/images/18.jpg";
+import imgSrc30 from "../../assets/images/19.jpg";
+
 import { Link } from "react-router-dom";
 
 export const workExperiences = [
@@ -48,6 +68,20 @@ export const workExperiences = [
     images: [imgSrc8, imgSrc9, imgSrc10, imgSrc11],
     companyName: "Address Name 4",
     projectTitle: "Project Title 4",
+    description: "A brief description of the project or work experience.",
+  },
+  {
+    id: 6,
+    images: [imgSrc12, imgSrc13, imgSrc14, imgSrc15,imgSrc16,imgSrc17,imgSrc18,imgSrc19,imgSrc20,imgSrc21,imgSrc22],
+    companyName: "Address Name 5",
+    projectTitle: "Project Title 5",
+    description: "A brief description of the project or work experience.",
+  },
+  {
+    id: 7,
+    images: [imgSrc23, imgSrc24, imgSrc25, imgSrc26,imgSrc27,imgSrc28,imgSrc29,imgSrc30],
+    companyName: "Address Name 6",
+    projectTitle: "Project Title 6",
     description: "A brief description of the project or work experience.",
   },
 ];
@@ -106,8 +140,8 @@ const WorkExperience = () => {
                   className="w-full h-48 object-cover cursor-pointer"
                   onClick={() => setSelectedImage(images[0])}
                 />
-                {/* <div className="p-6">
-                  <h2 className="text-xl font-semibold text-gray-800 mb-2">
+                <div className="p-6">
+                  {/* <h2 className="text-xl font-semibold text-gray-800 mb-2">
                     {companyName}
                   </h2>
                   <h3 className="text-lg font-medium text-gray-700 mb-4">
@@ -115,16 +149,16 @@ const WorkExperience = () => {
                   </h3>
                   <p className="text-gray-600 mb-4">
                     {description.substring(0, 100)}...
-                  </p>
+                  </p> */}
                   <div className="flex justify-end">
                     <Link
                       to={`/experience/${id}`}
-                      className="btn bg-blue-500 hover:bg-blue-700 text-white px-4 py-2 rounded-lg"
+                      className="btn bg-blue hover:bg-blue text-white px-4 py-2 rounded-lg"
                     >
                       {translations[language].details}
                     </Link>
                   </div>
-                </div> */}
+                </div>
               </div>
             ))}
           </section>
