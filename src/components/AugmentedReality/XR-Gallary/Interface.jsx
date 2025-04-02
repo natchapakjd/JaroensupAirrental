@@ -32,6 +32,8 @@ const translations = {
     clearAllModels: "Clear All Models",
     startAnimation: "Start Animation",
     stopAnimation: "Stop Animation",
+    noAppointments: "No available appointments",
+    selectAppointment: "Select an appointment",
   },
   th: {
     menuOpen: "☰ เมนู",
@@ -45,7 +47,7 @@ const translations = {
     locationName: "ชื่อสถานที่:",
     selectRoomType: "เลือกประเภทห้อง:",
     widthOptional: "ความกว้าง (ตัวเลือก):",
-    heightOptional: "ความสูง (ตัวเลือก):",
+    heightOptional: "ความยาว (ตัวเลือก):",
     saveCalculation: "บันทึกการคำนวณ",
     uploadImage: "อัปโหลดรูปภาพ",
     backToDashboard: "กลับไปยังแดชบอร์ด",
@@ -55,6 +57,8 @@ const translations = {
     clearAllModels: "ลบโมเดลทั้งหมด",
     startAnimation: "เริ่มการแสดงผลความเย็น",
     stopAnimation: "หยุดการแสดงผลความเย็น",
+    noAppointments: "ไม่มีงานที่สามารถเลือกได้",
+    selectAppointment: "เลือกงาน",
   },
 };
 
@@ -87,6 +91,7 @@ const Interface = forwardRef(({ props }, ref) => {
   const [roomTypes, setRoomTypes] = useState([]); // 📌 เก็บค่าห้องจาก API
   const [width, setWidth] = useState(""); // Optional Width
   const [height, setHeight] = useState(""); // Optional Height
+  const [areaCals, setAreaCals] = useState([]);
   const navigate = useNavigate();
   const [language, setLanguage] = useState(
     localStorage.getItem("language") || "th"
@@ -95,18 +100,36 @@ const Interface = forwardRef(({ props }, ref) => {
   const { isPresenting } = useXRStore();
 
   useEffect(() => {
-    axios
-      .get(`${import.meta.env.VITE_SERVER_URL}/appointments`)
-      .then((response) => {
-        const data = response.data;
-        setAppointments(data);
-        if (data.length > 0) {
-          setSelectedAppointment(data[0].assignment_id);
+    const fetchData = async () => {
+      try {
+        // Fetch area_cals
+        const areaCalsResponse = await axios.get(`${import.meta.env.VITE_SERVER_URL}/area_cals`);
+        setAreaCals(areaCalsResponse.data);
+
+        // Fetch appointments
+        const appointmentsResponse = await axios.get(`${import.meta.env.VITE_SERVER_URL}/appointments`);
+        const appointmentsData = appointmentsResponse.data;
+
+        // Filter appointments to exclude those already in area_cals
+        const usedAssignmentIds = areaCalsResponse.data.map((area) => area.assignment_id);
+        const filteredAppointments = appointmentsData.filter(
+          (appointment) => !usedAssignmentIds.includes(appointment.assignment_id)
+        );
+
+        setAppointments(filteredAppointments);
+        if (filteredAppointments.length > 0) {
+          setSelectedAppointment(filteredAppointments[0].assignment_id);
+        } else {
+          setSelectedAppointment(null);
+          Swal.fire("Info", translations[language].noAppointments, "info");
         }
-      })
-      .catch((error) => {
-        console.error("Error fetching appointments:", error);
-      });
+      } catch (error) {
+        console.error("Error fetching data:", error);
+        Swal.fire("Error", "Failed to fetch data", "error");
+      }
+    };
+
+    fetchData();
   }, []);
 
   useEffect(() => {

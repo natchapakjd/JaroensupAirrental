@@ -3,6 +3,7 @@ import { useParams } from "react-router-dom";
 import Navbar from "../../components/Navbar";
 import Footer from "../../components/Footer";
 import { workExperiences } from "./WorkExperience";
+import BackButtonEdit from '../../components/BackButtonEdit';
 
 const WorkExperienceDetails = () => {
   const { expId } = useParams(); // ดึง id จาก URL
@@ -23,8 +24,9 @@ const WorkExperienceDetails = () => {
       <Navbar />
       <div className="bg-gray-100 min-h-screen py-8 font-prompt">
         <div className="container mx-auto px-6">
-          <div className="bg-white shadow-lg rounded-lg overflow-hidden">
-            {/* ตรวจสอบจำนวนรูปใน images */}
+          
+          <div className="bg-white shadow-lg rounded-lg overflow-hidden ">
+          <BackButtonEdit className="mb-4" /> 
             {images.length === 1 ? (
               <img
                 src={images[0]}
@@ -43,7 +45,7 @@ const WorkExperienceDetails = () => {
                 ))}
               </div>
             )}
-            <div className="p-8">
+            {/* <div className="p-8">
               <h1 className="text-3xl font-bold text-gray-800 mb-4">
                 {companyName}
               </h1>
@@ -51,7 +53,7 @@ const WorkExperienceDetails = () => {
                 {projectTitle}
               </h2>
               <p className="text-gray-600">{description}</p>
-            </div>
+            </div> */}
           </div>
         </div>
       </div>

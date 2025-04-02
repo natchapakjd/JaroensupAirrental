@@ -112,7 +112,7 @@ const ProductDetails = () => {
               <div className="flex justify-center mt-6">
                 <button
                   onClick={handleAddToCart}
-                  className="bg-blue text-white py-2 px-4 rounded hover:bg-blue-700 transition duration-200"
+                  className="bg-blue text-white py-2 px-4 rounded hover:bg-blue transition duration-200"
                 >
                   {t.addToCart}
                 </button>

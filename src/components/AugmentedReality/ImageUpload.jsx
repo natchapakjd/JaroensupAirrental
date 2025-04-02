@@ -7,8 +7,6 @@ const ImageUpload = () => {
   const [selectedImage, setSelectedImage] = useState(null);
   const [previewUrl, setPreviewUrl] = useState(null);
   const [uploading, setUploading] = useState(false);
-
-  // 📌 ดึงข้อมูล area_cals จาก API
   useEffect(() => {
     const fetchAreaCalculations = async () => {
       try {
@@ -22,7 +20,6 @@ const ImageUpload = () => {
     fetchAreaCalculations();
   }, []);
 
-  // 📌 เมื่อเลือกไฟล์ ให้แสดงตัวอย่าง
   const handleFileChange = (e) => {
     const file = e.target.files[0];
     if (file) {
@@ -30,8 +27,6 @@ const ImageUpload = () => {
       setPreviewUrl(URL.createObjectURL(file));
     }
   };
-
-  // 📌 อัปโหลดรูป
   const handleUpload = async () => {
     if (!selectedAreaId) {
       alert("กรุณาเลือกพื้นที่ก่อน!");
@@ -41,19 +36,16 @@ const ImageUpload = () => {
       alert("กรุณาเลือกภาพก่อน!");
       return;
     }
-
     setUploading(true);
     const formData = new FormData();
     formData.append("image", selectedImage);
     formData.append("area_calculation_id", selectedAreaId);
-
     try {
       const response = await axios.post(
         `${import.meta.env.VITE_SERVER_URL}/area_images`,
         formData,
         { headers: { "Content-Type": "multipart/form-data" } }
       );
-
       alert("อัปโหลดสำเร็จ! ภาพถูกอัปโหลดเรียบร้อย");
       console.log("Uploaded Image:", response.data);
       setSelectedImage(null);
@@ -66,7 +58,6 @@ const ImageUpload = () => {
       setUploading(false);
     }
   };
-
   return (
     <div className="p-4 bg-white shadow-md rounded-md font-prompt">
       <h2 className="text-lg font-bold mb-3">อัปโหลดรูปภาพพื้นที่</h2>

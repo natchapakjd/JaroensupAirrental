@@ -1,8 +1,8 @@
 import  create  from "zustand";
 
 const useModelsStore = create((set) => ({
-  models: [], // เก็บรายการโมเดล
-  selectedModel: null, // เก็บ id ของโมเดลที่เลือก
+  models: [], 
+  selectedModel: null, 
   setModels: (newModels) => set({ models: newModels }),
   setSelectedModel: (id) => set({ selectedModel: id }),
   

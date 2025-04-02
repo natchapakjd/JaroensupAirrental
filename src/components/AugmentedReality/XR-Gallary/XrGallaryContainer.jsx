@@ -12,13 +12,11 @@ import XrGallary from "./XrGallary";
 
 const XrGallaryContainer = () => {
   const [overlayContent, setOverlayContent] = useState(null);
-
   let interfaceRef = useCallback((node) => {
     if (node !== null) {
       setOverlayContent(node);
     }
   });
-
   return (
     <>
       <CharacterAnimationsProvider>
@@ -45,5 +43,4 @@ const XrGallaryContainer = () => {
     </>
   );
 };
-
 export default XrGallaryContainer;

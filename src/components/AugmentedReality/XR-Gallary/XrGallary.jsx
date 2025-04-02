@@ -34,24 +34,13 @@ const XrGallary = () => {
       reticleRef.current.quaternion,
       reticleRef.current.scale
     );
-
     reticleRef.current.rotation.set(-Math.PI / 2, 0, 0);
   });
 
-  // const placeModel = (e) => {
-  //   // สร้างตำแหน่งของโมเดลจาก hit point
-  //   let position = e.intersection.object.position.clone();
-  //   let id = Date.now();
-  //   let modelName = currentModelName; // เก็บชื่อโมเดลที่ต้องการวาง
-
-  //   // เพิ่มโมเดลใหม่เข้าไปใน state models
-  //   setModels([...models, { position, id, modelName, rotation: 0 }]);
-  // };
   const placeModel = () => {
     let id = Date.now();
     let modelName = currentModelName;
-    let position = reticleRef.current.position.clone(); // ใช้ตำแหน่งจาก reticleRef
-
+    let position = reticleRef.current.position.clone(); 
     setModels([...models, { position, id, modelName, rotation: 0 }]);
   };
 

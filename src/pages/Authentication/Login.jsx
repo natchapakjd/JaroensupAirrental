@@ -17,6 +17,7 @@ const translations = {
     register: "สมัครสมาชิก",
     loginSuccess: "ล็อคอินสำเร็จ",
     loginFail: "โปรดลองอีกครั้ง",
+    forgotPassword: "ลืมรหัสผ่าน",
   },
   en: {
     title: "Login",
@@ -27,6 +28,7 @@ const translations = {
     register: "Register",
     loginSuccess: "Login Successful",
     loginFail: "Please try again",
+    forgotPassword: "Forgot password"
   },
 };
 
@@ -122,10 +124,16 @@ const Login = () => {
                 placeholder={translations[language].password}
               />
             </div>
-            <button type="submit" className="btn bg-blue hover:bg-blue w-full text-white">
+            <button
+              type="submit"
+              className="btn bg-blue hover:bg-blue w-full text-white"
+            >
               {translations[language].loginBtn}
             </button>
           </form>
+          <Link to="/forgot-password" className="text-blue-500 hover:underline flex justify-end my-2">
+            {translations[language].forgotPassword || "Forgot Password?"}
+          </Link>
           <p className="mt-4 text-center text-sm text-gray-600">
             {translations[language].noAccount}{" "}
             <Link to="/register" className="text-blue">
