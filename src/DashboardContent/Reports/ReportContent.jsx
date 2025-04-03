@@ -30,7 +30,19 @@ const ReportContent = () => {
     localStorage.getItem("language") || "th"
   );
 
-  // Translation variables for Thai and English
+  const csvHeaders = [
+    { label: "เดือน", key: "month" },
+    { label: "จำนวนงานทั้งหมด(งาน)", key: "task_count" },
+    { label: "จำนวนคำสั่งซื้อทั้งหมด(ออเดอร์)", key: "order_count" },
+    { label: "จำนวนการชำระเงินทั้งหมด(บาท)", key: "payment_count" },
+    { label: "รายได้รวม(บาท)", key: "income" },
+  ];
+
+  const monthNamesTH = [
+    "มกราคม", "กุมภาพันธ์", "มีนาคม", "เมษายน", "พฤษภาคม", "มิถุนายน", 
+    "กรกฎาคม", "สิงหาคม", "กันยายน", "ตุลาคม", "พฤศจิกายน", "ธันวาคม"
+  ];
+
   const translations = {
     th: {
       reportTitle: "แดชบอร์ดสรุปผล",
@@ -66,8 +78,12 @@ const ReportContent = () => {
     const fetchCounts = async () => {
       try {
         const response = await axios.get(`${api_url}/api/counts`);
-        setTaskCounts(response.data.monthlyData);
-        setIncomeData(response.data.monthlyData);
+        const formattedData = response.data.monthlyData.map(item => ({
+          ...item,
+          month: monthNamesTH[item.month - 1],
+        }));
+        setTaskCounts(formattedData);
+        setIncomeData(formattedData);
         setUserCounts(response.data.userCounts);
       } catch (error) {
         setError("Failed to fetch data. Please try again later.");
@@ -79,7 +95,6 @@ const ReportContent = () => {
 
     fetchCounts();
   }, [api_url]);
-
   if (loading) return <Loading />;
   if (error)
     return <div className="text-red-500 text-center py-8">{error}</div>;
@@ -91,13 +106,19 @@ const ReportContent = () => {
           {translations[language].reportTitle}
         </h1>
         <CSVLink
-          data={taskCounts}
-          filename={"report-data.csv"}
-          className="btn btn-success text-white px-4 py-2 rounded-lg shadow-md font-prompt"
-          target="_blank"
-        >
-          {translations[language].exportCsvButton}
-        </CSVLink>
+  data={[
+    ["ห้างร้านเจริญทรัพย์"], 
+    ["รายงานสรุปผลในปี 2568"],
+    csvHeaders.map(header => header.label), // ใช้ labels ของ headers
+    ...taskCounts.map(item => csvHeaders.map(header => item[header.key])) // ดึงค่าตาม headers
+  ]}
+  filename={"report-data.csv"}
+  className="btn btn-success text-white px-4 py-2 rounded-lg shadow-md font-prompt"
+  target="_blank"
+>
+  {translations[language].exportCsvButton}
+</CSVLink>
+
       </div>
 
       <div className="bg-white p-6 rounded-lg shadow-md">

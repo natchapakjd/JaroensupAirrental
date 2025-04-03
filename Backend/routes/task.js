@@ -169,7 +169,6 @@ router.get("/tasks/paged", (req, res) => {
   });
 });
 
-
 router.get("/v2/tasks/paged", (req, res) => {
   const { page = 1, limit = 10, user_id } = req.query; // รับ user_id จาก query params
   const offset = (page - 1) * limit;
@@ -246,9 +245,26 @@ router.get("/task/:id", (req, res) => {
       tasktypes.type_name,
       status.*,
       rental.*,
-      users.firstname,
-      users.lastname,
-      users.phone
+      users.firstname AS user_firstname,
+      users.lastname AS user_lastname,
+      users.phone,
+      (
+        SELECT JSON_ARRAYAGG(
+          JSON_OBJECT(
+            'tech_id', ta.tech_id,
+            'firstname', tech_users.firstname,
+            'lastname', tech_users.lastname
+          )
+        )
+        FROM (
+          SELECT DISTINCT 
+            taskassignments.tech_id
+          FROM taskassignments
+          WHERE taskassignments.task_id = tasks.task_id
+        ) AS ta
+        INNER JOIN technicians ON ta.tech_id = technicians.tech_id
+        INNER JOIN users AS tech_users ON technicians.user_id = tech_users.user_id
+      ) AS technicians
     FROM 
       tasks
     INNER JOIN 
@@ -273,11 +289,15 @@ router.get("/task/:id", (req, res) => {
       return res.status(404).json({ error: "Task not found" });
     }
 
-    res.status(200).json(result[0]);
+    // Parse the technicians JSON string if needed (depends on your DB driver)
+    const taskData = result[0];
+    if (typeof taskData.technicians === 'string') {
+      taskData.technicians = JSON.parse(taskData.technicians);
+    }
+
+    res.status(200).json(taskData);
   });
 });
-
-
 
 router.get("/tasks", (req, res) => {
   const query = `
@@ -1351,7 +1371,7 @@ router.post("/task_images", upload.single("image"), async (req, res) => {
   try {
     // ✅ อัปโหลดรูปไปยัง Cloudinary
     const result = await cloudinary.uploader.upload(req.file.path, {
-      folder: "task_images",
+      folder: "image/task_images",
     });
 
     const imageUrl = result.secure_url;

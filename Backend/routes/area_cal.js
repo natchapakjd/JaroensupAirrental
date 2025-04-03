@@ -2,7 +2,6 @@ const express = require('express');
 const router = express.Router();
 const db = require("../db");
 
-// 📌 ดึงข้อมูลทั้งหมดจาก area_calculation_history
 router.get("/area_cals", (req, res) => {
     const query = `
       SELECT area_calculation_history.*, room_types.room_name AS room_type_name 
@@ -20,7 +19,6 @@ router.get("/area_cals", (req, res) => {
     });
 });
 
-// 📌 ดึงข้อมูลแบบแบ่งหน้า
 router.get("/area_cal-paging", (req, res) => {
   const { page = 1, limit = 10 } = req.query;
   const offset = (page - 1) * limit;
@@ -137,7 +135,6 @@ router.post("/area_cal", (req, res) => {
   });
 });
 
-
 router.put("/v2/area_cal/:id", (req, res) => {
   const id = req.params.id;
   const {
@@ -186,7 +183,6 @@ router.put("/v2/area_cal/:id", (req, res) => {
   );
 });
 
-// 📌 อัปเดตข้อมูล
 router.put("/area_cal/:id", (req, res) => {
     const id = req.params.id;
     const { assignment_id, location_name, width, height, air_conditioners_needed, room_type_id } = req.body;
@@ -206,7 +202,6 @@ router.put("/area_cal/:id", (req, res) => {
     });
 });
 
-// 📌 ลบข้อมูล
 router.delete("/area_cal/:id", (req, res) => {
     const id = req.params.id;
     const query = "DELETE FROM area_calculation_history WHERE calculation_id = ?";

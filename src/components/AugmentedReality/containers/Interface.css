@@ -1,0 +1,245 @@
+#root {
+    width: 100%;
+    height: 100%;
+    background-color: white;
+}
+
+#overlay-content{
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    bottom: 5rem;
+    pointer-events: none;
+}
+
+.dom-container{
+    position: absolute;
+    bottom: 8vh;
+    width: 100%;
+    height: 80%;
+}   
+
+.menu-button {
+    position: absolute; /* ทำให้สามารถกำหนดตำแหน่งแบบอิสระ */
+    top: 0rem;
+    right: 1rem; /* เลื่อนปุ่มไปชิดขวา */
+    padding: 0.8rem 1rem;
+    border-radius: 0.3rem;
+    border: none;
+    background-color: rgba(255,127,80,0.9);
+    color: white;
+    font-size: 1rem;
+    cursor: pointer;
+    pointer-events: auto;
+    z-index: 1000;
+}
+
+/* Popup Menu */
+.popup-menu {
+    position: absolute;
+    top: 4rem;
+    right: 1rem; /* เปลี่ยนจาก left เป็น right เพื่อให้เมนูชิดขวา */
+    width: 800px;
+    height: 800px;
+    background-color: rgba(0, 0, 0, 0.8);
+    padding: 1rem;
+    border-radius: 0.5rem;
+    box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.3);
+    pointer-events: auto;
+    z-index: 999;
+}
+
+.button-container{
+    display:flex;
+    justify-content: center;
+    align-items: center;
+    width: 100%;
+    gap: 1rem;
+    margin: 0 auto;
+    padding: 1rem;
+    overflow: auto;
+    pointer-events: auto;
+}
+
+.button{
+    padding: 0.5rem 1rem;
+    border-radius: 0.2rem;
+    border-style: none;
+    color: white;
+    background-color: rgba(255,127,80,0.7);
+}
+.button.active{
+    background-color: rgba(255,127,80,1);
+
+}
+.ar-button{
+    background-color: rgb(255,127,80) !important;
+}
+
+/* Dropdown */
+.dropdown-ar-label {
+    color: white;
+    font-size: 1rem;
+    margin-bottom: 0.5rem;
+    display: block;
+}
+
+.dropdown-ar {
+    width: 100%;
+    padding: 0.5rem;
+    border-radius: 0.3rem;
+    border: none;
+    font-size: 1rem;
+    background-color: white;
+    color: black;
+    cursor: pointer;
+    margin-bottom: 1rem;
+}
+
+
+.model-count-container {
+    color: white;
+    font-size: 1rem;
+    margin-top: 1rem;
+    padding: 0.5rem;
+    border-radius: 0.3rem;
+    background-color: rgba(255, 255, 255, 0.1);
+    text-align: left;
+}
+.model-count-container h3 {
+    font-size: 1.2rem;
+    margin-bottom: 0.5rem;
+}
+
+
+.input-container {
+    margin-bottom: 1rem;
+    text-align: left;
+}
+
+.input-label {
+    color: white;
+    font-size: 1rem;
+    display: block;
+    margin-bottom: 0.5rem;
+}
+
+.input-field {
+    width: 100%;
+    padding: 0.5rem;
+    border-radius: 0.3rem;
+    border: none;
+    font-size: 1rem;
+    background-color: white;
+    color: black;
+    cursor: pointer;
+}
+
+/* 📌 Dropdown */
+.dropdown-ar-container {
+    margin-bottom: 1rem;
+}
+
+.save-button {
+    background-color: green;
+    color: white;
+    font-weight: bold;
+    margin-top: 1rem;
+}
+
+.save-button:hover {
+    background-color: darkgreen;
+}
+
+/* 📌 Container สำหรับ Input และ Dropdown */
+.grid-container {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr); /* 2 คอลัมน์ */
+    gap: 1rem; /* ระยะห่างระหว่างช่อง */
+}
+
+/* 📌 ปรับขนาดให้เต็มคอลัมน์ */
+.full-width {
+    grid-column: span 2;
+}
+.button-container-right {
+    display: flex;
+    justify-content: flex-end; /* ✅ ชิดขวา */
+    margin-top: 1rem;
+}
+
+@media screen and (max-width: 768px) {
+    .grid-container {
+        grid-template-columns: 1fr; /* ✅ ปรับให้เป็น 1 คอลัมน์ในหน้าจอเล็ก */
+    }
+    
+    .full-width {
+        grid-column: span 1; /* ✅ ปรับให้เต็ม 1 คอลัมน์ */
+    }
+
+    .popup-menu {
+        width: 95vw; /* ✅ ปรับขนาดเมนูให้เต็มหน้าจอ */
+        height: auto; /* ✅ ปรับให้สูงเท่ากับเนื้อหา */
+        max-height: 90vh; /* ✅ จำกัดความสูง */
+        overflow-y: auto; /* ✅ เลื่อนเมนูได้ถ้าสูงเกิน */
+    }
+
+    .menu-button {
+        right: 0.5rem; /* ✅ ปรับให้ชิดขวาบนมือถือ */
+        top: 0.5rem;
+        padding: 0.6rem 0.8rem;
+    }
+
+    .button-container {
+        flex-direction: column; /* ✅ ปรับปุ่มให้เรียงแนวตั้ง */
+        gap: 0.5rem;
+    }
+
+    .button {
+        width: 100%; /* ✅ ปรับปุ่มให้เต็มจอ */
+        padding: 0.8rem;
+    }
+
+    .save-button {
+        width: 100%; /* ✅ ปรับปุ่มเซฟให้เต็มจอ */
+        text-align: center;
+    }
+
+    .button-container-right {
+        justify-content: center; /* ✅ ปรับปุ่มเซฟให้อยู่ตรงกลางในมือถือ */
+    }
+}
+
+
+@media screen and (max-width: 1024px) {
+    .popup-menu {
+        width: 90vw; /* ✅ ปรับขนาดให้เต็มจอมากขึ้น */
+        max-height: 80vh;
+    }
+
+    .grid-container {
+        grid-template-columns: 1fr 1fr; /* ✅ ปรับให้เป็น 2 คอลัมน์ */
+    }
+}
+
+@media screen and (max-width: 768px) {
+    .popup-menu {
+        width: 95vw;
+        max-height: 90vh;
+    }
+
+    .grid-container {
+        grid-template-columns: 1fr; /* ✅ ปรับให้เป็น 1 คอลัมน์ */
+    }
+}
+
+.capture-button {
+    background-color: royalblue;
+    color: white;
+    font-weight: bold;
+    margin-right: 1rem; /* ✅ เพิ่มระยะห่างจากปุ่ม Save */
+}
+
+.capture-button:hover {
+    background-color: navy;
+}

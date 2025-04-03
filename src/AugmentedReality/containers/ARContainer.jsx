@@ -4,11 +4,11 @@ import { XR } from "@react-three/xr";
 import {
   CharacterAnimationsProvider,
   useCharacterAnimations,
-} from "../contexts/CharacterAnimations";
+} from "../contexts/ModelAnimation";
 import Interface from "./Interface";
 import "./Interface.css";
 import { useCallback, useState } from "react";
-import XrGallary from "./XrGallary";
+import XrGallary from "./ArGallary";
 
 const XrGallaryContainer = () => {
   const [overlayContent, setOverlayContent] = useState(null);

@@ -26,7 +26,7 @@
     padding: 0.8rem 1rem;
     border-radius: 0.3rem;
     border: none;
-    background-color: rgba(255,127,80,0.9);
+    background-color: rgba(124, 42, 255, 0.9);
     color: white;
     font-size: 1rem;
     cursor: pointer;
@@ -66,14 +66,14 @@
     border-radius: 0.2rem;
     border-style: none;
     color: white;
-    background-color: rgba(255,127,80,0.7);
+    background-color: rgba(124, 42, 255, 0.9);
 }
 .button.active{
-    background-color: rgba(255,127,80,1);
+    background-color: rgba(124, 42, 255, 0.5);
 
 }
 .ar-button{
-    background-color: rgb(255,127,80) !important;
+    background-color: rgba(124, 42, 255, 0.9) !important;
 }
 
 /* Dropdown */

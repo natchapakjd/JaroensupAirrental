@@ -32,8 +32,6 @@ router.get("/area_images/:area_calculation_id", (req, res) => {
     }
   );
 });
-
-
 // 📌 (3) ลบรูปภาพ
 router.delete("/area_images/:id", (req, res) => {
   const { id } = req.params;
@@ -54,7 +52,7 @@ router.delete("/area_images/:id", (req, res) => {
 
     try {
       // ✅ ลบจาก Cloudinary
-      await cloudinary.uploader.destroy(`area_images/${publicId}`);
+      await cloudinary.uploader.destroy(`image/area_images/${publicId}`);
 
       // ✅ ลบจาก Database
       db.query("DELETE FROM area_images WHERE id = ?", [id], (err) => {
@@ -81,7 +79,7 @@ router.post("/area_images", upload.single("image"), async (req, res) => {
   try {
     // ✅ อัปโหลดไฟล์ไปยัง Cloudinary
     const result = await cloudinary.uploader.upload(req.file.path, {
-      folder: "area_images",
+      folder: "image/area_images",
     });
 
     const imageUrl = result.secure_url;

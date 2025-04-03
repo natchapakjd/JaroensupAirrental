@@ -28,7 +28,7 @@ import RegisterToTech from "./pages/Authentication/RegisterToTech";
 import DashboardRoute from "./DashboardPage/DashboardRoute";
 import { AuthProvider } from "./context/AuthContext";
 import Payment from "./pages/Payment/Payment";
-import XrGallaryContainer from "./components/AugmentedReality/XR-Gallary/XrGallaryContainer";
+import XrGallaryContainer from "./AugmentedReality/containers/ARContainer";
 import WorkExperienceDetails from "./pages/common/WorkExperienceDetails";
 import TaskDetails from "./pages/History/TaskDetails";
 import TaskImages from "./pages/History/TaskImages";

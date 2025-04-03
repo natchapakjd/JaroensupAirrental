@@ -1,9 +1,9 @@
 import React, { forwardRef, useState, useEffect } from "react";
-import { useCharacterAnimations } from "../contexts/CharacterAnimations";
+import { useCharacterAnimations } from "../contexts/ModelAnimation";
 import "./Interface.css";
 import useModelsStore from "../stores/modelStore";
 import axios from "axios";
-import ImageUpload from "../ImageUpload";
+import ImageUpload from "../functions/ImageUpload";
 import Swal from "sweetalert2";
 import withReactContent from "sweetalert2-react-content";
 import { Navigate, useNavigate } from "react-router-dom";
@@ -204,7 +204,7 @@ const Interface = forwardRef(({ props }, ref) => {
 
   return (
     <div id="overlay-content" ref={ref}>
-      <div className="dom-container">
+      <div className="dom-container font-prompt">
         <button
           className="menu-button"
           onClick={() => setIsMenuOpen(!isMenuOpen)}
