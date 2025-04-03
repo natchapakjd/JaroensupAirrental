@@ -1557,7 +1557,6 @@ router.put("/v2/tasks/complete/:taskId", async (req, res) => {
 });
 
 
-
 router.get("/v3/tasks/paged", (req, res) => {
   const { page = 1, limit = 10 } = req.query; // Default to page 1, 10 items per page
   const offset = (page - 1) * limit;
@@ -1625,5 +1624,25 @@ router.get("/v3/tasks/paged", (req, res) => {
     });
   });
 });
+
+router.get("/task/status/:taskId", (req, res) => {
+  const { taskId } = req.params;
+
+  db.query("SELECT status_id FROM tasks WHERE task_id = ?", [taskId], (error, results) => {
+    if (error) {
+      console.error("Error fetching task status:", error);
+      return res.status(500).json({ message: "Internal Server Error" });
+    }
+
+    console.log("Query Result:", results);
+
+    if (!results || results.length === 0) {
+      return res.status(404).json({ message: "Task not found" });
+    }
+
+    res.json({ status_id: results[0].status_id });
+  });
+});
+
 
 module.exports = router;

@@ -8,8 +8,8 @@ import BackButton from "../../components/BackButton";
 const WorkExperienceDetails = () => {
   const { expId } = useParams(); // ดึง id จาก URL
   const experience = workExperiences.find((exp) => exp.id === Number(expId)); // ค้นหางานที่ตรงกับ id
-  const [currentImage, setCurrentImage] = useState(0);
   const [isFullScreen, setIsFullScreen] = useState(false);
+  const [fullScreenImage, setFullScreenImage] = useState(null);
 
   if (!experience) {
     return (
@@ -21,6 +21,16 @@ const WorkExperienceDetails = () => {
 
   const { images, companyName, projectTitle, description } = experience;
 
+  const openFullScreen = (image) => {
+    setFullScreenImage(image);
+    setIsFullScreen(true);
+  };
+
+  const closeFullScreen = () => {
+    setIsFullScreen(false);
+    setFullScreenImage(null);
+  };
+
   return (
     <>
       <Navbar />
@@ -30,38 +40,29 @@ const WorkExperienceDetails = () => {
             <BackButton />
           </div>
           <div className="bg-white shadow-lg rounded-lg overflow-hidden p-6">
-            {images.length > 1 ? (
-              <div className="relative">
+      
+            <div className="grid grid-cols-2 gap-4">
+              {images.map((image, index) => (
                 <img
-                  src={images[currentImage]}
-                  alt={`Image ${currentImage + 1} of ${companyName}`}
-                  className="w-full h-96 object-cover rounded cursor-pointer"
-                  onClick={() => setIsFullScreen(true)}
+                  key={index}
+                  src={image}
+                  alt={`Image ${index + 1} of ${companyName}`}
+                  className="w-full h-64 object-cover rounded cursor-pointer"
+                  onClick={() => openFullScreen(image)}
                 />
-                <div className="flex justify-center mt-4 space-x-2">
-                  {images.map((_, index) => (
-                    <button
-                      key={index}
-                      className={`w-4 h-4 rounded-full ${index === currentImage ? "bg-blue" : "bg-gray-300"}`}
-                      onClick={() => setCurrentImage(index)}
-                    />
-                  ))}
-                </div>
-              </div>
-            ) : (
-              <img
-                src={images[0]}
-                alt={`Image of ${companyName}`}
-                className="w-full h-96 object-cover rounded cursor-pointer"
-                onClick={() => setIsFullScreen(true)}
-              />
-            )}
+              ))}
+            </div>
           </div>
         </div>
       </div>
+
       {isFullScreen && (
-        <div className="fixed inset-0 bg-black bg-opacity-80 flex justify-center items-center z-50" onClick={() => setIsFullScreen(false)}>
-          <img src={images[currentImage]} alt="Full Screen" className="max-w-full max-h-full" />
+        <div className="fixed inset-0 bg-black bg-opacity-80 flex justify-center items-center z-50" onClick={closeFullScreen}>
+          <img
+            src={fullScreenImage}
+            alt="Full Screen"
+            className="max-w-full max-h-full object-contain"
+          />
         </div>
       )}
       <Footer />
