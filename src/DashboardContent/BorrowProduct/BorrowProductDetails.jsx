@@ -28,7 +28,8 @@ const translations = {
     noProductsBorrowed: "No products borrowed",
     taskNotFound: "Task details not found. The task may have been canceled.",
     taskIdMissing: "Task ID is missing. Please check again.",
-    completeTaskConfirm: "Are you sure you want to mark this task as completed?",
+    completeTaskConfirm:
+      "Are you sure you want to mark this task as completed?",
     deleteTaskConfirm: "Are you sure you want to delete this task?",
     image: "Images",
     editImage: "Edit Image",
@@ -56,7 +57,8 @@ const translations = {
     noProductsBorrowed: "ไม่มีผลิตภัณฑ์ที่ยืม",
     taskNotFound: "ไม่พบข้อมูลการยืมนี้ ข้อมูลอาจถูกยกเลิกไปแล้ว",
     taskIdMissing: "รหัสงานหายไป กรุณาตรวจสอบอีกครั้ง",
-    completeTaskConfirm: "คุณแน่ใจหรือไม่ว่าต้องการทำเครื่องหมายว่างานนี้เสร็จสมบูรณ์?",
+    completeTaskConfirm:
+      "คุณแน่ใจหรือไม่ว่าต้องการทำเครื่องหมายว่างานนี้เสร็จสมบูรณ์?",
     deleteTaskConfirm: "คุณแน่ใจหรือไม่ว่าต้องการลบงานนี้?",
     image: "รูปภาพแนบ",
     editImage: "แก้ไขรูปภาพ",
@@ -67,65 +69,39 @@ const translations = {
 };
 
 const BorrowProductDetails = () => {
-  const { task_id } = useParams();
+  const { taskId } = useParams();
   const [borrowingData, setBorrowingData] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-  const [language, setLanguage] = useState(localStorage.getItem("language") || "th");
+  const [language, setLanguage] = useState(
+    localStorage.getItem("language") || "th"
+  );
   const cookies = new Cookies();
   const token = cookies.get("authToken");
   const decodedToken = jwtDecode(token);
   const techId = decodedToken.id;
   const role = decodedToken.role;
+  const [products, setProducts] = useState([]);
 
   useEffect(() => {
-    if (task_id) {
+    if (taskId) {
       fetchBorrowingDetails();
     } else {
       setError(translations[language].taskIdMissing);
       setLoading(false);
     }
-  }, [task_id]);
-
-  const updateIdCardImage = async (taskId, newImageFile) => {
-    const formData = new FormData();
-    formData.append("id_card_image", newImageFile);
-
-    try {
-      const response = await axios.put(
-        `${import.meta.env.VITE_SERVER_URL}/v2/equipment-borrowing/update-image/${taskId}`,
-        formData,
-        { headers: { "Content-Type": "multipart/form-data" } }
-      );
-      console.log("Image updated:", response.data);
-      setBorrowingData((prev) => ({
-        ...prev,
-        image_url: response.data.image_url,
-      }));
-      Swal.fire({
-        title: "Success",
-        text: translations[language].uploadNewImage + " completed",
-        icon: "success",
-      });
-    } catch (error) {
-      console.error("Error updating image:", error.response?.data || error);
-      Swal.fire({
-        title: "Error",
-        text: translations[language].uploadNewImage + " failed",
-        icon: "error",
-      });
-    }
-  };
+  }, [taskId]);
 
   const fetchBorrowingDetails = async () => {
     try {
       const response = await axios.get(
-        `${import.meta.env.VITE_SERVER_URL}/v4/equipment-borrowing/id/${task_id}`
+        `${import.meta.env.VITE_SERVER_URL}/v4/equipment-borrowing/id/${taskId}`
       );
       if (!response.data || Object.keys(response.data).length === 0) {
         setBorrowingData(null);
       } else {
         setBorrowingData(response.data);
+        setProducts(response.data.products);
       }
       setLoading(false);
     } catch (err) {
@@ -158,9 +134,41 @@ const BorrowProductDetails = () => {
       },
     }).then((result) => {
       if (result.isConfirmed) {
-        updateIdCardImage(task_id, result.value);
+        updateIdCardImage(taskId, result.value);
       }
     });
+  };
+
+  const updateIdCardImage = async (taskId, newImageFile) => {
+    const formData = new FormData();
+    formData.append("id_card_image", newImageFile);
+
+    try {
+      const response = await axios.put(
+        `${
+          import.meta.env.VITE_SERVER_URL
+        }/v2/equipment-borrowing/update-image/${taskId}`,
+        formData,
+        { headers: { "Content-Type": "multipart/form-data" } }
+      );
+      console.log("Image updated:", response.data);
+      setBorrowingData((prev) => ({
+        ...prev,
+        image_url: response.data.image_url,
+      }));
+      Swal.fire({
+        title: "Success",
+        text: translations[language].uploadNewImage + " completed",
+        icon: "success",
+      });
+    } catch (error) {
+      console.error("Error updating image:", error.response?.data || error);
+      Swal.fire({
+        title: "Error",
+        text: translations[language].uploadNewImage + " failed",
+        icon: "error",
+      });
+    }
   };
 
   if (loading) return <Loading />;
@@ -171,7 +179,7 @@ const BorrowProductDetails = () => {
         <div className="max-w-4xl mx-auto bg-white shadow-lg rounded-lg p-6 text-center">
           <h1 className="text-2xl font-bold text-gray-700 mb-4">{error}</h1>
           <p className="text-gray-600">
-            {translations[language].taskIdMissing} {task_id}.
+            {translations[language].taskIdMissing} {taskId}.
           </p>
         </div>
       </div>
@@ -191,11 +199,12 @@ const BorrowProductDetails = () => {
               {translations[language].userInformation}
             </h2>
             <p className="text-gray-700">
-              <strong>{translations[language].userId}:</strong> {borrowingData.user_id}
+              <strong>{translations[language].userId}:</strong>{" "}
+              {borrowingData.user_id}
             </p>
             <p className="text-gray-700">
-              <strong>{translations[language].name}:</strong> {borrowingData.firstname}{" "}
-              {borrowingData.lastname}
+              <strong>{translations[language].name}:</strong>{" "}
+              {borrowingData.firstname} {borrowingData.lastname}
             </p>
           </div>
 
@@ -204,10 +213,12 @@ const BorrowProductDetails = () => {
               {translations[language].taskInformation}
             </h2>
             <p className="text-gray-700">
-              <strong>{translations[language].taskId}:</strong> {borrowingData.task_id}
+              <strong>{translations[language].taskId}:</strong>{" "}
+              {borrowingData.taskId}
             </p>
             <p className="text-gray-700">
-              <strong>{translations[language].description}:</strong> {borrowingData.task_desc}
+              <strong>{translations[language].description}:</strong>{" "}
+              {borrowingData.task_desc}
             </p>
             <p className="text-gray-700">
               <strong>{translations[language].status}:</strong>{" "}
@@ -222,10 +233,12 @@ const BorrowProductDetails = () => {
               {translations[language].borrowingInformation}
             </h2>
             <p className="text-gray-700">
-              <strong>{translations[language].borrowingId}:</strong> {borrowingData.borrowing_id}
+              <strong>{translations[language].borrowingId}:</strong>{" "}
+              {borrowingData.borrowing_id}
             </p>
             <p className="text-gray-700">
-              <strong>{translations[language].productName}:</strong> {borrowingData.product_name}
+              <strong>{translations[language].productName}:</strong>{" "}
+              {borrowingData.product_name}
             </p>
             <p className="text-gray-700">
               <strong>{translations[language].borrowDate}:</strong>{" "}
@@ -249,7 +262,9 @@ const BorrowProductDetails = () => {
                 <img
                   src={borrowingData.image_url}
                   alt="Borrowing Remark Image"
-                  className={`max-w-full h-auto rounded-lg shadow-md ${role === 3 ? "cursor-pointer" : ""}`}
+                  className={`max-w-full h-auto rounded-lg shadow-md ${
+                    role === 3 ? "cursor-pointer" : ""
+                  }`}
                   onError={(e) => {
                     e.target.onerror = null;
                     e.target.src = "/placeholder-image.jpg"; // Optional fallback image
@@ -264,16 +279,18 @@ const BorrowProductDetails = () => {
             <h2 className="text-xl font-semibold mb-4 text-gray-800">
               {translations[language].borrowedProducts}
             </h2>
-            {borrowingData.products && borrowingData.products.length > 0 ? (
+            {products && Array.isArray(products) && products.length > 0 ? (
               <ul className="list-disc pl-5 text-gray-700">
-                {borrowingData.products.map((product, index) => (
+                {products[0].map((product, index) => (
                   <li key={index}>
                     {product.product_name} (Quantity: {product.quantity})
                   </li>
                 ))}
               </ul>
             ) : (
-              <p className="text-gray-700">{translations[language].noProductsBorrowed}</p>
+              <p className="text-gray-700">
+                {translations[language].noProductsBorrowed}
+              </p>
             )}
           </div>
         </div>

@@ -189,41 +189,67 @@ const TaskContent = () => {
 
   const handleDelete = async (taskId) => {
     try {
-      const result = await Swal.fire({
-        title: "Are you sure?",
-        text: "You won't be able to revert this!",
-        icon: "warning",
-        showCancelButton: true,
-        confirmButtonColor: "#3085d6",
-        cancelButtonColor: "#d33",
-        confirmButtonText: "Yes, delete it!",
-        cancelButtonText: "Cancel",
-      });
-
-      if (result.isConfirmed) {
-        const response = await axios.delete(`${apiUrl}/task/${taskId}`, {
-          withCredentials: true,
+        // 1. ดึงข้อมูล task เพื่อตรวจสอบ status_id ก่อนลบ
+        const taskResponse = await axios.get(`${apiUrl}/task/status/${taskId}`, {
+            withCredentials: true,
         });
 
-        await axios.post(`${apiUrl}/task-log`, {
-          task_id: taskId,
-          user_id: user_id,
-          action: "ลบงาน",
-        });
+        console.log("Task ID:", taskId);
+        console.log("Task Status:", taskResponse.data);
 
-        if (response.status === 204) {
-          Swal.fire("Deleted!", "Your task has been deleted.", "success");
-          setTasks(tasks.filter((task) => task.task_id !== taskId));
+        const taskData = taskResponse.data; // ข้อมูล task ที่ได้จาก API
+
+        // 2. ตรวจสอบว่า status_id เป็น 4 หรือ 5 หรือไม่
+        if (taskData.status_id === 4 || taskData.status_id === 5) {
+            Swal.fire({
+                title: "Cannot Delete Task",
+                text: "กรุณาคืนอุปกรณ์ก่อนลบงาน",
+                icon: "warning",
+            });
+            return; 
         }
-      }
+
+        // 3. ถ้า status_id ไม่ใช่ 4 หรือ 5 ให้แสดง Confirm Dialog
+        const result = await Swal.fire({
+            title: "Are you sure?",
+            text: "คุณแน่ใจใช่ไหมว่าจะลบงานนี้!",
+            icon: "warning",
+            showCancelButton: true,
+            confirmButtonColor: "#3085d6",
+            cancelButtonColor: "#d33",
+            confirmButtonText: "ใช่, ลบเลย!",
+            cancelButtonText: "Cancel",
+        });
+
+        if (result.isConfirmed) {
+            // 4. ลบ task
+            const response = await axios.delete(`${apiUrl}/task/${taskId}`, {
+                withCredentials: true,
+            });
+
+            // 5. บันทึก log การลบ task
+            await axios.post(`${apiUrl}/task-log`, {
+                task_id: taskId,
+                user_id: user_id,
+                action: "ลบงาน",
+            });
+
+            // 6. ถ้าลบสำเร็จ (204 No Content)
+            if (response.status === 204) {
+                Swal.fire("Deleted!", "งานถูกลบเรียบร้อยแล้ว.", "success");
+                setTasks(tasks.filter((task) => task.task_id !== taskId));
+            }
+        }
     } catch (error) {
-      Swal.fire({
-        title: "Error",
-        text: error.message,
-        icon: "error",
-      });
+        Swal.fire({
+            title: "Error",
+            text: error.message,
+            icon: "error",
+        });
     }
-  };
+};
+
+  
 
   const handleViewDetails = (taskId) => {
     navigate(`/dashboard/tasks/${taskId}`);

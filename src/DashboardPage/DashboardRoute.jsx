@@ -100,7 +100,7 @@ const DashboardRoute = () => {
             <Route path="payments/add" element={<AddPayment />} />
             <Route path="payments/edit/:paymentId" element={<EditPayment />} />
             <Route path="borrows" element={<BorrowProductTable />} />
-            <Route path="borrows/details/:task_id" element={<BorrowProductDetails />} />
+            <Route path="borrows/details/:taskId" element={<BorrowProductDetails />} />
             <Route path="orders" element={<OrderContent />} />
             <Route path="orders/details/:orderId" element={<OrderDetails/>} />
             <Route path="orders/detail-log/:taskId" element={<OrderDetailsLog/>} />

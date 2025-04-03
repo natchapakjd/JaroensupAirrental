@@ -110,6 +110,7 @@ const BorrowProductTable = () => {
     },
   };
   const currentLang = translation[language] || translation.en;
+  const navigate = useNavigate();
 
   useEffect(() => {
     fetchBorrowingData(techId);
@@ -360,7 +361,7 @@ const BorrowProductTable = () => {
   };
 
   const handleNavigate = (task_id) => {
-    window.location.href = `/dashboard/borrows/details/${task_id}`;
+    navigate(`/dashboard/borrows/details/${task_id}`);
   };
 
   return (
@@ -520,7 +521,7 @@ const BorrowProductTable = () => {
 
                         <button
                           className="btn btn-success text-white "
-                          onClick={() => handleNavigate(item.task_id)} // Wrap the function in an arrow function
+                          onClick={() => handleNavigate(item.task_id)} 
                         >
                           {currentLang.details}
                         </button>
