@@ -19,7 +19,6 @@ import AddWarehouse from '../DashboardContent/Warehouses/AddWarehouse'
 import AddAttribute from '../DashboardContent/Attributes/AddAttribute'
 import AttributeContent from '../DashboardContent/Attributes/AttributeContent'
 import DashboardContent from './DashboardContent'
-import ThreeScene from '../DashboardContent/AugmentedReality/ThreeScene'
 import ReportContent from '../DashboardContent/Reports/ReportContent'
 import TaskContent from '../DashboardContent/Tasks/TaskContent'
 import AddTask from '../DashboardContent/Tasks/AddTask'
@@ -112,7 +111,6 @@ const DashboardRoute = () => {
             <Route path="tasks/approve/:taskId" element={<ApproveTask />} />
             <Route path="tasks/add-image/:taskId" element={<AddTaskImages />} />
             <Route path="user" element={<UserContent />} />
-            {/* <Route path="augmented-reality" element={<ThreeScene />} /> */}
             <Route path="analytics" element={<ReportContent />} />
             <Route path="brands" element={<BrandContent />} />
             <Route path="brands/add" element={<AddBrand />} />

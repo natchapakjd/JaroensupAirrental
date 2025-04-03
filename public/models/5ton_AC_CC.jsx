@@ -1,7 +1,7 @@
 import React from "react";
 import { useGLTF } from "@react-three/drei";
-import { useCharacterAnimations } from "../../src/components/AugmentedReality/contexts/CharacterAnimations";
-import useModelsStore from "../../src/components/AugmentedReality/stores/modelStore";
+import { useCharacterAnimations } from "../../src/AugmentedReality/contexts/ModelAnimation";
+import useModelsStore from "../../src/AugmentedReality/stores/modelStore";
 import { useEffect } from "react";
 export default function Air5tonCC(props) {
   const { nodes, materials } = useGLTF("/models/5ton_AC_CC.gltf");

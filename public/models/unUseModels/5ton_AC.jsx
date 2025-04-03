@@ -6,7 +6,7 @@ Command: npx gltfjsx@6.5.3 5ton_AC.gltf
 import React from 'react'
 import { useGLTF } from '@react-three/drei'
 import { useEffect } from 'react'
-import { useCharacterAnimations } from '../../../src/components/AugmentedReality/contexts/CharacterAnimations'
+import { useCharacterAnimations } from '../../../src/AugmentedReality/contexts/CharacterAnimations'
 
 export default function Model(props) {
   const { nodes, materials } = useGLTF('models/oldModels/5ton_AC.gltf')

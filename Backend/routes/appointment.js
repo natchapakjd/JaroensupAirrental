@@ -96,7 +96,6 @@ router.get("/assignments-paging", (req, res) => {
   });
 });
 
-
 router.get("v2/appointment/:id", (req, res) => {
   const id = req.params.id;
   const query = `

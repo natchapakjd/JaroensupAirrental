@@ -2,12 +2,12 @@ import { OrbitControls } from "@react-three/drei";
 import { useRef, useState } from "react";
 import { useThree } from "@react-three/fiber";
 import { Interactive, useHitTest, useXR } from "@react-three/xr";
-import { useCharacterAnimations } from "../contexts/CharacterAnimations";
+import { useCharacterAnimations } from "../contexts/ModelAnimation";
 import useXRStore from "../stores/useXRStore"; 
 import useModelsStore from "../stores/modelStore";
-import Air5tonCC from "../../../../public/models/5ton_AC_CC";
-import Air10tonCC from "../../../../public/models/10ton_AC_CC";
-import Air20tonCC from "../../../../public/models/20ton_AC_CC";
+import Air5tonCC from "../../../public/models/5ton_AC_CC";
+import Air10tonCC from "../../../public/models/10ton_AC_CC";
+import Air20tonCC from "../../../public/models/20ton_AC_CC";
 import { useEffect } from "react";
 
 const XrGallary = () => {

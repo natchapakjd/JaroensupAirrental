@@ -101,17 +101,14 @@ const Header = () => {
         <p className=" text-sm md:text-xl ml-11 font-semibold text-white ">
         {translations[language].hello}, {user ? `${user.firstname} ${user.lastname}` : "Admin"}
         </p>
-        <p className="text-sm text-white ml-11 font-normal">
-          {translations[language].haveNiceDay}
-        </p>
       </div>
 
       <div className="flex justify-end items-center px-2">
-        {windowWidth > 968 && (
+        {/* {windowWidth > 968 && (
           <p className="badge badge-outline  p-3 text-sm mx-2 text-white">
             {language === "th" ? "🇹🇭 ไทย" : "🇬🇧 English"}
           </p>
-        )}
+        )} */}
         {windowWidth > 968 && (
           <div className="border border-l-6 h-full bg-gray-600 mr-6"></div>
         )}

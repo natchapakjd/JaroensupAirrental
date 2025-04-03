@@ -2,7 +2,7 @@ import React, { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
 import axios from "axios";
 import Swal from "sweetalert2";
-
+import BackButton from "../../components/BackButton";
 const AreacalDetails = () => {
   const { area_calculation_id } = useParams();
   const [images, setImages] = useState([]);
@@ -11,10 +11,12 @@ const AreacalDetails = () => {
   const [language, setLanguage] = useState(
     localStorage.getItem("language") || "th"
   );
+  const [isFullScreen, setIsFullScreen] = useState(false);
+  const [currentImage, setCurrentImage] = useState(null);
 
   // Translation variables
   const translations = {
-    areaImagesTitle: language === "th" ? "รูปภาพในแต่ละพื้นที่" : "Area Images",
+    areaImagesTitle: language === "th" ? "รูปภาพที่เกี่ยวข้องกับพื้นที่" : "Area Images",
     uploadNewImageButton:
       language === "th" ? "อัปโหลดรูปใหม่" : "Upload New Image",
     noImagesMessage:
@@ -207,6 +209,7 @@ const AreacalDetails = () => {
   return (
     <div className="container mx-auto p-8">
       <div className="max-w-6xl mx-auto p-6 font-prompt">
+        <BackButton/>
         <h2 className="text-3xl font-bold text-center text-gray-800 mb-6">
           {translations.areaImagesTitle}
         </h2>
@@ -236,6 +239,10 @@ const AreacalDetails = () => {
               <div
                 key={image.id}
                 className="relative bg-white shadow-lg rounded-xl overflow-hidden transition-all transform hover:scale-105 cursor-pointer"
+                onClick={() => {
+                  setCurrentImage(image.image_url);
+                  setIsFullScreen(true);
+                }}
               >
                 <img
                   src={image.image_url}
@@ -264,6 +271,18 @@ const AreacalDetails = () => {
                 </div>
               </div>
             ))}
+          </div>
+        )}
+        {isFullScreen && (
+          <div
+            className="fixed inset-0 bg-black bg-opacity-80 flex justify-center items-center z-50"
+            onClick={() => setIsFullScreen(false)}
+          >
+            <img
+              src={currentImage}
+              alt="Full Screen"
+              className="max-w-full max-h-full"
+            />
           </div>
         )}
       </div>

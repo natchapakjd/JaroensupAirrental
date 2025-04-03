@@ -1104,106 +1104,120 @@ const Areacal = () => {
 
   function spreadCoolingEffect(cell, boxElement) {
     const gridCells = document.querySelectorAll(".cell");
-    const gridWidth = parseInt(document.getElementById("width").value, 10); // ใช้ขนาดกริดที่กำหนดจาก input
-    const gridHeight = parseInt(document.getElementById("length").value, 10); // ใช้ขนาดกริดที่กำหนดจาก input
+    const gridWidth = parseInt(document.getElementById("width").value, 10);
+    const gridHeight = parseInt(document.getElementById("length").value, 10);
     let coolingRange, rowOff;
 
-    // ตรวจสอบว่า boxElement มี attribute data-rotation หรือไม่
     if (!boxElement.hasAttribute("data-rotation")) {
-      boxElement.setAttribute("data-rotation", "0"); // กำหนดค่าเริ่มต้นสำหรับ box ใหม่
+        boxElement.setAttribute("data-rotation", "0");
     }
+    const rotation = parseInt(boxElement.getAttribute("data-rotation"), 10);
 
+    // กำหนดขนาดพื้นที่ทำความเย็น
     if (boxElement.classList.contains("oneton")) {
-      coolingRange = 5; // 5x5 grid
-      rowOff = -2; // เริ่มต้นจากแถว -2
+        coolingRange = 5; rowOff = -2;
     } else if (boxElement.classList.contains("fiveton")) {
-      coolingRange = 9; // 9x9 grid
-      rowOff = -4; // เริ่มต้นจากแถว -4
+        coolingRange = 9; rowOff = -4;
     } else if (boxElement.classList.contains("tenton")) {
-      coolingRange = 13; // 13x13 grid
-      rowOff = -6; // เริ่มต้นจากแถว -6
+        coolingRange = 13; rowOff = -6;
     } else if (boxElement.classList.contains("twentyton")) {
-      coolingRange = 19; // 19x19 grid
-      rowOff = -9; // เริ่มต้นจากแถว -9
+        coolingRange = 19; rowOff = -9;
     }
 
     const cellIndex = Array.from(gridCells).indexOf(cell);
-    const startingRow = Math.floor(cellIndex / gridWidth); // แถวที่เริ่มต้น
-    const startingCol = cellIndex % gridWidth; // คอลัมน์ที่เริ่มต้น
-
-    // ลิสต์เซลล์ที่ได้รับผลจากความเย็น
+    const startingRow = Math.floor(cellIndex / gridWidth);
+    const startingCol = cellIndex % gridWidth;
     const coolingCells = [];
-    // ดึง obs2 ทั้งหมด
-    const obstacles = document.querySelectorAll(".obstacle2");
 
-    // คำนวณเซลล์ที่จะได้รับผลจากความเย็น
-    for (
-      let rowOffset = rowOff;
-      rowOffset < coolingRange + rowOff;
-      rowOffset++
-    ) {
-      for (let colOffset = 0; colOffset < coolingRange; colOffset++) {
-        let targetRow, targetCol;
+    // ฟังก์ชันตรวจสอบสิ่งกีดขวาง
+    const hasObstacle = (row, col) => {
+        if (row < 0 || row >= gridHeight || col < 0 || col >= gridWidth) return true;
+        const index = row * gridWidth + col;
+        return gridCells[index].querySelector(".obstacle2");
+    };
 
-        // การปรับตำแหน่งตามการหมุน
-        const rotation = parseInt(boxElement.getAttribute("data-rotation"), 10);
-        if (rotation === 0) {
-          [targetRow, targetCol] = [
-            startingRow + rowOffset,
-            startingCol + colOffset,
-          ];
-        } else if (rotation === 90) {
-          [targetRow, targetCol] = [
-            startingRow + colOffset,
-            startingCol - rowOffset,
-          ];
-        } else if (rotation === 180) {
-          [targetRow, targetCol] = [
-            startingRow - rowOffset,
-            startingCol - colOffset,
-          ];
-        } else if (rotation === 270) {
-          [targetRow, targetCol] = [
-            startingRow - colOffset,
-            startingCol + rowOffset,
-          ];
-        }
+    // ตรวจสอบทุกเซลล์ในพื้นที่ทำความเย็น
+    for (let rowOffset = rowOff; rowOffset < coolingRange + rowOff; rowOffset++) {
+        for (let colOffset = 0; colOffset < coolingRange; colOffset++) {
+            let targetRow, targetCol;
 
-        // ตรวจสอบว่าเซลล์ที่คำนวณได้อยู่ในกริดหรือไม่
-        if (
-          targetRow >= 0 &&
-          targetRow < gridHeight &&
-          targetCol >= 0 &&
-          targetCol < gridWidth
-        ) {
-          const targetIndex = targetRow * gridWidth + targetCol;
-          const targetCell = gridCells[targetIndex];
-
-          // หากเจอ obs2 หยุดกระจายในแนว row หรือ col เท่านั้น
-          if (targetCell.querySelector(".obstacle2")) {
-            // ถ้าพบ obstacle2 ในเซลล์เป้าหมาย
-            console.log(
-              `เจอ obstacle2 ใน cell ที่ rowOffset: ${rowOffset}, colOffset: ${colOffset}`
-            );
-            if (rotation === 0 || rotation === 180) {
-              break; // หยุดในลูป colOffset สำหรับการแพร่ในแนว row
-            } else if (rotation === 90 || rotation === 270) {
-              break; // หยุดในลูป rowOffset สำหรับการแพร่ในแนว col
+            // คำนวณตำแหน่งตามการหมุน
+            switch (rotation) {
+                case 0:
+                    targetRow = startingRow + rowOffset;
+                    targetCol = startingCol + colOffset;
+                    break;
+                case 90:
+                    targetRow = startingRow + colOffset;
+                    targetCol = startingCol - rowOffset;
+                    break;
+                case 180:
+                    targetRow = startingRow - rowOffset;
+                    targetCol = startingCol - colOffset;
+                    break;
+                case 270:
+                    targetRow = startingRow - colOffset;
+                    targetCol = startingCol + rowOffset;
+                    break;
             }
-          }
 
-          coolingCells.push(targetCell);
+            if (targetRow >= 0 && targetRow < gridHeight && targetCol >= 0 && targetCol < gridWidth) {
+                const targetIndex = targetRow * gridWidth + targetCol;
+                const targetCell = gridCells[targetIndex];
+
+                let pathClear = true;
+                
+                if (rotation === 0 || rotation === 180) {
+                    // ตรวจสอบแนวตั้งก่อน
+                    const rowStep = targetRow > startingRow ? 1 : -1;
+                    for (let r = startingRow; r !== targetRow; r += rowStep) {
+                        if (hasObstacle(r, startingCol)) {
+                            pathClear = false;
+                            break;
+                        }
+                    }
+                    // ตรวจสอบแนวนอน
+                    const colStep = targetCol > startingCol ? 1 : -1;
+                    for (let c = startingCol; c !== targetCol && pathClear; c += colStep) {
+                        if (hasObstacle(targetRow, c)) {
+                            pathClear = false;
+                            break;
+                        }
+                    }
+                } else {
+                    // ตรวจสอบแนวนอนก่อน
+                    const colStep = targetCol > startingCol ? 1 : -1;
+                    for (let c = startingCol; c !== targetCol; c += colStep) {
+                        if (hasObstacle(startingRow, c)) {
+                            pathClear = false;
+                            break;
+                        }
+                    }
+                    // ตรวจสอบแนวตั้ง
+                    const rowStep = targetRow > startingRow ? 1 : -1;
+                    for (let r = startingRow; r !== targetRow && pathClear; r += rowStep) {
+                        if (hasObstacle(r, targetCol)) {
+                            pathClear = false;
+                            break;
+                        }
+                    }
+                }
+
+                // เพิ่มเซลล์ถ้าเส้นทางปลอดภัยและไม่มีสิ่งกีดขวางในเซลล์นั้น
+                if (pathClear && !hasObstacle(targetRow, targetCol)) {
+                    coolingCells.push(targetCell);
+                }
+            }
         }
-      }
     }
 
-    // เพิ่มความเย็นในเซลล์ที่ได้รับผล
+    // นำความเย็นไปใช้กับเซลล์ที่ผ่านการตรวจสอบ
     coolingCells.forEach((targetCell) => {
-      if (!targetCell.coolingSources) targetCell.coolingSources = new Set();
-      targetCell.coolingSources.add(boxElement.id);
-      targetCell.classList.add("cooling-effect");
+        if (!targetCell.coolingSources) targetCell.coolingSources = new Set();
+        targetCell.coolingSources.add(boxElement.id);
+        targetCell.classList.add("cooling-effect");
     });
-  }
+}
   
   // ฟังก์ชันลบ cooling effect
   async function removeCoolingEffect(boxElement) {

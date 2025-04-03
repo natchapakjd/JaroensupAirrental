@@ -28,6 +28,9 @@ const translations = {
     phone: "เบอร์ติดต่อ",
     price: "ราคารวม",
     organization_name: "ชื่อองค์กร",
+    technicians: "ช่างที่รับผิดชอบ", 
+    techId: "รหัสช่าง", 
+    techName: "ชื่อช่าง", 
   },
   en: {
     taskDetails: "Task Details",
@@ -45,6 +48,9 @@ const translations = {
     phone: "Phone",
     price: "Price",
     organization_name: "Organization Name",
+    technicians: "Technicians", 
+    techId: "Technician ID", 
+    techName: "Technician Name", 
   },
 };
 
@@ -236,13 +242,42 @@ const TaskDetails = () => {
                 {task.address}
               </p>
             )}
-            {task.total !== 0 && (
+            {task.total !== 0 && task.total !== null && (
               <p>
                 <strong>{translations[language].price}:</strong> {task.total}
               </p>
             )}
           </div>
 
+          {task.technicians && task.technicians.length > 0 && (
+          <div className="mt-8">
+            <h3 className="text-lg mb-4 font-semibold">{translations[language].technicians}</h3>
+            <div className="overflow-x-auto">
+              <table className="min-w-full bg-white border border-gray-200 shadow-md rounded-lg mb-4">
+                <thead>
+                  <tr className="bg-gray-200 text-gray-700 uppercase text-sm leading-normal">
+                    <th className="py-3 px-6 text-left">{translations[language].techId}</th>
+                    <th className="py-3 px-6 text-left">{translations[language].techName}</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {task.technicians.map((technician, index) => (
+                    <tr
+                      key={index}
+                      className="border-b border-gray-200 hover:bg-gray-100"
+                    >
+                      <td className="py-3 px-6 text-center">{technician.tech_id}</td>
+                      <td className="py-3 px-6">
+                        {technician.firstname} {technician.lastname}
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          </div>
+        )}
+        
           {/* Rental Details Table */}
           {task.rentalDetails && task.rentalDetails.length > 1 && (
             <div className="mt-8">

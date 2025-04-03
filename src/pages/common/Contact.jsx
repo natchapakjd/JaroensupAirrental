@@ -73,7 +73,7 @@ const Contact = () => {
               <li>
                 {translations[language].phone}: 086-975-0664
               </li>
-              <li>
+              {/* <li>
                 {translations[language].email}: contact@example.com
               </li>
               <li>
@@ -81,7 +81,7 @@ const Contact = () => {
                 <a href="https://www.example.com" className="text-blue-500 hover:underline">
                   www.example.com
                 </a>
-              </li>
+              </li> */}
             </ul>
           </div>
         </div>

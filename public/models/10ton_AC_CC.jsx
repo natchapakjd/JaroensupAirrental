@@ -5,8 +5,8 @@ Command: npx gltfjsx@6.5.3 10ton_AC_CC.gltf
 
 import React, { useEffect } from 'react';
 import { useGLTF } from '@react-three/drei';
-import { useCharacterAnimations } from '../../src/components/AugmentedReality/contexts/CharacterAnimations';
-import useModelsStore from '../../src/components/AugmentedReality/stores/modelStore';
+import { useCharacterAnimations } from '../../src/AugmentedReality/contexts/ModelAnimation';
+import useModelsStore from '../../src/AugmentedReality/stores/modelStore';
 
 export default function Air10tonCC(props) {
   const { nodes, materials } = useGLTF('/models/10ton_AC_CC.gltf');

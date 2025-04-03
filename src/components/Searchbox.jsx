@@ -8,11 +8,10 @@ const Searchbox = ({ onSelectLocation }) => {
   const map = useMap();
   const [debouncedQuery, setDebouncedQuery] = useState("");
 
-  // Debounce logic
   useEffect(() => {
     const handler = setTimeout(() => {
       setDebouncedQuery(searchQuery);
-    }, 500); // Delay of 500ms
+    }, 500); 
 
     return () => clearTimeout(handler);
   }, [searchQuery]);
