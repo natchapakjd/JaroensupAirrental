@@ -23,9 +23,35 @@ label {
   box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
 }
 
+.direction-arrow2 {
+  font-size: 20px; 
+  font-weight: 200; /* หนาที่สุด */
+  text-shadow: 1px 1px 1px red; 
+  color: red;
+  position: absolute;
+  bottom: 0px;
+  right: 0px;
+  pointer-events: none;
+  transform-origin: center;  /* หมุนจากจุดศูนย์กลาง */
+  transition: transform 0.2s ease-in-out;
+}
+
+.direction-arrow {
+  font-size: 20px; 
+  font-weight: 200; 
+  text-shadow: 1px 1px 1px red; 
+  color: red;
+  position: absolute;
+  bottom: 0px;
+  right: 1px;
+  pointer-events: none;
+  transform-origin: center; 
+  transition: transform 0.2s ease-in-out;
+}
+
 .b-air {
   padding: 8px 15px;
-  font-size: 14px;
+  font-size: 16px;
   cursor: pointer;
   background-color: #007bff;
   color: white;
