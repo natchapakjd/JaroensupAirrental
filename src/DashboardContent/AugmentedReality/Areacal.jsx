@@ -979,6 +979,19 @@ const Areacal = () => {
       boxElement.textContent = getACLabel(boxType);
       boxElement.setAttribute("data-rotation", "0");
     }
+
+    
+    if (boxType !== "obstacle" && boxType !== "obstacle2") {
+      const arrowDiv = document.createElement("div");
+      if(width && length < 30){
+        arrowDiv.className = "direction-arrow";
+      }else{
+        arrowDiv.className = "direction-arrow2";
+      }
+      arrowDiv.textContent = getDirectionArrow(0); // เริ่มต้นที่ 0°
+      boxElement.appendChild(arrowDiv);
+    }
+    
     const newId = `box-${Date.now()}`;
     boxElement.id = newId;
     boxElement.setAttribute("draggable", "true");
@@ -1406,8 +1419,9 @@ const Areacal = () => {
 
   function rotateAC(boxElement) {
     if (!boxElement.hasAttribute("data-rotation")) {
-      boxElement.setAttribute("data-rotation", "0"); 
+      boxElement.setAttribute("data-rotation", "0");
     }
+  
     const currentRotation = parseInt(
       boxElement.getAttribute("data-rotation"),
       10
@@ -1415,18 +1429,41 @@ const Areacal = () => {
     const newRotation = (currentRotation + 90) % 360;
     boxElement.setAttribute("data-rotation", newRotation);
     boxElement.style.transform = `rotate(${newRotation}deg)`;
+  
     const parentCell = boxElement.parentElement;
     removeCoolingEffect(boxElement);
     spreadCoolingEffect(parentCell, boxElement);
     updateRemoveButtonPosition(boxElement);
+    
+    
+    // อัปเดต state
     setAcPlacements((prev) =>
       prev.map((ac) =>
         ac.id === boxElement.id ? { ...ac, rotation: newRotation } : ac
       )
     );
-    console.log(`หมุน ${boxElement.id} ไปที่ ${newRotation}°`);
+  
+    const directionArrow = getDirectionArrow(newRotation);
+    boxElement.setAttribute("data-direction", directionArrow); // หรือจะเอาไปแสดงที่ innerText ก็ได้
+    console.log(`หมุน ${boxElement.id} ไปที่ ${newRotation}° (${directionArrow})`);
   }
+  
 
+  function getDirectionArrow(degree) {
+    switch (degree) {
+      case 0:
+        return "→"; // ขวา
+      case 90:
+        return "↓"; // ล่าง
+      case 180:
+        return "←"; // ซ้าย
+      case 270:
+        return "↑"; // บน
+      default:
+        return "?";
+    }
+  }
+  
   const selectAssignmentAndLoadGrid = async () => {
     try {
       // ✅ 1. ดึงรายการ Assignment จาก API
@@ -1539,6 +1576,16 @@ const Areacal = () => {
           e.dataTransfer.setData("boxId", boxElement.id);
         });
 
+        if (type !== "obstacle" && type !== "obstacle2") {
+          const arrowDiv = document.createElement("div");
+          if(width && length < 30){
+            arrowDiv.className = "direction-arrow";
+          }else{
+            arrowDiv.className = "direction-arrow2";
+          }          arrowDiv.textContent = getDirectionArrow(rotation);
+          arrowDiv.style.transform = `rotate(${-rotation}deg)`; // ✅ ให้หมุนตาม rotation
+          boxElement.appendChild(arrowDiv);
+      }
         // ✅ 11. เพิ่มปุ่มลบ
         const deleteButton = createDeleteButton(boxElement);
         adjustDeleteButtonSize(deleteButton, boxElement);
@@ -1589,6 +1636,18 @@ const Areacal = () => {
     adjustRotationForRoomEdge(acBox, bestCell, gridWidth, gridHeight);
     const newRotation = parseInt(acBox.getAttribute("data-rotation"), 10) || 0;
     acBox.style.transform = `rotate(${newRotation}deg)`;
+    
+    if (acType !== "obstacle" && acType !== "obstacle2") {
+      const arrowDiv = document.createElement("div");
+      if(width && length < 30){
+        arrowDiv.className = "direction-arrow";
+      }else{
+        arrowDiv.className = "direction-arrow2";
+      }      arrowDiv.textContent = getDirectionArrow(newRotation);
+      arrowDiv.style.transform = `rotate(${-newRotation}deg)`;
+      acBox.appendChild(arrowDiv);
+    }
+
     const row = parseInt(bestCell.getAttribute("data-row"), 10);
     const col = parseInt(bestCell.getAttribute("data-col"), 10);
     acBox.setAttribute("data-tooltip", `Row: ${row}, Col: ${col} (m)`);

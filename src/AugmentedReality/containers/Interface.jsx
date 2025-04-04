@@ -102,36 +102,66 @@ const Interface = forwardRef(({ props }, ref) => {
   useEffect(() => {
     const fetchData = async () => {
       try {
-        // Fetch area_cals
-        const areaCalsResponse = await axios.get(`${import.meta.env.VITE_SERVER_URL}/area_cals`);
-        setAreaCals(areaCalsResponse.data);
-
-        // Fetch appointments
-        const appointmentsResponse = await axios.get(`${import.meta.env.VITE_SERVER_URL}/appointments`);
-        const appointmentsData = appointmentsResponse.data;
-
-        // Filter appointments to exclude those already in area_cals
-        const usedAssignmentIds = areaCalsResponse.data.map((area) => area.assignment_id);
-        const filteredAppointments = appointmentsData.filter(
-          (appointment) => !usedAssignmentIds.includes(appointment.assignment_id)
+        const areaCalsResponse = await axios.get(
+          `${import.meta.env.VITE_SERVER_URL}/area_cals`
         );
-
-        setAppointments(filteredAppointments);
-        if (filteredAppointments.length > 0) {
-          setSelectedAppointment(filteredAppointments[0].assignment_id);
+        setAreaCals(areaCalsResponse.data);
+  
+        const appointmentsResponse = await axios.get(
+          `${import.meta.env.VITE_SERVER_URL}/appointments`
+        );
+        const appointmentsData = appointmentsResponse.data;
+  
+        const usedAssignmentIds = new Set(
+          areaCalsResponse.data.map((area) => area.assignment_id)
+        );
+        console.log("Used assignment IDs:", Array.from(usedAssignmentIds));
+  
+        // หา task_id ทั้งหมดจาก appointments ที่มี assignment_id ถูกใช้ไปแล้ว
+        const usedTaskIds = new Set();
+        appointmentsData.forEach(appointment => {
+          if (usedAssignmentIds.has(appointment.assignment_id)) {
+            usedTaskIds.add(appointment.task_id);
+          }
+        });
+        console.log("Used task IDs from assignments:", Array.from(usedTaskIds));
+  
+        const uniqueAppointments = [];
+        const seenTaskIds = new Set([...usedTaskIds]); // รวม task_id ที่ถูกใช้แล้วด้วย
+  
+        appointmentsData.forEach((appointment) => {
+          const isAssignmentUsed = usedAssignmentIds.has(appointment.assignment_id);
+          const isTaskUsedOrSeen = seenTaskIds.has(appointment.task_id);
+  
+          console.log(`Appointment ${appointment.assignment_id}:`, {
+            task_id: appointment.task_id,
+            isAssignmentUsed,
+            isTaskUsedOrSeen
+          });
+  
+          if (!isAssignmentUsed && !isTaskUsedOrSeen) {
+            seenTaskIds.add(appointment.task_id);
+            uniqueAppointments.push(appointment);
+          }
+        });
+  
+        console.log("Filtered appointments:", uniqueAppointments);
+        setAppointments(uniqueAppointments);
+  
+        if (uniqueAppointments.length > 0) {
+          setSelectedAppointment(uniqueAppointments[0].assignment_id); 
         } else {
-          setSelectedAppointment(null);
-          Swal.fire("Info", translations[language].noAppointments, "info");
+          setSelectedAppointment([]);
         }
       } catch (error) {
         console.error("Error fetching data:", error);
         Swal.fire("Error", "Failed to fetch data", "error");
       }
     };
-
+  
     fetchData();
   }, []);
-
+  
   useEffect(() => {
     axios
       .get(`${import.meta.env.VITE_SERVER_URL}/area-types`)
