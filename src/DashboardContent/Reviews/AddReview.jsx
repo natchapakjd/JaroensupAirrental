@@ -130,7 +130,7 @@ const AddReview = () => {
             <option value="">{translations[language].taskLabel}</option>
             {tasks.map((task,index) => (
               <option key={task.task_id} value={task.task_id}>
-                {index+1}. {task.firstname} {task.lastname}: {task.description}
+                {index+1}. ผู้สั่ง ({task.firstname} {task.lastname}) : รายละเอียดงาน - {task.description}
               </option>
             ))}
           </select>

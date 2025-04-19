@@ -79,6 +79,60 @@ router.get("/area_cal/:id", (req, res) => {
     });
 });
 
+router.get("/area_cal/by-task/:task_id", (req, res) => {
+  const taskId = req.params.task_id;
+
+  // ค้นหา assignment_id แรกจาก taskassignments
+  const findAssignmentQuery = `
+    SELECT assignment_id
+    FROM taskassignments
+    WHERE task_id = ?
+    LIMIT 1
+  `;
+
+  db.query(findAssignmentQuery, [taskId], (err, assignmentResult) => {
+    if (err) {
+      console.error("Error fetching assignment_id: " + err);
+      return res.status(500).json({ error: "Failed to fetch assignment_id" });
+    }
+
+    if (assignmentResult.length === 0) {
+      return res.status(404).json({ error: "No assignment found for this task_id" });
+    }
+
+    const assignmentId = assignmentResult[0].assignment_id;
+
+    // ค้นหาข้อมูลใน area_calculation_history โดยใช้ assignment_id
+    const query = `
+      SELECT 
+        area_calculation_history.*, 
+        room_types.room_name AS room_type_name
+      FROM area_calculation_history
+      INNER JOIN room_types ON area_calculation_history.room_type_id = room_types.id
+      WHERE area_calculation_history.assignment_id = ?
+    `;
+
+    db.query(query, [assignmentId], (err, result) => {
+      if (err) {
+        console.error("Error fetching area_calculation_history: " + err);
+        return res.status(500).json({ error: "Failed to fetch area_calculation_history" });
+      }
+
+      if (result.length === 0) {
+        return res.status(404).json({ error: "No area calculation found for this assignment_id" });
+      }
+
+      // แปลง grid_pattern จาก JSON string เป็น object
+      const formattedResult = result.map(item => ({
+        ...item,
+        grid_pattern: item.grid_pattern ? JSON.parse(item.grid_pattern) : null
+      }));
+
+      res.json(formattedResult);
+    });
+  });
+});
+
 router.post("/area_cal", (req, res) => {
   const { 
     assignment_id, 

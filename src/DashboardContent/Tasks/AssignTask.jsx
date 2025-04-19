@@ -76,7 +76,9 @@ const AssignTask = () => {
     const fetchTasks = async () => {
       try {
         const response = await axios.get(`${apiUrl}/tasks`);
-        const taskFilter = response.data.filter((task)=>task.status_id === 4 || task.task_type_id === 12)
+        const taskFilter = response.data.filter(
+          (task) => task.status_id === 4 || task.task_type_id === 12
+        );
         setTasks(taskFilter);
       } catch (error) {
         console.error("Error fetching tasks:", error);
@@ -108,7 +110,9 @@ const AssignTask = () => {
       try {
         const response = await axios.get(`${apiUrl}/tasktypes`);
         const filteredTaskTypes = response.data.filter((type) =>
-          ["งานเช่าเครื่องปรับอากาศ", "ล้างเครื่่องปรับอากาศ"].includes(type.type_name)
+          ["งานเช่าเครื่องปรับอากาศ", "ล้างเครื่่องปรับอากาศ"].includes(
+            type.type_name
+          )
         );
         setTaskTypes(filteredTaskTypes);
       } catch (error) {
@@ -124,42 +128,58 @@ const AssignTask = () => {
 
   const handleAssign = async (e) => {
     e.preventDefault();
-  
-    const uniqueTechIds = [...new Set(selectedTechIds)].map((id) => parseInt(id, 10)); // Convert strings to numbers
-    const selectedTask = tasks.find((task) => task.task_id === parseInt(selectedTaskId, 10));   
+
+    const uniqueTechIds = [...new Set(selectedTechIds)].map((id) =>
+      parseInt(id, 10)
+    ); // Convert strings to numbers
+    const selectedTask = tasks.find(
+      (task) => task.task_id === parseInt(selectedTaskId, 10)
+    );
     try {
       // Assign the task
       await axios.post(`${apiUrl}/v2/appointments`, {
         task_id: selectedTaskId,
         tech_ids: uniqueTechIds,
       });
-  
+
       // Fetch updated assigned tasks
       const updatedAssignedTasks = await axios.get(
         `${apiUrl}/assignments-paging?page=${currentPage}&limit=5`
       );
       setAssignedTasks(updatedAssignedTasks.data.data);
       setTotalPages(updatedAssignedTasks.data.total.totalPages);
-  
+
       // Get linetoken of selected technicians
-      const assignedTechs = technicians.filter((tech) =>
-        uniqueTechIds.includes(tech.tech_id) // Now this should match
+      const assignedTechs = technicians.filter(
+        (tech) => uniqueTechIds.includes(tech.tech_id) // Now this should match
       );
       console.log("Assigned Techs:", assignedTechs);
-  
+
       const linetokenArray = assignedTechs
         .filter((tech) => tech.linetoken) // Ensure linetoken exists
         .map((tech) => tech.linetoken);
       console.log("Linetoken Array:", linetokenArray);
-  
       // Send LINE notification to all assigned technicians
       if (linetokenArray.length > 0) {
-        const message = `คุณได้รับมอบหมายงานใหม่: ${selectedTask.description}`;
+        const message = `คุณได้รับมอบหมายงานใหม่จากระบบ:
+
+📋 **งาน**: ${selectedTask.task_type_name || "ไม่ระบุสถานที่งาน"}
+📝 **รายละเอียด**: ${selectedTask.description || "ไม่มีรายละเอียดเพิ่มเติม"}
+📅 **วันที่เริ่ม**: ${
+          selectedTask.appointment_date
+            ? new Date(selectedTask.appointment_date).toLocaleDateString(
+                "th-TH",
+                { timeZone: "Asia/Bangkok" }
+              )
+            : "ไม่ระบุ"
+        }
+
+กรุณาตรวจสอบรายละเอียดในระบบเพื่อดำเนินการต่อ`;
         await sendLineNotification(linetokenArray, message);
       } else {
         console.log("No valid linetokens found for notification.");
       }
-  
+
       // Show success notification
       await Swal.fire({
         title: "สำเร็จ!",
@@ -167,7 +187,7 @@ const AssignTask = () => {
         icon: "success",
         confirmButtonText: "ตกลง",
       });
-  
+
       // Reset form fields
       setSelectedTaskId("");
       setSelectedTechIds([]);
@@ -183,34 +203,50 @@ const AssignTask = () => {
     }
   };
 
+  // const sendLineNotification = async (linetokenArray, message) => {
+  //   try {
+  //     const today = new Date().toISOString().split("T")[0];
+  //     const notificationKey = `task_assign_notification_${selectedTaskId}`;
+
+  //     // Check if notification was already sent today
+  //     if (localStorage.getItem(notificationKey) === today) {
+  //       console.log("Notification already sent today for this task.");
+  //       return;
+  //     }
+
+  //     const body = {
+  //       userIds: linetokenArray,
+  //       message: message,
+  //     };
+
+  //     const response = await axios.post(`${apiUrl}/send-messages-multi`, body, {
+  //       withCredentials: true,
+  //     });
+
+  //     // Mark notification as sent
+  //     localStorage.setItem(notificationKey, today);
+  //     console.log("Multicast notification sent successfully:", response.data);
+  //   } catch (error) {
+  //     console.error("Error sending LINE notification:", error);
+  //     throw error; // Re-throw to handle in handleAssign
+  //   }
+  // };
+  
   const sendLineNotification = async (linetokenArray, message) => {
     try {
-      const today = new Date().toISOString().split("T")[0];
-      const notificationKey = `task_assign_notification_${selectedTaskId}`;
-
-      // Check if notification was already sent today
-      if (localStorage.getItem(notificationKey) === today) {
-        console.log("Notification already sent today for this task.");
-        return;
-      }
-
       const body = {
         userIds: linetokenArray,
         message: message,
       };
-
-      const response = await axios.post(
-        `${apiUrl}/send-messages-multi`,
-        body,
-        { withCredentials: true }
-      );
-
-      // Mark notification as sent
-      localStorage.setItem(notificationKey, today);
-      console.log("Multicast notification sent successfully:", response.data);
+  
+      const response = await axios.post(`${apiUrl}/send-messages-multi`, body, {
+        withCredentials: true,
+      });
+  
+      console.log("LINE notification sent successfully:", response.data);
     } catch (error) {
       console.error("Error sending LINE notification:", error);
-      throw error; // Re-throw to handle in handleAssign
+      throw error; // Re-throw to handle in caller function
     }
   };
 
@@ -227,7 +263,9 @@ const AssignTask = () => {
 
     if (result.isConfirmed) {
       try {
-        const response = await axios.delete(`${apiUrl}/appointment/${assignmentId}`);
+        const response = await axios.delete(
+          `${apiUrl}/appointment/${assignmentId}`
+        );
         if (response.status === 200) {
           const updatedAssignedTasks = await axios.get(
             `${apiUrl}/assignments-paging?page=${currentPage}&limit=5`
@@ -295,7 +333,8 @@ const AssignTask = () => {
                 )
                 .map((task, index) => (
                   <option key={index + 1} value={task.task_id}>
-                    {index + 1}. {task.firstname} {task.lastname} ({task.username}) รายละเอียดงาน: {task.description}
+                    {index + 1}. {task.firstname} {task.lastname} (
+                    {task.username}) รายละเอียดงาน: {task.description}
                   </option>
                 ))}
             </select>
@@ -321,7 +360,10 @@ const AssignTask = () => {
               ))}
             </select>
           </div>
-          <button type="submit" className="btn bg-blue text-white hover:bg-blue">
+          <button
+            type="submit"
+            className="btn bg-blue text-white hover:bg-blue"
+          >
             {t.assignButton}
           </button>
         </form>
@@ -331,9 +373,13 @@ const AssignTask = () => {
           <table className="w-full border-collapse border border-gray-300">
             <thead>
               <tr>
-                <th className="border border-gray-300 p-2">{t.appointmentId}</th>
+                <th className="border border-gray-300 p-2">
+                  {t.appointmentId}
+                </th>
                 <th className="border border-gray-300 p-2">{t.task}</th>
-                <th className="border border-gray-300 p-2">{t.technicianName}</th>
+                <th className="border border-gray-300 p-2">
+                  {t.technicianName}
+                </th>
                 <th className="border border-gray-300 p-2">{t.action}</th>
               </tr>
             </thead>
@@ -342,7 +388,9 @@ const AssignTask = () => {
                 assignedTasks.map((assignment, index) => (
                   <tr key={index + 1}>
                     <td className="border border-gray-300 p-2">{index + 1}</td>
-                    <td className="border border-gray-300 p-2">{assignment.description}</td>
+                    <td className="border border-gray-300 p-2">
+                      {assignment.description}
+                    </td>
                     <td className="border border-gray-300 p-2">
                       {assignment.firstname} {assignment.lastname}
                     </td>
@@ -372,7 +420,9 @@ const AssignTask = () => {
           <div className="flex justify-between items-center mt-4">
             <p
               onClick={() => setCurrentPage((prev) => Math.max(prev - 1, 1))}
-              className={`cursor-pointer ${currentPage === 1 ? "text-gray-400" : "text-black"}`}
+              className={`cursor-pointer ${
+                currentPage === 1 ? "text-gray-400" : "text-black"
+              }`}
             >
               {t.previous}
             </p>
@@ -380,8 +430,12 @@ const AssignTask = () => {
               {t.page} {currentPage} {t.of} {totalPages}
             </span>
             <p
-              onClick={() => setCurrentPage((prev) => Math.min(prev + 1, totalPages))}
-              className={`cursor-pointer ${currentPage === totalPages ? "text-gray-400" : "text-black"}`}
+              onClick={() =>
+                setCurrentPage((prev) => Math.min(prev + 1, totalPages))
+              }
+              className={`cursor-pointer ${
+                currentPage === totalPages ? "text-gray-400" : "text-black"
+              }`}
             >
               {t.next}
             </p>

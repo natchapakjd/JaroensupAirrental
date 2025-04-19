@@ -184,7 +184,8 @@ const TaskDetails = () => {
             {task.user_id && (
               <p>
                 <strong>{translations[language].orderedBy}:</strong>{" "}
-                {task.firstname} {task.lastname}
+                {task.user_firstname} {task.user_lastname}  
+
               </p>
             )}
             {task.phone && (
@@ -288,9 +289,7 @@ const TaskDetails = () => {
                     <tr className="bg-gray-200 text-gray-700 uppercase text-sm leading-normal">
                       <th className="py-3 px-6 text-left">รหัสสินค้า</th>
                       <th className="py-3 px-6 text-left">ชื่ออุปกรณ์</th>
-                      <th className="py-3 px-6 text-left">จำนวน</th>
-                      <th className="py-3 px-6 text-left">วันที่เริ่มต้น</th>
-                      <th className="py-3 px-6 text-left">วันที่สิ้นสุด</th>
+                      <th className="py-3 px-6 text-left">จำนวน</th>              
                     </tr>
                   </thead>
                   <tbody>
@@ -317,20 +316,6 @@ const TaskDetails = () => {
                           </td>
                           <td className="py-3 px-6">
                             {rental.total_quantity_used}
-                          </td>
-                          <td className="py-3 px-6">
-                            {rental.rental_start_date
-                              ? new Date(
-                                  rental.rental_start_date
-                                ).toLocaleDateString()
-                              : "-"}
-                          </td>
-                          <td className="py-3 px-6">
-                            {rental.rental_end_date
-                              ? new Date(
-                                  rental.rental_end_date
-                                ).toLocaleDateString()
-                              : "-"}
                           </td>
                         </tr>
                       );

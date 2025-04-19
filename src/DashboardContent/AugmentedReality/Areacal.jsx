@@ -148,7 +148,9 @@ const Areacal = () => {
   useEffect(() => {
     const checkMobile = () => {
       // ตรวจสอบเฉพาะ Mobile จริงๆ ไม่รวม iPad
-      const isMobileDevice = /Mobi|Android|iPhone/i.test(navigator.userAgent) && !/iPad/i.test(navigator.userAgent);
+      const isMobileDevice =
+        /Mobi|Android|iPhone/i.test(navigator.userAgent) &&
+        !/iPad/i.test(navigator.userAgent);
       setIsMobile(isMobileDevice);
     };
 
@@ -196,12 +198,15 @@ const Areacal = () => {
     const storedLanguage = localStorage.getItem("language") || "en";
     setCurrentLanguage(storedLanguage);
   }, [localStorage.getItem("language")]);
+
   useEffect(() => {
     const fetchAssignments = async () => {
       try {
         // Fetch assignments
-        const response = await axios.get(`${import.meta.env.VITE_SERVER_URL}/appointments`);
-  
+        const response = await axios.get(
+          `${import.meta.env.VITE_SERVER_URL}/appointments`
+        );
+
         // Remove duplicates based on task_id
         const uniqueAssignments = response.data.reduce((acc, current) => {
           const existing = acc.find((item) => item.task_id === current.task_id);
@@ -210,22 +215,23 @@ const Areacal = () => {
           }
           return acc;
         }, []);
-  
+
         // Filter out assignments that are already in area_cal
         const usedAssignmentIds = areaCalList.map((area) => area.assignment_id);
         const filteredAssignments = uniqueAssignments.filter(
           (assignment) => !usedAssignmentIds.includes(assignment.assignment_id)
         );
-  
+
         console.log("Filtered Assignments (Second Hook):", filteredAssignments);
         setAssignments(filteredAssignments);
       } catch (error) {
         console.error("Error fetching assignments:", error);
       }
     };
-  
+
     fetchAssignments();
   }, [areaCalList]); // Depend on areaCalList
+
   useEffect(() => {
     // 📌 ดึงข้อมูลประเภทห้องจาก API
     const fetchRoomTypes = async () => {
@@ -495,6 +501,7 @@ const Areacal = () => {
       );
     }
   };
+
   const handleDraggingMode = (event) => {
     const checked = event.target.checked;
     setIsDraggingMode(checked);
@@ -506,6 +513,7 @@ const Areacal = () => {
       console.log("ปิดโหมดลากค้างและคัดลอก");
     }
   };
+
   function handleEraserButton() {
     setIsEraserMode(!isEraserMode);
     if (!isEraserMode) {
@@ -598,7 +606,7 @@ const Areacal = () => {
     const usageResult = document.getElementById("ac-usage-result");
     usageResult.innerHTML = "";
     result.forEach(({ size, count }) => {
-      const sizeInTons = size / 12000; 
+      const sizeInTons = size / 12000;
       usageResult.innerHTML += `<div>แอร์ขนาด ${sizeInTons} ตัน: ${count} ตัว</div>`;
     });
     addApplyButton(result);
@@ -858,7 +866,6 @@ const Areacal = () => {
 
     // คำนวณพื้นที่และ BTU ที่ต้องการ
     const roomArea = width * length;
-    f;
     const requiredBTU = roomArea * btuRequiredPerSqM;
 
     // ดึงค่าจากกล่องจำนวนแอร์ที่มีอยู่
@@ -899,8 +906,8 @@ const Areacal = () => {
       return;
     }
     const grid = document.getElementById("grid");
-    grid.innerHTML = ""; 
-    let cellSize = 40; 
+    grid.innerHTML = "";
+    let cellSize = 40;
     if (width > 30 || length > 30) {
       cellSize = 20;
     }
@@ -911,8 +918,8 @@ const Areacal = () => {
       cell.classList.add("cell");
 
       const row = Math.floor(i / width);
-      const col = i % width; 
-      cell.setAttribute("data-index", i); 
+      const col = i % width;
+      cell.setAttribute("data-index", i);
       cell.setAttribute("data-row", row);
       cell.setAttribute("data-col", col);
       cell.style.width = `${cellSize}px`;
@@ -922,6 +929,43 @@ const Areacal = () => {
       grid.appendChild(cell);
     }
     await new Promise((resolve) => setTimeout(resolve, 50));
+    setHasQuickPlacedAC(false); // รีเซ็ตสถานะเมื่อสร้าง Grid ใหม่
+    calculateBTUWithMinAC();
+  };
+
+  const clearGrid = async () => {
+    if (isNaN(width) || isNaN(length) || width < 1 || length < 1) {
+      Swal.fire({
+        title: "จำกัดความกว้างความยาว",
+        text: "กรุณากรอกความกว้างและความยาวเป็นตัวเลขที่ถูกต้อง",
+        icon: "warning",
+        confirmButtonText: "ตกลง",
+      });
+      return;
+    }
+    const grid = document.getElementById("grid");
+    grid.innerHTML = "";
+    let cellSize = 40;
+    if (width > 30 || length > 30) {
+      cellSize = 20;
+    }
+    grid.style.gridTemplateColumns = `repeat(${width}, ${cellSize}px)`;
+    grid.style.gridTemplateRows = `repeat(${length}, ${cellSize}px)`;
+    for (let i = 0; i < width * length; i++) {
+      const cell = document.createElement("div");
+      cell.classList.add("cell");
+
+      const row = Math.floor(i / width);
+      const col = i % width;
+      cell.setAttribute("data-index", i);
+      cell.setAttribute("data-row", row);
+      cell.setAttribute("data-col", col);
+      cell.style.width = `${cellSize}px`;
+      cell.style.height = `${cellSize}px`;
+      cell.addEventListener("dragover", (e) => e.preventDefault());
+      cell.addEventListener("drop", handleDrop);
+      grid.appendChild(cell);
+    }
     setAcPlacements([]);
     setHasQuickPlacedAC(false); // รีเซ็ตสถานะเมื่อสร้าง Grid ใหม่
     calculateBTUWithMinAC();
@@ -956,10 +1000,10 @@ const Areacal = () => {
     let boxType = null;
     let isExistingBox = false;
     if (document.getElementById(boxId)) {
-      isExistingBox = true; 
+      isExistingBox = true;
       boxElement = document.getElementById(boxId);
-      boxType = getACTypeFromClass(boxElement); 
-      removeCoolingEffect(boxElement); 
+      boxType = getACTypeFromClass(boxElement);
+      removeCoolingEffect(boxElement);
     } else {
       boxElement = document.createElement("div");
       const typeMap = {
@@ -973,25 +1017,24 @@ const Areacal = () => {
       };
       boxType = typeMap[boxId] || "ac";
       if (boxType === "ac") {
-        return; 
+        return;
       }
       boxElement.className = `box ${boxType}`;
       boxElement.textContent = getACLabel(boxType);
       boxElement.setAttribute("data-rotation", "0");
     }
 
-    
     if (boxType !== "obstacle" && boxType !== "obstacle2") {
       const arrowDiv = document.createElement("div");
-      if(width && length < 30){
+      if (width && length < 30) {
         arrowDiv.className = "direction-arrow";
-      }else{
+      } else {
         arrowDiv.className = "direction-arrow2";
       }
       arrowDiv.textContent = getDirectionArrow(0); // เริ่มต้นที่ 0°
       boxElement.appendChild(arrowDiv);
     }
-    
+
     const newId = `box-${Date.now()}`;
     boxElement.id = newId;
     boxElement.setAttribute("draggable", "true");
@@ -999,7 +1042,7 @@ const Areacal = () => {
     setAcPlacements((prev) => {
       const filteredPlacements = prev.filter((ac) => ac.id !== boxId);
       const existingAC = prev.find((ac) => ac.id === boxId);
-      const rotationValue = existingAC ? existingAC.rotation : 0; 
+      const rotationValue = existingAC ? existingAC.rotation : 0;
       return [
         ...filteredPlacements,
         {
@@ -1008,7 +1051,7 @@ const Areacal = () => {
           row,
           col,
           type: boxType,
-          rotation: rotationValue, 
+          rotation: rotationValue,
         },
       ];
     });
@@ -1122,19 +1165,23 @@ const Areacal = () => {
     let coolingRange, rowOff;
 
     if (!boxElement.hasAttribute("data-rotation")) {
-        boxElement.setAttribute("data-rotation", "0");
+      boxElement.setAttribute("data-rotation", "0");
     }
     const rotation = parseInt(boxElement.getAttribute("data-rotation"), 10);
 
     // กำหนดขนาดพื้นที่ทำความเย็น
     if (boxElement.classList.contains("oneton")) {
-        coolingRange = 5; rowOff = -2;
+      coolingRange = 5;
+      rowOff = -2;
     } else if (boxElement.classList.contains("fiveton")) {
-        coolingRange = 9; rowOff = -4;
+      coolingRange = 9;
+      rowOff = -4;
     } else if (boxElement.classList.contains("tenton")) {
-        coolingRange = 13; rowOff = -6;
+      coolingRange = 13;
+      rowOff = -6;
     } else if (boxElement.classList.contains("twentyton")) {
-        coolingRange = 19; rowOff = -9;
+      coolingRange = 19;
+      rowOff = -9;
     }
 
     const cellIndex = Array.from(gridCells).indexOf(cell);
@@ -1144,94 +1191,112 @@ const Areacal = () => {
 
     // ฟังก์ชันตรวจสอบสิ่งกีดขวาง
     const hasObstacle = (row, col) => {
-        if (row < 0 || row >= gridHeight || col < 0 || col >= gridWidth) return true;
-        const index = row * gridWidth + col;
-        return gridCells[index].querySelector(".obstacle2");
+      if (row < 0 || row >= gridHeight || col < 0 || col >= gridWidth)
+        return true;
+      const index = row * gridWidth + col;
+      return gridCells[index].querySelector(".obstacle2");
     };
 
     // ตรวจสอบทุกเซลล์ในพื้นที่ทำความเย็น
-    for (let rowOffset = rowOff; rowOffset < coolingRange + rowOff; rowOffset++) {
-        for (let colOffset = 0; colOffset < coolingRange; colOffset++) {
-            let targetRow, targetCol;
+    for (
+      let rowOffset = rowOff;
+      rowOffset < coolingRange + rowOff;
+      rowOffset++
+    ) {
+      for (let colOffset = 0; colOffset < coolingRange; colOffset++) {
+        let targetRow, targetCol;
 
-            // คำนวณตำแหน่งตามการหมุน
-            switch (rotation) {
-                case 0:
-                    targetRow = startingRow + rowOffset;
-                    targetCol = startingCol + colOffset;
-                    break;
-                case 90:
-                    targetRow = startingRow + colOffset;
-                    targetCol = startingCol - rowOffset;
-                    break;
-                case 180:
-                    targetRow = startingRow - rowOffset;
-                    targetCol = startingCol - colOffset;
-                    break;
-                case 270:
-                    targetRow = startingRow - colOffset;
-                    targetCol = startingCol + rowOffset;
-                    break;
-            }
-
-            if (targetRow >= 0 && targetRow < gridHeight && targetCol >= 0 && targetCol < gridWidth) {
-                const targetIndex = targetRow * gridWidth + targetCol;
-                const targetCell = gridCells[targetIndex];
-
-                let pathClear = true;
-                
-                if (rotation === 0 || rotation === 180) {
-                    // ตรวจสอบแนวตั้งก่อน
-                    const rowStep = targetRow > startingRow ? 1 : -1;
-                    for (let r = startingRow; r !== targetRow; r += rowStep) {
-                        if (hasObstacle(r, startingCol)) {
-                            pathClear = false;
-                            break;
-                        }
-                    }
-                    // ตรวจสอบแนวนอน
-                    const colStep = targetCol > startingCol ? 1 : -1;
-                    for (let c = startingCol; c !== targetCol && pathClear; c += colStep) {
-                        if (hasObstacle(targetRow, c)) {
-                            pathClear = false;
-                            break;
-                        }
-                    }
-                } else {
-                    // ตรวจสอบแนวนอนก่อน
-                    const colStep = targetCol > startingCol ? 1 : -1;
-                    for (let c = startingCol; c !== targetCol; c += colStep) {
-                        if (hasObstacle(startingRow, c)) {
-                            pathClear = false;
-                            break;
-                        }
-                    }
-                    // ตรวจสอบแนวตั้ง
-                    const rowStep = targetRow > startingRow ? 1 : -1;
-                    for (let r = startingRow; r !== targetRow && pathClear; r += rowStep) {
-                        if (hasObstacle(r, targetCol)) {
-                            pathClear = false;
-                            break;
-                        }
-                    }
-                }
-
-                // เพิ่มเซลล์ถ้าเส้นทางปลอดภัยและไม่มีสิ่งกีดขวางในเซลล์นั้น
-                if (pathClear && !hasObstacle(targetRow, targetCol)) {
-                    coolingCells.push(targetCell);
-                }
-            }
+        // คำนวณตำแหน่งตามการหมุน
+        switch (rotation) {
+          case 0:
+            targetRow = startingRow + rowOffset;
+            targetCol = startingCol + colOffset;
+            break;
+          case 90:
+            targetRow = startingRow + colOffset;
+            targetCol = startingCol - rowOffset;
+            break;
+          case 180:
+            targetRow = startingRow - rowOffset;
+            targetCol = startingCol - colOffset;
+            break;
+          case 270:
+            targetRow = startingRow - colOffset;
+            targetCol = startingCol + rowOffset;
+            break;
         }
+
+        if (
+          targetRow >= 0 &&
+          targetRow < gridHeight &&
+          targetCol >= 0 &&
+          targetCol < gridWidth
+        ) {
+          const targetIndex = targetRow * gridWidth + targetCol;
+          const targetCell = gridCells[targetIndex];
+
+          let pathClear = true;
+
+          if (rotation === 0 || rotation === 180) {
+            // ตรวจสอบแนวตั้งก่อน
+            const rowStep = targetRow > startingRow ? 1 : -1;
+            for (let r = startingRow; r !== targetRow; r += rowStep) {
+              if (hasObstacle(r, startingCol)) {
+                pathClear = false;
+                break;
+              }
+            }
+            // ตรวจสอบแนวนอน
+            const colStep = targetCol > startingCol ? 1 : -1;
+            for (
+              let c = startingCol;
+              c !== targetCol && pathClear;
+              c += colStep
+            ) {
+              if (hasObstacle(targetRow, c)) {
+                pathClear = false;
+                break;
+              }
+            }
+          } else {
+            // ตรวจสอบแนวนอนก่อน
+            const colStep = targetCol > startingCol ? 1 : -1;
+            for (let c = startingCol; c !== targetCol; c += colStep) {
+              if (hasObstacle(startingRow, c)) {
+                pathClear = false;
+                break;
+              }
+            }
+            // ตรวจสอบแนวตั้ง
+            const rowStep = targetRow > startingRow ? 1 : -1;
+            for (
+              let r = startingRow;
+              r !== targetRow && pathClear;
+              r += rowStep
+            ) {
+              if (hasObstacle(r, targetCol)) {
+                pathClear = false;
+                break;
+              }
+            }
+          }
+
+          // เพิ่มเซลล์ถ้าเส้นทางปลอดภัยและไม่มีสิ่งกีดขวางในเซลล์นั้น
+          if (pathClear && !hasObstacle(targetRow, targetCol)) {
+            coolingCells.push(targetCell);
+          }
+        }
+      }
     }
 
     // นำความเย็นไปใช้กับเซลล์ที่ผ่านการตรวจสอบ
     coolingCells.forEach((targetCell) => {
-        if (!targetCell.coolingSources) targetCell.coolingSources = new Set();
-        targetCell.coolingSources.add(boxElement.id);
-        targetCell.classList.add("cooling-effect");
+      if (!targetCell.coolingSources) targetCell.coolingSources = new Set();
+      targetCell.coolingSources.add(boxElement.id);
+      targetCell.classList.add("cooling-effect");
     });
-}
-  
+  }
+
   // ฟังก์ชันลบ cooling effect
   async function removeCoolingEffect(boxElement) {
     const gridCells = document.querySelectorAll(".cell");
@@ -1255,10 +1320,10 @@ const Areacal = () => {
     acBox.setAttribute("data-row", "0");
     acBox.setAttribute("data-col", "0");
     acBox.setAttribute("draggable", "true");
-    acBox.id = `ac-${Date.now()}`; 
+    acBox.id = `ac-${Date.now()}`;
     acBox.addEventListener("dragstart", (e) => {
       e.dataTransfer.setData("boxId", acBox.id);
-      removeCoolingEffect(acBox); 
+      removeCoolingEffect(acBox);
     });
     document.querySelectorAll(".cell").forEach((cell) => {
       cell.addEventListener("dragover", (e) => {
@@ -1280,7 +1345,7 @@ const Areacal = () => {
             draggedBox,
             uncoveredCells,
             gridWidth
-          ); 
+          );
         }
       });
     });
@@ -1421,7 +1486,7 @@ const Areacal = () => {
     if (!boxElement.hasAttribute("data-rotation")) {
       boxElement.setAttribute("data-rotation", "0");
     }
-  
+
     const currentRotation = parseInt(
       boxElement.getAttribute("data-rotation"),
       10
@@ -1429,25 +1494,25 @@ const Areacal = () => {
     const newRotation = (currentRotation + 90) % 360;
     boxElement.setAttribute("data-rotation", newRotation);
     boxElement.style.transform = `rotate(${newRotation}deg)`;
-  
+
     const parentCell = boxElement.parentElement;
     removeCoolingEffect(boxElement);
     spreadCoolingEffect(parentCell, boxElement);
     updateRemoveButtonPosition(boxElement);
-    
-    
+
     // อัปเดต state
     setAcPlacements((prev) =>
       prev.map((ac) =>
         ac.id === boxElement.id ? { ...ac, rotation: newRotation } : ac
       )
     );
-  
+
     const directionArrow = getDirectionArrow(newRotation);
     boxElement.setAttribute("data-direction", directionArrow); // หรือจะเอาไปแสดงที่ innerText ก็ได้
-    console.log(`หมุน ${boxElement.id} ไปที่ ${newRotation}° (${directionArrow})`);
+    console.log(
+      `หมุน ${boxElement.id} ไปที่ ${newRotation}° (${directionArrow})`
+    );
   }
-  
 
   function getDirectionArrow(degree) {
     switch (degree) {
@@ -1463,7 +1528,7 @@ const Areacal = () => {
         return "?";
     }
   }
-  
+
   const selectAssignmentAndLoadGrid = async () => {
     try {
       // ✅ 1. ดึงรายการ Assignment จาก API
@@ -1578,14 +1643,15 @@ const Areacal = () => {
 
         if (type !== "obstacle" && type !== "obstacle2") {
           const arrowDiv = document.createElement("div");
-          if(width && length < 30){
+          if (width && length < 30) {
             arrowDiv.className = "direction-arrow";
-          }else{
+          } else {
             arrowDiv.className = "direction-arrow2";
-          }          arrowDiv.textContent = getDirectionArrow(rotation);
+          }
+          arrowDiv.textContent = getDirectionArrow(rotation);
           arrowDiv.style.transform = `rotate(${-rotation}deg)`; // ✅ ให้หมุนตาม rotation
           boxElement.appendChild(arrowDiv);
-      }
+        }
         // ✅ 11. เพิ่มปุ่มลบ
         const deleteButton = createDeleteButton(boxElement);
         adjustDeleteButtonSize(deleteButton, boxElement);
@@ -1623,27 +1689,28 @@ const Areacal = () => {
     gridHeight,
     acType
   ) {
-    if (uncoveredCells.size === 0) return null; 
+    if (uncoveredCells.size === 0) return null;
     const bestCell = findBestCellForAC(
       uncoveredCells,
       gridWidth,
       gridHeight,
       acType
     );
-    if (!bestCell) return null; 
+    if (!bestCell) return null;
     const acBox = createACBox(acType);
-    adjustBoxSize(acBox, bestCell); 
+    adjustBoxSize(acBox, bestCell);
     adjustRotationForRoomEdge(acBox, bestCell, gridWidth, gridHeight);
     const newRotation = parseInt(acBox.getAttribute("data-rotation"), 10) || 0;
     acBox.style.transform = `rotate(${newRotation}deg)`;
-    
+
     if (acType !== "obstacle" && acType !== "obstacle2") {
       const arrowDiv = document.createElement("div");
-      if(width && length < 30){
+      if (width && length < 30) {
         arrowDiv.className = "direction-arrow";
-      }else{
+      } else {
         arrowDiv.className = "direction-arrow2";
-      }      arrowDiv.textContent = getDirectionArrow(newRotation);
+      }
+      arrowDiv.textContent = getDirectionArrow(newRotation);
       arrowDiv.style.transform = `rotate(${-newRotation}deg)`;
       acBox.appendChild(arrowDiv);
     }
@@ -1673,18 +1740,18 @@ const Areacal = () => {
   }
 
   function placeACInFallbackPosition(uncoveredCells, acType) {
-    if (uncoveredCells.size === 0) return false; 
+    if (uncoveredCells.size === 0) return false;
     console.log("fallback");
     const fallbackCellIndex = Array.from(uncoveredCells.keys())[0];
     const fallbackCell = uncoveredCells.get(fallbackCellIndex);
     uncoveredCells.delete(fallbackCellIndex);
-    return true; 
+    return true;
   }
 
   function findBestCellForAC(uncoveredCells, gridWidth, gridHeight, acType) {
     let bestCell = null;
     let bestScore = -Infinity;
-    const spacing = getACSpacing(acType); 
+    const spacing = getACSpacing(acType);
     for (const [index, cell] of uncoveredCells.entries()) {
       const row = Math.floor(index / gridWidth);
       const col = index % gridWidth;
@@ -1783,6 +1850,7 @@ const Areacal = () => {
         return "ไม่ระบุ";
     }
   }
+
   const AC_TYPE_MAP = {
     12000: { className: "oneton", label: "1Ton" },
     60000: { className: "fiveton", label: "5Ton" },
@@ -1854,6 +1922,7 @@ const Areacal = () => {
       Swal.fire("สำเร็จ!", `เลือก Assignment ID: ${selectedId}`, "success");
     }
   };
+
   const handleSelectAreaCal = async () => {
     const { value: formValues } = await Swal.fire({
       title: "เลือกข้อมูลคำนวณพื้นที่",
@@ -1944,6 +2013,7 @@ const Areacal = () => {
   const handleNavigateToAR = () => {
     navigate("/augmented-reality");
   };
+
   function handleDraggingModeV1(event) {
     if (event.target.checked) {
       isDraggingModeV1 = true;
@@ -1955,6 +2025,7 @@ const Areacal = () => {
       console.log("ปิดโหมดลากค้างและคัดลอก");
     }
   }
+
   function enableDragCopyModeV1() {
     if (!isDraggingModeV1) return; // ⛔ หยุดทำงานถ้ายังไม่ได้เปิดโหมดลากค้าง
 
@@ -2076,7 +2147,7 @@ const Areacal = () => {
     grid.removeEventListener("mousemove", dragCopy); // ยกเลิก Event Listener
     grid.removeEventListener("mouseup", stopDragCopy); // ยกเลิก Event Listener
   }
-  
+
   function addFunctionalityToBoxV1(boxElement) {
     // ✅ Check if it's NOT an obstacle before adding click event
     if (
@@ -2116,6 +2187,7 @@ const Areacal = () => {
 
     return newBox;
   }
+
   return (
     <>
       <div className="container mx-auto p-8"></div>
@@ -2281,11 +2353,7 @@ const Areacal = () => {
           คำนวณจำนวนแอร์ที่ต้องใช้
         </button> */}
         <br />
-        <button
-          id="createGrid"
-          className="my-2 mr-2 b-air"
-          onClick={createGrid}
-        >
+        <button id="createGrid" className="my-2 mr-2 b-air" onClick={clearGrid}>
           {translations[currentLanguage].clearGrid}
         </button>
         <button

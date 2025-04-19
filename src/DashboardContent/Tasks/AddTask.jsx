@@ -174,15 +174,18 @@ const AddTask = () => {
           <h1 className="text-2xl font-semibold mx-2">{t.addTaskTitle}</h1>
         </div>
         <form onSubmit={handleSubmit} className="space-y-4 text-md">
-        <div>
-            <label className="block mb-2">{t.organizationName}</label> {/* ✅ เพิ่ม */}
-            <input
-              type="text"
-              value={organizationName}
-              onChange={(e) => setOrganizationName(e.target.value)}
-              className="input input-bordered p-2 w-full"
-            />
-          </div>
+        {taskTypeId !== "12" && (
+  <div>
+    <label className="block mb-2">{t.organizationName}</label>
+    <input
+      type="text"
+      value={organizationName}
+      onChange={(e) => setOrganizationName(e.target.value)}
+      className="input input-bordered p-2 w-full"
+    />
+  </div>
+)}
+
           <div>
             <label className="block mb-2">{t.taskType}</label>
             <select

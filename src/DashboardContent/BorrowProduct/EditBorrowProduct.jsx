@@ -301,7 +301,7 @@ const EditBorrowProduct = () => {
             <button
               type="button"
               onClick={() => removeProduct(index)}
-              className="btn btn-error btn-sm bg-blue-500 hover:bg-blue-600 text-white"
+              className="btn btn-error btn-sm bg-blue-500 hover:bg-blue text-white"
             >
               Remove
             </button>
