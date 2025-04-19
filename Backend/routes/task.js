@@ -1628,7 +1628,7 @@ router.get("/v3/tasks/paged", (req, res) => {
 router.get("/task/status/:taskId", (req, res) => {
   const { taskId } = req.params;
 
-  db.query("SELECT status_id FROM tasks WHERE task_id = ?", [taskId], (error, results) => {
+  db.query("SELECT status_id,task_type_id FROM tasks WHERE task_id = ?", [taskId], (error, results) => {
     if (error) {
       console.error("Error fetching task status:", error);
       return res.status(500).json({ message: "Internal Server Error" });
@@ -1640,7 +1640,7 @@ router.get("/task/status/:taskId", (req, res) => {
       return res.status(404).json({ message: "Task not found" });
     }
 
-    res.json({ status_id: results[0].status_id });
+    res.json({ status_id: results[0].status_id ,task_type_id: results[0].task_type_id});
   });
 });
 

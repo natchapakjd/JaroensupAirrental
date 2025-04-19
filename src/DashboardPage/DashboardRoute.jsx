@@ -68,6 +68,11 @@ import BorrowPage from '../DashboardContent/BorrowProduct/BorrowPage'
 import AddProductAttribute from '../DashboardContent/Attributes/AddProductAttribute'
 import ProductAttributeContent from '../DashboardContent/Attributes/ProductAttributeContent'
 import ProductAttributeEdit from '../DashboardContent/Attributes/ProductAttributeEdit'
+import WorkExpContent from '../DashboardContent/WorkExperience/WorkExpContent'
+import AddWorkExp from '../DashboardContent/WorkExperience/AddWorkExp'
+import EditWorkExp from '../DashboardContent/WorkExperience/EditWorkExp'
+import WorkExpDetails from '../DashboardContent/WorkExperience/WorkExpDetails'
+import InstallationDetails from '../DashboardContent/Tasks/InstallationDetails'
 
 const DashboardRoute = () => {
   return (
@@ -87,6 +92,7 @@ const DashboardRoute = () => {
             <Route path="tasks/assign/edit/:assignmentId" element={<EditAssignmentTask />} />
             <Route path="tasks/:taskId" element={<TaskDetails />} />
             <Route path="tasks-tech/edit/:taskId" element={<UpdateTaskTech />} />
+            <Route path="tasks/installationDetails/:taskId" element={<InstallationDetails />} />
             <Route path="applicants" element={<ApplicantContent />} />
             <Route path="applicants/add" element={<AddApplicant />} />
             <Route path="applicants/edit/:applicantId" element={<EditApplicant />} />
@@ -142,7 +148,12 @@ const DashboardRoute = () => {
             <Route path="attributes/products" element={<ProductAttributeContent />} />
             <Route path="attributes/products/add" element={<AddProductAttribute />} />
             <Route path="attributes/products/edit/:id" element={<ProductAttributeEdit />} />
-          </Routes>
+            <Route path="workexperiences" element={<WorkExpContent />} />
+            <Route path="workexperiences/add" element={<AddWorkExp />} />
+            <Route path="workexperiences/edit/:id" element={<EditWorkExp />} />
+            <Route path="workexperiences/details/:id" element={<WorkExpDetails />} />
+
+            </Routes>
         </div>
       </div>
   )

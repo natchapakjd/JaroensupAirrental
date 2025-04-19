@@ -19,6 +19,7 @@ import {
   MdHistory,
   MdOutlineSettings,
   MdOutlineMenu,
+  MdTaskAlt 
 } from "react-icons/md";
 import { jwtDecode } from "jwt-decode";
 import Cookies from "universal-cookie";
@@ -52,6 +53,7 @@ const Sidebar = () => {
       historyLog: "History Log",
       settings: "Settings",
       jaroensup: "Jaroensup",
+      work_exp: "Work Experience"
     },
     th: {
       dashboard: "แดชบอร์ด",
@@ -72,6 +74,7 @@ const Sidebar = () => {
       historyLog: "ประวัติการดำเนินการ",
       settings: "การตั้งค่า",
       jaroensup: "เจริญทรัพย์",
+      work_exp: "ผลงานเก่า"
     },
   };
 
@@ -310,6 +313,21 @@ const Sidebar = () => {
                     >
                       <MdPieChart className="mt-1" />{" "}
                       {translations[currentLanguage].analytics}
+                    </a>
+                  </li>
+                  <li
+                    className={`mb-5 hover:rounded-lg hover:py-3 hover:px-4 transition-all duration-300 hover:mx-5 ${
+                      isActive("/dashboard/workexperiences")
+                        ? "bg-blue text-white mx-5 px-4 py-3 rounded-lg"
+                        : null
+                    }`}
+                  >
+                    <a
+                      className="text-base pl-10 flex gap-1"
+                      href="/dashboard/workexperiences"
+                    >
+                      <MdTaskAlt className="mt-1" />{" "}
+                      {translations[currentLanguage].work_exp}
                     </a>
                   </li>
                   <li

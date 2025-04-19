@@ -26,6 +26,7 @@ const borrow_prod = require("./routes/borrow_product");
 const cal_area = require('./routes/area_cal')
 const status = require("./routes/status");
 const chart = require("./routes/chart")
+const work_exps = require("./routes/work_exp")
 const isAdmin = require("./middlewares/isAdmin");
 
 const cookieParser = require("cookie-parser");
@@ -82,6 +83,7 @@ app.use(chart)
 app.use(shipping)
 app.use(area_type)
 app.use(area_images)
+app.use(work_exps)
 
 app.listen(port, () => {
   console.log(`App is running at http://localhost:${port}`);

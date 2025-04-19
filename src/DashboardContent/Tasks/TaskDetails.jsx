@@ -7,24 +7,80 @@ import Loading from "../../components/Loading";
 import BackButtonEdit from "../../components/BackButtonEdit";
 import withReactContent from "sweetalert2-react-content";
 import Swal from "sweetalert2";
+
 const TaskDetails = () => {
   const { taskId } = useParams();
   const [task, setTask] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-  const apiUrl = import.meta.env.VITE_SERVER_URL; // Use environment variable
-  const [images, setImages] = useState([]); // To store images
-  const [selectedImage, setSelectedImage] = useState(null); // To store the selected image for popup
-  const [rentals, setRentals] = useState([]);
-
-  // Determine language from localStorage
+  const [images, setImages] = useState([]);
+  const [hasAreaCalculation, setHasAreaCalculation] = useState(false);
+  const apiUrl = import.meta.env.VITE_SERVER_URL;
   const language = localStorage.getItem("language") || "en";
   const MySwal = withReactContent(Swal);
 
   useEffect(() => {
-    fetchTaskDetails();
-    fetchTaskImages();
+    const fetchData = async () => {
+      try {
+        setLoading(true);
+        await Promise.all([
+          fetchTaskDetails(),
+          fetchTaskImages(),
+          fetchAreaCalculation(),
+        ]);
+      } catch (err) {
+        setError(translations[language].failedToLoad);
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchData();
   }, [taskId]);
+
+  const fetchTaskDetails = async () => {
+    try {
+      const response = await axios.get(`${apiUrl}/task/${taskId}`);
+      let taskData = response.data;
+
+      const rentalResponse = await axios.get(`${apiUrl}/rentals`);
+      const rentalData = rentalResponse.data.rentalData;
+
+      if (Array.isArray(rentalData)) {
+        taskData = {
+          ...taskData,
+          rentalDetails: rentalData.filter(
+            (rental) => rental.task_id === taskData.task_id
+          ),
+        };
+      } else {
+        console.error("Rental data is not in expected format:", rentalData);
+      }
+
+      setTask(taskData);
+    } catch (error) {
+      console.error("Error fetching task details:", error);
+      throw error;
+    }
+  };
+
+  const fetchTaskImages = async () => {
+    try {
+      const response = await axios.get(`${apiUrl}/task_images/${taskId}`);
+      setImages(response.data);
+    } catch (error) {
+      console.error("Error fetching task images:", error);
+    }
+  };
+
+  const fetchAreaCalculation = async () => {
+    try {
+      const response = await axios.get(`${apiUrl}/area_cal/by-task/${taskId}`);
+      setHasAreaCalculation(response.data.length > 0);
+    } catch (error) {
+      console.error("Error fetching area calculation:", error);
+      setHasAreaCalculation(false);
+    }
+  };
 
   const showImagePopup = (imageUrl) => {
     MySwal.fire({
@@ -37,23 +93,7 @@ const TaskDetails = () => {
       },
     });
   };
-  // Fetch task images
-  const fetchTaskImages = async () => {
-    try {
-      const response = await axios.get(`${apiUrl}/task_images/${taskId}`);
-      setImages(response.data);
-    } catch (error) {
-      console.error("Error fetching task images:", error);
-      setError("Failed to load task images.");
-    }
-  };
 
-  // Close the modal
-  const closeModal = () => {
-    setSelectedImage(null);
-  };
-
-  // Translation object
   const translations = {
     en: {
       taskDetails: "Task Details",
@@ -72,9 +112,11 @@ const TaskDetails = () => {
       price: "Total Price",
       phone: "Phone",
       organizationName: "Organization Name",
-      technicians: "Technicians", 
-      techId: "Technician ID", 
-      techName: "Technician Name", 
+      technicians: "Technicians",
+      techId: "Technician ID",
+      techName: "Technician Name",
+      viewInstallationDetails: "View Installation Details",
+      editImages: "Edit Images",
     },
     th: {
       taskDetails: "รายละเอียดงาน",
@@ -93,52 +135,15 @@ const TaskDetails = () => {
       price: "ราคารวม",
       phone: "เบอร์ติดต่อ",
       organizationName: "ชื่อองค์กร",
-      technicians: "ช่างที่รับผิดชอบ", 
-      techId: "รหัสช่าง", 
-      techName: "ชื่อช่าง", 
+      technicians: "ช่างที่รับผิดชอบ",
+      techId: "รหัสช่าง",
+      techName: "ชื่อช่าง",
+      viewInstallationDetails: "ดูรายละเอียดการติดตั้ง",
+      editImages: "แก้ไขรูปภาพ",
     },
   };
 
   const t = translations[language];
-
-  useEffect(() => {
-    fetchTaskDetails();
-  }, [taskId]);
-
-  const fetchTaskDetails = async () => {
-    try {
-      // Fetch task details
-      const response = await axios.get(`${apiUrl}/task/${taskId}`);
-      let taskData = response.data;
-
-      // Fetch rentals data
-      const rentalResponse = await axios.get(
-        `${import.meta.env.VITE_SERVER_URL}/rentals`
-      );
-      const rentalData = rentalResponse.data.rentalData;
-
-      if (Array.isArray(rentalData)) {
-        // รวม rentals เข้าไปใน taskData โดย task_id ต้องตรงกัน
-        taskData = {
-          ...taskData,
-          rentalDetails: rentalData.filter(
-            (rental) => rental.task_id === taskData.task_id
-          ),
-        };
-      } else {
-        console.error("Rental data is not in expected format:", rentalData);
-      }
-
-      // Set updated task data
-      setTask(taskData);
-      console.log(taskData);
-    } catch (error) {
-      console.error("Error fetching task details:", error);
-      setError(t.failedToLoad);
-    } finally {
-      setLoading(false);
-    }
-  };
 
   if (loading) return <Loading />;
 
@@ -153,19 +158,27 @@ const TaskDetails = () => {
   return (
     <div className="container mx-auto p-8">
       <div className="p-8 rounded-lg shadow-lg w-full mx-auto font-prompt h-full">
-        <div className="flex justify-between">
-          <div className="flex w-full my-2">
+        <div className="flex justify-between items-center mb-4">
+          <div className="flex items-center">
             <BackButtonEdit />
             <h1 className="text-2xl font-semibold mx-2">
               {t.taskDetails}: {task.title}
             </h1>
           </div>
-
-          <Link to={`/dashboard/tasks/add-image/${taskId}`}>
-            <button className="btn bg-blue hover:bg-blue text-white">
-              แก้ไขรูปภาพ
-            </button>
-          </Link>
+          <div className="flex gap-2">
+            {hasAreaCalculation && (
+              <Link to={`/dashboard/tasks/installationDetails/${taskId}`}>
+                <button className="btn btn-primary text-white">
+                  {t.viewInstallationDetails}
+                </button>
+              </Link>
+            )}
+            <Link to={`/dashboard/tasks/add-image/${taskId}`}>
+              <button className="btn bg-blue hover:bg-blue text-white">
+                {t.editImages}
+              </button>
+            </Link>
+          </div>
         </div>
 
         <div className="mb-4">
@@ -181,7 +194,7 @@ const TaskDetails = () => {
           )}
           {task.user_id && (
             <p>
-              <strong>{t.name}:</strong> {task.firstname} {task.lastname}
+              <strong>{t.name}:</strong> {task.user_firstname} {task.user_lastname}
             </p>
           )}
           {task.phone && (
@@ -207,12 +220,12 @@ const TaskDetails = () => {
                   task.status_name === "pending"
                     ? "bg-yellow-100 text-yellow-800"
                     : task.status_name === "active"
-                      ? "bg-red-100 text-red-800"
-                      : task.status_name === "approve"
-                        ? "bg-green-100 text-green-800"
-                        : task.status_name === "hiring"
-                          ? "bg-gray-100 text-gray-800"
-                          : "bg-gray-200 text-gray-600"
+                    ? "bg-red-100 text-red-800"
+                    : task.status_name === "approve"
+                    ? "bg-green-100 text-green-800"
+                    : task.status_name === "hiring"
+                    ? "bg-gray-100 text-gray-800"
+                    : "bg-gray-200 text-gray-600"
                 }`}
               >
                 {task.status_name}
@@ -239,7 +252,6 @@ const TaskDetails = () => {
               })}
             </p>
           )}
-
           {task.address && (
             <p>
               <strong>{t.address}:</strong> {task.address}
@@ -247,7 +259,7 @@ const TaskDetails = () => {
           )}
           {task.total !== 0 && task.total !== null && (
             <p>
-              <strong>{translations[language].price}:</strong> {task.total}
+              <strong>{t.price}:</strong> {task.total}
             </p>
           )}
         </div>
@@ -269,7 +281,7 @@ const TaskDetails = () => {
                       key={index}
                       className="border-b border-gray-200 hover:bg-gray-100"
                     >
-                      <td className="py-3 px-6 text-center">{index+1}</td>
+                      <td className="py-3 px-6 text-center">{index + 1}</td>
                       <td className="py-3 px-6">
                         {technician.firstname} {technician.lastname}
                       </td>
@@ -280,8 +292,7 @@ const TaskDetails = () => {
             </div>
           </div>
         )}
-        
-        {/* Rental Details Table */}
+
         {task.rentalDetails && task.rentalDetails.length > 1 && (
           <div className="mt-8">
             <h3 className="text-lg mb-4 font-semibold">รายละเอียดการเช่า</h3>
@@ -292,46 +303,24 @@ const TaskDetails = () => {
                     <th className="py-3 px-6 text-left">รหัสสินค้า</th>
                     <th className="py-3 px-6 text-left">ชื่ออุปกรณ์</th>
                     <th className="py-3 px-6 text-left">จำนวน</th>
-                    <th className="py-3 px-6 text-left">วันที่เริ่มต้น</th>
-                    <th className="py-3 px-6 text-left">วันที่สิ้นสุด</th>
                   </tr>
                 </thead>
                 <tbody>
                   {task.rentalDetails.map((rental, index) => {
-                    // ตรวจสอบเงื่อนไข: ถ้า product_name เป็น "Unknown Product" และ total_quantity_used เป็น 0 หรือ 1 ให้ข้ามการแสดงผล
                     if (
                       rental.product_name === "Unknown Product" &&
-                      (rental.total_quantity_used === 0)
+                      rental.total_quantity_used === 0
                     ) {
-                      return null; // ไม่แสดงแถวนี้
+                      return null;
                     }
-
                     return (
                       <tr
                         key={index}
                         className="border-b border-gray-200 hover:bg-gray-100"
                       >
                         <td className="py-3 px-6 text-center">{rental.product_id}</td>
-                        <td className="py-3 px-6">
-                          {rental.product_name || "-"}
-                        </td>
-                        <td className="py-3 px-6">
-                          {rental.total_quantity_used}
-                        </td>
-                        <td className="py-3 px-6">
-                          {rental.rental_start_date
-                            ? new Date(
-                                rental.rental_start_date
-                              ).toLocaleDateString()
-                            : "-"}
-                        </td>
-                        <td className="py-3 px-6">
-                          {rental.rental_end_date
-                            ? new Date(
-                                rental.rental_end_date
-                              ).toLocaleDateString()
-                            : "-"}
-                        </td>
+                        <td className="py-3 px-6">{rental.product_name || "-"}</td>
+                        <td className="py-3 px-6">{rental.total_quantity_used}</td>
                       </tr>
                     );
                   })}
@@ -340,33 +329,29 @@ const TaskDetails = () => {
             </div>
           </div>
         )}
+
         {task.latitude && task.longitude && (
-          <p>
-            <strong>ตำแหน่งที่ตั้ง</strong>
-          </p>
-        )}
-        {/* Map Section */}
-        {task.latitude && task.longitude && (
-          <MapContainer
-            center={[task.latitude, task.longitude]} // Center the map on task's lat/long
-            zoom={13}
-            style={{ height: "400px", width: "100%" }}
-          >
-            <TileLayer
-              url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
-              attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
-            />
-            <Marker position={[task.latitude, task.longitude]}>
-              <Popup>{task.description}</Popup>
-            </Marker>
-          </MapContainer>
+          <div className="mt-8">
+            <p className="text-lg mb-4 font-semibold">ตำแหน่งที่ตั้ง</p>
+            <MapContainer
+              center={[task.latitude, task.longitude]}
+              zoom={13}
+              style={{ height: "400px", width: "100%" }}
+            >
+              <TileLayer
+                url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+                attribution='© <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+              />
+              <Marker position={[task.latitude, task.longitude]}>
+                <Popup>{task.description}</Popup>
+              </Marker>
+            </MapContainer>
+          </div>
         )}
 
         {images.length > 0 && (
           <div className="mt-8">
-            <h3 className="text-lg mb-6 font-semibold">
-              {translations[language].images}
-            </h3>
+            <h3 className="text-lg mb-6 font-semibold">{t.images}</h3>
             <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6">
               {images.map((image) => (
                 <div
@@ -380,9 +365,7 @@ const TaskDetails = () => {
                     className="w-full h-64 object-cover transform transition-transform duration-300 group-hover:scale-110"
                   />
                   <div className="absolute inset-0 bg-black bg-opacity-50 opacity-0 group-hover:opacity-100 flex justify-center items-center">
-                    <span className="text-white text-xl font-semibold">
-                      {translations[language].images}
-                    </span>
+                    <span className="text-white text-xl font-semibold">{t.images}</span>
                   </div>
                 </div>
               ))}

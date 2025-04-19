@@ -186,63 +186,64 @@ const TaskContent = () => {
       console.error("Error fetching statuses:", error);
     }
   };
-
   const handleDelete = async (taskId) => {
     try {
-        // 1. ดึงข้อมูล task เพื่อตรวจสอบ status_id ก่อนลบ
+        // 1. ดึงข้อมูล task เพื่อตรวจสอบ
         const taskResponse = await axios.get(`${apiUrl}/task/status/${taskId}`, {
             withCredentials: true,
         });
 
+        const taskData = taskResponse.data;
         console.log("Task ID:", taskId);
-        console.log("Task Status:", taskResponse.data);
+        console.log("Task Status:", taskData);
 
-        const taskData = taskResponse.data; // ข้อมูล task ที่ได้จาก API
-
-        // 2. ตรวจสอบว่า status_id เป็น 4 หรือ 5 หรือไม่
-        if (taskData.status_id === 4 || taskData.status_id === 5) {
+        // 2. ถ้าไม่ใช่งานล้าง และสถานะเป็น 4 หรือ 5 → ห้ามลบ
+        if (
+            taskData.task_type_id !== 12 &&
+            (taskData.status_id === 4 || taskData.status_id === 5)
+        ) {
             Swal.fire({
-                title: "Cannot Delete Task",
+                title: "ไม่สามารถลบงานได้",
                 text: "กรุณาคืนอุปกรณ์ก่อนลบงาน",
                 icon: "warning",
             });
-            return; 
+            return;
         }
 
-        // 3. ถ้า status_id ไม่ใช่ 4 หรือ 5 ให้แสดง Confirm Dialog
+        // 3. แสดง Swal Confirm สำหรับทุกประเภทงาน
         const result = await Swal.fire({
-            title: "Are you sure?",
-            text: "คุณแน่ใจใช่ไหมว่าจะลบงานนี้!",
+            title: "คุณแน่ใจหรือไม่?",
+            text: "คุณต้องการลบงานนี้ใช่หรือไม่?",
             icon: "warning",
             showCancelButton: true,
             confirmButtonColor: "#3085d6",
             cancelButtonColor: "#d33",
             confirmButtonText: "ใช่, ลบเลย!",
-            cancelButtonText: "Cancel",
+            cancelButtonText: "ยกเลิก",
         });
 
-        if (result.isConfirmed) {
-            // 4. ลบ task
-            const response = await axios.delete(`${apiUrl}/task/${taskId}`, {
-                withCredentials: true,
-            });
+        if (!result.isConfirmed) return;
 
-            // 5. บันทึก log การลบ task
-            await axios.post(`${apiUrl}/task-log`, {
-                task_id: taskId,
-                user_id: user_id,
-                action: "ลบงาน",
-            });
+        // 4. ลบงาน
+        const response = await axios.delete(`${apiUrl}/task/${taskId}`, {
+            withCredentials: true,
+        });
 
-            // 6. ถ้าลบสำเร็จ (204 No Content)
-            if (response.status === 204) {
-                Swal.fire("Deleted!", "งานถูกลบเรียบร้อยแล้ว.", "success");
-                setTasks(tasks.filter((task) => task.task_id !== taskId));
-            }
+        // 5. บันทึก log การลบ
+        await axios.post(`${apiUrl}/task-log`, {
+            task_id: taskId,
+            user_id: user_id,
+            action: "ลบงาน",
+        });
+
+        // 6. อัปเดตรายการใน frontend
+        if (response.status === 204) {
+            Swal.fire("ลบสำเร็จ!", "งานถูกลบเรียบร้อยแล้ว", "success");
+            setTasks(tasks.filter((task) => task.task_id !== taskId));
         }
     } catch (error) {
         Swal.fire({
-            title: "Error",
+            title: "เกิดข้อผิดพลาด",
             text: error.message,
             icon: "error",
         });
@@ -250,7 +251,6 @@ const TaskContent = () => {
 };
 
   
-
   const handleViewDetails = (taskId) => {
     navigate(`/dashboard/tasks/${taskId}`);
   };
