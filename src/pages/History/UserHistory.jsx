@@ -50,7 +50,7 @@ const translations = {
     statusActive: "กำลังดำเนินการ",
     statusApproved: "อนุมัติแล้ว",
     statusCompleted: "เสร็จสิ้น",
-    name : "ชื่อ-สกุล"
+    name: "ชื่อ-สกุล",
   },
   en: {
     userHistory: "User Task and Order History",
@@ -90,8 +90,7 @@ const translations = {
     statusActive: "Active",
     statusApproved: "Approved",
     statusCompleted: "Completed",
-    name : "Name"
-
+    name: "Name",
   },
 };
 
@@ -464,8 +463,10 @@ const UserHistory = () => {
                 {filteredTasks.length > 0 ? (
                   filteredTasks.map((task, index) => (
                     <tr key={index + 1}>
-                      <td>{(taskPage - 1) * 10 + index+1}</td>{" "}
-                      <td>{task.firstname} {task.lastname}</td>
+                      <td>{(taskPage - 1) * 10 + index + 1}</td>{" "}
+                      <td>
+                        {task.firstname} {task.lastname}
+                      </td>
                       <td>{task.type_name}</td>
                       <td>{task.address}</td>
                       <td>
@@ -486,37 +487,39 @@ const UserHistory = () => {
                         </span>
                       </td>
                       <td>
-                      <td>
-                      {new Date(
-                        new Date(task.appointment_date).getTime() +
-                          7 * 60 * 60 * 1000
-                      ).toLocaleString("th-TH", {
-                        timeZone: "Asia/Bangkok",
-                        year: "numeric",
-                        month: "2-digit",
-                        day: "2-digit",
-                        hour: "2-digit",
-                        minute: "2-digit",
-                        second: "2-digit",
-                        hour12: false, // ใช้รูปแบบ 24 ชั่วโมง
-                      })}
-                    </td>
+                        <td>
+                          <td>
+                            {new Date(
+                              new Date(task.appointment_date).getTime() +
+                                +6 * 60 * 60 * 1000
+                            ).toLocaleString("en-GB", {
+                              timeZone: "Europe/London",
+                              year: "numeric",
+                              month: "2-digit",
+                              day: "2-digit",
+                              hour: "2-digit",
+                              minute: "2-digit",
+                              second: "2-digit",
+                              hour12: false, // Use 24-hour format
+                            })}
+                          </td>
+                        </td>
                       </td>
                       <td>
-                      {new Date(
-                        new Date(task.created_at).getTime() +
-                          7 * 60 * 60 * 1000
-                      ).toLocaleString("th-TH", {
-                        timeZone: "Asia/Bangkok",
-                        year: "numeric",
-                        month: "2-digit",
-                        day: "2-digit",
-                        hour: "2-digit",
-                        minute: "2-digit",
-                        second: "2-digit",
-                        hour12: false, // ใช้รูปแบบ 24 ชั่วโมง
-                      })}
-                    </td>
+                        {new Date(
+                          new Date(task.created_at).getTime() +
+                            7 * 60 * 60 * 1000
+                        ).toLocaleString("en-TH", {
+                          timeZone: "Asia/Bangkok",
+                          year: "numeric",
+                          month: "2-digit",
+                          day: "2-digit",
+                          hour: "2-digit",
+                          minute: "2-digit",
+                          second: "2-digit",
+                          hour12: false, // ใช้รูปแบบ 24 ชั่วโมง
+                        })}
+                      </td>
                       <td>
                         <button
                           onClick={() => handleTaskDetail(task.task_id)}
@@ -652,20 +655,20 @@ const UserHistory = () => {
                       <td>{(orderPage - 1) * 10 + index + 1}</td>
                       {/* <td>{order.total_price.toFixed(2)}</td> */}
                       <td>
-                      {new Date(
-                        new Date(order.created_at).getTime() +
-                          7 * 60 * 60 * 1000
-                      ).toLocaleString("th-TH", {
-                        timeZone: "Asia/Bangkok",
-                        year: "numeric",
-                        month: "2-digit",
-                        day: "2-digit",
-                        hour: "2-digit",
-                        minute: "2-digit",
-                        second: "2-digit",
-                        hour12: false, // ใช้รูปแบบ 24 ชั่วโมง
-                      })}
-                    </td>
+                        {new Date(
+                          new Date(order.created_at).getTime() +
+                            7 * 60 * 60 * 1000
+                        ).toLocaleString("th-TH", {
+                          timeZone: "Asia/Bangkok",
+                          year: "numeric",
+                          month: "2-digit",
+                          day: "2-digit",
+                          hour: "2-digit",
+                          minute: "2-digit",
+                          second: "2-digit",
+                          hour12: false, // ใช้รูปแบบ 24 ชั่วโมง
+                        })}
+                      </td>
                       <td>
                         <span
                           className={`px-2 py-1 rounded ${

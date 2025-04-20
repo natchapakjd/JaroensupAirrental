@@ -144,11 +144,9 @@ const InstallationDetails = () => {
       </div>
     );
   }
-
   const airConditioners = data.grid_pattern || [];
   const gridWidth = data.width || 30;
   const gridHeight = data.height || 30;
-  const gridSize = Math.max(gridWidth, gridHeight);
 
   const typeCounts = {
     60000: data.air_5ton_used || 0,
@@ -161,12 +159,12 @@ const InstallationDetails = () => {
   );
 
   const renderGrid = () => {
-    const grid = Array.from({ length: gridSize }, () =>
-      Array.from({ length: gridSize }, () => null)
+    const grid = Array.from({ length: gridHeight }, () =>
+      Array.from({ length: gridWidth }, () => null)
     );
 
     airConditioners.forEach((item) => {
-      if (item.row < gridSize && item.col < gridSize) {
+      if (item.row < gridHeight && item.col < gridWidth) {
         grid[item.row][item.col] = item;
       }
     });
@@ -468,9 +466,9 @@ const InstallationDetails = () => {
               <th style={{ fontFamily: "Prompt, sans-serif" }}>
                 {translation.type}
               </th>
-              {/* <th style={{ fontFamily: "Prompt, sans-serif" }}>
+              <th style={{ fontFamily: "Prompt, sans-serif" }}>
                 {translation.position}
-              </th> */}
+              </th>
               <th style={{ fontFamily: "Prompt, sans-serif" }}>
                 {translation.meters}
               </th>
@@ -485,11 +483,11 @@ const InstallationDetails = () => {
                 <td style={{ fontFamily: "Prompt, sans-serif" }}>
                   {getDisplayType(ac.type)}
                 </td>
-                {/* <td style={{ fontFamily: "Prompt, sans-serif" }}>
-                  ({ac.row}, {ac.col})
-                </td> */}
                 <td style={{ fontFamily: "Prompt, sans-serif" }}>
-                  ({ac.row}m, {ac.col}m)
+                  ({ac.row}, {ac.col})
+                </td>
+                <td style={{ fontFamily: "Prompt, sans-serif" }}>
+                  ({ac.row+1}m, {ac.col+1}m)
                 </td>
                 <td style={{ fontFamily: "Prompt, sans-serif" }}>
                   {getDirection(ac.rotation)}

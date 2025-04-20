@@ -194,7 +194,8 @@ const TaskDetails = () => {
           )}
           {task.user_id && (
             <p>
-              <strong>{t.name}:</strong> {task.user_firstname} {task.user_lastname}
+              <strong>{t.name}:</strong> {task.user_firstname}{" "}
+              {task.user_lastname}
             </p>
           )}
           {task.phone && (
@@ -220,12 +221,12 @@ const TaskDetails = () => {
                   task.status_name === "pending"
                     ? "bg-yellow-100 text-yellow-800"
                     : task.status_name === "active"
-                    ? "bg-red-100 text-red-800"
-                    : task.status_name === "approve"
-                    ? "bg-green-100 text-green-800"
-                    : task.status_name === "hiring"
-                    ? "bg-gray-100 text-gray-800"
-                    : "bg-gray-200 text-gray-600"
+                      ? "bg-red-100 text-red-800"
+                      : task.status_name === "approve"
+                        ? "bg-green-100 text-green-800"
+                        : task.status_name === "hiring"
+                          ? "bg-gray-100 text-gray-800"
+                          : "bg-gray-200 text-gray-600"
                 }`}
               >
                 {task.status_name}
@@ -236,9 +237,16 @@ const TaskDetails = () => {
             <p>
               <strong>{t.startDate}:</strong>{" "}
               {new Date(
-                new Date(task.appointment_date).getTime() + 7 * 60 * 60 * 1000
-              ).toLocaleString("th-TH", {
-                timeZone: "Asia/Bangkok",
+                new Date(task.appointment_date).getTime() + 6 * 60 * 60 * 1000
+              ).toLocaleString("en-GB", {
+                timeZone: "Europe/London",
+                year: "numeric",
+                month: "2-digit",
+                day: "2-digit",
+                hour: "2-digit",
+                minute: "2-digit",
+                second: "2-digit",
+                hour12: false, // Use 24-hour format
               })}
             </p>
           )}
@@ -318,9 +326,15 @@ const TaskDetails = () => {
                         key={index}
                         className="border-b border-gray-200 hover:bg-gray-100"
                       >
-                        <td className="py-3 px-6 text-center">{rental.product_id}</td>
-                        <td className="py-3 px-6">{rental.product_name || "-"}</td>
-                        <td className="py-3 px-6">{rental.total_quantity_used}</td>
+                        <td className="py-3 px-6 text-center">
+                          {rental.product_id}
+                        </td>
+                        <td className="py-3 px-6">
+                          {rental.product_name || "-"}
+                        </td>
+                        <td className="py-3 px-6">
+                          {rental.total_quantity_used}
+                        </td>
                       </tr>
                     );
                   })}
@@ -365,7 +379,9 @@ const TaskDetails = () => {
                     className="w-full h-64 object-cover transform transition-transform duration-300 group-hover:scale-110"
                   />
                   <div className="absolute inset-0 bg-black bg-opacity-50 opacity-0 group-hover:opacity-100 flex justify-center items-center">
-                    <span className="text-white text-xl font-semibold">{t.images}</span>
+                    <span className="text-white text-xl font-semibold">
+                      {t.images}
+                    </span>
                   </div>
                 </div>
               ))}

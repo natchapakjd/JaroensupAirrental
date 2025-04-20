@@ -342,8 +342,11 @@ router.post("/tasks", (req, res) => {
     longitude,
     rental_start_date,
     rental_end_date,
-    organization_name, // ✅ เพิ่ม organization_name
+    organization_name,
   } = req.body;
+
+  const adjustedAppointmentDate = new Date(appointment_date);
+  adjustedAppointmentDate.setHours(adjustedAppointmentDate.getHours() - 12);
 
   const query = `
     INSERT INTO tasks 
@@ -359,11 +362,11 @@ router.post("/tasks", (req, res) => {
       task_type_id,
       quantity_used,
       address,
-      appointment_date,
+      adjustedAppointmentDate, // ✅ ใช้วันที่ที่ลด 12 ชม แล้ว
       latitude,
       longitude,
       1,
-      organization_name || null, // ✅ เพิ่ม organization_name (อนุญาตให้เป็น null ได้)
+      organization_name || null,
     ],
     (err, result) => {
       if (err) {
@@ -391,17 +394,18 @@ router.post("/tasks", (req, res) => {
           task_type_id,
           quantity_used,
           address,
-          appointment_date,
+          appointment_date: adjustedAppointmentDate, // ✅ ส่งคืนเวลาที่ถูกปรับ
           latitude,
           longitude,
           rental_start_date,
           rental_end_date,
-          organization_name, // ✅ เพิ่มใน response
+          organization_name,
         });
       });
     }
   );
 });
+
 
 router.put("/task/:id", (req, res) => {
   const id = req.params.id;
