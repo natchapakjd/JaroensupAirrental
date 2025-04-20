@@ -214,7 +214,7 @@ const RentAC = () => {
         },
         body: JSON.stringify({
           userId: "U9cb564155dddeaa549d97a8747eed534",
-          message: `แจ้งเตือนจากระบบ:\n\nคุณ ${profile.firstname} ${profile.lastname} ได้แจ้งงานเช่าเครื่องปรับอากาศ เข้ามาในระบบเรียบร้อยแล้ว.\n\nกรุณาตรวจสอบและดำเนินการตามความเหมาะสม.\n\nขอบคุณที่เลือกใช้บริการของเรา!`,
+          message: `แจ้งเตือนจากระบบ:\n\nคุณ ${profile.firstname} ${profile.lastname} ได้แจ้งงานเช่าเครื่องปรับอากาศ เข้ามาในระบบ.\n\nกรุณาตรวจสอบและดำเนินการตามความเหมาะสม.\n\nขอบคุณที่เลือกใช้บริการของเรา!`,
         }),
       }
     );
@@ -278,7 +278,7 @@ const RentAC = () => {
         user_id: userId,
         action: "สั่งงานเช่า",
       });
-
+      sendMessage()
       // Success message
       Swal.fire({
         title: "สำเร็จ!",

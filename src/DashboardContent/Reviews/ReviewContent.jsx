@@ -217,9 +217,9 @@ const ReviewContent = () => {
                 <th className="border p-2 text-center">
                   {translations[language].user}
                 </th>
-                <th className="border p-2 text-center">
+                {/* <th className="border p-2 text-center">
                   {translations[language].tech}
-                </th>
+                </th> */}
                 <th className="border p-2 text-center">
                   {translations[language].comment}
                 </th>
@@ -244,9 +244,9 @@ const ReviewContent = () => {
                     <td className="border p-2 text-center">
                       {review.member_firstname} {review.member_lastname}
                     </td>
-                    <td className="border p-2 text-center">
+                    {/* <td className="border p-2 text-center">
                       {review.tech_firstname} {review.tech_lastname}
-                    </td>
+                    </td> */}
                     <td className="border p-2 text-center">{review.comment}</td>
                     <td className="border p-2 text-center  place-items-center">
                       <div className="flex">
