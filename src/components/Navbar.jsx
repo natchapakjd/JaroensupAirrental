@@ -139,9 +139,9 @@ const Navbar = () => {
                 <li>
                   <Link to="/">{translations[language].home}</Link>
                 </li>
-                <li>
+                {/*<li>
                   <Link to="/product">{translations[language].product}</Link>
-                </li>
+                </li>*/}
                 <li>
                   <Link to="/services">{translations[language].services}</Link>
                 </li>
@@ -171,9 +171,9 @@ const Navbar = () => {
             <li>
               <Link to="/">{translations[language].home}</Link>
             </li>
-            <li>
+            {/*<li>
               <Link to="/product">{translations[language].product}</Link>
-            </li>
+            </li>*/}
             <li>
               <Link to="/services">{translations[language].services}</Link>
             </li>
@@ -201,13 +201,13 @@ const Navbar = () => {
           >
             {language === "th" ? "🇹🇭 ไทย" : "🇬🇧 English"}
           </button>
-          <li className="list-none ">
+          {/*<li className="list-none ">
             {!token && (
               <Link to="/login" className="text-sm md:text-base">
                 {translations[language].login}
               </Link>
             )}
-          </li>
+          </li>*/}
           {token && (
             <div className="dropdown dropdown-end">
               <div
